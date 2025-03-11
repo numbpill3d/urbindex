@@ -21,7 +21,7 @@
   "author": "Urbindex Team",
   "license": "MIT",
   "dependencies": {
-    "firebase": "^9.22.0",
+    "firebase": "^9.23.0",
     "leaflet": "^1.9.4"
   },
   "devDependencies": {
