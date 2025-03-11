@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a20">
+    <meta name="description" content="Urbindex - Community-driven urban exploration mapping tool">
+    <title>Urbindex</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+<body>
+    <div id="splash-screen" class="active">
+        <div class="splash-content">
+            <h1 class="neon-text">URBINDEX</h1>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <p class="tagline">Explore. Mark. Share.</p>
+        </div>
+    </div>
+
+    <div id="app" class="hidden">
+        <header>
+            <h1 class="neon-text">URBINDEX</h1>
+            <div id="user-profile">
+                <button id="login-button" class="neon-button">Sign In</button>
+                <div id="user-info" class="hidden">
+                    <img id="user-avatar" src="" alt="User avatar">
+                    <span id="user-name"></span>
+                </div>
+            </div>
+        </header>
+
+        <nav>
+            <button id="map-view-btn" class="nav-btn active">Map</button>
+            <button id="leaderboard-btn" class="nav-btn">Leaderboard</button>
+            <button id="my-locations-btn" class="nav-btn">My Spots</button>
+            <button id="settings-btn" class="nav-btn">Settings</button>
+        </nav>
+
+        <main>
+            <div id="map-container" class="view active">
+                <div id="map"></div>
+                <button id="add-location-btn" class="floating-btn">+</button>
+            </div>
+
+            <div id="leaderboard-container" class="view">
+                <h2>Top Explorers</h2>
+                <ul id="leaderboard-list"></ul>
+            </div>
+
+            <div id="my-locations-container" class="view">
+                <h2>My Exploration Spots</h2>
+                <ul id="my-locations-list"></ul>
+            </div>
+
+            <div id="settings-container" class="view">
+                <h2>Settings</h2>
+                <div class="setting-item">
+                    <label for="offline-mode">Offline Mode</label>
+                    <input type="checkbox" id="offline-mode">
+                </div>
+                <div class="setting-item">
+                    <label for="sync-frequency">Sync Frequency</label>
+                    <select id="sync-frequency">
+                        <option value="realtime">Real-time</option>
+                        <option value="hourly">Hourly</option>
+                        <option value="daily">Daily</option>
+                    </select>
+                </div>
+                <button id="logout-button" class="neon-button">Sign Out</button>
+                <div class="app-info">
+                    <p>Version: 1.0.0</p>
+                    <p>Made with ♥ for urban explorers</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Location Modal -->
+        <div id="location-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2 id="modal-title">Add New Location</h2>
+                <form id="location-form">
+                    <div class="form-group">
+                        <label for="location-name">Name</label>
+                        <input type="text" id="location-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="location-category">Category</label>
+                        <select id="location-category" required>
+                            <option value="abandoned">Abandoned</option>
+                            <option value="historical">Historical</option>
+                            <option value="street-art">Street Art</option>
+                            <option value="viewpoint">Viewpoint</option>
+                            <option value="hidden-gem">Hidden Gem</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="location-description">Description</label>
+                        <textarea id="location-description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="location-image">Image URL (optional)</label>
+                        <input type="url" id="location-image">
+                    </div>
+                    <div class="form-group">
+                        <label>Coordinates</label>
+                        <div class="coordinates-display">
+                            <span id="location-lat"></span>, <span id="location-lng"></span>
+                        </div>
+                    </div>
+                    <button type="submit" class="neon-button">Save Location</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/locations.js"></script>
+    <script src="js/leaderboard.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/offline.js"></script>
+    <script>
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
