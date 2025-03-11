@@ -1,0 +1,9 @@
+This is a placeholder for the default-avatar.png file.
+
+To add your own default avatar:
+1. Create a 128x128 pixel PNG image with a transparent background
+2. Use the cyberpunk/neon aesthetic with colors from the CSS variables
+3. Save it as "default-avatar.png" in this directory
+4. Replace this text file with your PNG file
+
+This image is used as the default profile picture for users who don't have a Google profile image.

@@ -79,7 +79,7 @@ function createOrUpdateUserProfile(user) {
     uid: user.uid,
     displayName: user.displayName || 'Anonymous Explorer',
     email: user.email,
-    photoURL: user.photoURL || 'images/default-avatar.png',
+    photoURL: user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User') + '&background=0a0a20&color=05d9e8&size=128',
     lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
     locationsCount: 0, // Will be updated when fetching user data
     score: 0 // Will be updated when fetching user data
@@ -112,7 +112,7 @@ function onUserSignedIn(user) {
   loginButton.classList.add('hidden');
   userInfo.classList.remove('hidden');
   userName.textContent = user.displayName || 'Explorer';
-  userAvatar.src = user.photoURL || 'images/default-avatar.png';
+  userAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User') + '&background=0a0a20&color=05d9e8&size=128';
   
   // Fetch user data from Firestore to get latest stats
   fetchUserData(user.uid);

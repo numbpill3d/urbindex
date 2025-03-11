@@ -1,0 +1,19 @@
+This is a placeholder for the icon-192x192.png file.
+
+To add your own icon:
+1. Create a 192x192 pixel PNG image with a transparent background
+2. Use the cyberpunk/neon aesthetic with colors from the CSS variables
+3. Save it as "icon-192x192.png" in this directory
+4. Replace this text file with your PNG file
+
+You'll need to create icons in the following sizes:
+- icon-72x72.png
+- icon-96x96.png
+- icon-128x128.png
+- icon-144x144.png
+- icon-152x152.png
+- icon-192x192.png
+- icon-384x384.png
+- icon-512x512.png
+
+These icons are referenced in the manifest.json file and are required for PWA functionality.

@@ -2,14 +2,22 @@
 // Replace with your own Firebase project configuration
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "urbindex.firebaseapp.com",
-  projectId: "urbindex",
-  storageBucket: "urbindex.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyA1234567890abcdefghijklmnopqrstuv",
+  authDomain: "urbindex-demo.firebaseapp.com",
+  projectId: "urbindex-demo",
+  storageBucket: "urbindex-demo.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abcdef1234567890",
+  measurementId: "G-ABCDEF1234"
 };
+
+// NOTE: The above configuration is a placeholder.
+// To get your own Firebase configuration:
+// 1. Go to https://console.firebase.google.com/
+// 2. Create a new project or select an existing one
+// 3. Click on the web icon (</>) to add a web app to your project
+// 4. Register your app with a nickname
+// 5. Copy the firebaseConfig object and replace the above values
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);

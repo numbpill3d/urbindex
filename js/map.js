@@ -526,10 +526,10 @@ function createCustomIcon(type) {
   // Get color for this type
   const color = colors[type] || colors.other;
   
-  // Create icon
+  // Create icon with CSS-based glow effect
   return L.divIcon({
     className: `custom-marker marker-${type}`,
-    html: `<div style="background-color: ${color}"></div>`,
+    html: `<div style="background-color: ${color}; box-shadow: 0 0 10px ${color}, 0 0 5px ${color}; display: flex; justify-content: center; align-items: center; border-radius: 50%; width: 100%; height: 100%; border: 2px solid white;">${type === 'user' ? '📍' : ''}</div>`,
     iconSize: [30, 30],
     iconAnchor: [15, 15],
     popupAnchor: [0, -15]
