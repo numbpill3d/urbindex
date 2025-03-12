@@ -1,7 +1,6 @@
 // Urbindex - Comments Module
 
-// Use utility functions from utils.js
-const formatDate = utilsModule.formatDate;
+// Use utility functions directly from utilsModule
 
 // Initialize comments functionality
 function initComments() {
@@ -201,7 +200,7 @@ function renderComments(locationId, container) {
       commentElement.dataset.id = comment.id;
       
       // Format date
-      const dateDisplay = formatDate(comment.createdAt);
+      const dateDisplay = utilsModule.formatDate(comment.createdAt);
       
       // Check if user is the author
       const user = authModule.getCurrentUser();

@@ -488,11 +488,11 @@ function addLocationToList(id, locationData, isOffline = false) {
   
   // Get risk level indicator
   const riskLevel = locationData.riskLevel || 'unknown';
-  const riskIndicator = `<span class="risk-indicator risk-${riskLevel}">${getRiskLabel(riskLevel)}</span>`;
+  const riskIndicator = `<span class="risk-indicator risk-${riskLevel}">${utilsModule.getRiskLabel(riskLevel)}</span>`;
   
   // Get location type
   const locationType = locationData.locationType || 'default';
-  const locationTypeLabel = getLocationTypeLabel(locationType);
+  const locationTypeLabel = utilsModule.getLocationTypeLabel(locationType);
   
   // Get first image if available
   const imageHtml = locationData.imageUrls && locationData.imageUrls.length > 0 
@@ -504,7 +504,7 @@ function addLocationToList(id, locationData, isOffline = false) {
     <div class="location-item-header">
       <h3>${locationData.name}</h3>
       <div class="location-badges">
-        <span class="location-category">${getCategoryLabel(locationData.category)}</span>
+        <span class="location-category">${utilsModule.getCategoryLabel(locationData.category)}</span>
         ${riskIndicator}
       </div>
     </div>
@@ -576,11 +576,7 @@ function showEmptyUserLocations() {
   }
 }
 
-// Use utility functions from utils.js
-const getCategoryLabel = utilsModule.getCategoryLabel;
-const getRiskLabel = utilsModule.getRiskLabel;
-const getLocationTypeLabel = utilsModule.getLocationTypeLabel;
-const formatDate = utilsModule.formatDate;
+// Use utility functions directly from utilsModule instead of creating local constants
 
 // Close location modal
 function closeLocationModal() {
