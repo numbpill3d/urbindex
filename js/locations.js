@@ -29,6 +29,12 @@ function initLocations() {
   window.addEventListener('offline', () => {
     console.log('App is offline. Changes will be saved locally.');
   });
+  
+  // Set up image preview for location form
+  const imageInput = document.getElementById('location-image');
+  if (imageInput) {
+    imageInput.addEventListener('change', handleImagePreview);
+  }
 }
 
 // Initialize IndexedDB
@@ -71,6 +77,160 @@ function openDB() {
     request.onerror = (event) => reject(event.target.error);
     request.onsuccess = (event) => resolve(event.target.result);
   });
+}
+
+// Handle image preview
+function handleImagePreview(event) {
+  const files = event.target.files;
+  const previewContainer = document.getElementById('image-preview-container');
+  
+  // Clear previous previews
+  previewContainer.innerHTML = '';
+  
+  if (files.length > 0) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      // Only process image files
+      if (!file.type.startsWith('image/')) continue;
+      
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.className = 'image-preview';
+        previewContainer.appendChild(img);
+      };
+      
+      reader.readAsDataURL(file);
+    }
+  }
+}
+
+// Save location to Firestore
+async function saveLocation(e) {
+  e.preventDefault();
+  
+  if (!authModule.isAuthenticated()) {
+    alert('Please sign in to add locations');
+    return;
+  }
+  
+  const form = document.getElementById('location-form');
+  const user = authModule.getCurrentUser();
+  const imageInput = document.getElementById('location-image');
+  
+  // Get form values
+  const locationData = {
+    name: document.getElementById('location-name').value,
+    category: document.getElementById('location-category').value,
+    description: document.getElementById('location-description').value,
+    notes: document.getElementById('location-notes').value || '',
+    riskLevel: document.getElementById('location-risk').value,
+    locationType: document.getElementById('location-type').value,
+    coordinates: new firebase.firestore.GeoPoint(
+      parseFloat(form.dataset.lat),
+      parseFloat(form.dataset.lng)
+    ),
+    createdBy: user.uid,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    upvotes: 0,
+    downvotes: 0,
+    rating: 0,
+    ratingCount: 0,
+    imageUrls: [],
+    claimedBy: null,
+    claimedAt: null,
+    crewId: null
+  };
+  
+  // Check if we're online
+  if (navigator.onLine) {
+    try {
+      // Upload images if any
+      if (imageInput.files.length > 0) {
+        const imageUrls = await uploadImages(imageInput.files, user.uid);
+        locationData.imageUrls = imageUrls;
+      }
+      
+      // Save to Firestore
+      const docRef = await locationsRef.add(locationData);
+      console.log('Location added with ID:', docRef.id);
+      
+      // Add marker to map
+      if (typeof mapModule !== 'undefined' && mapModule.addLocationMarker) {
+        mapModule.addLocationMarker({
+          id: docRef.id,
+          ...locationData,
+          coordinates: { 
+            lat: locationData.coordinates.latitude, 
+            lng: locationData.coordinates.longitude 
+          }
+        });
+      }
+      
+      // Update user's location count
+      updateUserLocationCount(user.uid);
+      
+      // Close modal
+      closeLocationModal();
+    } catch (error) {
+      console.error('Error adding location:', error);
+      alert('Error saving location. Please try again.');
+    }
+  } else {
+    // Save to IndexedDB for offline use
+    try {
+      await saveLocationOffline(locationData);
+      
+      // Add marker to map (temporary until sync)
+      const tempId = 'temp-' + Date.now();
+      if (typeof mapModule !== 'undefined' && mapModule.addLocationMarker) {
+        mapModule.addLocationMarker({
+          id: tempId,
+          ...locationData,
+          coordinates: { 
+            lat: locationData.coordinates.latitude, 
+            lng: locationData.coordinates.longitude 
+          },
+          isOffline: true
+        });
+      }
+      
+      // Close modal
+      closeLocationModal();
+      
+      // Show offline indicator
+      showOfflineIndicator();
+    } catch (error) {
+      console.error('Error saving location offline:', error);
+      alert('Error saving location offline. Please try again.');
+    }
+  }
+}
+
+// Upload images to Firebase Storage
+async function uploadImages(files, userId) {
+  if (files.length === 0) return [];
+  
+  const imageUrls = [];
+  const storageRef = storage.ref();
+  
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const fileRef = storageRef.child(`locations/${userId}/${Date.now()}_${file.name}`);
+    
+    try {
+      const snapshot = await fileRef.put(file);
+      const downloadUrl = await snapshot.ref.getDownloadURL();
+      imageUrls.push(downloadUrl);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
+  }
+  
+  return imageUrls;
 }
 
 // Save location to IndexedDB for offline use
@@ -326,25 +486,56 @@ function addLocationToList(id, locationData, isOffline = false) {
     }
   }
   
+  // Get risk level indicator
+  const riskLevel = locationData.riskLevel || 'unknown';
+  const riskIndicator = `<span class="risk-indicator risk-${riskLevel}">${getRiskLabel(riskLevel)}</span>`;
+  
+  // Get location type
+  const locationType = locationData.locationType || 'default';
+  const locationTypeLabel = getLocationTypeLabel(locationType);
+  
+  // Get first image if available
+  const imageHtml = locationData.imageUrls && locationData.imageUrls.length > 0 
+    ? `<img src="${locationData.imageUrls[0]}" alt="${locationData.name}" class="location-thumbnail">` 
+    : '';
+  
   // Create content
   listItem.innerHTML = `
     <div class="location-item-header">
       <h3>${locationData.name}</h3>
-      <span class="location-category">${getCategoryLabel(locationData.category)}</span>
+      <div class="location-badges">
+        <span class="location-category">${getCategoryLabel(locationData.category)}</span>
+        ${riskIndicator}
+      </div>
     </div>
+    ${imageHtml}
     <p class="location-description">${locationData.description || 'No description'}</p>
+    ${locationData.notes ? `<p class="location-notes"><strong>Notes:</strong> ${locationData.notes}</p>` : ''}
     <div class="location-meta">
       <span class="location-date">${dateDisplay}</span>
       <div class="location-stats">
         <span class="location-stat">👍 ${locationData.upvotes || 0}</span>
         <span class="location-stat">👎 ${locationData.downvotes || 0}</span>
+        <span class="location-type">${locationTypeLabel}</span>
       </div>
     </div>
+    ${locationData.claimedBy ? `
+      <div class="territory-owner">
+        <span>Claimed by: </span>
+        <span class="territory-owner-name">${locationData.claimedBy}</span>
+      </div>
+    ` : ''}
     ${isOffline ? '<div class="offline-badge">Saved Offline</div>' : ''}
+    <div class="location-actions">
+      <button class="view-on-map-btn neon-button" data-id="${id}">View on Map</button>
+    </div>
   `;
   
   // Add click event to show on map
-  listItem.addEventListener('click', () => {
+  const viewOnMapBtn = listItem.querySelector('.view-on-map-btn');
+  viewOnMapBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    
     // Show the map view
     document.getElementById('map-view-btn').click();
     
@@ -399,11 +590,239 @@ function getCategoryLabel(category) {
   return labels[category] || 'Other';
 }
 
+// Get human-readable risk level label
+function getRiskLabel(riskLevel) {
+  const labels = {
+    safe: 'Safe',
+    questionable: 'Questionable',
+    unknown: 'Unknown',
+    hot: 'Hot',
+    'high-risk': 'High Risk'
+  };
+  
+  return labels[riskLevel] || 'Unknown';
+}
+
+// Get human-readable location type label
+function getLocationTypeLabel(locationType) {
+  const labels = {
+    default: 'Default',
+    water: 'Water Source',
+    building: 'Abandoned Building',
+    power: 'Power Outlet',
+    camp: 'Camp Spot',
+    geocache: 'Geocache'
+  };
+  
+  return labels[locationType] || 'Default';
+}
+
+// Close location modal
+function closeLocationModal() {
+  const modal = document.getElementById('location-modal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+}
+
+// Update user's location count
+function updateUserLocationCount(userId) {
+  // Count user's locations
+  locationsRef.where('createdBy', '==', userId).get()
+    .then(snapshot => {
+      const count = snapshot.size;
+      
+      // Update user document
+      return usersRef.doc(userId).update({
+        locationsCount: count
+      });
+    })
+    .catch(error => {
+      console.error('Error updating user location count:', error);
+    });
+}
+
+// Add comment to a location
+async function addComment(locationId, commentText) {
+  if (!authModule.isAuthenticated()) {
+    alert('Please sign in to add comments');
+    return;
+  }
+  
+  const user = authModule.getCurrentUser();
+  
+  try {
+    const commentData = {
+      locationId,
+      text: commentText,
+      createdBy: user.uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      userDisplayName: user.displayName || 'Anonymous',
+      userPhotoURL: user.photoURL || null
+    };
+    
+    await commentsRef.add(commentData);
+    console.log('Comment added successfully');
+    return true;
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    return false;
+  }
+}
+
+// Load comments for a location
+async function loadComments(locationId) {
+  try {
+    const snapshot = await commentsRef
+      .where('locationId', '==', locationId)
+      .orderBy('createdAt', 'desc')
+      .get();
+    
+    const comments = [];
+    snapshot.forEach(doc => {
+      comments.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    return comments;
+  } catch (error) {
+    console.error('Error loading comments:', error);
+    return [];
+  }
+}
+
+// Claim a location
+async function claimLocation(locationId) {
+  if (!authModule.isAuthenticated()) {
+    alert('Please sign in to claim locations');
+    return false;
+  }
+  
+  const user = authModule.getCurrentUser();
+  
+  try {
+    // Check if location is already claimed
+    const locationDoc = await locationsRef.doc(locationId).get();
+    
+    if (!locationDoc.exists) {
+      console.error('Location does not exist');
+      return false;
+    }
+    
+    const locationData = locationDoc.data();
+    
+    // If already claimed by this user, do nothing
+    if (locationData.claimedBy === user.uid) {
+      return true;
+    }
+    
+    // Update location with claim info
+    await locationsRef.doc(locationId).update({
+      claimedBy: user.uid,
+      claimedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Add to territories collection
+    await territoriesRef.add({
+      locationId,
+      userId: user.uid,
+      claimedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      points: 0
+    });
+    
+    console.log('Location claimed successfully');
+    return true;
+  } catch (error) {
+    console.error('Error claiming location:', error);
+    return false;
+  }
+}
+
+// Rate a location with stars (1-5)
+async function rateLocationWithStars(locationId, rating) {
+  if (!authModule.isAuthenticated()) {
+    alert('Please sign in to rate locations');
+    return false;
+  }
+  
+  if (rating < 1 || rating > 5) {
+    console.error('Invalid rating value');
+    return false;
+  }
+  
+  const user = authModule.getCurrentUser();
+  
+  try {
+    // Check if user has already rated this location
+    const ratingRef = ratingsRef.doc(`${locationId}_${user.uid}_stars`);
+    const ratingDoc = await ratingRef.get();
+    
+    const locationRef = locationsRef.doc(locationId);
+    const locationDoc = await locationRef.get();
+    
+    if (!locationDoc.exists) {
+      console.error('Location does not exist');
+      return false;
+    }
+    
+    const locationData = locationDoc.data();
+    let newRating, newCount;
+    
+    if (ratingDoc.exists) {
+      // User is updating their rating
+      const oldRating = ratingDoc.data().value;
+      const oldTotal = locationData.rating * locationData.ratingCount;
+      const newTotal = oldTotal - oldRating + rating;
+      newCount = locationData.ratingCount;
+      newRating = newTotal / newCount;
+      
+      // Update the rating document
+      await ratingRef.update({
+        value: rating,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      // New rating
+      const oldTotal = (locationData.rating || 0) * (locationData.ratingCount || 0);
+      newCount = (locationData.ratingCount || 0) + 1;
+      newRating = (oldTotal + rating) / newCount;
+      
+      // Create new rating document
+      await ratingRef.set({
+        locationId,
+        userId: user.uid,
+        value: rating,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    
+    // Update location with new rating
+    await locationRef.update({
+      rating: newRating,
+      ratingCount: newCount
+    });
+    
+    console.log('Location rated successfully');
+    return true;
+  } catch (error) {
+    console.error('Error rating location:', error);
+    return false;
+  }
+}
+
 // Export functions for use in other modules
 window.locationsModule = {
   initLocations,
+  saveLocation,
   saveLocationOffline,
   loadOfflineLocations,
   syncOfflineLocations,
-  loadUserLocations
+  loadUserLocations,
+  addComment,
+  loadComments,
+  claimLocation,
+  rateLocationWithStars,
+  closeLocationModal
 };

@@ -24,9 +24,21 @@
         </div>
     </div>
 
+    <!-- Scanline effect for retro look -->
+    <div class="scanline"></div>
+    
     <div id="app" class="hidden">
         <header>
-            <h1 class="neon-text">URBINDEX</h1>
+            <div class="ascii-title-container">
+                <pre class="ascii-title">
+ █    █ █████  ████   █████ █   █ ████   █████ █   █
+ █    █ █   █  █   █    █   ██  █ █   █  █      █ █ 
+ █    █ █████  ████     █   █ █ █ █   █  ████    █  
+ █    █ █   █  █   █    █   █  ██ █   █  █       █  
+  ████  █████  ████   █████ █   █ ████   █████   █  
+                </pre>
+                <div class="radar-ping"></div>
+            </div>
             <div id="user-profile">
                 <button id="login-button" class="neon-button">Sign In</button>
                 <div id="user-info" class="hidden">
@@ -45,7 +57,43 @@
 
         <main>
             <div id="map-container" class="view active">
-                <div id="map"></div>
+                <div class="retro-layout">
+                    <!-- Left side: Feed and announcements -->
+                    <div class="left-panel">
+                        <div class="announcement-board">
+                            <h3 class="panel-title">Announcements</h3>
+                            <div class="announcement-content">
+                                <p>Welcome to the new Urbindex! Explore new features like crew territories, geocaching, and more.</p>
+                            </div>
+                        </div>
+                        <div class="activity-feed">
+                            <h3 class="panel-title">Activity Feed</h3>
+                            <ul id="activity-feed-list" class="feed-list">
+                                <!-- Feed items will be populated dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Right side: Map, marquee, and chat -->
+                    <div class="right-panel">
+                        <div class="online-users-marquee">
+                            <div class="marquee-content">
+                                <span>Online Users: </span>
+                                <span id="online-users-list">Loading users...</span>
+                            </div>
+                        </div>
+                        <div id="map" class="square-map"></div>
+                        <div class="chat-box">
+                            <div class="chat-messages" id="chat-messages">
+                                <!-- Chat messages will be populated dynamically -->
+                            </div>
+                            <div class="chat-input-container">
+                                <input type="text" id="chat-input" placeholder="Type a message..." class="chat-input">
+                                <button id="chat-send-btn" class="chat-send-btn">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <button id="add-location-btn" class="floating-btn">+</button>
             </div>
 
@@ -107,8 +155,34 @@
                         <textarea id="location-description" rows="3"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="location-image">Image URL (optional)</label>
-                        <input type="url" id="location-image">
+                        <label for="location-notes">Notes</label>
+                        <textarea id="location-notes" rows="3" placeholder="Add your personal notes about this location..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="location-image">Image Upload</label>
+                        <input type="file" id="location-image" accept="image/*" multiple>
+                        <div id="image-preview-container" class="image-preview-container"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="location-risk">Risk Level</label>
+                        <select id="location-risk" required>
+                            <option value="safe">Safe</option>
+                            <option value="questionable">Questionable</option>
+                            <option value="unknown">Unknown</option>
+                            <option value="hot">Hot</option>
+                            <option value="high-risk">High Risk</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="location-type">Location Type</label>
+                        <select id="location-type">
+                            <option value="default">Default</option>
+                            <option value="water">Water Source</option>
+                            <option value="building">Abandoned Building</option>
+                            <option value="power">Power Outlet</option>
+                            <option value="camp">Sleeping/Camp Spot</option>
+                            <option value="geocache">Geocache</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Coordinates</label>
@@ -127,6 +201,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/map.js"></script>
