@@ -576,46 +576,11 @@ function showEmptyUserLocations() {
   }
 }
 
-// Get human-readable category label
-function getCategoryLabel(category) {
-  const labels = {
-    abandoned: 'Abandoned',
-    historical: 'Historical',
-    'street-art': 'Street Art',
-    viewpoint: 'Viewpoint',
-    'hidden-gem': 'Hidden Gem',
-    other: 'Other'
-  };
-  
-  return labels[category] || 'Other';
-}
-
-// Get human-readable risk level label
-function getRiskLabel(riskLevel) {
-  const labels = {
-    safe: 'Safe',
-    questionable: 'Questionable',
-    unknown: 'Unknown',
-    hot: 'Hot',
-    'high-risk': 'High Risk'
-  };
-  
-  return labels[riskLevel] || 'Unknown';
-}
-
-// Get human-readable location type label
-function getLocationTypeLabel(locationType) {
-  const labels = {
-    default: 'Default',
-    water: 'Water Source',
-    building: 'Abandoned Building',
-    power: 'Power Outlet',
-    camp: 'Camp Spot',
-    geocache: 'Geocache'
-  };
-  
-  return labels[locationType] || 'Default';
-}
+// Use utility functions from utils.js
+const getCategoryLabel = utilsModule.getCategoryLabel;
+const getRiskLabel = utilsModule.getRiskLabel;
+const getLocationTypeLabel = utilsModule.getLocationTypeLabel;
+const formatDate = utilsModule.formatDate;
 
 // Close location modal
 function closeLocationModal() {

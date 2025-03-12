@@ -1,5 +1,8 @@
 // Urbindex - Comments Module
 
+// Use utility functions from utils.js
+const formatDate = utilsModule.formatDate;
+
 // Initialize comments functionality
 function initComments() {
   // Set up event listeners
@@ -198,14 +201,7 @@ function renderComments(locationId, container) {
       commentElement.dataset.id = comment.id;
       
       // Format date
-      let dateDisplay = 'Unknown date';
-      if (comment.createdAt) {
-        if (typeof comment.createdAt === 'string') {
-          dateDisplay = new Date(comment.createdAt).toLocaleDateString();
-        } else if (comment.createdAt.toDate) {
-          dateDisplay = comment.createdAt.toDate().toLocaleDateString();
-        }
-      }
+      const dateDisplay = formatDate(comment.createdAt);
       
       // Check if user is the author
       const user = authModule.getCurrentUser();

@@ -62,8 +62,9 @@ self.addEventListener('fetch', event => {
 
   // For Firebase API requests, use network-first strategy
   if (event.request.url.includes('firebaseio.com') || 
-      event.request.url.includes('googleapis.com')) {
-    return networkFirstStrategy(event);
+      event.request.url.includes('googleapis.com') ||
+      event.request.url.includes('firebasestorage.googleapis.com')) {
+    return event.respondWith(networkFirstStrategy(event));
   }
 
   // For all other requests, use cache-first strategy

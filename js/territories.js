@@ -881,4 +881,19 @@ function openInviteMemberModal(crewId) {
     document.body.removeChild(textarea);
     
     // Show copied message
-    copyBtn.textContent = 'Copie
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => {
+      copyBtn.textContent = 'Copy';
+    }, 2000);
+  });
+}
+
+// Export functions for use in other modules
+window.territoriesModule = {
+  initTerritories,
+  loadUserCrewInfo,
+  loadUserTerritories,
+  createCrew,
+  joinCrew,
+  leaveCrew
+};

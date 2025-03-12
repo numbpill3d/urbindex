@@ -129,51 +129,33 @@ function handleBackButton(event) {
 
 // Initialize all modules
 function initializeModules() {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
-      // Initialize authentication
-      if (typeof authModule !== 'undefined' && authModule.initAuth) {
-        authModule.initAuth();
-      }
+      // Define modules to initialize
+      const modules = [
+        { name: 'auth', init: authModule?.initAuth },
+        { name: 'map', init: mapModule?.initMap },
+        { name: 'locations', init: locationsModule?.initLocations },
+        { name: 'leaderboard', init: leaderboardModule?.initLeaderboard },
+        { name: 'territories', init: territoriesModule?.initTerritories },
+        { name: 'comments', init: commentsModule?.initComments },
+        { name: 'ratings', init: ratingsModule?.initRatings },
+        { name: 'geocaching', init: geocachingModule?.initGeocaching },
+        { name: 'offline', init: offlineModule?.initOffline }
+      ];
       
-      // Initialize map
-      if (typeof mapModule !== 'undefined' && mapModule.initMap) {
-        mapModule.initMap();
-      }
-      
-      // Initialize locations
-      if (typeof locationsModule !== 'undefined' && locationsModule.initLocations) {
-        locationsModule.initLocations();
-      }
-      
-      // Initialize leaderboard
-      if (typeof leaderboardModule !== 'undefined' && leaderboardModule.initLeaderboard) {
-        leaderboardModule.initLeaderboard();
-      }
-      
-      // Initialize territories
-      if (typeof territoriesModule !== 'undefined' && territoriesModule.initTerritories) {
-        territoriesModule.initTerritories();
-      }
-      
-      // Initialize comments
-      if (typeof commentsModule !== 'undefined' && commentsModule.initComments) {
-        commentsModule.initComments();
-      }
-      
-      // Initialize ratings
-      if (typeof ratingsModule !== 'undefined' && ratingsModule.initRatings) {
-        ratingsModule.initRatings();
-      }
-      
-      // Initialize geocaching
-      if (typeof geocachingModule !== 'undefined' && geocachingModule.initGeocaching) {
-        geocachingModule.initGeocaching();
-      }
-      
-      // Initialize offline functionality
-      if (typeof offlineModule !== 'undefined' && offlineModule.initOffline) {
-        offlineModule.initOffline();
+      // Initialize modules sequentially
+      for (const module of modules) {
+        if (typeof module.init === 'function') {
+          try {
+            console.log(`Initializing ${module.name} module...`);
+            await Promise.resolve(module.init());
+            console.log(`${module.name} module initialized successfully`);
+          } catch (moduleError) {
+            console.error(`Error initializing ${module.name} module:`, moduleError);
+            // Continue with other modules even if one fails
+          }
+        }
       }
       
       // Check URL parameters for initial view

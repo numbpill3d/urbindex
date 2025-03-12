@@ -130,44 +130,92 @@ function cacheLocationsNearPosition(position, radiusKm = 10) {
 
 // Cache locations in IndexedDB
 function cacheLocations(locations) {
-  // Open IndexedDB
-  const request = indexedDB.open('urbindex-db', 1);
-  
-  request.onerror = (event) => {
-    console.error('Error opening IndexedDB:', event.target.error);
-  };
-  
-  request.onsuccess = (event) => {
-    const db = event.target.result;
-    const transaction = db.transaction(['cachedLocations'], 'readwrite');
-    const store = transaction.objectStore('cachedLocations');
+  return new Promise((resolve, reject) => {
+    // Open IndexedDB
+    const request = indexedDB.open('urbindex-db', 1);
     
-    // Clear existing cached locations
-    store.clear();
-    
-    // Add each location to the store
-    locations.forEach(location => {
-      store.add(location);
-    });
-    
-    transaction.oncomplete = () => {
-      console.log(`Cached ${locations.length} locations for offline use`);
-      showToast(`Cached ${locations.length} locations for offline use`);
+    request.onerror = (event) => {
+      console.error('Error opening IndexedDB:', event.target.error);
+      reject(event.target.error);
     };
     
-    transaction.onerror = (event) => {
-      console.error('Error caching locations:', event.target.error);
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      
+      // Check if cachedLocations store exists
+      if (!db.objectStoreNames.contains('cachedLocations')) {
+        // Create the store in a new transaction
+        db.close();
+        const upgradeRequest = indexedDB.open('urbindex-db', db.version + 1);
+        
+        upgradeRequest.onupgradeneeded = (event) => {
+          const upgradeDb = event.target.result;
+          upgradeDb.createObjectStore('cachedLocations', { keyPath: 'id' });
+          console.log('Created cachedLocations object store');
+        };
+        
+        upgradeRequest.onsuccess = (event) => {
+          const upgradedDb = event.target.result;
+          cacheLocationsInDb(upgradedDb, locations)
+            .then(resolve)
+            .catch(reject);
+        };
+        
+        upgradeRequest.onerror = (event) => {
+          console.error('Error upgrading database:', event.target.error);
+          reject(event.target.error);
+        };
+      } else {
+        // Store already exists, proceed with caching
+        cacheLocationsInDb(db, locations)
+          .then(resolve)
+          .catch(reject);
+      }
     };
-  };
-  
-  request.onupgradeneeded = (event) => {
-    const db = event.target.result;
     
-    // Create object store for cached locations if it doesn't exist
-    if (!db.objectStoreNames.contains('cachedLocations')) {
-      db.createObjectStore('cachedLocations', { keyPath: 'id' });
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      
+      // Create object store for cached locations if it doesn't exist
+      if (!db.objectStoreNames.contains('cachedLocations')) {
+        db.createObjectStore('cachedLocations', { keyPath: 'id' });
+        console.log('Created cachedLocations object store during upgrade');
+      }
+    };
+  });
+}
+
+// Helper function to cache locations in the database
+function cacheLocationsInDb(db, locations) {
+  return new Promise((resolve, reject) => {
+    try {
+      const transaction = db.transaction(['cachedLocations'], 'readwrite');
+      const store = transaction.objectStore('cachedLocations');
+      
+      // Clear existing cached locations
+      store.clear();
+      
+      // Add each location to the store
+      locations.forEach(location => {
+        store.add(location);
+      });
+      
+      transaction.oncomplete = () => {
+        console.log(`Cached ${locations.length} locations for offline use`);
+        showToast(`Cached ${locations.length} locations for offline use`);
+        db.close();
+        resolve(locations.length);
+      };
+      
+      transaction.onerror = (event) => {
+        console.error('Error caching locations:', event.target.error);
+        reject(event.target.error);
+      };
+    } catch (error) {
+      console.error('Error in cacheLocationsInDb:', error);
+      reject(error);
     }
-  };
+  });
 }
 
 // Register background sync with service worker
