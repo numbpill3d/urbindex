@@ -64,13 +64,37 @@ function signInWithGoogle() {
 
 // Sign out
 function signOut() {
-  auth.signOut()
+  const user = auth.currentUser;
+  
+  // Mark user as offline before signing out
+  if (user) {
+    usersRef.doc(user.uid).update({
+      online: false,
+      lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+    })
     .then(() => {
-      console.log('User signed out');
+      auth.signOut()
+        .then(() => {
+          console.log('User signed out');
+        })
+        .catch(error => {
+          console.error('Sign out Error:', error);
+        });
     })
     .catch(error => {
-      console.error('Sign out Error:', error);
+      console.error('Error updating online status:', error);
+      // Still try to sign out even if updating status fails
+      auth.signOut();
     });
+  } else {
+    auth.signOut()
+      .then(() => {
+        console.log('User signed out');
+      })
+      .catch(error => {
+        console.error('Sign out Error:', error);
+      });
+  }
 }
 
 // Create or update user profile in Firestore
@@ -81,6 +105,7 @@ function createOrUpdateUserProfile(user) {
     email: user.email,
     photoURL: user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User') + '&background=0a0a20&color=05d9e8&size=128',
     lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+    online: true, // Mark user as online
     locationsCount: 0, // Will be updated when fetching user data
     score: 0 // Will be updated when fetching user data
   };
@@ -93,7 +118,8 @@ function createOrUpdateUserProfile(user) {
         return usersRef.doc(user.uid).update({
           displayName: userProfile.displayName,
           photoURL: userProfile.photoURL,
-          lastLogin: userProfile.lastLogin
+          lastLogin: userProfile.lastLogin,
+          online: true // Mark user as online
         });
       } else {
         // Create new user

@@ -8,7 +8,7 @@ let currentPosition = null;
 let onlineUsers = [];
 
 // Map configuration
-const mapConfig = {
+const mapConfig = {km
   initialView: [40.7128, -74.0060], // Default to New York City
   initialZoom: 13,
   maxZoom: 19,
@@ -89,137 +89,7 @@ function initMap() {
   });
 }
 
-// Initialize particle effects
-function initParticleEffects() {
-  const titleContainer = document.querySelector('.ascii-title-container');
-  if (!titleContainer) return;
-  
-  setInterval(() => {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    
-    const x = Math.random() * titleContainer.offsetWidth;
-    const y = Math.random() * titleContainer.offsetHeight;
-    const size = Math.random() * 5 + 2;
-    const colors = ['#05d9e8', '#ff2a6d', '#39ff14', '#9d4edd'];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    
-    particle.style.left = `${x}px`;
-    particle.style.top = `${y}px`;
-    particle.style.width = `${size}px`;
-    particle.style.height = `${size}px`;
-    particle.style.backgroundColor = color;
-    
-    titleContainer.appendChild(particle);
-    
-    setTimeout(() => {
-      if (titleContainer.contains(particle)) {
-        titleContainer.removeChild(particle);
-      }
-    }, 1500);
-  }, 300);
-}
 
-// Initialize chat functionality
-function initChat() {
-  const chatInput = document.getElementById('chat-input');
-  const chatSendBtn = document.getElementById('chat-send-btn');
-  
-  if (!chatInput || !chatSendBtn) return;
-  
-  chatSendBtn.addEventListener('click', sendChatMessage);
-  chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendChatMessage();
-  });
-  
-  listenForChatMessages();
-}
-
-// Send chat message
-function sendChatMessage() {
-  const chatInput = document.getElementById('chat-input');
-  const message = chatInput.value.trim();
-  
-  if (!message || !authModule.isAuthenticated()) return;
-  
-  const user = authModule.getCurrentUser();
-  
-  db.collection('chat').add({
-    text: message,
-    userId: user.uid,
-    userName: user.displayName || 'Anonymous',
-    userPhotoURL: user.photoURL || null,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  })
-  .then(() => {
-    chatInput.value = '';
-  })
-  .catch(error => {
-    console.error('Error sending message:', error);
-  });
-}
-
-// Listen for new chat messages
-function listenForChatMessages() {
-  const chatMessages = document.getElementById('chat-messages');
-  if (!chatMessages) return;
-  
-  db.collection('chat')
-    .orderBy('timestamp', 'desc')
-    .limit(20)
-    .onSnapshot(snapshot => {
-      chatMessages.innerHTML = '';
-      
-      const messages = [];
-      snapshot.forEach(doc => {
-        messages.push({ id: doc.id, ...doc.data() });
-      });
-      
-      messages.reverse().forEach(message => {
-        const messageEl = document.createElement('div');
-        messageEl.className = 'chat-message';
-        
-        let timeString = 'Just now';
-        if (message.timestamp && message.timestamp.toDate) {
-          const date = message.timestamp.toDate();
-          timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-        
-        messageEl.innerHTML = `
-          <span class="chat-user">${message.userName}:</span>
-          <span class="chat-text">${message.text}</span>
-          <span class="chat-time">${timeString}</span>
-        `;
-        
-        chatMessages.appendChild(messageEl);
-      });
-      
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    });
-}
-
-// Initialize activity feed
-function initActivityFeed() {
-  const feedList = document.getElementById('activity-feed-list');
-  if (!feedList) return;
-  
-  db.collection('locations')
-    .orderBy('createdAt', 'desc')
-    .limit(10)
-    .onSnapshot(snapshot => {
-      feedList.innerHTML = '';
-      
-      if (snapshot.empty) {
-        feedList.innerHTML = '<li class="feed-item">No recent activity</li>';
-        return;
-      }
-      
-      snapshot.forEach(doc => {
-        const locationData = doc.data();
-        addActivityFeedItem(doc.id, locationData);
-      });
-    });
-}
 
 // Add an item to the activity feed
 function addActivityFeedItem(id, locationData) {

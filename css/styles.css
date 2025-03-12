@@ -312,7 +312,7 @@ main {
 }
 
 .left-panel {
-  width: 50%;
+  width: 30%;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -322,7 +322,7 @@ main {
 }
 
 .right-panel {
-  width: 50%;
+  width: 70%;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -399,6 +399,7 @@ main {
   overflow: hidden;
   position: relative;
   margin-bottom: 10px;
+  z-index: 10;
 }
 
 #online-users-list {
@@ -407,6 +408,9 @@ main {
   animation: marquee 20s linear infinite;
   padding: 5px;
   color: var(--neon-green);
+  font-family: var(--font-secondary);
+  font-size: 0.9rem;
+  text-shadow: 0 0 5px var(--neon-green);
 }
 
 @keyframes marquee {
@@ -418,16 +422,17 @@ main {
   flex: 1;
   border: 2px solid var(--bbs-border);
   aspect-ratio: 1/1;
-  max-height: calc(100% - 130px);
+  max-height: calc(100% - 180px);
 }
 
 .chat-box {
-  height: 120px;
+  height: 150px;
   background-color: var(--bbs-header-bg);
   border: 2px solid var(--bbs-border);
   border-top: none;
   display: flex;
   flex-direction: column;
+  z-index: 10;
 }
 
 .chat-messages {
@@ -767,6 +772,183 @@ ul {
   border: 1px solid var(--neon-blue);
   color: var(--text-color);
   font-size: 1.2rem;
+}
+
+/* Crew Styles */
+#crews-container {
+  padding: 20px;
+}
+
+.crew-header {
+  padding: 20px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.crew-details {
+  margin-left: 20px;
+}
+
+.crew-details h2 {
+  margin-bottom: 5px;
+}
+
+.crew-role {
+  display: inline-block;
+  padding: 3px 8px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  margin-top: 5px;
+}
+
+.crew-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  background-color: var(--secondary-bg);
+  padding: 15px;
+  border-radius: var(--border-radius);
+}
+
+.crew-stat {
+  text-align: center;
+}
+
+.crew-stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--neon-blue);
+}
+
+.crew-stat-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.crew-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.crew-members {
+  margin-bottom: 20px;
+}
+
+.members-list {
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--bbs-border);
+  padding: 10px;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.member-item:last-child {
+  border-bottom: none;
+}
+
+.member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 0;
+  margin-right: 10px;
+  border: 1px solid var(--neon-blue);
+}
+
+.member-info {
+  flex: 1;
+}
+
+.member-name {
+  display: block;
+  font-weight: bold;
+}
+
+.member-role {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.territories-section {
+  margin-top: 20px;
+}
+
+.territories-list {
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--bbs-border);
+  padding: 10px;
+}
+
+.territory-item {
+  margin-bottom: 10px;
+}
+
+.territory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.territory-points {
+  color: var(--neon-green);
+  font-weight: bold;
+  font-family: var(--font-secondary);
+}
+
+.territory-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.crew-id-container {
+  background-color: var(--secondary-bg);
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid var(--bbs-border);
+  display: flex;
+  align-items: center;
+}
+
+.crew-id {
+  flex: 1;
+  font-family: monospace;
+  padding: 5px;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: var(--neon-blue);
+}
+
+.invite-instructions {
+  margin-top: 15px;
+  font-size: 0.9rem;
+}
+
+.invite-instructions ol {
+  margin-left: 20px;
+  margin-top: 5px;
+}
+
+.invite-instructions li {
+  margin-bottom: 5px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
 }
 
 /* Rating System */

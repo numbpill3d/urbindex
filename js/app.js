@@ -158,6 +158,9 @@ function initializeModules() {
         }
       }
       
+      // Initialize UI features that don't require authentication
+      initUIFeatures();
+      
       // Check URL parameters for initial view
       checkUrlParameters();
       
@@ -237,6 +240,306 @@ function checkAddToHomeScreen() {
     setTimeout(() => {
       showAddToHomeScreenPrompt();
     }, 30000); // 30 seconds delay
+  }
+}
+
+// Initialize UI features that don't require authentication
+function initUIFeatures() {
+  // Initialize particle effects for ASCII title
+  initParticleEffects();
+  
+  // Initialize chat UI (even if not logged in)
+  initChatUI();
+  
+  // Initialize activity feed
+  initActivityFeed();
+  
+  // Initialize online users marquee
+  initOnlineUsersMarquee();
+  
+  // Initialize crew UI elements
+  initCrewUI();
+}
+
+// Initialize particle effects for ASCII title
+function initParticleEffects() {
+  const titleContainer = document.querySelector('.ascii-title-container');
+  if (!titleContainer) return;
+  
+  setInterval(() => {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    
+    const x = Math.random() * titleContainer.offsetWidth;
+    const y = Math.random() * titleContainer.offsetHeight;
+    const size = Math.random() * 5 + 2;
+    const colors = ['#05d9e8', '#ff2a6d', '#39ff14', '#9d4edd'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    particle.style.backgroundColor = color;
+    
+    titleContainer.appendChild(particle);
+    
+    setTimeout(() => {
+      if (titleContainer.contains(particle)) {
+        titleContainer.removeChild(particle);
+      }
+    }, 1500);
+  }, 300);
+}
+
+// Initialize chat UI
+function initChatUI() {
+  const chatInput = document.getElementById('chat-input');
+  const chatSendBtn = document.getElementById('chat-send-btn');
+  
+  if (!chatInput || !chatSendBtn) return;
+  
+  chatSendBtn.addEventListener('click', () => {
+    if (!authModule.isAuthenticated()) {
+      alert('Please sign in to send messages');
+      return;
+    }
+    
+    const message = chatInput.value.trim();
+    if (message) {
+      sendChatMessage(message);
+      chatInput.value = '';
+    }
+  });
+  
+  chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      if (!authModule.isAuthenticated()) {
+        alert('Please sign in to send messages');
+        return;
+      }
+      
+      const message = chatInput.value.trim();
+      if (message) {
+        sendChatMessage(message);
+        chatInput.value = '';
+      }
+    }
+  });
+  
+  // Listen for chat messages
+  listenForChatMessages();
+}
+
+// Send chat message
+function sendChatMessage(message) {
+  if (!message || !authModule.isAuthenticated()) return;
+  
+  const user = authModule.getCurrentUser();
+  
+  db.collection('chat').add({
+    text: message,
+    userId: user.uid,
+    userName: user.displayName || 'Anonymous',
+    userPhotoURL: user.photoURL || null,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .catch(error => {
+    console.error('Error sending message:', error);
+  });
+}
+
+// Listen for new chat messages
+function listenForChatMessages() {
+  const chatMessages = document.getElementById('chat-messages');
+  if (!chatMessages) return;
+  
+  db.collection('chat')
+    .orderBy('timestamp', 'desc')
+    .limit(20)
+    .onSnapshot(snapshot => {
+      chatMessages.innerHTML = '';
+      
+      const messages = [];
+      snapshot.forEach(doc => {
+        messages.push({ id: doc.id, ...doc.data() });
+      });
+      
+      messages.reverse().forEach(message => {
+        const messageEl = document.createElement('div');
+        messageEl.className = 'chat-message';
+        
+        let timeString = 'Just now';
+        if (message.timestamp && message.timestamp.toDate) {
+          const date = message.timestamp.toDate();
+          timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        messageEl.innerHTML = `
+          <span class="chat-user">${message.userName}:</span>
+          <span class="chat-text">${message.text}</span>
+          <span class="chat-time">${timeString}</span>
+        `;
+        
+        chatMessages.appendChild(messageEl);
+      });
+      
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+}
+
+// Initialize activity feed
+function initActivityFeed() {
+  const feedList = document.getElementById('activity-feed-list');
+  if (!feedList) return;
+  
+  db.collection('locations')
+    .orderBy('createdAt', 'desc')
+    .limit(10)
+    .onSnapshot(snapshot => {
+      feedList.innerHTML = '';
+      
+      if (snapshot.empty) {
+        feedList.innerHTML = '<li class="feed-item">No recent activity</li>';
+        return;
+      }
+      
+      snapshot.forEach(doc => {
+        const locationData = doc.data();
+        addActivityFeedItem(doc.id, locationData);
+      });
+    });
+}
+
+// Add an item to the activity feed
+function addActivityFeedItem(id, locationData) {
+  const feedList = document.getElementById('activity-feed-list');
+  if (!feedList) return;
+  
+  const feedItem = document.createElement('li');
+  feedItem.className = 'feed-item';
+  
+  let dateDisplay = 'Just now';
+  if (locationData.createdAt) {
+    dateDisplay = utilsModule.formatDate(locationData.createdAt, true);
+  }
+  
+  const riskLevel = locationData.riskLevel || 'unknown';
+  const riskIndicator = `<span class="risk-indicator risk-${riskLevel}">${utilsModule.getRiskLabel(riskLevel)}</span>`;
+  
+  feedItem.innerHTML = `
+    <div class="feed-item-header">
+      <h4>${locationData.name}</h4>
+      ${riskIndicator}
+    </div>
+    <p class="feed-item-description">${locationData.description || 'No description'}</p>
+    <div class="feed-item-meta">
+      <span class="feed-item-date">${dateDisplay}</span>
+      <button class="view-on-map-btn" data-id="${id}">View</button>
+    </div>
+  `;
+  
+  const viewBtn = feedItem.querySelector('.view-on-map-btn');
+  viewBtn.addEventListener('click', () => {
+    if (mapModule && mapModule.map && locationData.coordinates) {
+      const lat = locationData.coordinates.latitude;
+      const lng = locationData.coordinates.longitude;
+      
+      mapModule.map.setView([lat, lng], 16);
+      
+      if (mapModule.locationMarkers && mapModule.locationMarkers[id]) {
+        mapModule.locationMarkers[id].openPopup();
+      }
+    }
+  });
+  
+  feedList.appendChild(feedItem);
+}
+
+// Initialize online users marquee
+function initOnlineUsersMarquee() {
+  const onlineUsersList = document.getElementById('online-users-list');
+  if (!onlineUsersList) return;
+  
+  // Set initial text
+  onlineUsersList.textContent = 'Connecting...';
+  
+  // Listen for online users
+  db.collection('users')
+    .where('online', '==', true)
+    .onSnapshot(snapshot => {
+      const users = [];
+      snapshot.forEach(doc => {
+        const userData = doc.data();
+        users.push(userData.displayName || 'Anonymous Explorer');
+      });
+      
+      if (users.length === 0) {
+        onlineUsersList.textContent = 'No users online';
+      } else {
+        onlineUsersList.textContent = users.join(', ');
+      }
+    });
+}
+
+// Initialize crew UI elements
+function initCrewUI() {
+  // Add crew button to navigation if it doesn't exist
+  const nav = document.querySelector('nav');
+  if (nav && !document.getElementById('crews-btn')) {
+    const crewsBtn = document.createElement('button');
+    crewsBtn.id = 'crews-btn';
+    crewsBtn.className = 'nav-btn';
+    crewsBtn.textContent = 'Crews';
+    
+    // Insert before settings button
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) {
+      nav.insertBefore(crewsBtn, settingsBtn);
+    } else {
+      nav.appendChild(crewsBtn);
+    }
+    
+    // Add event listener
+    crewsBtn.addEventListener('click', () => {
+      switchView('crews-container');
+      
+      // Update active button
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      crewsBtn.classList.add('active');
+    });
+  }
+  
+  // Create crews view container if it doesn't exist
+  if (!document.getElementById('crews-container')) {
+    const main = document.querySelector('main');
+    if (main) {
+      const crewsContainer = document.createElement('div');
+      crewsContainer.id = 'crews-container';
+      crewsContainer.className = 'view';
+      
+      crewsContainer.innerHTML = `
+        <h2>Crews</h2>
+        <div id="no-crew-message">
+          <p>You are not part of any crew yet.</p>
+          <div class="crew-actions">
+            <button id="create-crew-btn" class="neon-button">Create a Crew</button>
+            <button id="join-crew-btn" class="neon-button">Join a Crew</button>
+          </div>
+        </div>
+        <div id="crew-info" class="hidden">
+          <!-- Crew info will be populated dynamically -->
+        </div>
+        <div class="territories-section">
+          <h3>My Territories</h3>
+          <ul id="territories-list" class="territories-list"></ul>
+        </div>
+      `;
+      
+      main.appendChild(crewsContainer);
+    }
   }
 }
 
