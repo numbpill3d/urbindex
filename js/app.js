@@ -151,6 +151,21 @@ function initializeModules() {
         leaderboardModule.initLeaderboard();
       }
       
+      // Initialize territories
+      if (typeof territoriesModule !== 'undefined' && territoriesModule.initTerritories) {
+        territoriesModule.initTerritories();
+      }
+      
+      // Initialize comments
+      if (typeof commentsModule !== 'undefined' && commentsModule.initComments) {
+        commentsModule.initComments();
+      }
+      
+      // Initialize ratings
+      if (typeof ratingsModule !== 'undefined' && ratingsModule.initRatings) {
+        ratingsModule.initRatings();
+      }
+      
       // Initialize offline functionality
       if (typeof offlineModule !== 'undefined' && offlineModule.initOffline) {
         offlineModule.initOffline();
