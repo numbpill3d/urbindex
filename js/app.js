@@ -166,6 +166,11 @@ function initializeModules() {
         ratingsModule.initRatings();
       }
       
+      // Initialize geocaching
+      if (typeof geocachingModule !== 'undefined' && geocachingModule.initGeocaching) {
+        geocachingModule.initGeocaching();
+      }
+      
       // Initialize offline functionality
       if (typeof offlineModule !== 'undefined' && offlineModule.initOffline) {
         offlineModule.initOffline();
