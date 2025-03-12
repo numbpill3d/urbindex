@@ -5,6 +5,7 @@ let map;
 let userMarker;
 let locationMarkers = {};
 let currentPosition = null;
+let onlineUsers = [];
 
 // Map configuration
 const mapConfig = {
@@ -17,66 +18,29 @@ const mapConfig = {
   cyberpunkStyle: true // Enable custom cyberpunk styling
 };
 
-// Custom marker icons
-const markerIcons = {
-  // User marker
-  user: createCustomIcon('user'),
-  
-  // Category markers
-  abandoned: createCustomIcon('abandoned'),
-  historical: createCustomIcon('historical'),
-  'street-art': createCustomIcon('street-art'),
-  viewpoint: createCustomIcon('viewpoint'),
-  'hidden-gem': createCustomIcon('hidden-gem'),
-  other: createCustomIcon('other'),
-  
-  // Location type markers
-  water: createCustomIcon('water'),
-  building: createCustomIcon('building'),
-  power: createCustomIcon('power'),
-  camp: createCustomIcon('camp'),
-  geocache: createCustomIcon('geocache'),
-  
-  // Risk level markers (used for border color)
-  safe: '#39ff14', // Neon green
-  questionable: '#fee440', // Yellow
-  unknown: '#b3b3cc', // Gray
-  hot: '#ff9f1c', // Orange
-  'high-risk': '#ff2a6d' // Neon pink
-};
-
-// Online users for marquee
-let onlineUsers = [];
-
 // Initialize map
 function initMap() {
   // Create map instance
   map = L.map('map', {
-    zoomControl: false, // We'll add it manually in a better position for mobile
+    zoomControl: false,
     attributionControl: true,
     maxBounds: L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180)),
     maxBoundsViscosity: 1.0
   }).setView(mapConfig.initialView, mapConfig.initialZoom);
 
   // Add custom zoom control to bottom right
-  L.control.zoom({
-    position: 'bottomright'
-  }).addTo(map);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
 
   // Add tile layer with cyberpunk styling if enabled
   if (mapConfig.cyberpunkStyle) {
-    // Apply custom styling to the map tiles
     L.tileLayer(mapConfig.tileLayer, {
       attribution: mapConfig.attribution,
       maxZoom: mapConfig.maxZoom,
       minZoom: mapConfig.minZoom,
       className: 'cyberpunk-map-tiles'
     }).addTo(map);
-
-    // Apply custom CSS filter to the map
     document.querySelector('#map').classList.add('cyberpunk-filter');
   } else {
-    // Standard map tiles
     L.tileLayer(mapConfig.tileLayer, {
       attribution: mapConfig.attribution,
       maxZoom: mapConfig.maxZoom,
@@ -92,19 +56,15 @@ function initMap() {
   
   // Set up event listeners for location-related events
   document.addEventListener('user-signed-in', (event) => {
-    // Load user's locations when signed in
     loadLocations();
-    
-    // Add user to online users
-    const user = event.detail;
-    addOnlineUser(user);
+    addOnlineUser(event.detail);
+    initParticleEffects();
+    initChat();
+    initActivityFeed();
   });
   
   document.addEventListener('user-signed-out', () => {
-    // Clear user-specific markers when signed out
     clearUserSpecificMarkers();
-    
-    // Remove user from online users
     removeOnlineUser(authModule.getCurrentUser());
   });
   
@@ -127,15 +87,6 @@ function initMap() {
       });
     }
   });
-  
-  // Set up chat functionality
-  initChat();
-  
-  // Initialize activity feed
-  initActivityFeed();
-  
-  // Start particle effects
-  initParticleEffects();
 }
 
 // Initialize particle effects
@@ -143,42 +94,30 @@ function initParticleEffects() {
   const titleContainer = document.querySelector('.ascii-title-container');
   if (!titleContainer) return;
   
-  // Create particles at random intervals
   setInterval(() => {
-    createParticle(titleContainer);
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    
+    const x = Math.random() * titleContainer.offsetWidth;
+    const y = Math.random() * titleContainer.offsetHeight;
+    const size = Math.random() * 5 + 2;
+    const colors = ['#05d9e8', '#ff2a6d', '#39ff14', '#9d4edd'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    particle.style.backgroundColor = color;
+    
+    titleContainer.appendChild(particle);
+    
+    setTimeout(() => {
+      if (titleContainer.contains(particle)) {
+        titleContainer.removeChild(particle);
+      }
+    }, 1500);
   }, 300);
-}
-
-// Create a single particle
-function createParticle(container) {
-  const particle = document.createElement('div');
-  particle.className = 'particle';
-  
-  // Random position within the container
-  const x = Math.random() * container.offsetWidth;
-  const y = Math.random() * container.offsetHeight;
-  
-  // Random size
-  const size = Math.random() * 5 + 2;
-  
-  // Random color
-  const colors = ['#05d9e8', '#ff2a6d', '#39ff14', '#9d4edd'];
-  const color = colors[Math.floor(Math.random() * colors.length)];
-  
-  // Set styles
-  particle.style.left = `${x}px`;
-  particle.style.top = `${y}px`;
-  particle.style.width = `${size}px`;
-  particle.style.height = `${size}px`;
-  particle.style.backgroundColor = color;
-  
-  // Add to container
-  container.appendChild(particle);
-  
-  // Remove after animation completes
-  setTimeout(() => {
-    container.removeChild(particle);
-  }, 1500);
 }
 
 // Initialize chat functionality
@@ -188,19 +127,11 @@ function initChat() {
   
   if (!chatInput || !chatSendBtn) return;
   
-  // Send message on button click
-  chatSendBtn.addEventListener('click', () => {
-    sendChatMessage();
-  });
-  
-  // Send message on Enter key
+  chatSendBtn.addEventListener('click', sendChatMessage);
   chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      sendChatMessage();
-    }
+    if (e.key === 'Enter') sendChatMessage();
   });
   
-  // Listen for new messages
   listenForChatMessages();
 }
 
@@ -209,16 +140,10 @@ function sendChatMessage() {
   const chatInput = document.getElementById('chat-input');
   const message = chatInput.value.trim();
   
-  if (!message) return;
-  
-  if (!authModule.isAuthenticated()) {
-    alert('Please sign in to chat');
-    return;
-  }
+  if (!message || !authModule.isAuthenticated()) return;
   
   const user = authModule.getCurrentUser();
   
-  // Add message to Firestore
   db.collection('chat').add({
     text: message,
     userId: user.uid,
@@ -227,7 +152,6 @@ function sendChatMessage() {
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   })
   .then(() => {
-    // Clear input
     chatInput.value = '';
   })
   .catch(error => {
@@ -240,56 +164,38 @@ function listenForChatMessages() {
   const chatMessages = document.getElementById('chat-messages');
   if (!chatMessages) return;
   
-  // Listen for new messages
   db.collection('chat')
     .orderBy('timestamp', 'desc')
     .limit(20)
     .onSnapshot(snapshot => {
-      // Clear messages container
       chatMessages.innerHTML = '';
       
-      // Add messages in reverse order (newest at bottom)
       const messages = [];
       snapshot.forEach(doc => {
         messages.push({ id: doc.id, ...doc.data() });
       });
       
-      // Reverse to show oldest first
       messages.reverse().forEach(message => {
-        addChatMessage(message);
+        const messageEl = document.createElement('div');
+        messageEl.className = 'chat-message';
+        
+        let timeString = 'Just now';
+        if (message.timestamp && message.timestamp.toDate) {
+          const date = message.timestamp.toDate();
+          timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        messageEl.innerHTML = `
+          <span class="chat-user">${message.userName}:</span>
+          <span class="chat-text">${message.text}</span>
+          <span class="chat-time">${timeString}</span>
+        `;
+        
+        chatMessages.appendChild(messageEl);
       });
       
-      // Scroll to bottom
       chatMessages.scrollTop = chatMessages.scrollHeight;
     });
-}
-
-// Add a chat message to the UI
-function addChatMessage(message) {
-  const chatMessages = document.getElementById('chat-messages');
-  if (!chatMessages) return;
-  
-  const messageEl = document.createElement('div');
-  messageEl.className = 'chat-message';
-  
-  // Format timestamp
-  let timeString = 'Just now';
-  if (message.timestamp) {
-    if (message.timestamp.toDate) {
-      const date = message.timestamp.toDate();
-      timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-  }
-  
-  // Create message HTML
-  messageEl.innerHTML = `
-    <span class="chat-user">${message.userName}:</span>
-    <span class="chat-text">${message.text}</span>
-    <span class="chat-time">${timeString}</span>
-  `;
-  
-  // Add to container
-  chatMessages.appendChild(messageEl);
 }
 
 // Initialize activity feed
@@ -297,12 +203,10 @@ function initActivityFeed() {
   const feedList = document.getElementById('activity-feed-list');
   if (!feedList) return;
   
-  // Listen for new locations
   db.collection('locations')
     .orderBy('createdAt', 'desc')
     .limit(10)
     .onSnapshot(snapshot => {
-      // Clear feed container
       feedList.innerHTML = '';
       
       if (snapshot.empty) {
@@ -310,7 +214,6 @@ function initActivityFeed() {
         return;
       }
       
-      // Add locations to feed
       snapshot.forEach(doc => {
         const locationData = doc.data();
         addActivityFeedItem(doc.id, locationData);
@@ -326,18 +229,15 @@ function addActivityFeedItem(id, locationData) {
   const feedItem = document.createElement('li');
   feedItem.className = 'feed-item';
   
-  // Format date
   let dateDisplay = 'Just now';
   if (locationData.createdAt && locationData.createdAt.toDate) {
     const date = locationData.createdAt.toDate();
     dateDisplay = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
   
-  // Get risk level indicator
   const riskLevel = locationData.riskLevel || 'unknown';
   const riskIndicator = `<span class="risk-indicator risk-${riskLevel}">${getRiskLabel(riskLevel)}</span>`;
   
-  // Create feed item HTML
   feedItem.innerHTML = `
     <div class="feed-item-header">
       <h4>${locationData.name}</h4>
@@ -350,24 +250,20 @@ function addActivityFeedItem(id, locationData) {
     </div>
   `;
   
-  // Add click event to view on map button
   const viewBtn = feedItem.querySelector('.view-on-map-btn');
   viewBtn.addEventListener('click', () => {
-    // Center map on this location
     if (map && locationData.coordinates) {
       const lat = locationData.coordinates.latitude;
       const lng = locationData.coordinates.longitude;
       
       map.setView([lat, lng], 16);
       
-      // Open the popup if marker exists
       if (locationMarkers && locationMarkers[id]) {
         locationMarkers[id].openPopup();
       }
     }
   });
   
-  // Add to feed
   feedList.appendChild(feedItem);
 }
 
@@ -375,18 +271,15 @@ function addActivityFeedItem(id, locationData) {
 function addOnlineUser(user) {
   if (!user) return;
   
-  // Check if user is already in the list
   const existingUser = onlineUsers.find(u => u.uid === user.uid);
   if (existingUser) return;
   
-  // Add user to list
   onlineUsers.push({
     uid: user.uid,
     displayName: user.displayName || 'Anonymous',
     photoURL: user.photoURL || null
   });
   
-  // Update marquee
   updateOnlineUsersMarquee();
 }
 
@@ -394,10 +287,7 @@ function addOnlineUser(user) {
 function removeOnlineUser(user) {
   if (!user) return;
   
-  // Remove user from list
   onlineUsers = onlineUsers.filter(u => u.uid !== user.uid);
-  
-  // Update marquee
   updateOnlineUsersMarquee();
 }
 
@@ -411,7 +301,6 @@ function updateOnlineUsersMarquee() {
     return;
   }
   
-  // Create user list text
   const userNames = onlineUsers.map(user => user.displayName).join(', ');
   onlineUsersList.textContent = userNames;
 }
@@ -425,15 +314,13 @@ function getUserLocation() {
           const { latitude, longitude } = position.coords;
           currentPosition = { lat: latitude, lng: longitude };
           
-          // Center map on user's location
           map.setView([latitude, longitude], mapConfig.initialZoom);
           
-          // Add or update user marker
           if (userMarker) {
             userMarker.setLatLng([latitude, longitude]);
           } else {
             userMarker = L.marker([latitude, longitude], {
-              icon: markerIcons.user,
+              icon: createCustomIcon('user'),
               zIndexOffset: 1000
             }).addTo(map);
             
@@ -472,64 +359,472 @@ function onMapClick(e) {
 
 // Open add location modal
 function openAddLocationModal(position) {
-  // Set coordinates in the form
   document.getElementById('location-lat').textContent = position.lat.toFixed(6);
   document.getElementById('location-lng').textContent = position.lng.toFixed(6);
-  
-  // Set modal title
   document.getElementById('modal-title').textContent = 'Add New Location';
-  
-  // Reset form
   document.getElementById('location-form').reset();
   
-  // Clear image preview container
   const previewContainer = document.getElementById('image-preview-container');
   if (previewContainer) {
     previewContainer.innerHTML = '';
   }
   
-  // Store coordinates in form data attribute
   document.getElementById('location-form').dataset.lat = position.lat;
   document.getElementById('location-form').dataset.lng = position.lng;
-  
-  // Show modal
   document.getElementById('location-modal').classList.add('active');
-  
-  // Set up form submission
   document.getElementById('location-form').onsubmit = locationsModule.saveLocation;
 }
 
 // Load locations from Firestore
 function loadLocations() {
-  // Clear existing markers
   clearLocationMarkers();
   
-  // Query Firestore for locations
   locationsRef.get()
     .then(snapshot => {
       snapshot.forEach(doc => {
         const locationData = doc.data();
         
-        // Add marker to map
         addLocationMarker({
           id: doc.id,
           ...locationData,
           coordinates: { 
+            lat: locationData.coordinates.latitude, 
+            lng: locationData.coordinates.longitude 
+          }
+        });
+      });
+    })
+    .catch(error => {
+      console.error('Error loading locations:', error);
+    });
+    
+  loadOfflineLocations().then(offlineLocations => {
+    offlineLocations.forEach(location => {
+      addLocationMarker({
+        ...location,
+        coordinates: { 
+          lat: location.coordinates.latitude, 
+          lng: location.coordinates.longitude 
+        },
+        isOffline: true
+      });
+    });
+  });
+}
+
+// Add location marker to map
+function addLocationMarker(location) {
+  let iconType = location.category || 'other';
+  
+  if (location.locationType && location.locationType !== 'default') {
+    iconType = location.locationType;
+  }
+  
+  const marker = L.marker([location.coordinates.lat, location.coordinates.lng], {
+    icon: createCustomIcon(iconType)
+  });
+  
+  const riskLevel = location.riskLevel || 'unknown';
+  
+  let popupContent = `
+    <div class="location-popup">
+      <div class="location-popup-header">
+        <h3>${location.name}</h3>
+        <div class="location-badges">
+          <span class="location-category">${getCategoryLabel(location.category)}</span>
+          <span class="risk-indicator risk-${riskLevel}">${getRiskLabel(riskLevel)}</span>
+        </div>
+      </div>
+  `;
+  
+  if (location.description) {
+    popupContent += `<p class="location-description">${location.description}</p>`;
+  }
+  
+  if (location.notes) {
+    popupContent += `<p class="location-notes"><strong>Notes:</strong> ${location.notes}</p>`;
+  }
+  
+  if (location.imageUrls && location.imageUrls.length > 0) {
+    popupContent += `<div class="location-images">`;
+    location.imageUrls.forEach(url => {
+      popupContent += `<img src="${url}" alt="${location.name}" class="location-image">`;
+    });
+    popupContent += `</div>`;
+  } else if (location.imageUrl) {
+    popupContent += `<img src="${location.imageUrl}" alt="${location.name}" class="location-image">`;
+  }
+  
+  popupContent += `
+    <div class="star-rating" data-id="${location.id}">
+      <span class="star" data-rating="1">★</span>
+      <span class="star" data-rating="2">★</span>
+      <span class="star" data-rating="3">★</span>
+      <span class="star" data-rating="4">★</span>
+      <span class="star" data-rating="5">★</span>
+      <span class="rating-value">${location.rating ? location.rating.toFixed(1) : '0.0'}</span>
+      <span class="rating-count">(${location.ratingCount || 0})</span>
+    </div>
+    
+    <div class="rating-container">
+      <button class="rating-btn upvote" data-id="${location.id}" data-action="upvote">👍</button>
+      <span class="rating-count">${location.upvotes || 0}</span>
+      <button class="rating-btn downvote" data-id="${location.id}" data-action="downvote">👎</button>
+      <span class="rating-count">${location.downvotes || 0}</span>
+    </div>
+  `;
+  
+  if (location.claimedBy) {
+    popupContent += `
+      <div class="territory-owner">
+        <span>Claimed by: </span>
+        <span class="territory-owner-name">${location.claimedBy}</span>
+      </div>
+    `;
+  } else {
+    popupContent += `
+      <button class="claim-territory-btn neon-button" data-id="${location.id}">Claim Territory</button>
+    `;
+  }
+  
+  popupContent += `
+    <div class="comments-section">
+      <h4>Comments</h4>
+      <div class="comments-container" data-id="${location.id}">
+        <p class="loading-comments">Loading comments...</p>
+      </div>
+      <div class="comment-form">
+        <textarea class="comment-input" placeholder="Add a comment..."></textarea>
+        <button class="comment-submit-btn neon-button" data-id="${location.id}">Post</button>
+      </div>
+    </div>
+  `;
+  
+  if (location.isOffline) {
+    popupContent += `<p class="offline-badge">Saved Offline</p>`;
+  }
+  
+  popupContent += `</div>`;
+  
+  marker.bindPopup(popupContent, {
+    maxWidth: 300,
+    minWidth: 200
+  });
+  
+  marker.addTo(map);
+  locationMarkers[location.id] = marker;
+  
+  marker.on('popupopen', () => {
+    setTimeout(() => {
+      setupPopupEventListeners(location.id);
+      loadComments(location.id);
+    }, 100);
+  });
+  
+  return marker;
+}
+
+// Set up event listeners for popup elements
+function setupPopupEventListeners(locationId) {
+  // Rating buttons
+  const upvoteBtn = document.querySelector(`.rating-btn.upvote[data-id="${locationId}"]`);
+  const downvoteBtn = document.querySelector(`.rating-btn.downvote[data-id="${locationId}"]`);
+  
+  if (upvoteBtn) {
+    upvoteBtn.addEventListener('click', () => rateLocation(locationId, 'upvote'));
+  }
+  
+  if (downvoteBtn) {
+    downvoteBtn.addEventListener('click', () => rateLocation(locationId, 'downvote'));
+  }
+  
+  // Star rating
+  const stars = document.querySelectorAll(`.star-rating[data-id="${locationId}"] .star`);
+  stars.forEach(star => {
+    star.addEventListener('click', (e) => {
+      const rating = parseInt(e.target.dataset.rating);
+      rateLocationWithStars(locationId, rating);
+    });
+  });
+  
+  // Claim territory button
+  const claimBtn = document.querySelector(`.claim-territory-btn[data-id="${locationId}"]`);
+  if (claimBtn) {
+    claimBtn.addEventListener('click', () => claimTerritory(locationId));
+  }
+  
+  // Comment submit button
+  const commentBtn = document.querySelector(`.comment-submit-btn[data-id="${locationId}"]`);
+  const commentInput = commentBtn?.parentElement.querySelector('.comment-input');
+  
+  if (commentBtn && commentInput) {
+    commentBtn.addEventListener('click', () => {
+      const text = commentInput.value.trim();
+      if (text) {
+        addComment(locationId, text).then(success => {
+          if (success) {
+            commentInput.value = '';
+            loadComments(locationId);
+          }
+        });
+      }
+    });
+  }
+}
+
+// Load comments for a location
+function loadComments(locationId) {
+  const commentsContainer = document.querySelector(`.comments-container[data-id="${locationId}"]`);
+  if (!commentsContainer) return;
+  
+  commentsContainer.innerHTML = '<p class="loading-comments">Loading comments...</p>';
+  
+  locationsModule.loadComments(locationId).then(comments => {
+    commentsContainer.innerHTML = '';
+    
+    if (comments.length === 0) {
+      commentsContainer.innerHTML = '<p class="no-comments">No comments yet</p>';
+      return;
+    }
+    
+    comments.forEach(comment => {
+      const commentEl = document.createElement('div');
+      commentEl.className = 'comment';
+      
+      let dateDisplay = 'Just now';
+      if (comment.createdAt && comment.createdAt.toDate) {
+        const date = comment.createdAt.toDate();
+        dateDisplay = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+      
+      commentEl.innerHTML = `
+        <div class="comment-header">
+          <span class="comment-author">${comment.userDisplayName}</span>
+          <span class="comment-date">${dateDisplay}</span>
+        </div>
+        <div class="comment-content">${comment.text}</div>
+      `;
+      
+      commentsContainer.appendChild(commentEl);
+    });
+  });
+}
+
+// Add a comment to a location
+function addComment(locationId, text) {
+  return locationsModule.addComment(locationId, text);
+}
+
+// Claim territory
+function claimTerritory(locationId) {
+  if (!authModule.isAuthenticated()) {
+    alert('Please sign in to claim territories');
+    return;
+  }
+  
+  if (locationId.startsWith('temp-')) {
+    alert('You cannot claim offline locations');
+    return;
+  }
+  
+  locationsModule.claimLocation(locationId).then(success => {
+    if (success) {
+      refreshLocationMarker(locationId);
+    }
+  });
+}
+
+// Rate a location with stars
+function rateLocationWithStars(locationId, rating) {
+  if (!authModule.isAuthenticated()) {
+    alert('Please sign in to rate locations');
+    return;
+  }
+  
+  if (locationId.startsWith('temp-')) {
+    alert('You cannot rate offline locations');
+    return;
+  }
+  
+  locationsModule.rateLocationWithStars(locationId, rating).then(success => {
+    if (success) {
+      updateStarRatingUI(locationId, rating);
+    }
+  });
+}
+
+// Update star rating UI
+function updateStarRatingUI(locationId, rating) {
+  const stars = document.querySelectorAll(`.star-rating[data-id="${locationId}"] .star`);
+  stars.forEach(star => {
+    const starRating = parseInt(star.dataset.rating);
+    if (starRating <= rating) {
+      star.classList.add('active');
+    } else {
+      star.classList.remove('active');
+    }
+  });
+  
+  locationsRef.doc(locationId).get().then(doc => {
+    if (doc.exists) {
+      const locationData = doc.data();
+      
+      const ratingValue = document.querySelector(`.star-rating[data-id="${locationId}"] .rating-value`);
+      const ratingCount = document.querySelector(`.star-rating[data-id="${locationId}"] .rating-count`);
+      
+      if (ratingValue) {
+        ratingValue.textContent = locationData.rating.toFixed(1);
+      }
+      
+      if (ratingCount) {
+        ratingCount.textContent = `(${locationData.ratingCount})`;
+      }
+    }
+  });
+}
+
+// Rate a location with thumbs up/down
+function rateLocation(locationId, action) {
+  if (!authModule.isAuthenticated()) {
+    alert('Please sign in to rate locations');
+    return;
+  }
+  
+  if (locationId.startsWith('temp-')) {
+    alert('You cannot rate locations that are saved offline');
+    return;
+  }
+  
+  const user = authModule.getCurrentUser();
+  const ratingRef = ratingsRef.doc(`${locationId}_${user.uid}`);
+  
+  ratingRef.get()
+    .then(doc => {
+      const batch = db.batch();
+      
+      if (doc.exists) {
+        const currentRating = doc.data().type;
+        
+        if (currentRating === action) {
+          // User is removing their rating
+          batch.delete(ratingRef);
+          
+          // Update location rating count
+          const locationRef = locationsRef.doc(locationId);
+          batch.update(locationRef, {
+            [`${action}s`]: firebase.firestore.FieldValue.increment(-1)
+          });
+        } else {
+          // User is changing their rating
+          batch.update(ratingRef, {
+            type: action,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          // Update location rating counts
+          const locationRef = locationsRef.doc(locationId);
+          batch.update(locationRef, {
+            [`${action}s`]: firebase.firestore.FieldValue.increment(1),
+            [`${currentRating}s`]: firebase.firestore.FieldValue.increment(-1)
+          });
+        }
+      } else {
+        // New rating
+        batch.set(ratingRef, {
+          type: action,
+          userId: user.uid,
+          locationId: locationId,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // Update location rating count
+        const locationRef = locationsRef.doc(locationId);
+        batch.update(locationRef, {
+          [`${action}s`]: firebase.firestore.FieldValue.increment(1)
+        });
+      }
+      
+      // Commit the batch
+      return batch.commit();
+    })
+    .then(() => {
+      refreshLocationMarker(locationId);
+    })
+    .catch(error => {
+      console.error('Error rating location:', error);
+    });
+}
+
+// Refresh location marker after updates
+function refreshLocationMarker(locationId) {
+  locationsRef.doc(locationId).get().then(doc => {
+    if (doc.exists) {
+      const locationData = doc.data();
+      
+      // Update marker popup
+      const marker = locationMarkers[locationId];
+      if (marker) {
+        marker.closePopup();
+        
+        // Remove marker from map
+        map.removeLayer(marker);
+        
+        // Re-add marker with updated data
+        addLocationMarker({
+          id: locationId,
+          ...locationData,
+          coordinates: { 
+            lat: locationData.coordinates.latitude, 
+            lng: locationData.coordinates.longitude 
+          }
+        });
+        
+        // Open popup
+        locationMarkers[locationId].openPopup();
+      }
+    }
+  });
+}
+
+// Clear location markers
+function clearLocationMarkers() {
+  Object.values(locationMarkers).forEach(marker => {
+    map.removeLayer(marker);
+  });
+  
+  locationMarkers = {};
+}
+
+// Clear user-specific markers
+function clearUserSpecificMarkers() {
+  // Implementation depends on your requirements
+}
+
+// Create custom icon for markers
+function createCustomIcon(type, color) {
+  // Define colors for different categories
+  const colors = {
+    user: '#39ff14', // Neon green
     abandoned: '#ff2a6d', // Neon pink
     historical: '#05d9e8', // Neon blue
     'street-art': '#9d4edd', // Neon purple
     viewpoint: '#fee440', // Yellow
     'hidden-gem': '#f15bb5', // Pink
+    water: '#05d9e8', // Neon blue
+    building: '#ff2a6d', // Neon pink
+    power: '#39ff14', // Neon green
+    camp: '#9d4edd', // Neon purple
+    geocache: '#fee440', // Yellow
     other: '#ffffff' // White
   };
   
   // Get color for this type
-  const color = colors[type] || colors.other;
+  const iconColor = color || colors[type] || colors.other;
   
   // Create icon with CSS-based glow effect
   return L.divIcon({
     className: `custom-marker marker-${type}`,
-    html: `<div style="background-color: ${color}; box-shadow: 0 0 10px ${color}, 0 0 5px ${color}; display: flex; justify-content: center; align-items: center; border-radius: 50%; width: 100%; height: 100%; border: 2px solid white;">${type === 'user' ? '📍' : ''}</div>`,
+    html: `<div style="background-color: ${iconColor}; box-shadow: 0 0 10px ${iconColor}, 0 0 5px ${iconColor}; display: flex; justify-content: center; align-items: center; border-radius: 50%; width: 100%; height: 100%; border: 2px solid white;">${type === 'user' ? '📍' : ''}</div>`,
     iconSize: [30, 30],
     iconAnchor: [15, 15],
     popupAnchor: [0, -15]
@@ -548,6 +843,33 @@ function getCategoryLabel(category) {
   };
   
   return labels[category] || 'Other';
+}
+
+// Get human-readable risk level label
+function getRiskLabel(riskLevel) {
+  const labels = {
+    safe: 'Safe',
+    questionable: 'Questionable',
+    unknown: 'Unknown',
+    hot: 'Hot',
+    'high-risk': 'High Risk'
+  };
+  
+  return labels[riskLevel] || 'Unknown';
+}
+
+// Get human-readable location type label
+function getLocationTypeLabel(locationType) {
+  const labels = {
+    default: 'Default',
+    water: 'Water Source',
+    building: 'Abandoned Building',
+    power: 'Power Outlet',
+    camp: 'Camp Spot',
+    geocache: 'Geocache'
+  };
+  
+  return labels[locationType] || 'Default';
 }
 
 // Show offline indicator
@@ -571,5 +893,6 @@ window.mapModule = {
   initMap,
   getUserLocation,
   loadLocations,
-  clearLocationMarkers
+  clearLocationMarkers,
+  addLocationMarker
 };
