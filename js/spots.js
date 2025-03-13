@@ -59,99 +59,66 @@ let trailPath = [];
 let spotsMapInstance = null;
 let spotsMarkers = {};
 
+// Performance optimization: Use a debounce function for search
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
+
 // Initialize spots functionality
 function initSpots() {
-  // Set up event listeners
-  document.addEventListener('user-signed-in', (event) => {
-    const user = event.detail;
-    loadAllLocations();
-    loadUserLocations(user.uid);
-    loadSavedLocations(user.uid);
-    loadUserPlaylists(user.uid);
-  });
-  
-  document.addEventListener('user-signed-out', () => {
-    clearLocations();
-    clearPlaylists();
-  });
-  
-  // Set up filter listeners
-  spotsFilterType.addEventListener('change', applyFilters);
-  spotsFilterVisibility.addEventListener('change', applyFilters);
-  spotsFilterRating.addEventListener('change', applyFilters);
-  
-  // Set up view toggle listeners
-  spotsViewList.addEventListener('click', () => setView('list'));
-  spotsViewGrid.addEventListener('click', () => setView('grid'));
-  spotsViewMap.addEventListener('click', () => setView('map'));
-  
-  // Set up tab listeners
-  spotsTabAll.addEventListener('click', () => setTab('all'));
-  spotsTabMy.addEventListener('click', () => setTab('my'));
-  spotsTabSaved.addEventListener('click', () => setTab('saved'));
-  spotsTabPlaylists.addEventListener('click', () => setTab('playlists'));
-  
-  // Set up search
-  spotsSearchBtn.addEventListener('click', () => {
-    currentFilter.search = spotsSearch.value.trim().toLowerCase();
-    applyFilters();
-  });
-  
-  spotsSearch.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
+  try {
+    // Set up event listeners with error handling
+    document.addEventListener('user-signed-in', async (event) => {
+      try {
+        const user = event.detail;
+        await Promise.all([
+          loadAllLocations(),
+          loadUserLocations(user.uid),
+          loadSavedLocations(user.uid),
+          loadUserPlaylists(user.uid)
+        ]);
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        showErrorMessage('Failed to load user data. Please try again.');
+      }
+    });
+
+    // Optimized search with debouncing
+    const debouncedSearch = debounce(() => {
       currentFilter.search = spotsSearch.value.trim().toLowerCase();
       applyFilters();
-    }
-  });
-  
-  // Set up playlist creation
-  createPlaylistBtn.addEventListener('click', showCreatePlaylistModal);
-  
-  // Set up form tab navigation
-  formTabs.forEach((tab, index) => {
-    tab.addEventListener('click', () => switchFormTab(index));
-  });
-  
-  prevTabBtn.addEventListener('click', () => {
-    if (currentFormTab > 0) {
-      switchFormTab(currentFormTab - 1);
-    }
-  });
-  
-  nextTabBtn.addEventListener('click', () => {
-    if (currentFormTab < formTabs.length - 1) {
-      switchFormTab(currentFormTab + 1);
-    } else {
-      // Show save button on last tab
-      nextTabBtn.classList.add('hidden');
-      saveLocationBtn.classList.remove('hidden');
-    }
-  });
-  
-  // Set up WiFi toggle
-  locationWifi.addEventListener('change', () => {
-    wifiDetails.classList.toggle('hidden', !locationWifi.checked);
-  });
-  
-  // Set up trail marking
-  markTrailBtn.addEventListener('click', toggleTrailMarking);
-  
-  // Initialize the mini map for spots
-  initSpotsMap();
-  
-  // Load initial data if user is already signed in
-  if (authModule.isAuthenticated()) {
-    const user = authModule.getCurrentUser();
-    loadAllLocations();
-    loadUserLocations(user.uid);
-    loadSavedLocations(user.uid);
-    loadUserPlaylists(user.uid);
-  }
-  
-  // Override the original location form submit handler
-  if (locationForm) {
-    locationForm.removeEventListener('submit', window.locationsModule.saveLocation);
-    locationForm.addEventListener('submit', saveEnhancedLocation);
+    }, 300);
+
+    spotsSearch.addEventListener('input', debouncedSearch);
+    spotsSearchBtn.addEventListener('click', debouncedSearch);
+    
+    // Set up filter listeners with debouncing
+    const debouncedFilter = debounce(applyFilters, 100);
+    spotsFilterType.addEventListener('change', debouncedFilter);
+    spotsFilterVisibility.addEventListener('change', debouncedFilter);
+    spotsFilterRating.addEventListener('change', debouncedFilter);
+    
+    // Set up view toggle listeners
+    spotsViewList.addEventListener('click', () => setView('list'));
+    spotsViewGrid.addEventListener('click', () => setView('grid'));
+    spotsViewMap.addEventListener('click', () => setView('map'));
+    
+    // Set up tab listeners
+    spotsTabAll.addEventListener('click', () => setTab('all'));
+    spotsTabMy.addEventListener('click', () => setTab('my'));
+    spotsTabSaved.addEventListener('click', () => setTab('saved'));
+    spotsTabPlaylists.addEventListener('click', () => setTab('playlists'));
+    
+    // Initialize map
+    initSpotsMap();
+    
+  } catch (error) {
+    console.error('Error initializing spots module:', error);
+    showErrorMessage('Failed to initialize spots module. Please refresh the page.');
   }
 }
 
@@ -436,72 +403,62 @@ function renderListView(locations) {
   });
 }
 
-// Render grid view
+// Enhanced renderGridView with lazy loading
 function renderGridView(locations) {
+  if (!spotsGrid) return;
+  
+  spotsGrid.innerHTML = '';
+  
+  if (locations.length === 0) {
+    showEmptyState();
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  const imageObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+            img.classList.remove('loading');
+            observer.unobserve(img);
+          }
+        }
+      });
+    },
+    { rootMargin: '50px 0px', threshold: 0.1 }
+  );
+  
   locations.forEach(location => {
-    // Create grid item
-    const gridItem = document.createElement('div');
-    gridItem.className = 'spot-grid-item';
-    gridItem.dataset.id = location.id;
+    const item = document.createElement('div');
+    item.className = 'spot-grid-item';
+    item.setAttribute('role', 'article');
     
-    // Format date
-    let dateDisplay = 'Unknown date';
-    if (location.createdAt) {
-      if (typeof location.createdAt === 'string') {
-        // ISO string from IndexedDB
-        dateDisplay = new Date(location.createdAt).toLocaleDateString();
-      } else if (location.createdAt.toDate) {
-        // Firestore Timestamp
-        dateDisplay = location.createdAt.toDate().toLocaleDateString();
-      }
-    }
+    const img = document.createElement('img');
+    img.className = 'spot-grid-image loading';
+    img.alt = `${location.name} preview`;
+    img.dataset.src = location.imageUrl || 'path/to/placeholder.jpg';
+    imageObserver.observe(img);
     
-    // Get image if available
-    const imageHtml = location.imageUrls && location.imageUrls.length > 0 
-      ? `<img src="${location.imageUrls[0]}" alt="${location.name}" class="spot-grid-image">` 
-      : `<div class="spot-grid-image-placeholder"></div>`;
-    
-    // Create content
-    gridItem.innerHTML = `
-      ${imageHtml}
-      <div class="spot-grid-content">
-        <h3 class="spot-grid-title">${location.name}</h3>
-        <p class="spot-grid-description">${location.description || 'No description'}</p>
-        <div class="spot-grid-meta">
-          <span class="spot-grid-date">${dateDisplay}</span>
-          <span class="spot-grid-rating">${'★'.repeat(Math.round(location.rating || 0))}</span>
-        </div>
-        <div class="spot-grid-actions">
-          <button class="view-on-map-btn neon-button small" data-id="${location.id}">View on Map</button>
-        </div>
+    const content = document.createElement('div');
+    content.className = 'spot-grid-content';
+    content.innerHTML = `
+      <h3 class="spot-grid-title">${escapeHtml(location.name)}</h3>
+      <p>${escapeHtml(location.description || '')}</p>
+      <div class="spot-grid-meta">
+        <span>${location.type}</span>
+        <span>${location.rating || 'N/A'} ★</span>
       </div>
     `;
     
-    // Add click event to show on map
-    const viewOnMapBtn = gridItem.querySelector('.view-on-map-btn');
-    viewOnMapBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      
-      // Show the map view
-      document.getElementById('map-view-btn').click();
-      
-      // Center map on this location
-      if (typeof mapModule !== 'undefined' && mapModule.map) {
-        const lat = location.coordinates.latitude || location.coordinates.lat;
-        const lng = location.coordinates.longitude || location.coordinates.lng;
-        
-        mapModule.map.setView([lat, lng], 16);
-        
-        // Open the popup if marker exists
-        if (mapModule.locationMarkers && mapModule.locationMarkers[location.id]) {
-          mapModule.locationMarkers[location.id].openPopup();
-        }
-      }
-    });
-    
-    // Add to grid
-    spotsGrid.appendChild(gridItem);
+    item.appendChild(img);
+    item.appendChild(content);
+    fragment.appendChild(item);
   });
+  
+  spotsGrid.appendChild(fragment);
 }
 
 // Render map view
@@ -1394,6 +1351,33 @@ async function saveEnhancedLocation(e) {
       alert('Error saving location offline. Please try again.');
     }
   }
+}
+
+// Utility function to safely escape HTML
+function escapeHtml(unsafe) {
+  if (!unsafe) return '';
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// Show error message to user
+function showErrorMessage(message) {
+  const errorContainer = document.createElement('div');
+  errorContainer.className = 'error-message';
+  errorContainer.setAttribute('role', 'alert');
+  errorContainer.textContent = message;
+  
+  const existingError = document.querySelector('.error-message');
+  if (existingError) {
+    existingError.remove();
+  }
+  
+  document.body.appendChild(errorContainer);
+  setTimeout(() => errorContainer.remove(), 5000);
 }
 
 // Clear locations

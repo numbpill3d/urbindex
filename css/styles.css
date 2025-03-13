@@ -41,6 +41,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  scroll-behavior: smooth;
 }
 
 html, body {
@@ -60,6 +61,10 @@ body {
   right: 0;
   bottom: 0;
   overflow-y: auto;
+  scroll-behavior: smooth;
+  -webkit-overscroll-behavior-y: contain;
+  overscroll-behavior-y: contain;
+  -ms-scroll-chaining: none; /* For older Edge */
   overscroll-behavior-y: contain;
 }
 
@@ -308,6 +313,7 @@ nav {
   border-bottom: 2px solid var(--bbs-border); /* Thicker border for BBS aesthetic */
   overflow-x: auto;
   white-space: nowrap;
+  -ms-overflow-style: none; /* For IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
 
@@ -693,6 +699,18 @@ main {
   font-size: 0.8rem;
 }
 
+.legend-color.abandoned {
+  background-color: var(--neon-pink);
+}
+
+.legend-color.water {
+  background-color: var(--neon-blue);
+}
+
+.legend-color.camp {
+  background-color: var(--neon-green);
+}
+
 /* Map hover tooltip */
 .map-tooltip {
   position: absolute;
@@ -771,98 +789,6 @@ main {
 .leaflet-popup-content-wrapper {
   background-color: var(--secondary-bg);
   color: var(--text-color);
-  border: 2px solid var(--neon-blue); /* Thicker border for BBS aesthetic */
-  border-radius: var(--border-radius);
-  box-shadow: 0 0 15px rgba(5, 217, 232, 0.5);
-}
-
-.leaflet-popup-tip {
-  background-color: var(--neon-blue);
-}
-
-/* Custom Marker */
-.custom-marker {
-  width: 30px;
-  height: 30px;
-  border-radius: 0; /* Square markers for BBS aesthetic */
-  background-color: var(--neon-pink);
-  border: 2px solid white;
-  box-shadow: 0 0 15px var(--neon-pink);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-weight: bold;
-  animation: marker-pulse 2s infinite;
-}
-
-@keyframes marker-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 42, 109, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(255, 42, 109, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 42, 109, 0);
-  }
-}
-
-/* Floating Button */
-.floating-btn {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  width: 56px;
-  height: 56px;
-  border-radius: 0; /* Square button for BBS aesthetic */
-  background-color: var(--neon-pink);
-  color: white;
-  font-size: 24px;
-  border: 2px solid white; /* Thicker border for BBS aesthetic */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 0 15px var(--neon-pink);
-  z-index: 10;
-  transition: all var(--transition-speed) ease;
-}
-
-.floating-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 20px var(--neon-pink);
-}
-
-.floating-btn:active {
-  transform: scale(0.95);
-}
-
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transition: all var(--transition-speed) ease;
-}
-
-.modal.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.modal-content {
-  background-color: var(--secondary-bg);
   border: 2px solid var(--neon-blue); /* Thicker border for BBS aesthetic */
   border-radius: var(--border-radius);
   width: 90%;
@@ -1318,4 +1244,52 @@ ul {
 .invite-instructions ol {
   margin-left: 20px;
   margin-top: 5px;
+}
+
+.ios-scroll {
+  overflow-y: scroll; /* Fallback for iOS < 16 */
+}
+
+@supports (-webkit-touch-callout: none) {
+  /* iOS-specific override */
+  .overscroll-container {
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+}
+
+@supports not (overscroll-behavior-y: contain) {
+  .overscroll-container {
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    height: 100%;
+    position: relative;
+  }
+}
+
+/* Progressive enhancement for scrolling behavior */
+@supports (scrollbar-width: none) {
+  .overscroll-container {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}
+
+/* Fallback for browsers that don't support modern scroll features */
+@supports not (scrollbar-width: none) {
+  .overscroll-container {
+    overflow-y: auto;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+/* Fallback for browsers that don't support overscroll-behavior */
+@supports not (overscroll-behavior-y: contain) {
+  .overscroll-container {
+    overflow-y: auto;
+    height: 100%;
+    position: relative;
+  }
 }
