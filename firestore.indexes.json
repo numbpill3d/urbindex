@@ -31,13 +31,6 @@
         { "fieldPath": "locationId", "order": "ASCENDING" },
         { "fieldPath": "type", "order": "ASCENDING" }
       ]
-    },
-    {
-      "collectionGroup": "users",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "locationsCount", "order": "DESCENDING" }
-      ]
     }
   ],
   "fieldOverrides": []

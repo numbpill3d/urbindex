@@ -11,6 +11,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/spots.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 <body>
@@ -128,8 +129,75 @@
             </div>
 
             <div id="my-locations-container" class="view">
-                <h2>My Exploration Spots</h2>
-                <ul id="my-locations-list"></ul>
+                <h2>Exploration Spots</h2>
+                <div class="spots-controls">
+                    <div class="spots-filters">
+                        <select id="spots-filter-type" class="spots-filter" aria-label="Filter by location type">
+                            <option value="all">All Types</option>
+                            <option value="abandoned">Abandoned</option>
+                            <option value="historical">Historical</option>
+                            <option value="street-art">Street Art</option>
+                            <option value="viewpoint">Viewpoint</option>
+                            <option value="hidden-gem">Hidden Gem</option>
+                            <option value="water-fountain">Water Fountain</option>
+                            <option value="community-space">Community Space</option>
+                            <option value="public-lobby">Public Lobby</option>
+                            <option value="abandoned-house">Abandoned House</option>
+                            <option value="secret-trail">Secret Trail</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <select id="spots-filter-visibility" class="spots-filter" aria-label="Filter by visibility">
+                            <option value="all">All Spots</option>
+                            <option value="public">Public Spots</option>
+                            <option value="private">My Private Spots</option>
+                        </select>
+                        <select id="spots-filter-rating" class="spots-filter" aria-label="Filter by rating">
+                            <option value="all">All Ratings</option>
+                            <option value="5">★★★★★</option>
+                            <option value="4">★★★★☆ & up</option>
+                            <option value="3">★★★☆☆ & up</option>
+                            <option value="2">★★☆☆☆ & up</option>
+                            <option value="1">★☆☆☆☆ & up</option>
+                        </select>
+                    </div>
+                    <div class="spots-view-toggle">
+                        <button id="spots-view-list" class="view-toggle-btn active">List</button>
+                        <button id="spots-view-grid" class="view-toggle-btn">Grid</button>
+                        <button id="spots-view-map" class="view-toggle-btn">Map</button>
+                    </div>
+                </div>
+                
+                <div class="spots-tabs">
+                    <button id="spots-tab-all" class="spots-tab active">All Spots</button>
+                    <button id="spots-tab-my" class="spots-tab">My Spots</button>
+                    <button id="spots-tab-saved" class="spots-tab">Saved</button>
+                    <button id="spots-tab-playlists" class="spots-tab">Playlists</button>
+                </div>
+                
+                <div id="spots-search-container">
+                    <input type="text" id="spots-search" placeholder="Search spots...">
+                    <button id="spots-search-btn">Search</button>
+                </div>
+                
+                <div id="spots-container">
+                    <div id="spots-list-view" class="spots-view active">
+                        <ul id="my-locations-list"></ul>
+                    </div>
+                    <div id="spots-grid-view" class="spots-view">
+                        <div id="spots-grid"></div>
+                    </div>
+                    <div id="spots-map-view" class="spots-view">
+                        <div id="spots-map" class="mini-map"></div>
+                    </div>
+                </div>
+                
+                <div id="playlists-container" class="hidden">
+                    <div class="playlists-header">
+                        <h3>My Playlists</h3>
+                        <button id="create-playlist-btn" class="neon-button">Create Playlist</button>
+                    </div>
+                    <ul id="playlists-list"></ul>
+                </div>
             </div>
 
             <div id="profile-container" class="view">
@@ -211,62 +279,193 @@
                 <span class="close-modal">&times;</span>
                 <h2 id="modal-title">Add New Location</h2>
                 <form id="location-form">
-                    <div class="form-group">
-                        <label for="location-name">Name</label>
-                        <input type="text" id="location-name" required>
+                    <div class="form-tabs">
+                        <button type="button" class="form-tab active" data-tab="basic-info">Basic Info</button>
+                        <button type="button" class="form-tab" data-tab="details">Details</button>
+                        <button type="button" class="form-tab" data-tab="attributes">Attributes</button>
+                        <button type="button" class="form-tab" data-tab="media">Media</button>
                     </div>
-                    <div class="form-group">
-                        <label for="location-category">Category</label>
-                        <select id="location-category" required>
-                            <option value="abandoned">Abandoned</option>
-                            <option value="historical">Historical</option>
-                            <option value="street-art">Street Art</option>
-                            <option value="viewpoint">Viewpoint</option>
-                            <option value="hidden-gem">Hidden Gem</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="location-description">Description</label>
-                        <textarea id="location-description" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="location-notes">Notes</label>
-                        <textarea id="location-notes" rows="3" placeholder="Add your personal notes about this location..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="location-image">Image Upload</label>
-                        <input type="file" id="location-image" accept="image/*" multiple>
-                        <div id="image-preview-container" class="image-preview-container"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="location-risk">Risk Level</label>
-                        <select id="location-risk" required>
-                            <option value="safe">Safe</option>
-                            <option value="questionable">Questionable</option>
-                            <option value="unknown">Unknown</option>
-                            <option value="hot">Hot</option>
-                            <option value="high-risk">High Risk</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="location-type">Location Type</label>
-                        <select id="location-type">
-                            <option value="default">Default</option>
-                            <option value="water">Water Source</option>
-                            <option value="building">Abandoned Building</option>
-                            <option value="power">Power Outlet</option>
-                            <option value="camp">Sleeping/Camp Spot</option>
-                            <option value="geocache">Geocache</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Coordinates</label>
-                        <div class="coordinates-display">
-                            <span id="location-lat"></span>, <span id="location-lng"></span>
+                    
+                    <div id="basic-info" class="form-tab-content active">
+                        <div class="form-group">
+                            <label for="location-name">Name</label>
+                            <input type="text" id="location-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="location-category">Category</label>
+                            <select id="location-category" required aria-label="Location category">
+                                <option value="abandoned">Abandoned</option>
+                                <option value="historical">Historical</option>
+                                <option value="street-art">Street Art</option>
+                                <option value="viewpoint">Viewpoint</option>
+                                <option value="hidden-gem">Hidden Gem</option>
+                                <option value="water-fountain">Water Fountain</option>
+                                <option value="community-space">Community Space</option>
+                                <option value="public-lobby">Public Lobby</option>
+                                <option value="abandoned-house">Abandoned House</option>
+                                <option value="secret-trail">Secret Trail</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="location-type">Location Type</label>
+                            <select id="location-type" aria-label="Location type">
+                                <option value="default">Default</option>
+                                <option value="water">Water Source</option>
+                                <option value="building">Abandoned Building</option>
+                                <option value="power">Power Outlet</option>
+                                <option value="camp">Sleeping/Camp Spot</option>
+                                <option value="geocache">Geocache</option>
+                                <option value="water-fountain">Water Fountain</option>
+                                <option value="community-gathering">Community Gathering</option>
+                                <option value="public-lobby">Public Lobby</option>
+                                <option value="abandoned-house">Abandoned House</option>
+                                <option value="secret-trail">Secret Trail</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="location-visibility">Visibility</label>
+                            <select id="location-visibility" aria-label="Location visibility">
+                                <option value="public">Public - Visible to everyone</option>
+                                <option value="private">Private - Only visible to you</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="location-description">Description</label>
+                            <textarea id="location-description" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Coordinates</label>
+                            <div class="coordinates-display">
+                                <span id="location-lat"></span>, <span id="location-lng"></span>
+                            </div>
                         </div>
                     </div>
-                    <button type="submit" class="neon-button">Save Location</button>
+                    
+                    <div id="details" class="form-tab-content">
+                        <div class="form-group">
+                            <label for="location-address">Address (Optional)</label>
+                            <input type="text" id="location-address" placeholder="Street address or general location">
+                        </div>
+                        <div class="form-group">
+                            <label for="location-notes">Personal Notes</label>
+                            <textarea id="location-notes" rows="3" placeholder="Add your personal notes about this location..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="location-risk">Risk Level</label>
+                            <select id="location-risk" required aria-label="Risk level">
+                                <option value="safe">Safe</option>
+                                <option value="questionable">Questionable</option>
+                                <option value="unknown">Unknown</option>
+                                <option value="hot">Hot</option>
+                                <option value="high-risk">High Risk</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="location-safety">Safety Rating (1-10)</label>
+                            <input type="range" id="location-safety" min="1" max="10" value="5">
+                            <div class="range-labels">
+                                <span>Unsafe</span>
+                                <span>Very Safe</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="location-popularity">Popularity</label>
+                            <select id="location-popularity" aria-label="Location popularity">
+                                <option value="lowkey">Lowkey - Not well known</option>
+                                <option value="moderate">Moderate - Some visitors</option>
+                                <option value="hot">Hot - Popular spot</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="attributes" class="form-tab-content">
+                        <div class="form-group">
+                            <label for="location-wifi">WiFi Available</label>
+                            <div class="toggle-container">
+                                <input type="checkbox" id="location-wifi" class="toggle-checkbox">
+                                <label for="location-wifi" class="toggle-label"></label>
+                            </div>
+                        </div>
+                        <div id="wifi-details" class="form-group hidden">
+                            <label for="location-wifi-password">WiFi Password</label>
+                            <input type="text" id="location-wifi-password" placeholder="Leave blank if open network">
+                            <label for="location-wifi-name">Network Name (SSID)</label>
+                            <input type="text" id="location-wifi-name" placeholder="WiFi network name">
+                        </div>
+                        <div class="form-group">
+                            <label for="location-features">Features (Select all that apply)</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="feature-shelter" name="features" value="shelter">
+                                    <label for="feature-shelter">Shelter</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="feature-water" name="features" value="water">
+                                    <label for="feature-water">Water Source</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="feature-power" name="features" value="power">
+                                    <label for="feature-power">Power Outlet</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="feature-seating" name="features" value="seating">
+                                    <label for="feature-seating">Seating</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="feature-restroom" name="features" value="restroom">
+                                    <label for="feature-restroom">Restroom</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="feature-cell-signal" name="features" value="cell-signal">
+                                    <label for="feature-cell-signal">Cell Signal</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="location-best-time">Best Time to Visit</label>
+                            <select id="location-best-time" aria-label="Best time to visit">
+                                <option value="anytime">Anytime</option>
+                                <option value="morning">Morning</option>
+                                <option value="afternoon">Afternoon</option>
+                                <option value="evening">Evening</option>
+                                <option value="night">Night</option>
+                                <option value="weekday">Weekdays</option>
+                                <option value="weekend">Weekends</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="location-accessibility">Accessibility</label>
+                            <select id="location-accessibility" aria-label="Accessibility">
+                                <option value="easy">Easy - Accessible to most people</option>
+                                <option value="moderate">Moderate - Some physical effort required</option>
+                                <option value="difficult">Difficult - Challenging to access</option>
+                                <option value="very-difficult">Very Difficult - Specialized skills/equipment needed</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="media" class="form-tab-content">
+                        <div class="form-group">
+                            <label for="location-image">Image Upload</label>
+                            <input type="file" id="location-image" accept="image/*" multiple>
+                            <div id="image-preview-container" class="image-preview-container"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="location-trail-path">Trail Path (for Secret Trails)</label>
+                            <div class="trail-path-info">
+                                <p>For secret trails, you can mark the entire path on the map.</p>
+                                <button type="button" id="mark-trail-btn" class="neon-button small">Mark Trail on Map</button>
+                                <div id="trail-coordinates" class="hidden"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" id="prev-tab-btn" class="neon-button" disabled>Previous</button>
+                        <button type="button" id="next-tab-btn" class="neon-button">Next</button>
+                        <button type="submit" id="save-location-btn" class="neon-button hidden">Save Location</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -288,6 +487,7 @@
     <script src="js/geocaching.js"></script>
     <script src="js/territories.js"></script>
     <script src="js/leaderboard.js"></script>
+    <script src="js/spots.js"></script>
     <script src="js/app.js"></script>
     <script src="js/offline.js"></script>
     <script>
