@@ -16,7 +16,11 @@
 <body>
     <div id="splash-screen" class="active">
         <div class="splash-content">
-            <h1 class="neon-text">URBINDEX</h1>
+            <pre class="splash-ascii neon-text">
+ █    █ █████  ████   █████ █   █ ████   █████ █   █
+ █    █ █   █  █   █    █   ██  █ █   █  █      █ █ 
+  ████  █████  ████   █████ █   █ ████   █████   █  
+            </pre>
             <div class="loading-bar">
                 <div class="loading-progress"></div>
             </div>
@@ -33,11 +37,8 @@
                 <pre class="ascii-title">
  █    █ █████  ████   █████ █   █ ████   █████ █   █
  █    █ █   █  █   █    █   ██  █ █   █  █      █ █ 
- █    █ █████  ████     █   █ █ █ █   █  ████    █  
- █    █ █   █  █   █    █   █  ██ █   █  █       █  
   ████  █████  ████   █████ █   █ ████   █████   █  
                 </pre>
-                <div class="radar-ping"></div>
             </div>
             <div id="user-profile">
                 <button id="login-button" class="neon-button">Sign In</button>
@@ -52,6 +53,7 @@
             <button id="map-view-btn" class="nav-btn active">Map</button>
             <button id="leaderboard-btn" class="nav-btn">Leaderboard</button>
             <button id="my-locations-btn" class="nav-btn">My Spots</button>
+            <button id="profile-btn" class="nav-btn">Profile</button>
             <button id="settings-btn" class="nav-btn">Settings</button>
         </nav>
 
@@ -94,6 +96,29 @@
                         </div>
                     </div>
                 </div>
+                <!-- Map HUD Elements -->
+                <div class="map-hud map-coordinates">Coordinates: <span id="current-coordinates">0.000, 0.000</span></div>
+                <div class="map-hud map-zoom-level">Zoom: <span id="current-zoom">13</span></div>
+                <div class="map-hud map-info-panel">
+                    <div class="map-info-header">Location Info</div>
+                    <div class="map-info-content" id="map-info-content">
+                        <p>Hover over map elements to see details</p>
+                    </div>
+                </div>
+                <div class="map-hud map-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--neon-pink);"></div>
+                        <div class="legend-label">Abandoned</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--neon-blue);"></div>
+                        <div class="legend-label">Water Source</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--neon-green);"></div>
+                        <div class="legend-label">Camp Spot</div>
+                    </div>
+                </div>
                 <button id="add-location-btn" class="floating-btn">+</button>
             </div>
 
@@ -105,6 +130,57 @@
             <div id="my-locations-container" class="view">
                 <h2>My Exploration Spots</h2>
                 <ul id="my-locations-list"></ul>
+            </div>
+
+            <div id="profile-container" class="view">
+                <h2>User Profile</h2>
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <div class="profile-avatar-container">
+                            <img id="profile-avatar" src="" alt="Profile avatar">
+                            <button id="change-avatar-btn" class="neon-button small">Change</button>
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="profile-name">Username</h3>
+                            <p id="profile-joined">Joined: <span id="join-date">January 1, 2025</span></p>
+                            <p id="profile-locations">Locations: <span id="location-count">0</span></p>
+                        </div>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-explored">0</span>
+                            <span class="stat-label">Explored</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-shared">0</span>
+                            <span class="stat-label">Shared</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-rating">0</span>
+                            <span class="stat-label">Rating</span>
+                        </div>
+                    </div>
+                    <div class="profile-customization">
+                        <h3>Customization</h3>
+                        <div class="form-group">
+                            <label for="display-name">Display Name</label>
+                            <input type="text" id="display-name">
+                        </div>
+                        <div class="form-group">
+                            <label for="user-bio">Bio</label>
+                            <textarea id="user-bio" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-theme">Theme</label>
+                            <select id="user-theme">
+                                <option value="cyberpunk">Cyberpunk</option>
+                                <option value="retro">Retro</option>
+                                <option value="minimal">Minimal</option>
+                            </select>
+                        </div>
+                        <button id="save-profile-btn" class="neon-button">Save Changes</button>
+                    </div>
+                </div>
             </div>
 
             <div id="settings-container" class="view">

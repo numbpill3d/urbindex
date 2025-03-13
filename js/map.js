@@ -10,12 +10,13 @@ let onlineUsers = [];
 // Map configuration
 const mapConfig = {
   initialView: [40.7128, -74.0060], // Default to New York City
-  initialZoom: 13,
+  initialZoom: 18, // Increased zoom level for much closer view
   maxZoom: 19,
   minZoom: 3,
   tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Urbindex',
-  cyberpunkStyle: true // Enable custom cyberpunk styling
+  cyberpunkStyle: true, // Enable custom cyberpunk styling
+  loadFullMap: true // Load all map tiles
 };
 
 // Initialize map
@@ -37,16 +38,29 @@ function initMap() {
       attribution: mapConfig.attribution,
       maxZoom: mapConfig.maxZoom,
       minZoom: mapConfig.minZoom,
-      className: 'cyberpunk-map-tiles'
+      className: 'cyberpunk-map-tiles',
+      updateWhenIdle: false,
+      updateWhenZooming: true,
+      keepBuffer: 5, // Increased buffer for better loading
+      noWrap: false, // Allow map to wrap around the world
+      bounds: mapConfig.loadFullMap ? null : undefined // Load full map if enabled
     }).addTo(map);
     document.querySelector('#map').classList.add('cyberpunk-filter');
   } else {
     L.tileLayer(mapConfig.tileLayer, {
       attribution: mapConfig.attribution,
       maxZoom: mapConfig.maxZoom,
-      minZoom: mapConfig.minZoom
+      minZoom: mapConfig.minZoom,
+      updateWhenIdle: false,
+      updateWhenZooming: true,
+      keepBuffer: 5, // Increased buffer for better loading
+      noWrap: false, // Allow map to wrap around the world
+      bounds: mapConfig.loadFullMap ? null : undefined // Load full map if enabled
     }).addTo(map);
   }
+  
+  // Initialize map tooltip
+  initMapTooltip();
 
   // Set up event listeners
   map.on('click', onMapClick);
@@ -179,6 +193,7 @@ function getUserLocation() {
           const { latitude, longitude } = position.coords;
           currentPosition = { lat: latitude, lng: longitude };
           
+          // Set view with higher zoom level for closer view
           map.setView([latitude, longitude], mapConfig.initialZoom);
           
           if (userMarker) {
@@ -274,6 +289,65 @@ function loadLocations() {
         isOffline: true
       });
     });
+  });
+}
+
+// Initialize map tooltip for hover information
+function initMapTooltip() {
+  // Create tooltip element
+  const tooltip = document.createElement('div');
+  tooltip.className = 'map-tooltip';
+  document.body.appendChild(tooltip);
+  
+  // Add mousemove event to map
+  map.on('mousemove', (e) => {
+    // Check if mouse is over a marker
+    const target = e.originalEvent.target;
+    const isMarker = target.classList && (
+      target.classList.contains('leaflet-marker-icon') || 
+      target.closest('.leaflet-marker-icon')
+    );
+    
+    if (isMarker) {
+      // Get marker position
+      const markerElement = target.classList.contains('leaflet-marker-icon') ? 
+        target : target.closest('.leaflet-marker-icon');
+      
+      // Find marker data
+      let markerData = null;
+      for (const [id, marker] of Object.entries(locationMarkers)) {
+        if (marker._icon === markerElement) {
+          // Get location data from marker
+          db.collection('locations').doc(id).get().then(doc => {
+            if (doc.exists) {
+              const data = doc.data();
+              
+              // Show tooltip
+              tooltip.innerHTML = `
+                <div class="map-tooltip-content">
+                  <strong>${data.name}</strong>
+                  <div>${utilsModule.getCategoryLabel(data.category)}</div>
+                  ${data.description ? `<div>${data.description.substring(0, 50)}${data.description.length > 50 ? '...' : ''}</div>` : ''}
+                </div>
+              `;
+              
+              tooltip.style.left = `${e.originalEvent.clientX + 10}px`;
+              tooltip.style.top = `${e.originalEvent.clientY + 10}px`;
+              tooltip.classList.add('visible');
+            }
+          });
+          break;
+        }
+      }
+    } else {
+      // Hide tooltip if not over a marker
+      tooltip.classList.remove('visible');
+    }
+  });
+  
+  // Hide tooltip when mouse leaves map
+  map.getContainer().addEventListener('mouseleave', () => {
+    tooltip.classList.remove('visible');
   });
 }
 

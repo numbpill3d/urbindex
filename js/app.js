@@ -624,5 +624,214 @@ a2hsStyle.textContent = `
 
 document.head.appendChild(a2hsStyle);
 
+// Initialize user profile page
+function initUserProfilePage() {
+  // Check if profile container exists
+  const profileContainer = document.getElementById('profile-container');
+  if (!profileContainer) return;
+  
+  // Add more customization options
+  const customizationSection = profileContainer.querySelector('.profile-customization');
+  if (customizationSection) {
+    // Add additional customization options if they don't exist
+    if (!document.getElementById('user-banner')) {
+      const bannerGroup = document.createElement('div');
+      bannerGroup.className = 'form-group';
+      bannerGroup.innerHTML = `
+        <label for="user-banner">Profile Banner</label>
+        <select id="user-banner">
+          <option value="cyberpunk">Cyberpunk City</option>
+          <option value="neon">Neon Lights</option>
+          <option value="retro">Retro Wave</option>
+          <option value="minimal">Minimal Dark</option>
+          <option value="glitch">Digital Glitch</option>
+        </select>
+      `;
+      customizationSection.insertBefore(bannerGroup, document.getElementById('save-profile-btn'));
+    }
+    
+    if (!document.getElementById('user-accent-color')) {
+      const accentColorGroup = document.createElement('div');
+      accentColorGroup.className = 'form-group';
+      accentColorGroup.innerHTML = `
+        <label for="user-accent-color">Accent Color</label>
+        <select id="user-accent-color">
+          <option value="neon-blue">Neon Blue</option>
+          <option value="neon-pink">Neon Pink</option>
+          <option value="neon-green">Neon Green</option>
+          <option value="neon-purple">Neon Purple</option>
+          <option value="neon-yellow">Neon Yellow</option>
+        </select>
+      `;
+      customizationSection.insertBefore(accentColorGroup, document.getElementById('save-profile-btn'));
+    }
+    
+    if (!document.getElementById('user-font')) {
+      const fontGroup = document.createElement('div');
+      fontGroup.className = 'form-group';
+      fontGroup.innerHTML = `
+        <label for="user-font">Font Style</label>
+        <select id="user-font">
+          <option value="rajdhani">Rajdhani</option>
+          <option value="orbitron">Orbitron</option>
+          <option value="share-tech-mono">Share Tech Mono</option>
+          <option value="press-start-2p">Press Start 2P</option>
+        </select>
+      `;
+      customizationSection.insertBefore(fontGroup, document.getElementById('save-profile-btn'));
+    }
+    
+    if (!document.getElementById('user-badges')) {
+      const badgesGroup = document.createElement('div');
+      badgesGroup.className = 'form-group';
+      badgesGroup.innerHTML = `
+        <label>Display Badges</label>
+        <div class="badges-container">
+          <div class="badge-item">
+            <input type="checkbox" id="badge-explorer" checked>
+            <label for="badge-explorer" class="badge-label">Explorer</label>
+          </div>
+          <div class="badge-item">
+            <input type="checkbox" id="badge-contributor" checked>
+            <label for="badge-contributor" class="badge-label">Contributor</label>
+          </div>
+          <div class="badge-item">
+            <input type="checkbox" id="badge-pioneer" checked>
+            <label for="badge-pioneer" class="badge-label">Pioneer</label>
+          </div>
+        </div>
+      `;
+      customizationSection.insertBefore(badgesGroup, document.getElementById('save-profile-btn'));
+    }
+    
+    // Update save button event listener
+    const saveBtn = document.getElementById('save-profile-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', saveUserProfile);
+    }
+  }
+  
+  // Load user profile data
+  loadUserProfile();
+}
+
+// Load user profile data
+function loadUserProfile() {
+  if (!authModule.isAuthenticated()) return;
+  
+  const user = authModule.getCurrentUser();
+  
+  // Get user profile from Firestore
+  db.collection('users').doc(user.uid).get()
+    .then(doc => {
+      if (doc.exists) {
+        const userData = doc.data();
+        
+        // Set profile values
+        document.getElementById('profile-name').textContent = userData.displayName || user.displayName || 'Anonymous';
+        document.getElementById('profile-avatar').src = userData.photoURL || user.photoURL || 'images/default-avatar.png';
+        
+        if (userData.joinDate) {
+          document.getElementById('join-date').textContent = new Date(userData.joinDate.toDate()).toLocaleDateString();
+        }
+        
+        // Set form values
+        document.getElementById('display-name').value = userData.displayName || user.displayName || '';
+        document.getElementById('user-bio').value = userData.bio || '';
+        
+        if (userData.theme) {
+          document.getElementById('user-theme').value = userData.theme;
+        }
+        
+        if (userData.banner) {
+          document.getElementById('user-banner').value = userData.banner;
+        }
+        
+        if (userData.accentColor) {
+          document.getElementById('user-accent-color').value = userData.accentColor;
+        }
+        
+        if (userData.font) {
+          document.getElementById('user-font').value = userData.font;
+        }
+        
+        // Set badges
+        if (userData.badges) {
+          document.getElementById('badge-explorer').checked = userData.badges.includes('explorer');
+          document.getElementById('badge-contributor').checked = userData.badges.includes('contributor');
+          document.getElementById('badge-pioneer').checked = userData.badges.includes('pioneer');
+        }
+        
+        // Update stats
+        document.getElementById('stat-explored').textContent = userData.exploredCount || 0;
+        document.getElementById('stat-shared').textContent = userData.sharedCount || 0;
+        document.getElementById('stat-rating').textContent = userData.rating || 0;
+        document.getElementById('location-count').textContent = userData.locationCount || 0;
+      }
+    })
+    .catch(error => {
+      console.error('Error loading user profile:', error);
+    });
+}
+
+// Save user profile
+function saveUserProfile() {
+  if (!authModule.isAuthenticated()) {
+    alert('Please sign in to save your profile');
+    return;
+  }
+  
+  const user = authModule.getCurrentUser();
+  
+  // Get form values
+  const displayName = document.getElementById('display-name').value.trim();
+  const bio = document.getElementById('user-bio').value.trim();
+  const theme = document.getElementById('user-theme').value;
+  const banner = document.getElementById('user-banner').value;
+  const accentColor = document.getElementById('user-accent-color').value;
+  const font = document.getElementById('user-font').value;
+  
+  // Get badges
+  const badges = [];
+  if (document.getElementById('badge-explorer').checked) badges.push('explorer');
+  if (document.getElementById('badge-contributor').checked) badges.push('contributor');
+  if (document.getElementById('badge-pioneer').checked) badges.push('pioneer');
+  
+  // Update user profile in Firestore
+  db.collection('users').doc(user.uid).set({
+    displayName: displayName,
+    bio: bio,
+    theme: theme,
+    banner: banner,
+    accentColor: accentColor,
+    font: font,
+    badges: badges,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true })
+    .then(() => {
+      // Update display name in Firebase Auth if changed
+      if (displayName !== user.displayName) {
+        user.updateProfile({
+          displayName: displayName
+        });
+      }
+      
+      // Show success message
+      alert('Profile saved successfully');
+      
+      // Reload profile data
+      loadUserProfile();
+    })
+    .catch(error => {
+      console.error('Error saving profile:', error);
+      alert('Error saving profile. Please try again.');
+    });
+}
+
 // Initialize app when DOM is loaded
-document.addEventListener('DOMContentLoaded', initApp);
+document.addEventListener('DOMContentLoaded', () => {
+  initApp();
+  
+  // Initialize user profile page
+  initUserProfilePage();
+});
