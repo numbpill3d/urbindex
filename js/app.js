@@ -136,6 +136,7 @@ function initializeModules() {
         { name: 'auth', init: authModule?.initAuth },
         { name: 'map', init: mapModule?.initMap },
         { name: 'locations', init: locationsModule?.initLocations },
+        { name: 'spots', init: spotsModule?.initSpots },
         { name: 'leaderboard', init: leaderboardModule?.initLeaderboard },
         { name: 'territories', init: territoriesModule?.initTerritories },
         { name: 'comments', init: commentsModule?.initComments },

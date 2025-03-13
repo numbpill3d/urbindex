@@ -773,6 +773,84 @@ async function rateLocationWithStars(locationId, rating) {
   }
 }
 
+// Save a location to user's saved locations
+async function saveLocationToFavorites(locationId) {
+  if (!authModule.isAuthenticated()) {
+    alert('Please sign in to save locations');
+    return false;
+  }
+  
+  const user = authModule.getCurrentUser();
+  
+  try {
+    // Check if location is already saved
+    const savedLocationsRef = firebase.firestore().collection('savedLocations');
+    const savedId = `${user.uid}_${locationId}`;
+    const savedDoc = await savedLocationsRef.doc(savedId).get();
+    
+    if (savedDoc.exists) {
+      console.log('Location already saved');
+      return true;
+    }
+    
+    // Save to savedLocations collection
+    await savedLocationsRef.doc(savedId).set({
+      userId: user.uid,
+      locationId: locationId,
+      savedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    console.log('Location saved successfully');
+    return true;
+  } catch (error) {
+    console.error('Error saving location:', error);
+    return false;
+  }
+}
+
+// Remove a location from user's saved locations
+async function removeLocationFromFavorites(locationId) {
+  if (!authModule.isAuthenticated()) {
+    alert('Please sign in to manage saved locations');
+    return false;
+  }
+  
+  const user = authModule.getCurrentUser();
+  
+  try {
+    // Delete from savedLocations collection
+    const savedLocationsRef = firebase.firestore().collection('savedLocations');
+    const savedId = `${user.uid}_${locationId}`;
+    await savedLocationsRef.doc(savedId).delete();
+    
+    console.log('Location removed from saved successfully');
+    return true;
+  } catch (error) {
+    console.error('Error removing saved location:', error);
+    return false;
+  }
+}
+
+// Check if a location is saved by the current user
+async function isLocationSaved(locationId) {
+  if (!authModule.isAuthenticated()) {
+    return false;
+  }
+  
+  const user = authModule.getCurrentUser();
+  
+  try {
+    const savedLocationsRef = firebase.firestore().collection('savedLocations');
+    const savedId = `${user.uid}_${locationId}`;
+    const savedDoc = await savedLocationsRef.doc(savedId).get();
+    
+    return savedDoc.exists;
+  } catch (error) {
+    console.error('Error checking if location is saved:', error);
+    return false;
+  }
+}
+
 // Export functions for use in other modules
 window.locationsModule = {
   initLocations,
@@ -785,5 +863,8 @@ window.locationsModule = {
   loadComments,
   claimLocation,
   rateLocationWithStars,
-  closeLocationModal
+  closeLocationModal,
+  saveLocationToFavorites,
+  removeLocationFromFavorites,
+  isLocationSaved
 };
