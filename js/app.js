@@ -92,8 +92,8 @@ function setupEventListeners() {
 
 // Switch between views
 function switchView(targetViewId) {
-  // Hide all views
-  viewContainers.forEach(container => {
+  // Hide all views - both static and dynamically created
+  document.querySelectorAll('.view').forEach(container => {
     container.classList.remove('active');
   });
   
@@ -105,6 +105,13 @@ function switchView(targetViewId) {
     // Update history state for back button handling
     const viewName = targetViewId.replace('-container', '');
     history.pushState({ view: viewName }, '', `?view=${viewName}`);
+  } else {
+    // If target view doesn't exist, default to map view
+    const mapView = document.getElementById('map-container');
+    if (mapView) {
+      mapView.classList.add('active');
+      history.pushState({ view: 'map' }, '', `?view=map`);
+    }
   }
 }
 
@@ -131,21 +138,21 @@ function handleBackButton(event) {
 function initializeModules() {
   return new Promise(async (resolve, reject) => {
     try {
-      // Define modules to initialize
+      // Define modules to initialize with proper error handling for undefined modules
       const modules = [
-        { name: 'auth', init: authModule?.initAuth },
-        { name: 'map', init: mapModule?.initMap },
-        { name: 'locations', init: locationsModule?.initLocations },
-        { name: 'spots', init: spotsModule?.initSpots },
-        { name: 'leaderboard', init: leaderboardModule?.initLeaderboard },
-        { name: 'territories', init: territoriesModule?.initTerritories },
-        { name: 'comments', init: commentsModule?.initComments },
-        { name: 'ratings', init: ratingsModule?.initRatings },
-        { name: 'geocaching', init: geocachingModule?.initGeocaching },
-        { name: 'offline', init: offlineModule?.initOffline }
+        { name: 'auth', init: window.authModule?.initAuth },
+        { name: 'map', init: window.mapModule?.initMap },
+        { name: 'locations', init: window.locationsModule?.initLocations },
+        { name: 'spots', init: window.spotsModule?.initSpots },
+        { name: 'leaderboard', init: window.leaderboardModule?.initLeaderboard },
+        { name: 'territories', init: window.territoriesModule?.initTerritories },
+        { name: 'comments', init: window.commentsModule?.initComments },
+        { name: 'ratings', init: window.ratingsModule?.initRatings },
+        { name: 'geocaching', init: window.geocachingModule?.initGeocaching },
+        { name: 'offline', init: window.offlineModule?.initOffline }
       ];
       
-      // Initialize modules sequentially
+      // Initialize modules sequentially with better error handling
       for (const module of modules) {
         if (typeof module.init === 'function') {
           try {
@@ -154,8 +161,16 @@ function initializeModules() {
             console.log(`${module.name} module initialized successfully`);
           } catch (moduleError) {
             console.error(`Error initializing ${module.name} module:`, moduleError);
+            // Log detailed error information for debugging
+            if (moduleError.stack) {
+              console.error(`Stack trace: ${moduleError.stack}`);
+            }
             // Continue with other modules even if one fails
           }
+        } else if (module.init !== undefined) {
+          console.warn(`Module ${module.name} has an invalid initializer`);
+        } else {
+          console.warn(`Module ${module.name} is not available`);
         }
       }
       
@@ -182,7 +197,13 @@ function checkUrlParameters() {
     const targetButton = document.getElementById(`${viewParam}-btn`);
     if (targetButton) {
       targetButton.click();
+    } else {
+      // If the view parameter doesn't match any button, default to map view
+      document.getElementById('map-view-btn').click();
     }
+  } else {
+    // If no view parameter, ensure map view is active
+    document.getElementById('map-view-btn').click();
   }
   
   // Handle share parameters
@@ -262,12 +283,22 @@ function initUIFeatures() {
   initCrewUI();
 }
 
-// Initialize particle effects for ASCII title
+// Initialize particle effects for ASCII title with memory leak prevention
 function initParticleEffects() {
   const titleContainer = document.querySelector('.ascii-title-container');
   if (!titleContainer) return;
   
-  setInterval(() => {
+  // Store interval ID for cleanup
+  const particleInterval = setInterval(() => {
+    // Limit the number of particles to prevent performance issues
+    const existingParticles = titleContainer.querySelectorAll('.particle');
+    if (existingParticles.length > 50) {
+      // Remove oldest particle if we have too many
+      if (existingParticles[0] && titleContainer.contains(existingParticles[0])) {
+        titleContainer.removeChild(existingParticles[0]);
+      }
+    }
+    
     const particle = document.createElement('div');
     particle.className = 'particle';
     
@@ -285,12 +316,23 @@ function initParticleEffects() {
     
     titleContainer.appendChild(particle);
     
+    // Set a timeout to remove this particle
     setTimeout(() => {
       if (titleContainer.contains(particle)) {
         titleContainer.removeChild(particle);
       }
     }, 1500);
   }, 300);
+  
+  // Store the interval ID on the window object for potential cleanup
+  window.particleEffectsInterval = particleInterval;
+  
+  // Add event listener to clean up when navigating away
+  window.addEventListener('beforeunload', () => {
+    if (window.particleEffectsInterval) {
+      clearInterval(window.particleEffectsInterval);
+    }
+  });
 }
 
 // Initialize chat UI
@@ -332,84 +374,239 @@ function initChatUI() {
   listenForChatMessages();
 }
 
-// Send chat message
+// Send chat message with improved error handling and sanitization
 function sendChatMessage(message) {
-  if (!message || !authModule.isAuthenticated()) return;
+  if (!message || !window.authModule?.isAuthenticated()) {
+    console.warn('Cannot send message: empty message or user not authenticated');
+    return;
+  }
   
-  const user = authModule.getCurrentUser();
+  const user = window.authModule.getCurrentUser();
+  if (!user) {
+    console.error('Cannot send message: user object is null');
+    return;
+  }
+  
+  // Sanitize message to prevent XSS attacks
+  const sanitizedMessage = typeof window.utilsModule?.sanitizeHtml === 'function' 
+    ? window.utilsModule.sanitizeHtml(message)
+    : message;
   
   db.collection('chat').add({
-    text: message,
+    text: sanitizedMessage,
     userId: user.uid,
     userName: user.displayName || 'Anonymous',
     userPhotoURL: user.photoURL || null,
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   })
+  .then(() => {
+    console.log('Message sent successfully');
+  })
   .catch(error => {
     console.error('Error sending message:', error);
+    // Show error to user
+    if (typeof window.offlineModule?.showToast === 'function') {
+      window.offlineModule.showToast('Failed to send message. Please try again.', 'error');
+    }
   });
 }
 
-// Listen for new chat messages
+// Listen for new chat messages with improved error handling and performance
 function listenForChatMessages() {
   const chatMessages = document.getElementById('chat-messages');
   if (!chatMessages) return;
   
-  db.collection('chat')
-    .orderBy('timestamp', 'desc')
-    .limit(20)
-    .onSnapshot(snapshot => {
-      chatMessages.innerHTML = '';
-      
-      const messages = [];
-      snapshot.forEach(doc => {
-        messages.push({ id: doc.id, ...doc.data() });
+  // Store the unsubscribe function for cleanup
+  let unsubscribe;
+  
+  try {
+    unsubscribe = db.collection('chat')
+      .orderBy('timestamp', 'desc')
+      .limit(20)
+      .onSnapshot(snapshot => {
+        // Use document fragment for better performance
+        const fragment = document.createDocumentFragment();
+        
+        const messages = [];
+        snapshot.forEach(doc => {
+          messages.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Clear existing messages
+        chatMessages.innerHTML = '';
+        
+        messages.reverse().forEach(message => {
+          const messageEl = document.createElement('div');
+          messageEl.className = 'chat-message';
+          
+          let timeString = 'Just now';
+          if (message.timestamp && message.timestamp.toDate) {
+            const date = message.timestamp.toDate();
+            timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          }
+          
+          // Sanitize user input to prevent XSS
+          const userName = typeof window.utilsModule?.sanitizeHtml === 'function' 
+            ? window.utilsModule.sanitizeHtml(message.userName || 'Anonymous')
+            : (message.userName || 'Anonymous');
+            
+          const messageText = typeof window.utilsModule?.sanitizeHtml === 'function'
+            ? window.utilsModule.sanitizeHtml(message.text || '')
+            : (message.text || '');
+          
+          messageEl.innerHTML = `
+            <span class="chat-user">${userName}:</span>
+            <span class="chat-text">${messageText}</span>
+            <span class="chat-time">${timeString}</span>
+          `;
+          
+          fragment.appendChild(messageEl);
+        });
+        
+        // Append all messages at once for better performance
+        chatMessages.appendChild(fragment);
+        
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, error => {
+        console.error('Error listening for chat messages:', error);
       });
       
-      messages.reverse().forEach(message => {
-        const messageEl = document.createElement('div');
-        messageEl.className = 'chat-message';
-        
-        let timeString = 'Just now';
-        if (message.timestamp && message.timestamp.toDate) {
-          const date = message.timestamp.toDate();
-          timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-        
-        messageEl.innerHTML = `
-          <span class="chat-user">${message.userName}:</span>
-          <span class="chat-text">${message.text}</span>
-          <span class="chat-time">${timeString}</span>
-        `;
-        
-        chatMessages.appendChild(messageEl);
-      });
-      
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+    // Store unsubscribe function for cleanup
+    window.chatUnsubscribe = unsubscribe;
+    
+    // Add event listener to clean up when navigating away
+    window.addEventListener('beforeunload', () => {
+      if (window.chatUnsubscribe) {
+        window.chatUnsubscribe();
+      }
     });
+  } catch (error) {
+    console.error('Error setting up chat listener:', error);
+  }
 }
 
-// Initialize activity feed
+// Initialize activity feed with improved error handling and performance
 function initActivityFeed() {
   const feedList = document.getElementById('activity-feed-list');
   if (!feedList) return;
   
-  db.collection('locations')
-    .orderBy('createdAt', 'desc')
-    .limit(10)
-    .onSnapshot(snapshot => {
-      feedList.innerHTML = '';
-      
-      if (snapshot.empty) {
-        feedList.innerHTML = '<li class="feed-item">No recent activity</li>';
-        return;
-      }
-      
-      snapshot.forEach(doc => {
-        const locationData = doc.data();
-        addActivityFeedItem(doc.id, locationData);
+  // Store the unsubscribe function for cleanup
+  let unsubscribe;
+  
+  try {
+    unsubscribe = db.collection('locations')
+      .orderBy('createdAt', 'desc')
+      .limit(10)
+      .onSnapshot(snapshot => {
+        // Use document fragment for better performance
+        const fragment = document.createDocumentFragment();
+        
+        // Clear existing items
+        feedList.innerHTML = '';
+        
+        if (snapshot.empty) {
+          const emptyItem = document.createElement('li');
+          emptyItem.className = 'feed-item';
+          emptyItem.textContent = 'No recent activity';
+          fragment.appendChild(emptyItem);
+        } else {
+          snapshot.forEach(doc => {
+            const locationData = doc.data();
+            const feedItem = createActivityFeedItem(doc.id, locationData);
+            if (feedItem) {
+              fragment.appendChild(feedItem);
+            }
+          });
+        }
+        
+        // Append all items at once for better performance
+        feedList.appendChild(fragment);
+      }, error => {
+        console.error('Error listening for activity feed:', error);
+        feedList.innerHTML = '<li class="feed-item error">Error loading activity feed</li>';
       });
+      
+    // Store unsubscribe function for cleanup
+    window.activityFeedUnsubscribe = unsubscribe;
+    
+    // Add event listener to clean up when navigating away
+    window.addEventListener('beforeunload', () => {
+      if (window.activityFeedUnsubscribe) {
+        window.activityFeedUnsubscribe();
+      }
     });
+  } catch (error) {
+    console.error('Error setting up activity feed:', error);
+    feedList.innerHTML = '<li class="feed-item error">Error loading activity feed</li>';
+  }
+}
+
+// Create activity feed item (separated from add function for better organization)
+function createActivityFeedItem(id, locationData) {
+  if (!locationData) return null;
+  
+  const feedItem = document.createElement('li');
+  feedItem.className = 'feed-item';
+  
+  let dateDisplay = 'Just now';
+  if (locationData.createdAt) {
+    dateDisplay = window.utilsModule?.formatDate?.(locationData.createdAt, true) || 'Recent';
+  }
+  
+  const riskLevel = locationData.riskLevel || 'unknown';
+  const riskLabel = window.utilsModule?.getRiskLabel?.(riskLevel) || riskLevel;
+  const riskIndicator = `<span class="risk-indicator risk-${riskLevel}">${riskLabel}</span>`;
+  
+  // Sanitize user input to prevent XSS
+  const name = typeof window.utilsModule?.sanitizeHtml === 'function'
+    ? window.utilsModule.sanitizeHtml(locationData.name || 'Unnamed Location')
+    : (locationData.name || 'Unnamed Location');
+    
+  const description = typeof window.utilsModule?.sanitizeHtml === 'function'
+    ? window.utilsModule.sanitizeHtml(locationData.description || 'No description')
+    : (locationData.description || 'No description');
+  
+  feedItem.innerHTML = `
+    <div class="feed-item-header">
+      <h4>${name}</h4>
+      ${riskIndicator}
+    </div>
+    <p class="feed-item-description">${description}</p>
+    <div class="feed-item-meta">
+      <span class="feed-item-date">${dateDisplay}</span>
+      <button class="view-on-map-btn" data-id="${id}">View</button>
+    </div>
+  `;
+  
+  const viewBtn = feedItem.querySelector('.view-on-map-btn');
+  if (viewBtn) {
+    viewBtn.addEventListener('click', () => {
+      if (window.mapModule?.map && locationData.coordinates) {
+        const lat = locationData.coordinates.latitude;
+        const lng = locationData.coordinates.longitude;
+        
+        window.mapModule.map.setView([lat, lng], 16);
+        
+        if (window.mapModule.locationMarkers && window.mapModule.locationMarkers[id]) {
+          window.mapModule.locationMarkers[id].openPopup();
+        }
+      }
+    });
+  }
+  
+  return feedItem;
+}
+
+// Add activity feed item (now just appends the created item)
+function addActivityFeedItem(id, locationData) {
+  const feedList = document.getElementById('activity-feed-list');
+  if (!feedList) return;
+  
+  const feedItem = createActivityFeedItem(id, locationData);
+  if (feedItem) {
+    feedList.appendChild(feedItem);
+  }
 }
 
 // Add an item to the activity feed
@@ -520,6 +717,8 @@ function initCrewUI() {
       const crewsContainer = document.createElement('div');
       crewsContainer.id = 'crews-container';
       crewsContainer.className = 'view';
+      // Explicitly ensure it's not active by default
+      crewsContainer.classList.remove('active');
       
       crewsContainer.innerHTML = `
         <h2>Crews</h2>

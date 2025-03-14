@@ -42,6 +42,9 @@
   padding: 0;
   box-sizing: border-box;
   scroll-behavior: smooth;
+  touch-action: pan-y pinch-zoom; /* Better cross-browser touch handling */
+  -ms-scroll-chaining: none;
+  overscroll-behavior: contain; /* Modern browsers */
 }
 
 html, body {
@@ -66,6 +69,50 @@ body {
   overscroll-behavior-y: contain;
   -ms-scroll-chaining: none; /* For older Edge */
   overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  /* Fallback scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 8px;
+    background-color: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  
+  /* Cross-browser scroll behavior */
+  touch-action: pan-y pinch-zoom;
+  -ms-scroll-chaining: none;
+  
+  /* Prevent overscroll with fallbacks */
+  @supports (overscroll-behavior: contain) {
+    overscroll-behavior: contain;
+  }
+  @supports not (overscroll-behavior: contain) {
+    position: relative;
+    overflow-y: auto;
+    touch-action: pan-y;
+  }
+
+  /* Cross-browser scrollbar styling */
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  
+  /* Custom scrollbar styling for WebKit browsers */
+  &::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  
+  /* Modern scrollbar styling with fallback */
+  @supports (scrollbar-width: thin) {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
 }
 
 a {
@@ -315,6 +362,9 @@ nav {
   white-space: nowrap;
   -ms-overflow-style: none; /* For IE and Edge */
   scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  -webkit-scrollbar-width: thin;
+  scrollbar-width: thin;
 }
 
 nav::-webkit-scrollbar {
