@@ -88,6 +88,146 @@ function setupEventListeners() {
   
   // Handle back button on mobile
   window.addEventListener('popstate', handleBackButton);
+  
+  // Set up forum-specific event listeners
+  setupForumEventListeners();
+  
+  // Set up avatar upload event listener
+  setupAvatarUpload();
+}
+
+// Set up forum-specific event listeners
+function setupForumEventListeners() {
+  const newPostBtn = document.getElementById('new-post-btn');
+  const cancelPostBtn = document.getElementById('cancel-post-btn');
+  const forumPostForm = document.getElementById('forum-post-form');
+  const forumCategories = document.querySelectorAll('.forum-category');
+  
+  if (newPostBtn) {
+    newPostBtn.addEventListener('click', () => {
+      if (!window.authModule?.isAuthenticated()) {
+        alert('Please sign in to create a post');
+        return;
+      }
+      
+      if (forumPostForm) {
+        forumPostForm.classList.remove('hidden');
+      }
+    });
+  }
+  
+  if (cancelPostBtn) {
+    cancelPostBtn.addEventListener('click', () => {
+      if (forumPostForm) {
+        forumPostForm.classList.add('hidden');
+        forumPostForm.reset();
+      }
+    });
+  }
+  
+  if (forumCategories) {
+    forumCategories.forEach(category => {
+      category.addEventListener('click', () => {
+        // Remove active class from all categories
+        forumCategories.forEach(cat => cat.classList.remove('active'));
+        
+        // Add active class to clicked category
+        category.classList.add('active');
+        
+        // Load forum posts for this category
+        const categoryValue = category.dataset.category;
+        if (window.forumModule?.loadForumPosts) {
+          window.forumModule.loadForumPosts(categoryValue);
+        }
+      });
+    });
+  }
+}
+
+// Set up avatar upload event listener
+function setupAvatarUpload() {
+  const avatarUpload = document.getElementById('avatar-upload');
+  if (avatarUpload) {
+    avatarUpload.addEventListener('change', (e) => {
+      if (!window.authModule?.isAuthenticated()) {
+        alert('Please sign in to change your avatar');
+        return;
+      }
+      
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Check file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Image size should be less than 2MB');
+        return;
+      }
+      
+      // Upload to Firebase Storage
+      const user = window.authModule.getCurrentUser();
+      const storageRef = firebase.storage().ref();
+      const avatarRef = storageRef.child(`avatars/${user.uid}`);
+      
+      // Show loading state
+      const profileAvatar = document.getElementById('profile-avatar');
+      const userAvatar = document.getElementById('user-avatar');
+      if (profileAvatar) {
+        profileAvatar.style.opacity = '0.5';
+      }
+      
+      // Upload file
+      avatarRef.put(file).then(snapshot => {
+        return snapshot.ref.getDownloadURL();
+      }).then(downloadURL => {
+        // Update user profile
+        return user.updateProfile({
+          photoURL: downloadURL
+        }).then(() => {
+          // Update Firestore user document
+          return db.collection('users').doc(user.uid).update({
+            photoURL: downloadURL,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+      }).then(() => {
+        // Update UI
+        if (profileAvatar) {
+          profileAvatar.src = user.photoURL;
+          profileAvatar.style.opacity = '1';
+        }
+        if (userAvatar) {
+          userAvatar.src = user.photoURL;
+        }
+        
+        // Show success message
+        if (window.offlineModule?.showToast) {
+          window.offlineModule.showToast('Avatar updated successfully', 'success');
+        } else {
+          alert('Avatar updated successfully');
+        }
+      }).catch(error => {
+        console.error('Error uploading avatar:', error);
+        
+        // Reset opacity
+        if (profileAvatar) {
+          profileAvatar.style.opacity = '1';
+        }
+        
+        // Show error message
+        if (window.offlineModule?.showToast) {
+          window.offlineModule.showToast('Error updating avatar. Please try again.', 'error');
+        } else {
+          alert('Error updating avatar. Please try again.');
+        }
+      });
+    });
+  }
 }
 
 // Switch between views
@@ -102,6 +242,16 @@ function switchView(targetViewId) {
   if (targetView) {
     targetView.classList.add('active');
     
+    // Special handling for map view to ensure map is properly initialized
+    if (targetViewId === 'map-container' && window.mapModule?.map) {
+      // Force a resize event to make sure the map renders correctly
+      setTimeout(() => {
+        if (window.mapModule.map()) {
+          window.mapModule.map().invalidateSize();
+        }
+      }, 100);
+    }
+    
     // Update history state for back button handling
     const viewName = targetViewId.replace('-container', '');
     history.pushState({ view: viewName }, '', `?view=${viewName}`);
@@ -111,6 +261,13 @@ function switchView(targetViewId) {
     if (mapView) {
       mapView.classList.add('active');
       history.pushState({ view: 'map' }, '', `?view=map`);
+      
+      // Force a resize event to make sure the map renders correctly
+      setTimeout(() => {
+        if (window.mapModule?.map && window.mapModule.map()) {
+          window.mapModule.map().invalidateSize();
+        }
+      }, 100);
     }
   }
 }
@@ -144,12 +301,13 @@ function initializeModules() {
         { name: 'map', init: window.mapModule?.initMap },
         { name: 'locations', init: window.locationsModule?.initLocations },
         { name: 'spots', init: window.spotsModule?.initSpots },
-        { name: 'leaderboard', init: window.leaderboardModule?.initLeaderboard },
+        { name: 'forum', init: window.forumModule?.initForum },
         { name: 'territories', init: window.territoriesModule?.initTerritories },
         { name: 'comments', init: window.commentsModule?.initComments },
         { name: 'ratings', init: window.ratingsModule?.initRatings },
         { name: 'geocaching', init: window.geocachingModule?.initGeocaching },
-        { name: 'offline', init: window.offlineModule?.initOffline }
+        { name: 'offline', init: window.offlineModule?.initOffline },
+        { name: 'radar', init: window.radarModule?.initRadar }
       ];
       
       // Initialize modules sequentially with better error handling
@@ -213,6 +371,26 @@ function checkUrlParameters() {
     const url = urlParams.get('url');
     
     handleSharedContent(title, text, url);
+  }
+  
+  // Handle forum post parameter
+  if (viewParam === 'forum' && urlParams.has('post')) {
+    const postId = urlParams.get('post');
+    if (postId && window.forumModule) {
+      // Load the specific post
+      setTimeout(() => {
+        const postElement = document.querySelector(`.forum-item[data-id="${postId}"]`);
+        if (postElement) {
+          postElement.scrollIntoView({ behavior: 'smooth' });
+          postElement.classList.add('highlighted');
+          
+          // Remove highlight after a few seconds
+          setTimeout(() => {
+            postElement.classList.remove('highlighted');
+          }, 3000);
+        }
+      }, 1000); // Give time for forum posts to load
+    }
   }
 }
 
@@ -586,11 +764,19 @@ function createActivityFeedItem(id, locationData) {
         const lat = locationData.coordinates.latitude;
         const lng = locationData.coordinates.longitude;
         
-        window.mapModule.map.setView([lat, lng], 16);
+        // Switch to map view
+        document.getElementById('map-view-btn').click();
         
-        if (window.mapModule.locationMarkers && window.mapModule.locationMarkers[id]) {
-          window.mapModule.locationMarkers[id].openPopup();
-        }
+        // Set map view and open popup
+        setTimeout(() => {
+          if (window.mapModule.map()) {
+            window.mapModule.map().setView([lat, lng], 16);
+            
+            if (window.locationMarkers && window.locationMarkers[id]) {
+              window.locationMarkers[id].openPopup();
+            }
+          }
+        }, 100);
       }
     });
   }
@@ -607,51 +793,6 @@ function addActivityFeedItem(id, locationData) {
   if (feedItem) {
     feedList.appendChild(feedItem);
   }
-}
-
-// Add an item to the activity feed
-function addActivityFeedItem(id, locationData) {
-  const feedList = document.getElementById('activity-feed-list');
-  if (!feedList) return;
-  
-  const feedItem = document.createElement('li');
-  feedItem.className = 'feed-item';
-  
-  let dateDisplay = 'Just now';
-  if (locationData.createdAt) {
-    dateDisplay = utilsModule.formatDate(locationData.createdAt, true);
-  }
-  
-  const riskLevel = locationData.riskLevel || 'unknown';
-  const riskIndicator = `<span class="risk-indicator risk-${riskLevel}">${utilsModule.getRiskLabel(riskLevel)}</span>`;
-  
-  feedItem.innerHTML = `
-    <div class="feed-item-header">
-      <h4>${locationData.name}</h4>
-      ${riskIndicator}
-    </div>
-    <p class="feed-item-description">${locationData.description || 'No description'}</p>
-    <div class="feed-item-meta">
-      <span class="feed-item-date">${dateDisplay}</span>
-      <button class="view-on-map-btn" data-id="${id}">View</button>
-    </div>
-  `;
-  
-  const viewBtn = feedItem.querySelector('.view-on-map-btn');
-  viewBtn.addEventListener('click', () => {
-    if (mapModule && mapModule.map && locationData.coordinates) {
-      const lat = locationData.coordinates.latitude;
-      const lng = locationData.coordinates.longitude;
-      
-      mapModule.map.setView([lat, lng], 16);
-      
-      if (mapModule.locationMarkers && mapModule.locationMarkers[id]) {
-        mapModule.locationMarkers[id].openPopup();
-      }
-    }
-  });
-  
-  feedList.appendChild(feedItem);
 }
 
 // Initialize online users marquee
@@ -824,214 +965,7 @@ a2hsStyle.textContent = `
 
 document.head.appendChild(a2hsStyle);
 
-// Initialize user profile page
-function initUserProfilePage() {
-  // Check if profile container exists
-  const profileContainer = document.getElementById('profile-container');
-  if (!profileContainer) return;
-  
-  // Add more customization options
-  const customizationSection = profileContainer.querySelector('.profile-customization');
-  if (customizationSection) {
-    // Add additional customization options if they don't exist
-    if (!document.getElementById('user-banner')) {
-      const bannerGroup = document.createElement('div');
-      bannerGroup.className = 'form-group';
-      bannerGroup.innerHTML = `
-        <label for="user-banner">Profile Banner</label>
-        <select id="user-banner">
-          <option value="cyberpunk">Cyberpunk City</option>
-          <option value="neon">Neon Lights</option>
-          <option value="retro">Retro Wave</option>
-          <option value="minimal">Minimal Dark</option>
-          <option value="glitch">Digital Glitch</option>
-        </select>
-      `;
-      customizationSection.insertBefore(bannerGroup, document.getElementById('save-profile-btn'));
-    }
-    
-    if (!document.getElementById('user-accent-color')) {
-      const accentColorGroup = document.createElement('div');
-      accentColorGroup.className = 'form-group';
-      accentColorGroup.innerHTML = `
-        <label for="user-accent-color">Accent Color</label>
-        <select id="user-accent-color">
-          <option value="neon-blue">Neon Blue</option>
-          <option value="neon-pink">Neon Pink</option>
-          <option value="neon-green">Neon Green</option>
-          <option value="neon-purple">Neon Purple</option>
-          <option value="neon-yellow">Neon Yellow</option>
-        </select>
-      `;
-      customizationSection.insertBefore(accentColorGroup, document.getElementById('save-profile-btn'));
-    }
-    
-    if (!document.getElementById('user-font')) {
-      const fontGroup = document.createElement('div');
-      fontGroup.className = 'form-group';
-      fontGroup.innerHTML = `
-        <label for="user-font">Font Style</label>
-        <select id="user-font">
-          <option value="rajdhani">Rajdhani</option>
-          <option value="orbitron">Orbitron</option>
-          <option value="share-tech-mono">Share Tech Mono</option>
-          <option value="press-start-2p">Press Start 2P</option>
-        </select>
-      `;
-      customizationSection.insertBefore(fontGroup, document.getElementById('save-profile-btn'));
-    }
-    
-    if (!document.getElementById('user-badges')) {
-      const badgesGroup = document.createElement('div');
-      badgesGroup.className = 'form-group';
-      badgesGroup.innerHTML = `
-        <label>Display Badges</label>
-        <div class="badges-container">
-          <div class="badge-item">
-            <input type="checkbox" id="badge-explorer" checked>
-            <label for="badge-explorer" class="badge-label">Explorer</label>
-          </div>
-          <div class="badge-item">
-            <input type="checkbox" id="badge-contributor" checked>
-            <label for="badge-contributor" class="badge-label">Contributor</label>
-          </div>
-          <div class="badge-item">
-            <input type="checkbox" id="badge-pioneer" checked>
-            <label for="badge-pioneer" class="badge-label">Pioneer</label>
-          </div>
-        </div>
-      `;
-      customizationSection.insertBefore(badgesGroup, document.getElementById('save-profile-btn'));
-    }
-    
-    // Update save button event listener
-    const saveBtn = document.getElementById('save-profile-btn');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', saveUserProfile);
-    }
-  }
-  
-  // Load user profile data
-  loadUserProfile();
-}
-
-// Load user profile data
-function loadUserProfile() {
-  if (!authModule.isAuthenticated()) return;
-  
-  const user = authModule.getCurrentUser();
-  
-  // Get user profile from Firestore
-  db.collection('users').doc(user.uid).get()
-    .then(doc => {
-      if (doc.exists) {
-        const userData = doc.data();
-        
-        // Set profile values
-        document.getElementById('profile-name').textContent = userData.displayName || user.displayName || 'Anonymous';
-        document.getElementById('profile-avatar').src = userData.photoURL || user.photoURL || 'images/default-avatar.png';
-        
-        if (userData.joinDate) {
-          document.getElementById('join-date').textContent = new Date(userData.joinDate.toDate()).toLocaleDateString();
-        }
-        
-        // Set form values
-        document.getElementById('display-name').value = userData.displayName || user.displayName || '';
-        document.getElementById('user-bio').value = userData.bio || '';
-        
-        if (userData.theme) {
-          document.getElementById('user-theme').value = userData.theme;
-        }
-        
-        if (userData.banner) {
-          document.getElementById('user-banner').value = userData.banner;
-        }
-        
-        if (userData.accentColor) {
-          document.getElementById('user-accent-color').value = userData.accentColor;
-        }
-        
-        if (userData.font) {
-          document.getElementById('user-font').value = userData.font;
-        }
-        
-        // Set badges
-        if (userData.badges) {
-          document.getElementById('badge-explorer').checked = userData.badges.includes('explorer');
-          document.getElementById('badge-contributor').checked = userData.badges.includes('contributor');
-          document.getElementById('badge-pioneer').checked = userData.badges.includes('pioneer');
-        }
-        
-        // Update stats
-        document.getElementById('stat-explored').textContent = userData.exploredCount || 0;
-        document.getElementById('stat-shared').textContent = userData.sharedCount || 0;
-        document.getElementById('stat-rating').textContent = userData.rating || 0;
-        document.getElementById('location-count').textContent = userData.locationCount || 0;
-      }
-    })
-    .catch(error => {
-      console.error('Error loading user profile:', error);
-    });
-}
-
-// Save user profile
-function saveUserProfile() {
-  if (!authModule.isAuthenticated()) {
-    alert('Please sign in to save your profile');
-    return;
-  }
-  
-  const user = authModule.getCurrentUser();
-  
-  // Get form values
-  const displayName = document.getElementById('display-name').value.trim();
-  const bio = document.getElementById('user-bio').value.trim();
-  const theme = document.getElementById('user-theme').value;
-  const banner = document.getElementById('user-banner').value;
-  const accentColor = document.getElementById('user-accent-color').value;
-  const font = document.getElementById('user-font').value;
-  
-  // Get badges
-  const badges = [];
-  if (document.getElementById('badge-explorer').checked) badges.push('explorer');
-  if (document.getElementById('badge-contributor').checked) badges.push('contributor');
-  if (document.getElementById('badge-pioneer').checked) badges.push('pioneer');
-  
-  // Update user profile in Firestore
-  db.collection('users').doc(user.uid).set({
-    displayName: displayName,
-    bio: bio,
-    theme: theme,
-    banner: banner,
-    accentColor: accentColor,
-    font: font,
-    badges: badges,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  }, { merge: true })
-    .then(() => {
-      // Update display name in Firebase Auth if changed
-      if (displayName !== user.displayName) {
-        user.updateProfile({
-          displayName: displayName
-        });
-      }
-      
-      // Show success message
-      alert('Profile saved successfully');
-      
-      // Reload profile data
-      loadUserProfile();
-    })
-    .catch(error => {
-      console.error('Error saving profile:', error);
-      alert('Error saving profile. Please try again.');
-    });
-}
-
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
-  
-  // Initialize user profile page
-  initUserProfilePage();
 });

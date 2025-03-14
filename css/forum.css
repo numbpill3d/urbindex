@@ -1,0 +1,553 @@
+/* Urbindex - Forum Module CSS */
+
+/* Forum Container */
+#forum-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Forum Header */
+.forum-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--bbs-border);
+}
+
+.forum-title {
+  margin: 0;
+  color: var(--neon-blue);
+  text-shadow: 0 0 10px var(--neon-blue);
+}
+
+.forum-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Forum Categories */
+.forum-categories {
+  display: flex;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.forum-categories::-webkit-scrollbar {
+  display: none;
+}
+
+.forum-category {
+  background: transparent;
+  border: 1px solid var(--bbs-border);
+  color: var(--text-secondary);
+  padding: 8px 15px;
+  font-family: var(--font-secondary);
+  font-size: 0.9rem;
+  margin-right: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-speed) ease;
+}
+
+.forum-category:hover {
+  color: var(--text-color);
+  border-color: var(--neon-blue);
+}
+
+.forum-category.active {
+  background-color: var(--bbs-border);
+  color: var(--primary-bg);
+  border-color: var(--bbs-border);
+}
+
+/* Forum Search */
+.forum-search {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+#forum-search {
+  flex: 1;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--bbs-border);
+  color: var(--text-color);
+  font-family: var(--font-main);
+}
+
+#forum-search-btn {
+  background-color: var(--bbs-border);
+  color: var(--primary-bg);
+  border: none;
+  padding: 0 15px;
+  font-family: var(--font-secondary);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+/* Forum Post Form */
+.forum-post-form {
+  background-color: var(--secondary-bg);
+  border: 2px solid var(--bbs-border);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.forum-form-header {
+  margin-bottom: 15px;
+  color: var(--neon-blue);
+  font-size: 1.2rem;
+}
+
+.forum-form-group {
+  margin-bottom: 15px;
+}
+
+.forum-form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.forum-form-group input,
+.forum-form-group textarea,
+.forum-form-group select {
+  width: 100%;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(5, 217, 232, 0.3);
+  color: var(--text-color);
+  font-family: var(--font-main);
+}
+
+.forum-form-group textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.forum-form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Forum List */
+.forum-list {
+  list-style: none;
+  padding: 0;
+}
+
+.forum-item {
+  background-color: var(--secondary-bg);
+  border: 2px solid var(--bbs-border);
+  margin-bottom: 15px;
+  padding: 15px;
+  transition: all var(--transition-speed) ease;
+}
+
+.forum-item:hover {
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 10px rgba(5, 217, 232, 0.3);
+}
+
+.forum-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.forum-item-title {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--neon-blue);
+}
+
+.forum-item-category {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 3px 8px;
+  font-size: 0.8rem;
+  border-radius: var(--border-radius);
+}
+
+.forum-item-content {
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.forum-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.forum-item-author {
+  display: flex;
+  align-items: center;
+}
+
+.forum-author-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 0;
+  margin-right: 10px;
+  border: 1px solid var(--neon-blue);
+}
+
+.forum-author-name {
+  color: var(--text-color);
+}
+
+.forum-item-stats {
+  display: flex;
+  gap: 15px;
+  color: var(--text-secondary);
+}
+
+.forum-item-actions {
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 15px;
+}
+
+.forum-action-btn {
+  background: transparent;
+  border: 1px solid var(--bbs-border);
+  color: var(--text-secondary);
+  padding: 5px 10px;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.forum-action-btn:hover {
+  color: var(--text-color);
+  border-color: var(--neon-blue);
+}
+
+.action-icon {
+  margin-right: 5px;
+}
+
+/* Forum Comments */
+.forum-comments-container {
+  display: none;
+  margin-top: 15px;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.forum-comments-container.active {
+  display: block;
+}
+
+.forum-comments-loading,
+.forum-comments-error,
+.forum-no-comments {
+  padding: 10px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.forum-comments-list {
+  margin-bottom: 15px;
+}
+
+.forum-comment {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.forum-comment:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.forum-comment-author {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.forum-comment-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 0;
+  margin-right: 8px;
+  border: 1px solid var(--neon-blue);
+}
+
+.forum-comment-name {
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.forum-comment-date {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.forum-comment-content {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.forum-comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.forum-comment-input {
+  width: 100%;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(5, 217, 232, 0.3);
+  color: var(--text-color);
+  font-family: var(--font-main);
+  resize: vertical;
+  min-height: 80px;
+}
+
+.forum-comment-submit {
+  align-self: flex-end;
+}
+
+/* Loading and Empty States */
+.forum-item.loading,
+.forum-item.empty,
+.forum-item.error {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-secondary);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .forum-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .forum-actions {
+    margin-top: 15px;
+  }
+  
+  .forum-item-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .forum-item-stats {
+    margin-top: 10px;
+  }
+  
+  .forum-item-actions {
+    flex-wrap: wrap;
+  }
+}
+
+/* Radar Widget Styles */
+.radar-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 200px;
+  height: 200px;
+  background-color: rgba(10, 10, 32, 0.8);
+  border: 2px solid var(--neon-blue);
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(5, 217, 232, 0.5);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.radar-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.radar-sweep {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 50%, rgba(5, 217, 232, 0.2) 100%);
+  animation: radar-sweep 4s infinite linear;
+  transform-origin: center;
+}
+
+.radar-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background-color: var(--neon-blue);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px var(--neon-blue);
+}
+
+.radar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 1px solid rgba(5, 217, 232, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.radar-ring-1 {
+  width: 40%;
+  height: 40%;
+}
+
+.radar-ring-2 {
+  width: 70%;
+  height: 70%;
+}
+
+.radar-ring-3 {
+  width: 100%;
+  height: 100%;
+}
+
+.radar-blip {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: var(--neon-pink);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px var(--neon-pink);
+}
+
+.radar-toggle {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  background-color: var(--secondary-bg);
+  border: 2px solid var(--neon-blue);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 101;
+  box-shadow: 0 0 10px rgba(5, 217, 232, 0.5);
+}
+
+.radar-toggle-icon {
+  color: var(--neon-blue);
+  font-size: 1.2rem;
+}
+
+.radar-widget.minimized {
+  width: 40px;
+  height: 40px;
+}
+
+.radar-widget.minimized .radar-screen {
+  display: none;
+}
+
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Street Pass Notification */
+.street-pass-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--secondary-bg);
+  border: 2px solid var(--neon-green);
+  padding: 15px 20px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  animation: notification-in 0.5s ease, notification-pulse 2s infinite alternate;
+  max-width: 90%;
+}
+
+.street-pass-icon {
+  font-size: 1.5rem;
+  color: var(--neon-green);
+}
+
+.street-pass-content {
+  flex: 1;
+}
+
+.street-pass-title {
+  font-family: var(--font-secondary);
+  font-size: 1.1rem;
+  color: var(--neon-green);
+  margin: 0 0 5px 0;
+}
+
+.street-pass-message {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.street-pass-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.street-pass-close:hover {
+  color: var(--text-color);
+}
+
+@keyframes notification-in {
+  from {
+    transform: translateX(-50%) translateY(-100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes notification-pulse {
+  from {
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(57, 255, 20, 0.7);
+  }
+}

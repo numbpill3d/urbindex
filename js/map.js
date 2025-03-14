@@ -61,66 +61,8 @@ function initMap() {
       L.tileLayer(mapConfig.tileLayer, tileLayerOptions).addTo(map);
     }
     
-    // Initialize map tooltip
-    initMapTooltip();
-
     // Set up event listeners
     map.on('click', onMapClick);
-    
-    // Set up event listeners for location-related events with proper error handling
-    document.addEventListener('user-signed-in', (event) => {
-      try {
-        loadLocations();
-        if (event.detail) {
-          addOnlineUser(event.detail);
-        }
-      } catch (error) {
-        console.error('Error handling user sign-in event:', error);
-      }
-    });
-    
-    document.addEventListener('user-signed-out', () => {
-      try {
-        clearUserSpecificMarkers();
-        const currentUser = window.authModule?.getCurrentUser();
-        if (currentUser) {
-          removeOnlineUser(currentUser);
-        }
-      } catch (error) {
-        console.error('Error handling user sign-out event:', error);
-      }
-    });
-    
-    // Add location button event listener
-    const addLocationBtn = document.getElementById('add-location-btn');
-    if (addLocationBtn) {
-      addLocationBtn.addEventListener('click', () => {
-        if (!window.authModule?.isAuthenticated()) {
-          alert('Please sign in to add locations');
-          return;
-        }
-        
-        if (currentPosition) {
-          openAddLocationModal(currentPosition);
-        } else {
-          getUserLocation().then(position => {
-            if (position) {
-              openAddLocationModal(position);
-            } else {
-              alert('Unable to get your current location. Please try again or click on the map to select a location.');
-            }
-          }).catch(error => {
-            console.error('Error getting user location:', error);
-            alert('Error getting your location. Please try clicking on the map to select a location.');
-          });
-        }
-      });
-    }
-    
-    // Get user's location
-    getUserLocation().catch(error => {
-      console.error('Error getting initial user location:', error);
-    });
     
     // Update coordinates display on mouse move
     map.on('mousemove', (e) => {
@@ -142,107 +84,6 @@ function initMap() {
   } catch (error) {
     console.error('Error initializing map:', error);
   }
-}
-
-// Add an item to the activity feed
-function addActivityFeedItem(id, locationData) {
-  const feedList = document.getElementById('activity-feed-list');
-  if (!feedList) return;
-  
-  const feedItem = document.createElement('li');
-  feedItem.className = 'feed-item';
-  
-  let dateDisplay = 'Just now';
-  if (locationData.createdAt) {
-    dateDisplay = window.utilsModule?.formatDate?.(locationData.createdAt, true) || 'Recent';
-  }
-  
-  const riskLevel = locationData.riskLevel || 'unknown';
-  const riskLabel = window.utilsModule?.getRiskLabel?.(riskLevel) || riskLevel;
-  const riskIndicator = `<span class="risk-indicator risk-${riskLevel}">${riskLabel}</span>`;
-  
-  // Sanitize user input to prevent XSS
-  const name = typeof window.utilsModule?.sanitizeHtml === 'function'
-    ? window.utilsModule.sanitizeHtml(locationData.name || 'Unnamed Location')
-    : (locationData.name || 'Unnamed Location');
-    
-  const description = typeof window.utilsModule?.sanitizeHtml === 'function'
-    ? window.utilsModule.sanitizeHtml(locationData.description || 'No description')
-    : (locationData.description || 'No description');
-  
-  feedItem.innerHTML = `
-    <div class="feed-item-header">
-      <h4>${name}</h4>
-      ${riskIndicator}
-    </div>
-    <p class="feed-item-description">${description}</p>
-    <div class="feed-item-meta">
-      <span class="feed-item-date">${dateDisplay}</span>
-      <button class="view-on-map-btn" data-id="${id}">View</button>
-    </div>
-  `;
-  
-  const viewBtn = feedItem.querySelector('.view-on-map-btn');
-  if (viewBtn) {
-    viewBtn.addEventListener('click', () => {
-      if (map && locationData.coordinates) {
-        const lat = locationData.coordinates.latitude;
-        const lng = locationData.coordinates.longitude;
-        
-        map.setView([lat, lng], 16);
-        
-        if (locationMarkers && locationMarkers[id]) {
-          locationMarkers[id].openPopup();
-        }
-      }
-    });
-  }
-  
-  feedList.appendChild(feedItem);
-}
-
-// Add user to online users
-function addOnlineUser(user) {
-  if (!user) return;
-  
-  const existingUser = onlineUsers.find(u => u.uid === user.uid);
-  if (existingUser) return;
-  
-  onlineUsers.push({
-    uid: user.uid,
-    displayName: user.displayName || 'Anonymous',
-    photoURL: user.photoURL || null
-  });
-  
-  updateOnlineUsersMarquee();
-}
-
-// Remove user from online users
-function removeOnlineUser(user) {
-  if (!user) return;
-  
-  onlineUsers = onlineUsers.filter(u => u.uid !== user.uid);
-  updateOnlineUsersMarquee();
-}
-
-// Update online users marquee
-function updateOnlineUsersMarquee() {
-  const onlineUsersList = document.getElementById('online-users-list');
-  if (!onlineUsersList) return;
-  
-  if (onlineUsers.length === 0) {
-    onlineUsersList.textContent = 'No users online';
-    return;
-  }
-  
-  const userNames = onlineUsers.map(user => {
-    // Sanitize user names to prevent XSS
-    return typeof window.utilsModule?.sanitizeHtml === 'function'
-      ? window.utilsModule.sanitizeHtml(user.displayName)
-      : user.displayName;
-  }).join(', ');
-  
-  onlineUsersList.textContent = userNames;
 }
 
 // Get user's current location with improved error handling
@@ -303,11 +144,6 @@ function getUserLocation() {
               break;
           }
           
-          // Show error message to user if offline module is available
-          if (window.offlineModule?.showToast) {
-            window.offlineModule.showToast(errorMessage, 'error');
-          }
-          
           reject(new Error(errorMessage));
         },
         {
@@ -319,12 +155,6 @@ function getUserLocation() {
     } else {
       const errorMessage = 'Geolocation is not supported by this browser';
       console.warn(errorMessage);
-      
-      // Show error message to user if offline module is available
-      if (window.offlineModule?.showToast) {
-        window.offlineModule.showToast(errorMessage, 'warning');
-      }
-      
       reject(new Error(errorMessage));
     }
   });
@@ -384,180 +214,33 @@ function loadLocations() {
   document.dispatchEvent(reloadEvent);
   
   // Load locations from Firestore
-  locationsRef.get()
-    .then(snapshot => {
-      snapshot.forEach(doc => {
-        const locationData = doc.data();
-        
-        addLocationMarker({
-          id: doc.id,
-          ...locationData,
-          coordinates: { 
-            lat: locationData.coordinates.latitude, 
-            lng: locationData.coordinates.longitude 
-          }
-        });
-      });
-    })
-    .catch(error => {
-      console.error('Error loading locations:', error);
-      if (window.offlineModule?.showToast) {
-        window.offlineModule.showToast('Error loading locations. Please try again.', 'error');
-      }
-    });
-  
-  // Load offline locations
-  if (window.loadOfflineLocations) {
-    window.loadOfflineLocations().then(offlineLocations => {
-      offlineLocations.forEach(location => {
-        addLocationMarker({
-          ...location,
-          coordinates: { 
-            lat: location.coordinates.latitude, 
-            lng: location.coordinates.longitude 
-          },
-          isOffline: true
-        });
-      });
-    }).catch(error => {
-      console.error('Error loading offline locations:', error);
-    });
-  }
-}
-
-// Initialize map tooltip for hover information with performance improvements
-function initMapTooltip() {
   try {
-    // Create tooltip element
-    const tooltip = document.createElement('div');
-    tooltip.className = 'map-tooltip';
-    document.body.appendChild(tooltip);
-    
-    // Cache for marker data to avoid repeated Firestore queries
-    const markerDataCache = new Map();
-    
-    // Use a debounced function for mousemove to improve performance
-    const debouncedMouseMove = debounce((e) => {
-      // Check if mouse is over a marker
-      const target = e.originalEvent.target;
-      const isMarker = target.classList && (
-        target.classList.contains('leaflet-marker-icon') || 
-        target.closest('.leaflet-marker-icon')
-      );
-      
-      if (isMarker) {
-        // Get marker position
-        const markerElement = target.classList.contains('leaflet-marker-icon') ? 
-          target : target.closest('.leaflet-marker-icon');
-        
-        // Find marker data
-        for (const [id, marker] of Object.entries(locationMarkers)) {
-          if (marker._icon === markerElement) {
-            // Check cache first
-            if (markerDataCache.has(id)) {
-              const data = markerDataCache.get(id);
-              updateTooltip(data, e);
-            } else {
-              // Get location data from marker
-              db.collection('locations').doc(id).get().then(doc => {
-                if (doc.exists) {
-                  const data = doc.data();
-                  
-                  // Cache the data for future use
-                  markerDataCache.set(id, data);
-                  
-                  updateTooltip(data, e);
-                }
-              }).catch(error => {
-                console.error('Error fetching location data for tooltip:', error);
-              });
-            }
-            break;
-          }
-        }
-      } else {
-        // Hide tooltip if not over a marker
-        tooltip.classList.remove('visible');
-      }
-    }, 50); // 50ms debounce
-    
-    // Helper function to update tooltip content and position
-    function updateTooltip(data, e) {
-      if (!data) return;
-      
-      // Sanitize data to prevent XSS
-      const name = typeof window.utilsModule?.sanitizeHtml === 'function'
-        ? window.utilsModule.sanitizeHtml(data.name || 'Unnamed Location')
-        : (data.name || 'Unnamed Location');
-        
-      const category = data.category || 'other';
-      const categoryLabel = window.utilsModule?.getCategoryLabel?.(category) || category;
-      
-      const description = data.description || '';
-      const truncatedDescription = description.length > 50 
-        ? description.substring(0, 50) + '...' 
-        : description;
-      
-      const sanitizedDescription = typeof window.utilsModule?.sanitizeHtml === 'function'
-        ? window.utilsModule.sanitizeHtml(truncatedDescription)
-        : truncatedDescription;
-      
-      // Show tooltip
-      tooltip.innerHTML = `
-        <div class="map-tooltip-content">
-          <strong>${name}</strong>
-          <div>${categoryLabel}</div>
-          ${sanitizedDescription ? `<div>${sanitizedDescription}</div>` : ''}
-        </div>
-      `;
-      
-      // Position tooltip with bounds checking to keep it on screen
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const tooltipWidth = tooltip.offsetWidth;
-      const tooltipHeight = tooltip.offsetHeight;
-      
-      let left = e.originalEvent.clientX + 10;
-      let top = e.originalEvent.clientY + 10;
-      
-      // Adjust if tooltip would go off right edge
-      if (left + tooltipWidth > viewportWidth - 10) {
-        left = e.originalEvent.clientX - tooltipWidth - 10;
-      }
-      
-      // Adjust if tooltip would go off bottom edge
-      if (top + tooltipHeight > viewportHeight - 10) {
-        top = e.originalEvent.clientY - tooltipHeight - 10;
-      }
-      
-      tooltip.style.left = `${left}px`;
-      tooltip.style.top = `${top}px`;
-      tooltip.classList.add('visible');
-    }
-    
-    // Add mousemove event to map
-    map.on('mousemove', debouncedMouseMove);
-    
-    // Hide tooltip when mouse leaves map
-    map.getContainer().addEventListener('mouseleave', () => {
-      tooltip.classList.remove('visible');
-    });
-    
-    // Clear cache when locations are reloaded
-    document.addEventListener('locations-reloaded', () => {
-      markerDataCache.clear();
-    });
-    
-    // Utility function for debouncing
-    function debounce(func, wait) {
-      let timeout;
-      return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-      };
+    // Check if db is defined
+    if (typeof db !== 'undefined') {
+      const locationsRef = db.collection('locations');
+      locationsRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            const locationData = doc.data();
+            
+            addLocationMarker({
+              id: doc.id,
+              ...locationData,
+              coordinates: { 
+                lat: locationData.coordinates.latitude, 
+                lng: locationData.coordinates.longitude 
+              }
+            });
+          });
+        })
+        .catch(error => {
+          console.error('Error loading locations:', error);
+        });
+    } else {
+      console.warn('db is not defined');
     }
   } catch (error) {
-    console.error('Error initializing map tooltip:', error);
+    console.error('Error in loadLocations:', error);
   }
 }
 
@@ -586,137 +269,9 @@ function addLocationMarker(location) {
       icon: createCustomIcon(iconType)
     });
     
-    const riskLevel = location.riskLevel || 'unknown';
-    
-    // Sanitize user-provided content to prevent XSS
-    const sanitizeContent = (content) => {
-      return typeof window.utilsModule?.sanitizeHtml === 'function'
-        ? window.utilsModule.sanitizeHtml(content || '')
-        : (content || '');
-    };
-    
-    const name = sanitizeContent(location.name || 'Unnamed Location');
-    const description = sanitizeContent(location.description || '');
-    const notes = sanitizeContent(location.notes || '');
-    const categoryLabel = window.utilsModule?.getCategoryLabel?.(location.category) || location.category || 'Other';
-    const riskLabel = window.utilsModule?.getRiskLabel?.(riskLevel) || riskLevel;
-    
-    let popupContent = `
-      <div class="location-popup">
-        <div class="location-popup-header">
-          <h3>${name}</h3>
-          <div class="location-badges">
-            <span class="location-category">${categoryLabel}</span>
-            <span class="risk-indicator risk-${riskLevel}">${riskLabel}</span>
-          </div>
-        </div>
-    `;
-    
-    if (description) {
-      popupContent += `<p class="location-description">${description}</p>`;
-    }
-    
-    if (notes) {
-      popupContent += `<p class="location-notes"><strong>Notes:</strong> ${notes}</p>`;
-    }
-    
-    // Safely handle images with error fallbacks
-    if (location.imageUrls && Array.isArray(location.imageUrls) && location.imageUrls.length > 0) {
-      popupContent += `<div class="location-images">`;
-      location.imageUrls.forEach(url => {
-        if (url && typeof url === 'string') {
-          popupContent += `
-            <img src="${url}" alt="${name}" class="location-image" 
-                 onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%22%20height%3D%22100%22%3E%3Crect%20fill%3D%22%23ddd%22%20width%3D%22100%22%20height%3D%22100%22%2F%3E%3Ctext%20fill%3D%22%23888%22%20font-family%3D%22sans-serif%22%20font-size%3D%2210%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3EImage%20Error%3C%2Ftext%3E%3C%2Fsvg%3E';">
-          `;
-        }
-      });
-      popupContent += `</div>`;
-    } else if (location.imageUrl && typeof location.imageUrl === 'string') {
-      popupContent += `
-        <img src="${location.imageUrl}" alt="${name}" class="location-image"
-             onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%22%20height%3D%22100%22%3E%3Crect%20fill%3D%22%23ddd%22%20width%3D%22100%22%20height%3D%22100%22%2F%3E%3Ctext%20fill%3D%22%23888%22%20font-family%3D%22sans-serif%22%20font-size%3D%2210%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3EImage%20Error%3C%2Ftext%3E%3C%2Fsvg%3E';">
-      `;
-    }
-    
-    // Add ratings section
-    const rating = location.rating ? parseFloat(location.rating).toFixed(1) : '0.0';
-    const ratingCount = location.ratingCount || 0;
-    const upvotes = location.upvotes || 0;
-    const downvotes = location.downvotes || 0;
-    
-    popupContent += `
-      <div class="star-rating" data-id="${location.id}">
-        <span class="star" data-rating="1">★</span>
-        <span class="star" data-rating="2">★</span>
-        <span class="star" data-rating="3">★</span>
-        <span class="star" data-rating="4">★</span>
-        <span class="star" data-rating="5">★</span>
-        <span class="rating-value">${rating}</span>
-        <span class="rating-count">(${ratingCount})</span>
-      </div>
-      
-      <div class="rating-container">
-        <button class="rating-btn upvote" data-id="${location.id}" data-action="upvote">👍</button>
-        <span class="rating-count">${upvotes}</span>
-        <button class="rating-btn downvote" data-id="${location.id}" data-action="downvote">👎</button>
-        <span class="rating-count">${downvotes}</span>
-      </div>
-    `;
-    
-    // Add territory information
-    if (location.claimedBy) {
-      const claimedBy = sanitizeContent(location.claimedBy);
-      popupContent += `
-        <div class="territory-owner">
-          <span>Claimed by: </span>
-          <span class="territory-owner-name">${claimedBy}</span>
-        </div>
-      `;
-    } else {
-      popupContent += `
-        <button class="claim-territory-btn neon-button" data-id="${location.id}">Claim Territory</button>
-      `;
-    }
-    
-    // Add comments section
-    popupContent += `
-      <div class="comments-section">
-        <h4>Comments</h4>
-        <div class="comments-container" data-id="${location.id}">
-          <p class="loading-comments">Loading comments...</p>
-        </div>
-        <div class="comment-form">
-          <textarea class="comment-input" placeholder="Add a comment..."></textarea>
-          <button class="comment-submit-btn neon-button" data-id="${location.id}">Post</button>
-        </div>
-      </div>
-    `;
-    
-    // Add offline badge if needed
-    if (location.isOffline) {
-      popupContent += `<p class="offline-badge">Saved Offline</p>`;
-    }
-    
-    popupContent += `</div>`;
-    
-    // Bind popup to marker
-    marker.bindPopup(popupContent, {
-      maxWidth: 300,
-      minWidth: 200
-    });
-    
     // Add marker to map
     marker.addTo(map);
     locationMarkers[location.id] = marker;
-    
-    // Set up event listeners when popup opens
-    marker.on('popupopen', () => {
-      setTimeout(() => {
-        setupPopupEventListeners(location.id);
-        loadComments(location.id);
-      }, 100);
-    });
     
     return marker;
   } catch (error) {
@@ -725,69 +280,139 @@ function addLocationMarker(location) {
   }
 }
 
-// Set up event listeners for popup elements
-function setupPopupEventListeners(locationId) {
+// Clear location markers
+function clearLocationMarkers() {
   try {
-    // Rating buttons
-    const upvoteBtn = document.querySelector(`.rating-btn.upvote[data-id="${locationId}"]`);
-    const downvoteBtn = document.querySelector(`.rating-btn.downvote[data-id="${locationId}"]`);
-    
-    if (upvoteBtn) {
-      upvoteBtn.addEventListener('click', () => rateLocation(locationId, 'upvote'));
-    }
-    
-    if (downvoteBtn) {
-      downvoteBtn.addEventListener('click', () => rateLocation(locationId, 'downvote'));
-    }
-    
-    // Star rating
-    const stars = document.querySelectorAll(`.star-rating[data-id="${locationId}"] .star`);
-    stars.forEach(star => {
-      star.addEventListener('click', (e) => {
-        const rating = parseInt(e.target.dataset.rating);
-        rateLocationWithStars(locationId, rating);
-      });
+    Object.values(locationMarkers).forEach(marker => {
+      if (map && marker) {
+        map.removeLayer(marker);
+      }
     });
     
-    // Claim territory button
-    const claimBtn = document.querySelector(`.claim-territory-btn[data-id="${locationId}"]`);
-    if (claimBtn) {
-      claimBtn.addEventListener('click', () => claimTerritory(locationId));
-    }
-    
-    // Comment submit button
-    const commentBtn = document.querySelector(`.comment-submit-btn[data-id="${locationId}"]`);
-    const commentInput = commentBtn?.parentElement.querySelector('.comment-input');
-    
-    if (commentBtn && commentInput) {
-      commentBtn.addEventListener('click', () => {
-        const text = commentInput.value.trim();
-        if (text) {
-          addComment(locationId, text).then(success => {
-            if (success) {
-              commentInput.value = '';
-              loadComments(locationId);
-            }
-          }).catch(error => {
-            console.error('Error adding comment:', error);
-          });
-        }
-      });
-    }
+    locationMarkers = {};
   } catch (error) {
-    console.error('Error setting up popup event listeners:', error);
+    console.error('Error clearing location markers:', error);
   }
+}
+
+// Create custom icon for map markers
+function createCustomIcon(type) {
+  // Default icon options
+  const iconOptions = {
+    iconUrl: 'images/markers/default.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  };
+  
+  // Set icon URL based on type
+  switch (type) {
+    case 'abandoned':
+      iconOptions.iconUrl = 'images/markers/abandoned.png';
+      break;
+    case 'historical':
+      iconOptions.iconUrl = 'images/markers/historical.png';
+      break;
+    case 'viewpoint':
+      iconOptions.iconUrl = 'images/markers/viewpoint.png';
+      break;
+    case 'water':
+      iconOptions.iconUrl = 'images/markers/water.png';
+      break;
+    case 'camp':
+      iconOptions.iconUrl = 'images/markers/camp.png';
+      break;
+    case 'user':
+      iconOptions.iconUrl = 'images/markers/user.png';
+      break;
+    default:
+      iconOptions.iconUrl = 'images/markers/default.png';
+  }
+  
+  return L.icon(iconOptions);
+}
+
+// Clear user-specific markers
+function clearUserSpecificMarkers() {
+  // Implementation would depend on how user-specific markers are tracked
+  console.log('Clearing user-specific markers');
 }
 
 // Load comments for a location
 function loadComments(locationId) {
-  try {
-    const commentsContainer = document.querySelector(`.comments-container[data-id="${locationId}"]`);
-    if (!commentsContainer) return;
-    
-    commentsContainer.innerHTML = '<p class="loading-comments">Loading comments...</p>';
-    
-    if (window.locationsModule?.loadComments) {
-      window.locationsModule.loadComments(locationId)
-        .then(comments => {
-          comm
+  const commentsContainer = document.querySelector(`.comments-container[data-id="${locationId}"]`);
+  if (!commentsContainer) return;
+  
+  commentsContainer.innerHTML = '<p class="loading-comments">Loading comments...</p>';
+  
+  if (window.commentsModule?.loadComments) {
+    window.commentsModule.loadComments(locationId);
+  } else {
+    commentsContainer.innerHTML = '<p>Comments not available</p>';
+  }
+}
+
+// Add comment to a location
+function addComment(locationId, text) {
+  return new Promise((resolve, reject) => {
+    if (window.commentsModule?.addComment) {
+      window.commentsModule.addComment(locationId, text)
+        .then(() => resolve(true))
+        .catch(error => {
+          console.error('Error adding comment:', error);
+          reject(error);
+        });
+    } else {
+      console.warn('commentsModule.addComment is not available');
+      reject(new Error('Comments module not available'));
+    }
+  });
+}
+
+// Rate location with stars
+function rateLocationWithStars(locationId, rating) {
+  if (window.ratingsModule?.rateLocation) {
+    window.ratingsModule.rateLocation(locationId, rating);
+  } else {
+    console.warn('ratingsModule.rateLocation is not available');
+  }
+}
+
+// Rate location with upvote/downvote
+function rateLocation(locationId, action) {
+  if (window.ratingsModule?.voteLocation) {
+    window.ratingsModule.voteLocation(locationId, action);
+  } else {
+    console.warn('ratingsModule.voteLocation is not available');
+  }
+}
+
+// Claim territory
+function claimTerritory(locationId) {
+  if (window.territoriesModule?.claimTerritory) {
+    window.territoriesModule.claimTerritory(locationId);
+  } else {
+    console.warn('territoriesModule.claimTerritory is not available');
+  }
+}
+
+// Export functions for use in other modules
+window.mapModule = {
+  initMap,
+  getUserLocation,
+  loadLocations,
+  clearLocationMarkers,
+  addLocationMarker,
+  locationMarkers,
+  map: () => map // Return the map instance as a getter function
+};
+
+// Initialize map when the script loads
+document.addEventListener('DOMContentLoaded', () => {
+  // Wait a short time to ensure all dependencies are loaded
+  setTimeout(() => {
+    if (typeof initMap === 'function') {
+      initMap();
+    }
+  }, 500);
+});

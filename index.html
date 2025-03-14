@@ -12,6 +12,7 @@
     <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/spots.css">
+    <link rel="stylesheet" href="css/forum.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 <body>
@@ -52,7 +53,7 @@
 
         <nav>
             <button id="map-view-btn" class="nav-btn active">Map</button>
-            <button id="leaderboard-btn" class="nav-btn">Leaderboard</button>
+            <button id="forum-btn" class="nav-btn">Forum</button>
             <button id="my-locations-btn" class="nav-btn">My Spots</button>
             <button id="profile-btn" class="nav-btn">Profile</button>
             <button id="settings-btn" class="nav-btn">Settings</button>
@@ -123,9 +124,60 @@
                 <button id="add-location-btn" class="floating-btn">+</button>
             </div>
 
-            <div id="leaderboard-container" class="view">
-                <h2>Top Explorers</h2>
-                <ul id="leaderboard-list"></ul>
+            <div id="forum-container" class="view">
+                <div class="forum-header">
+                    <h2 class="forum-title">Community Forum</h2>
+                    <div class="forum-actions">
+                        <button id="new-post-btn" class="neon-button">New Post</button>
+                    </div>
+                </div>
+                
+                <div class="forum-categories">
+                    <button class="forum-category active" data-category="all">All</button>
+                    <button class="forum-category" data-category="general">General</button>
+                    <button class="forum-category" data-category="locations">Locations</button>
+                    <button class="forum-category" data-category="tips">Tips & Tricks</button>
+                    <button class="forum-category" data-category="events">Events</button>
+                    <button class="forum-category" data-category="crews">Crews</button>
+                    <button class="forum-category" data-category="help">Help & Support</button>
+                </div>
+                
+                <div class="forum-search">
+                    <input type="text" id="forum-search" placeholder="Search forum posts...">
+                    <button id="forum-search-btn">Search</button>
+                </div>
+                
+                <form id="forum-post-form" class="forum-post-form hidden">
+                    <h3 class="forum-form-header">Create New Post</h3>
+                    <div class="forum-form-group">
+                        <label for="forum-post-title">Title</label>
+                        <input type="text" id="forum-post-title" required>
+                    </div>
+                    <div class="forum-form-group">
+                        <label for="forum-category">Category</label>
+                        <select id="forum-category" required>
+                            <option value="general">General</option>
+                            <option value="locations">Locations</option>
+                            <option value="tips">Tips & Tricks</option>
+                            <option value="events">Events</option>
+                            <option value="crews">Crews</option>
+                            <option value="help">Help & Support</option>
+                            <option value="bugs">Bugs & Issues</option>
+                            <option value="suggestions">Suggestions</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="forum-form-group">
+                        <label for="forum-post-content">Content</label>
+                        <textarea id="forum-post-content" required></textarea>
+                    </div>
+                    <div class="forum-form-actions">
+                        <button type="button" id="cancel-post-btn" class="neon-button">Cancel</button>
+                        <button type="submit" class="neon-button">Post</button>
+                    </div>
+                </form>
+                
+                <ul id="forum-list" class="forum-list"></ul>
             </div>
 
             <div id="my-locations-container" class="view">
@@ -206,7 +258,8 @@
                     <div class="profile-header">
                         <div class="profile-avatar-container">
                             <img id="profile-avatar" src="" alt="Profile avatar">
-                            <button id="change-avatar-btn" class="neon-button small">Change</button>
+                            <button id="change-avatar-btn" class="neon-button small" onclick="document.getElementById('avatar-upload').click()">Change</button>
+                            <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
                         </div>
                         <div class="profile-info">
                             <h3 id="profile-name">Username</h3>
@@ -487,7 +540,8 @@
     <script src="js/ratings.js"></script>
     <script src="js/geocaching.js"></script>
     <script src="js/territories.js"></script>
-    <script src="js/leaderboard.js"></script>
+    <script src="js/forum.js"></script>
+    <script src="js/radar.js"></script>
     <script src="js/spots.js"></script>
     <script src="js/app.js"></script>
     <script src="js/offline.js"></script>
