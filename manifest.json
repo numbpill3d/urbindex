@@ -68,11 +68,11 @@
       "icons": [{ "src": "images/icons/map-icon.png", "sizes": "96x96" }]
     },
     {
-      "name": "Leaderboard",
-      "short_name": "Leaders",
-      "description": "View top contributors",
-      "url": "/index.html?view=leaderboard",
-      "icons": [{ "src": "images/icons/leaderboard-icon.png", "sizes": "96x96" }]
+      "name": "Forum",
+      "short_name": "Forum",
+      "description": "Community discussions",
+      "url": "/index.html?view=forum",
+      "icons": [{ "src": "images/icons/forum-icon.png", "sizes": "96x96" }]
     }
   ],
   "categories": ["maps", "social", "lifestyle"],

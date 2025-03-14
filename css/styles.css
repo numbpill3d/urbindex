@@ -1343,3 +1343,40 @@ ul {
     position: relative;
   }
 }
+
+/* Hidden class for elements that should be hidden */
+.hidden {
+  display: none !important;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background-color: var(--secondary-bg);
+  border: 2px solid var(--neon-blue);
+  border-radius: var(--border-radius);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  position: relative;
+  box-shadow: 0 0 20px rgba(5, 217, 232, 0.5);
+  animation: modal-in 0.3s ease;
+}

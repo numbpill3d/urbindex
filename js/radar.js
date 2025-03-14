@@ -22,33 +22,228 @@ const radarConfig = {
 const userPositions = new Map();
 
 // Current user position
-let currentPosition = null;
+let userPosition = null;
+
+// Street pass history
+let streetPassHistory = [];
 
 // Initialize radar widget
 function initRadar() {
-  // Create radar widget if it doesn't exist
-  if (!document.querySelector('.radar-widget')) {
-    createRadarWidget();
+  try {
+    // Create radar widget if it doesn't exist
+    if (!document.querySelector('.radar-widget')) {
+      createRadarWidget();
+    }
+    
+    // Get DOM elements
+    radarWidget = document.querySelector('.radar-widget');
+    radarToggle = document.querySelector('.radar-toggle');
+    radarScreen = document.querySelector('.radar-screen');
+    radarSweep = document.querySelector('.radar-sweep');
+    radarCenter = document.querySelector('.radar-center');
+    
+    // Set up event listeners
+    if (radarToggle) {
+      radarToggle.addEventListener('click', toggleRadar);
+    }
+    
+    // Add radar styles
+    addRadarStyles();
+    
+    // Start radar if enabled
+    if (radarConfig.enabled) {
+      startRadar();
+    }
+    
+    console.log('Radar module initialized');
+    return Promise.resolve();
+  } catch (error) {
+    console.error('Error initializing radar module:', error);
+    return Promise.reject(error);
   }
+}
+
+// Add radar styles
+function addRadarStyles() {
+  // Check if styles already exist
+  if (document.getElementById('radar-styles')) return;
   
-  // Get DOM elements
-  radarWidget = document.querySelector('.radar-widget');
-  radarToggle = document.querySelector('.radar-toggle');
-  radarScreen = document.querySelector('.radar-screen');
-  radarSweep = document.querySelector('.radar-sweep');
-  radarCenter = document.querySelector('.radar-center');
+  // Create style element
+  const style = document.createElement('style');
+  style.id = 'radar-styles';
   
-  // Set up event listeners
-  if (radarToggle) {
-    radarToggle.addEventListener('click', toggleRadar);
-  }
+  // Add radar styles
+  style.textContent = `
+    .radar-widget {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 150px;
+      height: 150px;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .radar-widget.minimized {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .radar-screen {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background-color: rgba(10, 10, 32, 0.7);
+      border: 2px solid var(--neon-blue);
+      box-shadow: 0 0 10px rgba(5, 217, 232, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .radar-sweep {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 50% 0%);
+      background: linear-gradient(90deg, rgba(5, 217, 232, 0.1) 0%, rgba(5, 217, 232, 0.3) 100%);
+      transform-origin: center;
+      animation: radar-sweep 4s infinite linear;
+    }
+    
+    @keyframes radar-sweep {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .radar-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 6px;
+      height: 6px;
+      background-color: var(--neon-blue);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 5px var(--neon-blue);
+    }
+    
+    .radar-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border-radius: 50%;
+      border: 1px solid rgba(5, 217, 232, 0.3);
+      transform: translate(-50%, -50%);
+    }
+    
+    .radar-ring-1 {
+      width: 33%;
+      height: 33%;
+    }
+    
+    .radar-ring-2 {
+      width: 66%;
+      height: 66%;
+    }
+    
+    .radar-ring-3 {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .radar-blip {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background-color: var(--neon-pink);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 5px var(--neon-pink);
+    }
+    
+    @keyframes radar-blip-pulse {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.5;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .radar-toggle {
+      position: absolute;
+      bottom: -10px;
+      right: -10px;
+      width: 30px;
+      height: 30px;
+      background-color: var(--neon-blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 5px var(--neon-blue);
+      z-index: 1001;
+    }
+    
+    .radar-toggle-icon {
+      font-size: 16px;
+    }
+    
+    .radar-widget.minimized .radar-screen {
+      opacity: 0.5;
+    }
+    
+    .street-pass-notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(10, 10, 32, 0.9);
+      border: 1px solid var(--neon-pink);
+      border-radius: 5px;
+      padding: 10px 20px;
+      box-shadow: 0 0 10px rgba(255, 42, 109, 0.5);
+      color: var(--text-color);
+      z-index: 2000;
+      animation: notification-fade 4s forwards;
+    }
+    
+    @keyframes notification-fade {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+      }
+      10% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+      90% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+      }
+    }
+  `;
   
-  // Start radar if enabled
-  if (radarConfig.enabled) {
-    startRadar();
-  }
-  
-  console.log('Radar module initialized');
+  // Add to document head
+  document.head.appendChild(style);
 }
 
 // Create radar widget DOM elements
@@ -115,10 +310,10 @@ function getCurrentPosition() {
     navigator.geolocation.getCurrentPosition(
       position => {
         const { latitude, longitude } = position.coords;
-        currentPosition = { latitude, longitude };
+        userPosition = { latitude, longitude };
         
         // Update user position in Firestore if authenticated
-        updateUserPosition(currentPosition);
+        updateUserPosition(userPosition);
       },
       error => {
         console.error('Geolocation error:', error);
@@ -201,7 +396,7 @@ function startNearbyUsersListener() {
 
 // Update radar display with nearby users
 function updateRadarDisplay() {
-  if (!radarScreen || !currentPosition) return;
+  if (!radarScreen || !userPosition) return;
   
   // Clear existing blips
   clearBlips();
@@ -214,8 +409,8 @@ function updateRadarDisplay() {
     
     // Calculate distance
     const distance = calculateDistance(
-      currentPosition.latitude,
-      currentPosition.longitude,
+      userPosition.latitude,
+      userPosition.longitude,
       user.position.latitude,
       user.position.longitude
     );
@@ -246,12 +441,12 @@ function updateRadarDisplay() {
 
 // Add a blip to the radar
 function addBlipToRadar(user) {
-  if (!radarScreen || !currentPosition) return;
+  if (!radarScreen || !userPosition) return;
   
   // Calculate position on radar
   const angle = calculateBearing(
-    currentPosition.latitude,
-    currentPosition.longitude,
+    userPosition.latitude,
+    userPosition.longitude,
     user.position.latitude,
     user.position.longitude
   );
@@ -329,3 +524,113 @@ function calculateBearing(lat1, lon1, lat2, lon2) {
   const φ1 = lat1 * Math.PI / 180;
   const φ2 = lat2 * Math.PI / 180;
   const Δλ = (lon2 - lon1) * Math.PI / 180;
+  
+  const y = Math.sin(Δλ) * Math.cos(φ2);
+  const x = Math.cos(φ1) * Math.sin(φ2) -
+            Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+  
+  let θ = Math.atan2(y, x);
+  θ = θ * 180 / Math.PI; // Convert to degrees
+  return (θ + 360) % 360; // Normalize to 0-360
+}
+
+// Check for street pass with another user
+function checkStreetPass(user) {
+  if (!userPosition || !user.position) return;
+  
+  // Calculate distance
+  const distance = calculateDistance(
+    userPosition.latitude,
+    userPosition.longitude,
+    user.position.latitude,
+    user.position.longitude
+  );
+  
+  // Check if close enough for street pass (within 10 meters)
+  if (distance <= 10) {
+    // Check if we've already passed this user recently
+    const recentPass = streetPassHistory.find(pass => 
+      pass.uid === user.uid && 
+      (Date.now() - pass.timestamp) < 3600000 // Within the last hour
+    );
+    
+    if (!recentPass) {
+      // Record street pass
+      const streetPass = {
+        uid: user.uid,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        timestamp: Date.now(),
+        location: {
+          latitude: userPosition.latitude,
+          longitude: userPosition.longitude
+        }
+      };
+      
+      // Add to history
+      streetPassHistory.unshift(streetPass);
+      
+      // Limit history to 50 entries
+      if (streetPassHistory.length > 50) {
+        streetPassHistory.pop();
+      }
+      
+      // Save to database
+      saveStreetPass(streetPass);
+      
+      // Show notification
+      showStreetPassNotification(streetPass);
+    }
+  }
+}
+
+// Save street pass to database
+function saveStreetPass(streetPass) {
+  if (!window.authModule?.isAuthenticated()) return;
+  
+  const user = window.authModule.getCurrentUser();
+  if (!user) return;
+  
+  // Add to Firestore
+  db.collection('street_passes').add({
+    userId: user.uid,
+    passedUserId: streetPass.uid,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    location: new firebase.firestore.GeoPoint(
+      streetPass.location.latitude,
+      streetPass.location.longitude
+    )
+  }).catch(error => {
+    console.error('Error saving street pass:', error);
+  });
+}
+
+// Show street pass notification
+function showStreetPassNotification(streetPass) {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = 'street-pass-notification';
+  
+  // Create notification content
+  notification.innerHTML = `
+    <div class="notification-content">
+      <img src="${streetPass.photoURL || 'images/default-avatar.png'}" alt="${streetPass.displayName}" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;">
+      <span>Street Pass with ${streetPass.displayName}</span>
+    </div>
+  `;
+  
+  // Add to document
+  document.body.appendChild(notification);
+  
+  // Remove after animation
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.parentNode.removeChild(notification);
+    }
+  }, 4000);
+}
+
+// Export functions for use in other modules
+window.radarModule = {
+  initRadar
+};

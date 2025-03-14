@@ -1,86 +1,159 @@
 // Urbindex - Forum Module
 
-// DOM Elements
-let forumContainer;
-let forumList;
-let forumPostForm;
-let forumPostTitle;
-let forumPostContent;
-let forumCategorySelect;
-let forumSearchInput;
-let forumSearchBtn;
+// Forum state
+let currentCategory = 'all';
+let posts = [];
+let isLoading = false;
 
-// Initialize forum
+// Initialize forum module
 function initForum() {
-  // Get DOM elements
-  forumContainer = document.getElementById('forum-container');
-  forumList = document.getElementById('forum-list');
-  forumPostForm = document.getElementById('forum-post-form');
-  forumPostTitle = document.getElementById('forum-post-title');
-  forumPostContent = document.getElementById('forum-post-content');
-  forumCategorySelect = document.getElementById('forum-category');
-  forumSearchInput = document.getElementById('forum-search');
-  forumSearchBtn = document.getElementById('forum-search-btn');
-  
-  if (!forumContainer || !forumList) {
-    console.error('Forum container or list not found');
-    return;
+  try {
+    // Set up event listeners
+    setupEventListeners();
+    
+    // Load initial posts
+    loadForumPosts('all');
+    
+    console.log('Forum module initialized');
+    return Promise.resolve();
+  } catch (error) {
+    console.error('Error initializing forum module:', error);
+    return Promise.reject(error);
   }
-  
-  // Set up event listeners
-  if (forumPostForm) {
-    forumPostForm.addEventListener('submit', createForumPost);
-  }
-  
-  if (forumSearchBtn && forumSearchInput) {
-    forumSearchBtn.addEventListener('click', () => {
-      const searchTerm = forumSearchInput.value.trim();
-      if (searchTerm) {
-        searchForumPosts(searchTerm);
+}
+
+// Set up event listeners
+function setupEventListeners() {
+  // New post button
+  const newPostBtn = document.getElementById('new-post-btn');
+  if (newPostBtn) {
+    newPostBtn.addEventListener('click', () => {
+      if (!window.authModule?.isAuthenticated()) {
+        alert('Please sign in to create a post');
+        return;
+      }
+      
+      const postForm = document.getElementById('forum-post-form');
+      if (postForm) {
+        postForm.classList.remove('hidden');
       }
     });
   }
   
-  // Load forum posts
-  loadForumPosts();
+  // Cancel post button
+  const cancelPostBtn = document.getElementById('cancel-post-btn');
+  if (cancelPostBtn) {
+    cancelPostBtn.addEventListener('click', () => {
+      const postForm = document.getElementById('forum-post-form');
+      if (postForm) {
+        postForm.classList.add('hidden');
+        postForm.reset();
+      }
+    });
+  }
   
-  console.log('Forum module initialized');
+  // Forum post form
+  const postForm = document.getElementById('forum-post-form');
+  if (postForm) {
+    postForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitForumPost();
+    });
+  }
+  
+  // Forum search
+  const searchBtn = document.getElementById('forum-search-btn');
+  const searchInput = document.getElementById('forum-search');
+  
+  if (searchBtn && searchInput) {
+    searchBtn.addEventListener('click', () => {
+      const searchTerm = searchInput.value.trim();
+      if (searchTerm) {
+        searchForumPosts(searchTerm);
+      } else {
+        loadForumPosts(currentCategory);
+      }
+    });
+    
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const searchTerm = searchInput.value.trim();
+        if (searchTerm) {
+          searchForumPosts(searchTerm);
+        } else {
+          loadForumPosts(currentCategory);
+        }
+      }
+    });
+  }
+  
+  // Forum categories
+  const categories = document.querySelectorAll('.forum-category');
+  if (categories) {
+    categories.forEach(category => {
+      category.addEventListener('click', () => {
+        // Remove active class from all categories
+        categories.forEach(cat => cat.classList.remove('active'));
+        
+        // Add active class to clicked category
+        category.classList.add('active');
+        
+        // Load posts for this category
+        const categoryValue = category.dataset.category;
+        currentCategory = categoryValue;
+        loadForumPosts(categoryValue);
+      });
+    });
+  }
 }
 
-// Load forum posts from Firestore
-function loadForumPosts(category = null) {
+// Load forum posts
+function loadForumPosts(category = 'all') {
+  if (isLoading) return;
+  isLoading = true;
+  
+  const forumList = document.getElementById('forum-list');
   if (!forumList) return;
   
   // Show loading state
-  forumList.innerHTML = '<li class="forum-item loading">Loading forum posts...</li>';
+  forumList.innerHTML = '<li class="forum-item loading">Loading posts...</li>';
   
-  // Create query
-  let query = db.collection('forum')
-    .orderBy('createdAt', 'desc')
-    .limit(20);
+  // Reference to posts collection
+  let postsRef = db.collection('forum_posts').orderBy('createdAt', 'desc');
   
-  // Filter by category if provided
-  if (category && category !== 'all') {
-    query = query.where('category', '==', category);
+  // Filter by category if not 'all'
+  if (category !== 'all') {
+    postsRef = postsRef.where('category', '==', category);
   }
   
-  // Execute query
-  query.get()
+  // Get posts
+  postsRef.get()
     .then(snapshot => {
       // Clear loading state
       forumList.innerHTML = '';
       
       if (snapshot.empty) {
-        forumList.innerHTML = '<li class="forum-item empty">No forum posts yet. Be the first to post!</li>';
+        forumList.innerHTML = '<li class="forum-item empty">No posts found</li>';
         return;
       }
+      
+      // Store posts in memory
+      posts = [];
       
       // Create document fragment for better performance
       const fragment = document.createDocumentFragment();
       
       snapshot.forEach(doc => {
-        const post = doc.data();
-        const postElement = createForumPostElement(doc.id, post);
+        const postData = doc.data();
+        const post = {
+          id: doc.id,
+          ...postData
+        };
+        
+        posts.push(post);
+        
+        // Create post element
+        const postElement = createPostElement(post);
         fragment.appendChild(postElement);
       });
       
@@ -89,105 +162,164 @@ function loadForumPosts(category = null) {
     })
     .catch(error => {
       console.error('Error loading forum posts:', error);
-      forumList.innerHTML = '<li class="forum-item error">Error loading forum posts. Please try again.</li>';
+      forumList.innerHTML = '<li class="forum-item error">Error loading posts. Please try again.</li>';
+    })
+    .finally(() => {
+      isLoading = false;
     });
 }
 
-// Create forum post element
-function createForumPostElement(id, post) {
+// Create post element
+function createPostElement(post) {
   const postElement = document.createElement('li');
   postElement.className = 'forum-item';
-  postElement.dataset.id = id;
+  postElement.dataset.id = post.id;
   
   // Format date
   let dateDisplay = 'Just now';
   if (post.createdAt) {
-    dateDisplay = window.utilsModule?.formatDate?.(post.createdAt, true) || 'Recent';
+    const date = post.createdAt.toDate ? post.createdAt.toDate() : new Date(post.createdAt);
+    dateDisplay = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
   
   // Sanitize user input to prevent XSS
   const title = typeof window.utilsModule?.sanitizeHtml === 'function'
-    ? window.utilsModule.sanitizeHtml(post.title || 'Untitled Post')
-    : (post.title || 'Untitled Post');
+    ? window.utilsModule.sanitizeHtml(post.title || 'Untitled')
+    : (post.title || 'Untitled');
     
   const content = typeof window.utilsModule?.sanitizeHtml === 'function'
     ? window.utilsModule.sanitizeHtml(post.content || '')
     : (post.content || '');
     
-  const authorName = typeof window.utilsModule?.sanitizeHtml === 'function'
+  const author = typeof window.utilsModule?.sanitizeHtml === 'function'
     ? window.utilsModule.sanitizeHtml(post.authorName || 'Anonymous')
     : (post.authorName || 'Anonymous');
   
   // Get category label
   const categoryLabel = getCategoryLabel(post.category);
   
-  // Create HTML structure
+  // Create post HTML
   postElement.innerHTML = `
     <div class="forum-item-header">
       <h3 class="forum-item-title">${title}</h3>
       <span class="forum-item-category">${categoryLabel}</span>
     </div>
     <div class="forum-item-content">${content}</div>
-    <div class="forum-item-meta">
-      <div class="forum-item-author">
-        <img src="${post.authorPhotoURL || 'images/default-avatar.png'}" alt="Author avatar" class="forum-author-avatar">
-        <span class="forum-author-name">${authorName}</span>
-      </div>
-      <div class="forum-item-stats">
+    <div class="forum-item-footer">
+      <div class="forum-item-meta">
+        <span class="forum-item-author">Posted by ${author}</span>
         <span class="forum-item-date">${dateDisplay}</span>
-        <span class="forum-item-comments">${post.commentCount || 0} comments</span>
-        <span class="forum-item-likes">${post.likeCount || 0} likes</span>
+      </div>
+      <div class="forum-item-actions">
+        <button class="forum-item-reply-btn neon-button small" data-id="${post.id}">Reply</button>
+        <button class="forum-item-share-btn neon-button small" data-id="${post.id}">Share</button>
       </div>
     </div>
-    <div class="forum-item-actions">
-      <button class="forum-action-btn like-btn" data-id="${id}">
-        <span class="action-icon">👍</span> Like
-      </button>
-      <button class="forum-action-btn comment-btn" data-id="${id}">
-        <span class="action-icon">💬</span> Comment
-      </button>
-      <button class="forum-action-btn share-btn" data-id="${id}">
-        <span class="action-icon">🔗</span> Share
-      </button>
+    <div class="forum-item-replies" data-id="${post.id}"></div>
+    <div class="forum-item-reply-form hidden" data-id="${post.id}">
+      <textarea class="forum-reply-input" placeholder="Write a reply..."></textarea>
+      <div class="forum-reply-actions">
+        <button class="forum-reply-cancel-btn neon-button small">Cancel</button>
+        <button class="forum-reply-submit-btn neon-button small" data-id="${post.id}">Post Reply</button>
+      </div>
     </div>
-    <div class="forum-comments-container" data-id="${id}"></div>
   `;
   
-  // Add event listeners
-  const likeBtn = postElement.querySelector('.like-btn');
-  const commentBtn = postElement.querySelector('.comment-btn');
-  const shareBtn = postElement.querySelector('.share-btn');
-  
-  if (likeBtn) {
-    likeBtn.addEventListener('click', () => likeForumPost(id));
-  }
-  
-  if (commentBtn) {
-    commentBtn.addEventListener('click', () => toggleComments(id));
-  }
-  
-  if (shareBtn) {
-    shareBtn.addEventListener('click', () => shareForumPost(id, title));
-  }
+  // Set up event listeners for this post
+  setupPostEventListeners(postElement, post);
   
   return postElement;
 }
 
-// Create a new forum post
-function createForumPost(event) {
-  event.preventDefault();
+// Set up event listeners for a post
+function setupPostEventListeners(postElement, post) {
+  // Reply button
+  const replyBtn = postElement.querySelector('.forum-item-reply-btn');
+  if (replyBtn) {
+    replyBtn.addEventListener('click', () => {
+      if (!window.authModule?.isAuthenticated()) {
+        alert('Please sign in to reply');
+        return;
+      }
+      
+      const replyForm = postElement.querySelector('.forum-item-reply-form');
+      if (replyForm) {
+        replyForm.classList.remove('hidden');
+      }
+    });
+  }
   
+  // Cancel reply button
+  const cancelReplyBtn = postElement.querySelector('.forum-reply-cancel-btn');
+  if (cancelReplyBtn) {
+    cancelReplyBtn.addEventListener('click', () => {
+      const replyForm = postElement.querySelector('.forum-item-reply-form');
+      const replyInput = postElement.querySelector('.forum-reply-input');
+      
+      if (replyForm) {
+        replyForm.classList.add('hidden');
+      }
+      
+      if (replyInput) {
+        replyInput.value = '';
+      }
+    });
+  }
+  
+  // Submit reply button
+  const submitReplyBtn = postElement.querySelector('.forum-reply-submit-btn');
+  if (submitReplyBtn) {
+    submitReplyBtn.addEventListener('click', () => {
+      const replyInput = postElement.querySelector('.forum-reply-input');
+      if (replyInput) {
+        const replyText = replyInput.value.trim();
+        if (replyText) {
+          submitReply(post.id, replyText);
+          replyInput.value = '';
+          
+          const replyForm = postElement.querySelector('.forum-item-reply-form');
+          if (replyForm) {
+            replyForm.classList.add('hidden');
+          }
+        }
+      }
+    });
+  }
+  
+  // Share button
+  const shareBtn = postElement.querySelector('.forum-item-share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      sharePost(post);
+    });
+  }
+  
+  // Load replies for this post
+  loadReplies(post.id);
+}
+
+// Submit a new forum post
+function submitForumPost() {
   if (!window.authModule?.isAuthenticated()) {
     alert('Please sign in to create a post');
     return;
   }
   
-  const title = forumPostTitle.value.trim();
-  const content = forumPostContent.value.trim();
-  const category = forumCategorySelect.value;
+  const titleInput = document.getElementById('forum-post-title');
+  const categorySelect = document.getElementById('forum-category');
+  const contentInput = document.getElementById('forum-post-content');
+  
+  if (!titleInput || !categorySelect || !contentInput) {
+    console.error('Form elements not found');
+    return;
+  }
+  
+  const title = titleInput.value.trim();
+  const category = categorySelect.value;
+  const content = contentInput.value.trim();
   
   if (!title || !content) {
-    alert('Please enter a title and content for your post');
+    alert('Please fill in all required fields');
     return;
   }
   
@@ -195,39 +327,40 @@ function createForumPost(event) {
   
   // Create post object
   const post = {
-    title: title,
-    content: content,
-    category: category,
+    title,
+    category,
+    content,
     authorId: user.uid,
     authorName: user.displayName || 'Anonymous',
     authorPhotoURL: user.photoURL || null,
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    commentCount: 0,
+    replyCount: 0,
     likeCount: 0
   };
   
   // Add post to Firestore
-  db.collection('forum').add(post)
-    .then(docRef => {
-      console.log('Forum post created with ID:', docRef.id);
-      
+  db.collection('forum_posts').add(post)
+    .then(() => {
       // Reset form
-      forumPostTitle.value = '';
-      forumPostContent.value = '';
+      const postForm = document.getElementById('forum-post-form');
+      if (postForm) {
+        postForm.reset();
+        postForm.classList.add('hidden');
+      }
       
       // Reload posts
-      loadForumPosts();
+      loadForumPosts(currentCategory);
       
       // Show success message
       if (window.offlineModule?.showToast) {
-        window.offlineModule.showToast('Post created successfully!', 'success');
+        window.offlineModule.showToast('Post created successfully', 'success');
       } else {
-        alert('Post created successfully!');
+        alert('Post created successfully');
       }
     })
     .catch(error => {
-      console.error('Error creating forum post:', error);
+      console.error('Error creating post:', error);
       
       // Show error message
       if (window.offlineModule?.showToast) {
@@ -238,242 +371,230 @@ function createForumPost(event) {
     });
 }
 
-// Like a forum post
-function likeForumPost(postId) {
+// Submit a reply to a post
+function submitReply(postId, replyText) {
   if (!window.authModule?.isAuthenticated()) {
-    alert('Please sign in to like posts');
+    alert('Please sign in to reply');
     return;
   }
   
   const user = window.authModule.getCurrentUser();
-  const likeRef = db.collection('forum_likes').doc(`${postId}_${user.uid}`);
   
-  // Check if user already liked this post
-  likeRef.get()
-    .then(doc => {
-      const batch = db.batch();
-      
-      if (doc.exists) {
-        // User already liked this post, so unlike it
-        batch.delete(likeRef);
-        
-        // Decrement like count
-        const postRef = db.collection('forum').doc(postId);
-        batch.update(postRef, {
-          likeCount: firebase.firestore.FieldValue.increment(-1)
-        });
-      } else {
-        // User hasn't liked this post yet, so like it
-        batch.set(likeRef, {
-          userId: user.uid,
-          postId: postId,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        // Increment like count
-        const postRef = db.collection('forum').doc(postId);
-        batch.update(postRef, {
-          likeCount: firebase.firestore.FieldValue.increment(1)
-        });
-      }
-      
-      // Commit the batch
-      return batch.commit();
-    })
+  // Create reply object
+  const reply = {
+    postId,
+    content: replyText,
+    authorId: user.uid,
+    authorName: user.displayName || 'Anonymous',
+    authorPhotoURL: user.photoURL || null,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    likeCount: 0
+  };
+  
+  // Add reply to Firestore
+  db.collection('forum_replies').add(reply)
     .then(() => {
-      // Reload posts to update UI
-      loadForumPosts();
+      // Increment reply count for the post
+      db.collection('forum_posts').doc(postId).update({
+        replyCount: firebase.firestore.FieldValue.increment(1),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      // Reload replies
+      loadReplies(postId);
+      
+      // Show success message
+      if (window.offlineModule?.showToast) {
+        window.offlineModule.showToast('Reply posted successfully', 'success');
+      }
     })
     .catch(error => {
-      console.error('Error liking forum post:', error);
+      console.error('Error posting reply:', error);
+      
+      // Show error message
+      if (window.offlineModule?.showToast) {
+        window.offlineModule.showToast('Error posting reply. Please try again.', 'error');
+      } else {
+        alert('Error posting reply. Please try again.');
+      }
     });
 }
 
-// Toggle comments section
-function toggleComments(postId) {
-  const commentsContainer = document.querySelector(`.forum-comments-container[data-id="${postId}"]`);
+// Load replies for a post
+function loadReplies(postId) {
+  const repliesContainer = document.querySelector(`.forum-item-replies[data-id="${postId}"]`);
+  if (!repliesContainer) return;
   
-  if (!commentsContainer) return;
-  
-  // Check if comments are already loaded
-  if (commentsContainer.classList.contains('active')) {
-    // Hide comments
-    commentsContainer.classList.remove('active');
-    commentsContainer.innerHTML = '';
-  } else {
-    // Show comments
-    commentsContainer.classList.add('active');
-    loadComments(postId, commentsContainer);
-  }
-}
-
-// Load comments for a post
-function loadComments(postId, container) {
   // Show loading state
-  container.innerHTML = '<div class="forum-comments-loading">Loading comments...</div>';
+  repliesContainer.innerHTML = '<div class="forum-reply loading">Loading replies...</div>';
   
-  // Get comments from Firestore
-  db.collection('forum_comments')
+  // Get replies
+  db.collection('forum_replies')
     .where('postId', '==', postId)
     .orderBy('createdAt', 'asc')
     .get()
     .then(snapshot => {
-      // Create HTML for comments
-      let commentsHTML = '';
+      // Clear loading state
+      repliesContainer.innerHTML = '';
       
       if (snapshot.empty) {
-        commentsHTML = '<div class="forum-no-comments">No comments yet. Be the first to comment!</div>';
-      } else {
-        commentsHTML = '<div class="forum-comments-list">';
-        
-        snapshot.forEach(doc => {
-          const comment = doc.data();
-          
-          // Format date
-          let dateDisplay = 'Just now';
-          if (comment.createdAt) {
-            dateDisplay = window.utilsModule?.formatDate?.(comment.createdAt, true) || 'Recent';
-          }
-          
-          // Sanitize user input
-          const content = typeof window.utilsModule?.sanitizeHtml === 'function'
-            ? window.utilsModule.sanitizeHtml(comment.content || '')
-            : (comment.content || '');
-            
-          const authorName = typeof window.utilsModule?.sanitizeHtml === 'function'
-            ? window.utilsModule.sanitizeHtml(comment.authorName || 'Anonymous')
-            : (comment.authorName || 'Anonymous');
-          
-          commentsHTML += `
-            <div class="forum-comment" data-id="${doc.id}">
-              <div class="forum-comment-author">
-                <img src="${comment.authorPhotoURL || 'images/default-avatar.png'}" alt="Author avatar" class="forum-comment-avatar">
-                <span class="forum-comment-name">${authorName}</span>
-                <span class="forum-comment-date">${dateDisplay}</span>
-              </div>
-              <div class="forum-comment-content">${content}</div>
-            </div>
-          `;
-        });
-        
-        commentsHTML += '</div>';
+        repliesContainer.innerHTML = '<div class="forum-reply empty">No replies yet</div>';
+        return;
       }
       
-      // Add comment form
-      commentsHTML += `
-        <div class="forum-comment-form">
-          <textarea class="forum-comment-input" placeholder="Write a comment..."></textarea>
-          <button class="forum-comment-submit neon-button" data-id="${postId}">Post Comment</button>
-        </div>
-      `;
+      // Create document fragment for better performance
+      const fragment = document.createDocumentFragment();
       
-      // Update container
-      container.innerHTML = commentsHTML;
+      snapshot.forEach(doc => {
+        const replyData = doc.data();
+        const reply = {
+          id: doc.id,
+          ...replyData
+        };
+        
+        // Create reply element
+        const replyElement = createReplyElement(reply);
+        fragment.appendChild(replyElement);
+      });
       
-      // Add event listener to comment form
-      const submitBtn = container.querySelector('.forum-comment-submit');
-      if (submitBtn) {
-        submitBtn.addEventListener('click', () => {
-          const input = container.querySelector('.forum-comment-input');
-          if (input && input.value.trim()) {
-            addComment(postId, input.value.trim(), container);
-          }
-        });
-      }
+      // Append all replies at once
+      repliesContainer.appendChild(fragment);
     })
     .catch(error => {
-      console.error('Error loading comments:', error);
-      container.innerHTML = '<div class="forum-comments-error">Error loading comments. Please try again.</div>';
+      console.error('Error loading replies:', error);
+      repliesContainer.innerHTML = '<div class="forum-reply error">Error loading replies</div>';
     });
 }
 
-// Add a comment to a post
-function addComment(postId, content, container) {
+// Create reply element
+function createReplyElement(reply) {
+  const replyElement = document.createElement('div');
+  replyElement.className = 'forum-reply';
+  replyElement.dataset.id = reply.id;
+  
+  // Format date
+  let dateDisplay = 'Just now';
+  if (reply.createdAt) {
+    const date = reply.createdAt.toDate ? reply.createdAt.toDate() : new Date(reply.createdAt);
+    dateDisplay = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  
+  // Sanitize user input to prevent XSS
+  const content = typeof window.utilsModule?.sanitizeHtml === 'function'
+    ? window.utilsModule.sanitizeHtml(reply.content || '')
+    : (reply.content || '');
+    
+  const author = typeof window.utilsModule?.sanitizeHtml === 'function'
+    ? window.utilsModule.sanitizeHtml(reply.authorName || 'Anonymous')
+    : (reply.authorName || 'Anonymous');
+  
+  // Create reply HTML
+  replyElement.innerHTML = `
+    <div class="forum-reply-header">
+      <span class="forum-reply-author">${author}</span>
+      <span class="forum-reply-date">${dateDisplay}</span>
+    </div>
+    <div class="forum-reply-content">${content}</div>
+    <div class="forum-reply-actions">
+      <button class="forum-reply-like-btn" data-id="${reply.id}">
+        <span class="like-icon">👍</span>
+        <span class="like-count">${reply.likeCount || 0}</span>
+      </button>
+    </div>
+  `;
+  
+  // Set up event listeners for this reply
+  setupReplyEventListeners(replyElement, reply);
+  
+  return replyElement;
+}
+
+// Set up event listeners for a reply
+function setupReplyEventListeners(replyElement, reply) {
+  // Like button
+  const likeBtn = replyElement.querySelector('.forum-reply-like-btn');
+  if (likeBtn) {
+    likeBtn.addEventListener('click', () => {
+      if (!window.authModule?.isAuthenticated()) {
+        alert('Please sign in to like replies');
+        return;
+      }
+      
+      likeReply(reply.id);
+    });
+  }
+}
+
+// Like a reply
+function likeReply(replyId) {
   if (!window.authModule?.isAuthenticated()) {
-    alert('Please sign in to comment');
+    alert('Please sign in to like replies');
     return;
   }
   
   const user = window.authModule.getCurrentUser();
   
-  // Create comment object
-  const comment = {
-    postId: postId,
-    content: content,
-    authorId: user.uid,
-    authorName: user.displayName || 'Anonymous',
-    authorPhotoURL: user.photoURL || null,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
-  
-  // Add comment to Firestore
-  db.collection('forum_comments').add(comment)
-    .then(() => {
-      // Increment comment count on post
-      return db.collection('forum').doc(postId).update({
-        commentCount: firebase.firestore.FieldValue.increment(1)
-      });
-    })
-    .then(() => {
-      // Reload comments
-      loadComments(postId, container);
-    })
-    .catch(error => {
-      console.error('Error adding comment:', error);
-      
-      // Show error message
-      if (window.offlineModule?.showToast) {
-        window.offlineModule.showToast('Error adding comment. Please try again.', 'error');
-      } else {
-        alert('Error adding comment. Please try again.');
-      }
-    });
-}
-
-// Share a forum post
-function shareForumPost(postId, title) {
-  // Create share URL
-  const shareUrl = `${window.location.origin}${window.location.pathname}?view=forum&post=${postId}`;
-  
-  // Check if Web Share API is available
-  if (navigator.share) {
-    navigator.share({
-      title: title,
-      text: 'Check out this post on Urbindex',
-      url: shareUrl
-    })
-    .catch(error => {
-      console.error('Error sharing:', error);
-    });
-  } else {
-    // Fallback: copy to clipboard
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => {
-        if (window.offlineModule?.showToast) {
-          window.offlineModule.showToast('Link copied to clipboard!', 'success');
-        } else {
-          alert('Link copied to clipboard!');
-        }
-      })
-      .catch(error => {
-        console.error('Error copying to clipboard:', error);
+  // Check if user has already liked this reply
+  db.collection('forum_likes')
+    .where('replyId', '==', replyId)
+    .where('userId', '==', user.uid)
+    .get()
+    .then(snapshot => {
+      if (!snapshot.empty) {
+        // User has already liked this reply, remove the like
+        const likeDoc = snapshot.docs[0];
         
-        // Manual fallback
-        prompt('Copy this link to share the post:', shareUrl);
-      });
-  }
+        return db.collection('forum_likes').doc(likeDoc.id).delete()
+          .then(() => {
+            // Decrement like count
+            return db.collection('forum_replies').doc(replyId).update({
+              likeCount: firebase.firestore.FieldValue.increment(-1)
+            });
+          });
+      } else {
+        // User has not liked this reply yet, add a like
+        return db.collection('forum_likes').add({
+          replyId,
+          userId: user.uid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        })
+          .then(() => {
+            // Increment like count
+            return db.collection('forum_replies').doc(replyId).update({
+              likeCount: firebase.firestore.FieldValue.increment(1)
+            });
+          });
+      }
+    })
+    .then(() => {
+      // Update like count in UI
+      const likeCountElement = document.querySelector(`.forum-reply-like-btn[data-id="${replyId}"] .like-count`);
+      if (likeCountElement) {
+        const currentCount = parseInt(likeCountElement.textContent);
+        likeCountElement.textContent = isNaN(currentCount) ? 1 : currentCount + 1;
+      }
+    })
+    .catch(error => {
+      console.error('Error liking reply:', error);
+    });
 }
 
 // Search forum posts
 function searchForumPosts(searchTerm) {
+  if (isLoading) return;
+  isLoading = true;
+  
+  const forumList = document.getElementById('forum-list');
   if (!forumList) return;
   
   // Show loading state
-  forumList.innerHTML = '<li class="forum-item loading">Searching forum posts...</li>';
+  forumList.innerHTML = '<li class="forum-item loading">Searching posts...</li>';
   
-  // This is a simple client-side search
-  // For a real app, you would use Firestore queries or a search service like Algolia
-  db.collection('forum')
+  // Perform search (client-side for simplicity)
+  // In a real app, you would use a server-side search or Firestore queries
+  
+  // Get all posts first
+  db.collection('forum_posts')
     .orderBy('createdAt', 'desc')
     .get()
     .then(snapshot => {
@@ -481,37 +602,48 @@ function searchForumPosts(searchTerm) {
       forumList.innerHTML = '';
       
       if (snapshot.empty) {
-        forumList.innerHTML = '<li class="forum-item empty">No forum posts found.</li>';
+        forumList.innerHTML = '<li class="forum-item empty">No posts found</li>';
         return;
       }
       
-      // Filter posts that match the search term
-      const searchTermLower = searchTerm.toLowerCase();
-      const matchingPosts = [];
+      // Filter posts by search term
+      const filteredPosts = [];
       
       snapshot.forEach(doc => {
-        const post = doc.data();
+        const postData = doc.data();
+        const post = {
+          id: doc.id,
+          ...postData
+        };
         
-        // Check if title or content contains the search term
+        // Check if post matches search term
+        const title = post.title || '';
+        const content = post.content || '';
+        const author = post.authorName || '';
+        
         if (
-          post.title.toLowerCase().includes(searchTermLower) ||
-          post.content.toLowerCase().includes(searchTermLower)
+          title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          author.toLowerCase().includes(searchTerm.toLowerCase())
         ) {
-          matchingPosts.push({ id: doc.id, ...post });
+          filteredPosts.push(post);
         }
       });
       
-      // Display matching posts
-      if (matchingPosts.length === 0) {
-        forumList.innerHTML = `<li class="forum-item empty">No posts found matching "${searchTerm}".</li>`;
+      // Store filtered posts in memory
+      posts = filteredPosts;
+      
+      if (filteredPosts.length === 0) {
+        forumList.innerHTML = '<li class="forum-item empty">No posts found matching your search</li>';
         return;
       }
       
       // Create document fragment for better performance
       const fragment = document.createDocumentFragment();
       
-      matchingPosts.forEach(post => {
-        const postElement = createForumPostElement(post.id, post);
+      filteredPosts.forEach(post => {
+        // Create post element
+        const postElement = createPostElement(post);
         fragment.appendChild(postElement);
       });
       
@@ -520,29 +652,80 @@ function searchForumPosts(searchTerm) {
     })
     .catch(error => {
       console.error('Error searching forum posts:', error);
-      forumList.innerHTML = '<li class="forum-item error">Error searching forum posts. Please try again.</li>';
+      forumList.innerHTML = '<li class="forum-item error">Error searching posts. Please try again.</li>';
+    })
+    .finally(() => {
+      isLoading = false;
     });
+}
+
+// Share a post
+function sharePost(post) {
+  // Create share URL
+  const shareUrl = `${window.location.origin}${window.location.pathname}?view=forum&post=${post.id}`;
+  
+  // Check if Web Share API is available
+  if (navigator.share) {
+    navigator.share({
+      title: post.title,
+      text: `Check out this post on Urbindex: ${post.title}`,
+      url: shareUrl
+    })
+      .then(() => console.log('Post shared successfully'))
+      .catch(error => console.error('Error sharing post:', error));
+  } else {
+    // Fallback to clipboard
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        // Show success message
+        if (window.offlineModule?.showToast) {
+          window.offlineModule.showToast('Link copied to clipboard', 'success');
+        } else {
+          alert('Link copied to clipboard');
+        }
+      })
+      .catch(error => {
+        console.error('Error copying link:', error);
+        
+        // Show error message
+        if (window.offlineModule?.showToast) {
+          window.offlineModule.showToast('Error copying link. Please try again.', 'error');
+        } else {
+          alert('Error copying link. Please try again.');
+        }
+      });
+  }
 }
 
 // Get category label
 function getCategoryLabel(category) {
-  const categories = {
-    'general': 'General',
-    'locations': 'Locations',
-    'tips': 'Tips & Tricks',
-    'events': 'Events',
-    'crews': 'Crews',
-    'help': 'Help & Support',
-    'bugs': 'Bugs & Issues',
-    'suggestions': 'Suggestions',
-    'other': 'Other'
-  };
-  
-  return categories[category] || 'Unknown';
+  switch (category) {
+    case 'general':
+      return 'General';
+    case 'locations':
+      return 'Locations';
+    case 'tips':
+      return 'Tips & Tricks';
+    case 'events':
+      return 'Events';
+    case 'crews':
+      return 'Crews';
+    case 'help':
+      return 'Help & Support';
+    case 'bugs':
+      return 'Bugs & Issues';
+    case 'suggestions':
+      return 'Suggestions';
+    case 'other':
+      return 'Other';
+    default:
+      return category || 'Unknown';
+  }
 }
 
 // Export functions for use in other modules
 window.forumModule = {
   initForum,
-  loadForumPosts
+  loadForumPosts,
+  searchForumPosts
 };
