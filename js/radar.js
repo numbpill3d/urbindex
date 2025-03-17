@@ -76,8 +76,8 @@ function addRadarStyles() {
   style.textContent = `
     .radar-widget {
       position: absolute;
-      top: 20px;
-      right: 20px;
+      bottom: 70px;
+      left: 20px;
       width: 150px;
       height: 150px;
       z-index: 1000;

@@ -309,6 +309,18 @@ function initializeModules() {
         { name: 'offline', init: window.offlineModule?.initOffline },
         { name: 'radar', init: window.radarModule?.initRadar }
       ];
+
+      // Add auth state change listener to add placeholder forum posts when user is authenticated
+      if (window.authModule) {
+        firebase.auth().onAuthStateChanged(user => {
+          if (user && window.forumInitModule?.addPlaceholderPosts) {
+            // Add placeholder forum posts if user is authenticated
+            window.forumInitModule.addPlaceholderPosts()
+              .then(() => console.log('Placeholder forum posts initialized'))
+              .catch(error => console.warn('Error initializing placeholder forum posts:', error));
+          }
+        });
+      }
       
       // Initialize modules sequentially with better error handling
       for (const module of modules) {

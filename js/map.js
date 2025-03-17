@@ -413,6 +413,28 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     if (typeof initMap === 'function') {
       initMap();
+      
+      // Add event listener for the add location button
+      const addLocationBtn = document.getElementById('add-location-btn');
+      if (addLocationBtn) {
+        addLocationBtn.addEventListener('click', () => {
+          if (!window.authModule?.isAuthenticated()) {
+            alert('Please sign in to add locations');
+            return;
+          }
+          
+          if (currentPosition) {
+            openAddLocationModal(currentPosition);
+          } else {
+            getUserLocation().then(position => {
+              openAddLocationModal(position);
+            }).catch(error => {
+              console.error('Error getting user location:', error);
+              alert('Could not get your location. Please try again.');
+            });
+          }
+        });
+      }
     }
   }, 500);
 });
