@@ -16,6 +16,38 @@
     <link rel="stylesheet" href="css/profile.css">
     <link rel="stylesheet" href="css/achievements.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        /* Update notification styles */
+        .update-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--secondary-bg);
+            border: 2px solid var(--neon-blue);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .update-notification-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .update-notification p {
+            margin: 0;
+            font-weight: bold;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
     <div id="splash-screen" class="active">
@@ -563,55 +595,4 @@
                     
                     <div class="form-actions">
                         <button type="button" id="prev-tab-btn" class="neon-button" disabled>Previous</button>
-                        <button type="button" id="next-tab-btn" class="neon-button">Next</button>
-                        <button type="submit" id="save-location-btn" class="neon-button hidden">Save Location</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/map-functions.js"></script>
-    <script src="js/locations.js"></script>
-    <script src="js/comments.js"></script>
-    <script src="js/ratings.js"></script>
-    <script src="js/geocaching.js"></script>
-    <script src="js/territories.js"></script>
-    <script src="js/forum.js"></script>
-    <script src="js/forum-init.js"></script>
-    <script src="js/spots.js"></script>
-    <script src="js/achievements.js"></script>
-    <script src="js/challenges.js"></script>
-    <script src="js/profile.js"></script>
-    <script src="js/search.js"></script>
-    <script src="js/media.js"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/social.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/offline.js"></script>
-    <script>
-        // Register service worker for PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.error('Service Worker registration failed:', error);
-                    });
-            });
-        }
-    </script>
-</body>
-</html>
+                        <button type="button" id="next-

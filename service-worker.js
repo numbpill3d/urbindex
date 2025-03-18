@@ -1,4 +1,4 @@
-const CACHE_NAME = 'urbindex-cache-v4';
+const CACHE_NAME = 'urbindex-cache-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -7,6 +7,8 @@ const STATIC_ASSETS = [
   '/css/spots.css',
   '/css/forum.css',
   '/css/risk-indicators.css',
+  '/css/profile.css',
+  '/css/achievements.css',
   '/js/app.js',
   '/js/auth.js',
   '/js/config.js',
@@ -18,8 +20,16 @@ const STATIC_ASSETS = [
   '/js/geocaching.js',
   '/js/territories.js',
   '/js/forum.js',
+  '/js/forum-init.js',
   '/js/radar.js',
   '/js/spots.js',
+  '/js/achievements.js',
+  '/js/challenges.js',
+  '/js/profile.js',
+  '/js/search.js',
+  '/js/media.js',
+  '/js/notifications.js',
+  '/js/social.js',
   '/js/offline.js',
   '/images/icons/icon-72x72.png',
   '/images/icons/icon-96x96.png',
