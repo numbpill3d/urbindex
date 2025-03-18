@@ -312,6 +312,7 @@ function initializeModules() {
         { name: 'search', init: window.searchModule?.initSearch },
         { name: 'media', init: window.mediaModule?.initMedia },
         { name: 'notifications', init: window.notificationsModule?.initNotifications },
+        { name: 'social', init: window.socialModule?.initSocial },
         { name: 'offline', init: window.offlineModule?.initOffline }
       ];
 
