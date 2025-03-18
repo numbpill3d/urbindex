@@ -1,7 +1,7 @@
 // Urbindex - Locations Module
 
 // DOM Elements
-const myLocationsList = document.getElementById('my-locations-list');
+const locationsListElement = document.getElementById('my-locations-list');
 
 // IndexedDB database name and version
 const DB_NAME = 'urbindex-db';
@@ -554,20 +554,20 @@ function addLocationToList(id, locationData, isOffline = false) {
   });
   
   // Add to the list
-  myLocationsList.appendChild(listItem);
+  locationsListElement.appendChild(listItem);
 }
 
 // Clear the user locations list
 function clearUserLocationsList() {
-  if (myLocationsList) {
-    myLocationsList.innerHTML = '';
+  if (locationsListElement) {
+    locationsListElement.innerHTML = '';
   }
 }
 
 // Show empty state for user locations
 function showEmptyUserLocations() {
-  if (myLocationsList) {
-    myLocationsList.innerHTML = `
+  if (locationsListElement) {
+    locationsListElement.innerHTML = `
       <div class="empty-state">
         <p>You haven't added any locations yet.</p>
         <p>Tap the + button on the map to add your first location!</p>

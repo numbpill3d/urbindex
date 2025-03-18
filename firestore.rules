@@ -51,5 +51,59 @@ service cloud.firestore {
       allow update: if request.auth != null && resource.data.createdBy == request.auth.uid;
       allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
     }
+    
+    // Chat messages - authenticated users can read all chat messages
+    // Users can only create, update, or delete their own chat messages
+    match /chat/{messageId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Forum posts - authenticated users can read all forum posts
+    // Users can only create, update, or delete their own forum posts
+    match /forum/{postId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.createdBy == request.auth.uid;
+      allow update: if request.auth != null && resource.data.createdBy == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+    }
+    
+    // Territories - authenticated users can read all territories
+    // Users can only create, update, or delete territories they own
+    match /territories/{territoryId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+    }
+    
+    // Crews - authenticated users can read all crews
+    // Users can only create, update, or delete crews they own
+    match /crews/{crewId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+    }
+    
+    // Crew members - authenticated users can read all crew members
+    // Users can only create, update, or delete their own crew membership
+    match /crewMembers/{membershipId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Geocaches - authenticated users can read all geocaches
+    // Users can only create, update, or delete geocaches they own
+    match /geocaches/{geocacheId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.createdBy == request.auth.uid;
+      allow update: if request.auth != null && resource.data.createdBy == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+    }
   }
 }

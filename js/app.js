@@ -306,8 +306,13 @@ function initializeModules() {
         { name: 'comments', init: window.commentsModule?.initComments },
         { name: 'ratings', init: window.ratingsModule?.initRatings },
         { name: 'geocaching', init: window.geocachingModule?.initGeocaching },
-        { name: 'offline', init: window.offlineModule?.initOffline },
-        { name: 'radar', init: window.radarModule?.initRadar }
+        { name: 'achievements', init: window.achievementsModule?.initAchievements },
+        { name: 'challenges', init: window.challengesModule?.initChallenges },
+        { name: 'profile', init: window.profileModule?.initProfile },
+        { name: 'search', init: window.searchModule?.initSearch },
+        { name: 'media', init: window.mediaModule?.initMedia },
+        { name: 'notifications', init: window.notificationsModule?.initNotifications },
+        { name: 'offline', init: window.offlineModule?.initOffline }
       ];
 
       // Add auth state change listener to add placeholder forum posts when user is authenticated

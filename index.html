@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/spots.css">
     <link rel="stylesheet" href="css/forum.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/achievements.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 <body>
@@ -47,21 +49,9 @@
         <header>
             <div class="ascii-title-container">
                 <pre class="ascii-title">
-  _____                                                                                     _____  
- ( ___ )                                                                                   ( ___ ) 
-  |   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|   |  
-  |   |                                                                                     |   |  
-  |   |   █████  █████           █████      ███                 █████                       |   |  
-  |   |  ░░███  ░░███           ░░███      ░░░                 ░░███                        |   |  
-  |   |   ░███   ░███  ████████  ░███████  ████  ████████    ███████   ██████  █████ █████  |   |  
-  |   |   ░███   ░███ ░░███░░███ ░███░░███░░███ ░░███░░███  ███░░███  ███░░███░░███ ░░███   |   |  
-  |   |   ░███   ░███  ░███ ░░░  ░███ ░███ ░███  ░███ ░███ ░███ ░███ ░███████  ░░░█████░    |   |  
-  |   |   ░███   ░███  ░███      ░███ ░███ ░███  ░███ ░███ ░███ ░███ ░███░░░    ███░░░███   |   |  
-  |   |   ░░████████   █████     ████████  █████ ████ █████░░████████░░██████  █████ █████  |   |  
-  |   |    ░░░░░░░░   ░░░░░     ░░░░░░░░  ░░░░░ ░░░░ ░░░░░  ░░░░░░░░  ░░░░░░  ░░░░░ ░░░░░   |   |  
-  |   |                                                                                     |   |  
-  |___|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|___|  
- (_____)                                                                                   (_____) 
+                    _  _ ____ ___  _ _  _ ___  ____ _  _
+                    |  | |__/ |__] | |\ | |  \ |___  \/ 
+                    |__| |  \ |__] | | \| |__/ |___ _/\_                                                                                  (_____) 
                 </pre>
             </div>
             <div id="user-profile">
@@ -303,6 +293,11 @@
                             <span class="stat-label">Rating</span>
                         </div>
                     </div>
+                    
+                    <!-- Rank Badge Display -->
+                    <div id="rank-badge-container"></div>
+                    
+                    <!-- Customization Section -->
                     <div class="profile-customization">
                         <h3>Customization</h3>
                         <div class="form-group">
@@ -323,6 +318,36 @@
                         </div>
                         <button id="save-profile-btn" class="neon-button">Save Changes</button>
                     </div>
+                </div>
+                
+                <!-- Exploration History -->
+                <div id="exploration-history"></div>
+                
+                <!-- Social Links -->
+                <div id="social-links-container"></div>
+                
+                <!-- Achievements Section -->
+                <div class="achievements-section">
+                    <h3>Achievements</h3>
+                    <div id="achievements-container"></div>
+                </div>
+                
+                <!-- Badges Section -->
+                <div class="badges-section">
+                    <h3>Badges</h3>
+                    <div id="badges-container"></div>
+                </div>
+                
+                <!-- Challenges Section -->
+                <div class="challenges-section">
+                    <h3>Active Challenges</h3>
+                    <div id="challenges-container"></div>
+                </div>
+                
+                <!-- Following/Followers Section -->
+                <div class="follow-sections">
+                    <div id="following-container"></div>
+                    <div id="followers-container"></div>
                 </div>
             </div>
 
@@ -564,8 +589,13 @@
     <script src="js/territories.js"></script>
     <script src="js/forum.js"></script>
     <script src="js/forum-init.js"></script>
-    <script src="js/radar.js"></script>
     <script src="js/spots.js"></script>
+    <script src="js/achievements.js"></script>
+    <script src="js/challenges.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/media.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/app.js"></script>
     <script src="js/offline.js"></script>
     <script>

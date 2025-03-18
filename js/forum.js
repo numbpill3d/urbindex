@@ -144,17 +144,22 @@ function loadForumPosts(category = 'all') {
       const fragment = document.createDocumentFragment();
       
       snapshot.forEach(doc => {
-        const postData = doc.data();
-        const post = {
-          id: doc.id,
-          ...postData
-        };
-        
-        posts.push(post);
-        
-        // Create post element
-        const postElement = createPostElement(post);
-        fragment.appendChild(postElement);
+        try {
+          const postData = doc.data();
+          const post = {
+            id: doc.id,
+            ...postData
+          };
+          
+          posts.push(post);
+          
+          // Create post element
+          const postElement = createPostElement(post);
+          fragment.appendChild(postElement);
+        } catch (error) {
+          console.error('Error processing post:', error, doc.id);
+          // Skip this post and continue with others
+        }
       });
       
       // Append all posts at once

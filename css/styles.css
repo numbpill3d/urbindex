@@ -13,7 +13,7 @@
   --shadow-color: rgba(255, 42, 109, 0.5);
   --font-main: 'Rajdhani', sans-serif;
   --font-secondary: 'Orbitron', sans-serif;
-  --header-height: 60px;
+  --header-height: 200px; /* Increased from 60px to accommodate ASCII art */
   --nav-height: 50px;
   --transition-speed: 0.3s;
   --border-radius: 0px; /* Hard edges for BBS/Neocities aesthetic */
@@ -45,6 +45,10 @@
   touch-action: pan-y pinch-zoom; /* Better cross-browser touch handling */
   -ms-scroll-chaining: none;
   overscroll-behavior: contain; /* Modern browsers */
+  scrollbar-width: thin;
+  -webkit-scrollbar-width: thin; /* Fallback */
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  -webkit-scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 html, body {
@@ -65,11 +69,12 @@ body {
   bottom: 0;
   overflow-y: auto;
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
   -webkit-overscroll-behavior-y: contain;
   overscroll-behavior-y: contain;
   -ms-scroll-chaining: none; /* For older Edge */
   overscroll-behavior-y: contain;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: auto; /* Fallback for unsupported browsers */
   -ms-overflow-style: -ms-autohiding-scrollbar;
   /* Fallback scrollbar styling */
   &::-webkit-scrollbar {
@@ -182,7 +187,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 90%; /* Increase if needed */
   overflow: visible; /* Ensure content isn't clipped */
   height: auto; /* Allow container to expand with content */
-  padding: 20px; /* Add padding to ensure content is visible */
+  padding: 30px; /* Increased padding to ensure content is visible */
 }
 
 .splash-ascii {
@@ -192,7 +197,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 14px; /* Adjust as needed */
   display: inline-block; /* Ensures proper sizing */
   height: auto; /* Allow height to adjust to content */
-  min-height: 160px; /* Increased min-height to ensure full visibility */
+  min-height: 200px; /* Further increased min-height to ensure full visibility */
   overflow: visible; /* Ensure content isn't clipped */
 }
 
@@ -338,13 +343,13 @@ header {
   min-height: var(--header-height);
   height: auto; /* Allow dynamic height for ASCII art */
   background-color: rgba(10, 10, 32, 0.9);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px); /* Safari support */
   border-bottom: 2px solid var(--bbs-border);
   display: flex;
   justify-content: space-between;
   align-items: flex-start; /* Align to top instead of center */
-  padding: 1.5rem 1rem; /* Increased padding */
+  padding: 2rem 1rem; /* Increased padding */
   position: sticky;
   top: 0;
   z-index: 100;
@@ -361,7 +366,8 @@ header {
   width: 100%;
   max-width: 400px;
   height: auto; /* Allow container to expand with content */
-  padding: 5px 0; /* Add padding to ensure content is visible */
+  padding: 10px 0; /* Increased padding to ensure content is visible */
+  margin-bottom: 20px; /* Add bottom margin for spacing */
 }
 
 /* ASCII Title Itself */
@@ -378,7 +384,7 @@ header {
     0 0 10px var(--neon-blue),
     0 0 20px var(--neon-blue);
   height: auto; /* Allow height to adjust to content */
-  min-height: 160px; /* Increased min-height to ensure full visibility */
+  min-height: 200px; /* Further increased min-height to ensure full visibility */
   overflow: visible; /* Ensure content isn't clipped */
 }
 
@@ -398,9 +404,10 @@ nav {
   white-space: nowrap;
   -ms-overflow-style: none; /* For IE and Edge */
   scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: -ms-autohiding-scrollbar;
-  -webkit-scrollbar-width: thin;
-  scrollbar-width: thin;
+  position: sticky;
+  top: var(--header-height);
+  z-index: 99;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 nav::-webkit-scrollbar {
@@ -459,7 +466,7 @@ main {
   display: flex;
   align-items: center;
   align-self: flex-start; /* Align to top */
-  margin-top: 10px; /* Add margin to align with ASCII art */
+  margin-top: 20px; /* Increased margin to align with ASCII art */
 }
 
 #user-info {
@@ -977,10 +984,18 @@ ul {
   border: none;
   color: var(--text-secondary);
   font-family: var(--font-secondary);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
   cursor: pointer;
   transition: all var(--transition-speed) ease;
 }
 
+.leaderboard-tab:hover {
+  color: var(--text-color);
+}
+
 .leaderboard-tab.active {
   color: var(--neon-blue);
-  border-bottom: 2px solid var(--
+  border-bottom: 2px solid var(--neon-blue);
+}
