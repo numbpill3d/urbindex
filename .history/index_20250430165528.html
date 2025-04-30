@@ -14,34 +14,32 @@
     <link rel="stylesheet" href="css/custom-markers.css">
     <style>
         :root {
-            /* Core Color Palette - Enhanced */
-            --primary-bg: #0c0c18;
-            --secondary-bg: #131328;
-            --tertiary-bg: #1a1a32;
-            --neon-blue: #00d5ff;
+            /* Core Color Palette */
+            --primary-bg: #0f0f1a;
+            --secondary-bg: #16162a;
+            --tertiary-bg: #1e1e36;
+            --neon-blue: #00c2ff;
             --neon-purple: #ae00ff;
             --neon-pink: #ff00a0;
             --neon-green: #00ffa2;
             --neon-yellow: #f9ff00;
-            --text-primary: #f0f0ff;
-            --text-secondary: #b0b0d0;
-            --text-muted: #7a7a9a;
+            --text-primary: #eaeaff;
+            --text-secondary: #a0a0c0;
+            --text-muted: #6a6a8a;
             --border-color: #2a2a4a;
             --danger: #ff3860;
             --warning: #ffdd57;
             --success: #23d160;
             --info: #209cee;
             
-            /* UI Elements - Improved */
+            /* UI Elements */
             --gradient-primary: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
             --gradient-alt: linear-gradient(135deg, var(--neon-pink), var(--neon-blue));
-            --gradient-glass: linear-gradient(120deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.4);
-            --shadow-hard: 0 8px 24px rgba(0, 0, 0, 0.6);
-            --shadow-glow: 0 0 15px rgba(0, 213, 255, 0.3);
-            --border-radius: 10px;
-            --border-radius-lg: 16px;
-            --border-radius-sm: 6px;
+            --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --shadow-hard: 0 6px 16px rgba(0, 0, 0, 0.5);
+            --border-radius: 8px;
+            --border-radius-lg: 12px;
+            --border-radius-sm: 4px;
             
             /* Typography */
             --font-main: 'JetBrains Mono', 'Courier New', monospace;
@@ -165,10 +163,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image:
-                radial-gradient(circle at 15% 50%, rgba(174, 0, 255, 0.12) 0%, transparent 35%),
-                radial-gradient(circle at 85% 30%, rgba(0, 213, 255, 0.12) 0%, transparent 35%),
-                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h100v100H0z' fill='none'/%3E%3Cpath d='M0 25h100M0 50h100M0 75h100' stroke='rgba(255,255,255,0.03)' stroke-width='0.5'/%3E%3Cpath d='M25 0v100M50 0v100M75 0v100' stroke='rgba(255,255,255,0.03)' stroke-width='0.5'/%3E%3C/svg%3E");
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(174, 0, 255, 0.08) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(0, 194, 255, 0.08) 0%, transparent 25%);
             z-index: -1;
         }
 
@@ -241,37 +238,6 @@
             background: none;
             font-family: var(--font-main);
             transition: all var(--transition-fast);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        button::after, .button::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 5px;
-            height: 5px;
-            background: var(--neon-blue);
-            opacity: 0;
-            border-radius: 100%;
-            transform: scale(1, 1) translate(-50%, -50%);
-            transform-origin: 50% 50%;
-        }
-        
-        button:focus:not(:active)::after, .button:focus:not(:active)::after {
-            animation: ripple 1s ease-out;
-        }
-        
-        @keyframes ripple {
-            0% {
-                opacity: 0.4;
-                transform: scale(0, 0);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(25, 25);
-            }
         }
 
         input, select, textarea {
@@ -321,10 +287,6 @@
             min-height: 100vh;
             opacity: 0;
             animation: fadeIn 0.8s ease-out forwards;
-            max-width: 1920px;
-            margin: 0 auto;
-            position: relative;
-            width: 100%;
         }
 
         #app.hidden {
@@ -333,10 +295,8 @@
 
         header {
             height: var(--header-height);
-            background-color: rgba(19, 19, 40, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(42, 42, 74, 0.6);
+            background-color: var(--secondary-bg);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -373,10 +333,8 @@
 
         /* Navigation */
         nav {
-            background: rgba(26, 26, 50, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(42, 42, 74, 0.6);
+            background: var(--tertiary-bg);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: center;
             padding: var(--spacing-sm);
@@ -384,12 +342,6 @@
             top: var(--header-height);
             z-index: 90;
             box-shadow: var(--shadow-soft);
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        
-        nav::-webkit-scrollbar {
-            display: none;
         }
 
         .nav-btn {
@@ -458,36 +410,14 @@
             font-weight: 600;
             border-radius: var(--border-radius);
             padding: var(--spacing-sm) var(--spacing-lg);
-            box-shadow: 0 0 15px rgba(0, 213, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 194, 255, 0.5);
             transition: all var(--transition-fast);
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        #login-button::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-primary);
-            z-index: -1;
-            transform: scaleX(0);
-            transform-origin: right;
-            transition: transform var(--transition-fast);
         }
 
         #login-button:hover {
-            color: white;
-            box-shadow: 0 0 20px rgba(174, 0, 255, 0.7);
+            background: var(--neon-purple);
+            box-shadow: 0 0 15px rgba(174, 0, 255, 0.7);
             transform: translateY(-2px);
-        }
-        
-        #login-button:hover::before {
-            transform: scaleX(1);
-            transform-origin: left;
         }
 
         #user-info {
@@ -1947,9 +1877,7 @@
             overflow: hidden;
             z-index: 1;
             transition: all var(--transition-fast);
-            box-shadow: 0 0 8px rgba(0, 213, 255, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            box-shadow: 0 0 5px rgba(0, 194, 255, 0.3);
         }
 
         .neon-button::before {
@@ -1965,35 +1893,17 @@
             transform-origin: right;
             transition: transform var(--transition-fast);
         }
-        
-        .neon-button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(0, 213, 255, 0.2), transparent);
-            transform: translateX(-100%);
-            transition: 0.6s;
-        }
 
         .neon-button:hover {
             color: var(--primary-bg);
-            box-shadow: 0 0 20px rgba(0, 213, 255, 0.6);
-            text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 194, 255, 0.5);
         }
 
         .neon-button:hover::before {
             transform: scaleX(1);
             transform-origin: left;
         }
-        
-        .neon-button:hover::after {
-            transform: translateX(100%);
-        }
 
         .neon-button.small {
             padding: var(--spacing-xs) var(--spacing-md);
             font-size: var(--font-size-xs);
-        }

@@ -1,14 +1,11 @@
-const CACHE_NAME = 'urbindex-cache-v6';
+const CACHE_NAME = 'urbindex-cache-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/service-worker.js',
-  '/firebaseConfig.js',
   '/css/styles.css',
   '/css/spots.css',
   '/css/forum.css',
-  '/css/custom-markers.css',
   '/css/risk-indicators.css',
   '/css/profile.css',
   '/css/achievements.css',
@@ -21,12 +18,7 @@ const STATIC_ASSETS = [
   '/js/comments.js',
   '/js/ratings.js',
   '/js/geocaching.js',
-  '/js/geocaching-complete.js',
-  '/js/geocaching-export.js',
-  '/js/geocaching-fix.js',
   '/js/territories.js',
-  '/js/territories-export.js',
-  '/js/territories-fix.js',
   '/js/forum.js',
   '/js/forum-init.js',
   '/js/radar.js',
@@ -39,8 +31,6 @@ const STATIC_ASSETS = [
   '/js/notifications.js',
   '/js/social.js',
   '/js/offline.js',
-  '/js/utils.js',
-  '/js/leaderboard.js',
   '/images/icons/icon-72x72.png',
   '/images/icons/icon-96x96.png',
   '/images/icons/icon-128x128.png',
@@ -49,18 +39,9 @@ const STATIC_ASSETS = [
   '/images/icons/icon-192x192.png',
   '/images/icons/icon-384x384.png',
   '/images/icons/icon-512x512.png',
-  '/images/default-avatar.txt',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/JetBrainsMono/2.304/web/woff2/JetBrainsMono-Regular.woff2',
-  'https://cdnjs.cloudflare.com/ajax/libs/Space-Grotesk/3.0.1/SpaceGrotesk[wght].woff2'
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
 ];
-
-// URLs for offline fallback content
-const OFFLINE_FALLBACKS = {
-  document: '/index.html',
-  image: '/images/icons/icon-192x192.png'
-};
 
 // Install event - cache static assets
 self.addEventListener('install', event => {
@@ -110,7 +91,7 @@ self.addEventListener('fetch', event => {
   event.respondWith(cacheFirstStrategy(event));
 });
 
-// Cache-first strategy with improved offline fallback
+// Cache-first strategy
 async function cacheFirstStrategy(event) {
   const cachedResponse = await caches.match(event.request);
   if (cachedResponse) {
@@ -133,38 +114,17 @@ async function cacheFirstStrategy(event) {
     // For navigation requests, return the offline page
     if (event.request.mode === 'navigate') {
       const cache = await caches.open(CACHE_NAME);
-      return cache.match(OFFLINE_FALLBACKS.document);
+      return cache.match('/index.html');
     }
     
-    // For image requests, return fallback image
-    if (event.request.destination === 'image') {
-      const cache = await caches.open(CACHE_NAME);
-      return cache.match(OFFLINE_FALLBACKS.image);
-    }
-    
-    // For font requests
-    if (event.request.destination === 'font') {
-      return new Response('', {
-        status: 503,
-        statusText: 'Service Unavailable'
-      });
-    }
-    
-    // For API or other requests
-    return new Response(JSON.stringify({
-      error: 'You are offline',
-      errorCode: 'OFFLINE'
-    }), {
-      status: 503,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store'
-      }
+    return new Response('Network error happened', {
+      status: 408,
+      headers: { 'Content-Type': 'text/plain' }
     });
   }
 }
 
-// Network-first strategy with better caching
+// Network-first strategy
 async function networkFirstStrategy(event) {
   try {
     const networkResponse = await fetch(event.request);
@@ -172,11 +132,7 @@ async function networkFirstStrategy(event) {
     // Cache valid responses for future use
     if (networkResponse && networkResponse.status === 200) {
       const cache = await caches.open(CACHE_NAME);
-      try {
-        cache.put(event.request, networkResponse.clone());
-      } catch (cacheError) {
-        console.error('Cache put error:', cacheError);
-      }
+      cache.put(event.request, networkResponse.clone());
     }
     
     return networkResponse;
@@ -188,26 +144,11 @@ async function networkFirstStrategy(event) {
       return cachedResponse;
     }
     
-    // If no cache for this specific request, determine appropriate fallback
-    if (event.request.headers.get('Accept')?.includes('application/json')) {
-      return new Response(JSON.stringify({
-        error: 'You are offline',
-        errorCode: 'OFFLINE',
-        timestamp: new Date().toISOString()
-      }), {
-        status: 503,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store'
-        }
-      });
-    } else {
-      // For non-JSON requests without a cached response
-      return new Response('Service unavailable while offline', {
-        status: 503,
-        headers: { 'Content-Type': 'text/plain' }
-      });
-    }
+    // If no cache for this specific request, return a generic offline response
+    return new Response(JSON.stringify({ error: 'You are offline' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
 
@@ -296,61 +237,17 @@ function deleteOfflineLocation(db, id) {
   });
 }
 
-// Create an offline fallback page
-async function createOfflineFallbackPage() {
-  const cache = await caches.open(CACHE_NAME);
-  
-  // Get the existing index.html
-  const indexResponse = await cache.match('/index.html');
-  if (!indexResponse) return;
-  
-  const indexHtml = await indexResponse.text();
-  
-  // Add offline indicator
-  const offlineHtml = indexHtml.replace(
-    '<body',
-    `<body data-offline="true"`
-  );
-  
-  // Store the offline version
-  const offlineResponse = new Response(offlineHtml, {
-    headers: {
-      'Content-Type': 'text/html',
-      'Cache-Control': 'no-store'
-    }
-  });
-  
-  await cache.put(new Request(OFFLINE_FALLBACKS.document), offlineResponse);
-}
-
-// Push notification event with enhanced options
+// Push notification event
 self.addEventListener('push', event => {
-  let data;
-  try {
-    data = event.data.json();
-  } catch (e) {
-    data = {
-      title: 'New Notification',
-      body: event.data.text(),
-      url: '/'
-    };
-  }
+  const data = event.data.json();
   
   const options = {
     body: data.body,
     icon: '/images/icons/icon-192x192.png',
     badge: '/images/icons/badge-72x72.png',
     vibrate: [100, 50, 100],
-    renotify: true,
-    requireInteraction: data.requireInteraction || false,
-    tag: data.tag || 'default',
-    actions: data.actions || [],
-    silent: data.silent || false,
-    timestamp: data.timestamp || Date.now(),
     data: {
-      url: data.url || '/',
-      primaryKey: data.primaryKey || null,
-      dateOfArrival: Date.now()
+      url: data.url || '/'
     }
   };
   
@@ -378,59 +275,4 @@ self.addEventListener('notificationclick', event => {
       }
     })
   );
-});
-
-// Periodic background sync (for newer browsers that support it)
-self.addEventListener('periodicsync', event => {
-  if (event.tag === 'sync-urbindex-data') {
-    event.waitUntil(syncBackgroundData());
-  }
-});
-
-// Function to sync data in the background
-async function syncBackgroundData() {
-  try {
-    const db = await openIndexedDB();
-    
-    // Sync various types of data
-    await Promise.all([
-      syncOfflineLocations(db),
-      syncOfflineComments(db),
-      syncOfflineRatings(db)
-    ]);
-    
-    db.close();
-    
-    // Update last sync timestamp
-    localStorage.setItem('last_background_sync', Date.now().toString());
-    
-    return true;
-  } catch (error) {
-    console.error('Background sync failed:', error);
-    return false;
-  }
-}
-
-// Function to sync offline comments
-async function syncOfflineComments(db) {
-  // This would be implemented similarly to syncOfflineLocations
-  // but handling comments instead
-  return Promise.resolve();
-}
-
-// Function to sync offline ratings
-async function syncOfflineRatings(db) {
-  // This would be implemented similarly to syncOfflineLocations
-  // but handling ratings instead
-  return Promise.resolve();
-}
-
-// Handle app installation event
-self.addEventListener('appinstalled', (event) => {
-  console.log('App was installed', event);
-});
-
-// Create offline fallback when the service worker installs
-self.addEventListener('install', (event) => {
-  event.waitUntil(createOfflineFallbackPage());
 });
