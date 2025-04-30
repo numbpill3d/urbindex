@@ -295,72 +295,41 @@ function clearLocationMarkers() {
   }
 }
 
-// Create custom icon for map markers using CSS and SVG instead of image files
+// Create custom icon for map markers
 function createCustomIcon(type) {
-  // Generate HTML for the icon using a div with appropriate styling
-  const iconHTML = createSVGMarkerForType(type);
-  
-  // Create a divIcon which allows for custom HTML
-  return L.divIcon({
-    html: iconHTML,
-    className: `custom-marker marker-${type}`,
+  // Default icon options
+  const iconOptions = {
+    iconUrl: 'images/markers/default.png',
     iconSize: [32, 32],
     iconAnchor: [16, 32],
     popupAnchor: [0, -32]
-  });
-}
-
-// Helper function to create SVG markers based on type
-function createSVGMarkerForType(type) {
-  // Define colors for each type
-  let color, secondaryColor, icon;
+  };
   
+  // Set icon URL based on type
   switch (type) {
     case 'abandoned':
-      color = '#ff2a6d'; // neon pink
-      secondaryColor = '#ff005d';
-      icon = 'home';
+      iconOptions.iconUrl = 'images/markers/abandoned.png';
       break;
     case 'historical':
-      color = '#9d4edd'; // neon purple
-      secondaryColor = '#8c2cf5';
-      icon = 'landmark';
+      iconOptions.iconUrl = 'images/markers/historical.png';
       break;
     case 'viewpoint':
-      color = '#05d9e8'; // neon blue
-      secondaryColor = '#00c1cf';
-      icon = 'mountain';
+      iconOptions.iconUrl = 'images/markers/viewpoint.png';
       break;
     case 'water':
-      color = '#05d9e8'; // neon blue
-      secondaryColor = '#00c1cf';
-      icon = 'water';
+      iconOptions.iconUrl = 'images/markers/water.png';
       break;
     case 'camp':
-      color = '#39ff14'; // neon green
-      secondaryColor = '#29ee04';
-      icon = 'campground';
+      iconOptions.iconUrl = 'images/markers/camp.png';
       break;
     case 'user':
-      color = '#ffdd44'; // yellow
-      secondaryColor = '#ffc107';
-      icon = 'user';
+      iconOptions.iconUrl = 'images/markers/user.png';
       break;
     default:
-      color = '#05d9e8'; // neon blue
-      secondaryColor = '#00c1cf';
-      icon = 'map-pin';
+      iconOptions.iconUrl = 'images/markers/default.png';
   }
   
-  // Create SVG marker with pulsing animation
-  return `
-    <div class="marker-container">
-      <div class="marker-pin" style="background-color: ${color}; box-shadow: 0 0 10px ${color};">
-        <i class="fas fa-${icon}" style="color: white;"></i>
-      </div>
-      <div class="marker-pulse" style="border-color: ${color};"></div>
-    </div>
-  `;
+  return L.icon(iconOptions);
 }
 
 // Clear user-specific markers
