@@ -3,42 +3,40 @@
   "short_name": "Urbindex",
   "description": "Community-driven urban exploration mapping tool",
   "start_url": "/index.html",
-  "id": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "browser"],
-  "background_color": "#0c0c18",
-  "theme_color": "#00d5ff",
-  "orientation": "any",
+  "background_color": "#0a0a20",
+  "theme_color": "#0a0a20",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "images/icons/icon-72x72.png",
       "sizes": "72x72",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "images/icons/icon-96x96.png",
       "sizes": "96x96",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "images/icons/icon-128x128.png",
       "sizes": "128x128",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "images/icons/icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "images/icons/icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "images/icons/icon-192x192.png",
@@ -50,7 +48,7 @@
       "src": "images/icons/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "images/icons/icon-512x512.png",
@@ -61,8 +59,6 @@
   ],
   "splash_pages": null,
   "scope": "/",
-  "lang": "en",
-  "dir": "ltr",
   "shortcuts": [
     {
       "name": "View Map",
@@ -77,37 +73,19 @@
       "description": "Community discussions",
       "url": "/index.html?view=forum",
       "icons": [{ "src": "images/icons/forum-icon.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "My Locations",
-      "short_name": "Spots",
-      "description": "View your saved locations",
-      "url": "/index.html?view=spots",
-      "icons": [{ "src": "images/icons/map-icon.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Profile",
-      "short_name": "Profile",
-      "description": "View your profile",
-      "url": "/index.html?view=profile",
-      "icons": [{ "src": "images/icons/map-icon.png", "sizes": "96x96" }]
     }
   ],
-  "categories": ["maps", "social", "lifestyle", "navigation", "travel"],
+  "categories": ["maps", "social", "lifestyle"],
   "screenshots": [
     {
       "src": "images/screenshots/map-view.png",
       "sizes": "1280x720",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "Map view showing urban exploration spots"
+      "type": "image/png"
     },
     {
       "src": "images/screenshots/location-details.png",
       "sizes": "1280x720",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "Detailed view of an urban exploration location"
+      "type": "image/png"
     }
   ],
   "related_applications": [],
@@ -122,12 +100,5 @@
       "text": "text",
       "url": "url"
     }
-  },
-  "handle_links": "preferred",
-  "launch_handler": {
-    "client_mode": ["navigate-existing", "auto"]
-  },
-  "edge_side_panel": {
-    "preferred_width": 400
   }
 }
