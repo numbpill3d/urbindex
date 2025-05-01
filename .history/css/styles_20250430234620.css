@@ -6,7 +6,7 @@
   --primary-bg: #080818;
   --secondary-bg: #101025;
   --tertiary-bg: #181830;
-  --card-bg: rgba(20, 20, 40, 0.9); /* Darkened from rgba(24, 24, 45, 0.85) */
+  --card-bg: rgba(24, 24, 45, 0.85);
   
   /* Accent Colors - Enhanced for better visibility */
   --neon-pink: #ff3a7d;
@@ -17,8 +17,8 @@
   
   /* Text Colors - Improved for better readability */
   --text-color: #ffffff;
-  --text-secondary: #e0e0ff; /* Lightened from #d0d0ff */
-  --text-muted: #b0b0d0;     /* Lightened from #9595b0 */
+  --text-secondary: #d0d0ff;
+  --text-muted: #9595b0;
   
   /* Functional Colors */
   --shadow-color: rgba(255, 58, 125, 0.5);
@@ -28,7 +28,7 @@
   --info: #00e5ff;
   
   /* Glass Effects - Enhanced for modern look */
-  --glass-bg: rgba(25, 25, 45, 0.8); /* Darkened from rgba(30, 30, 50, 0.75) */
+  --glass-bg: rgba(30, 30, 50, 0.75);
   --glass-border: rgba(120, 120, 170, 0.25);
   --glass-shadow: 0 10px 35px rgba(10, 10, 25, 0.6);
   
@@ -2051,73 +2051,53 @@ ul {
 }
 
 /* Notification */
-.notification-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 350px;
-}
-
 .notification {
-  background-color: var(--glass-bg);
-  border-left: 4px solid var(--neon-blue);
-  border-radius: var(--border-radius);
-  padding: 12px 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: var(--glass-shadow);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transform: translateX(120%);
-  transition: transform 0.3s ease;
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: var(--tertiary-bg);
+    border: 1px solid var(--neon-blue);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    box-shadow: 0 0 15px rgba(0, 194, 255, 0.3);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+    max-width: 300px;
 }
 
-.notification-visible {
-  transform: translateX(0);
-}
-
-.notification-hiding {
-  transform: translateX(120%);
+.notification.active {
+    transform: translateY(0);
+    opacity: 1;
 }
 
 .notification-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
 }
 
-.notification-content i {
-  font-size: 1.2rem;
+.notification-content p {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.notification-info {
+    border-color: var(--info);
 }
 
 .notification-success {
-  border-left-color: var(--success);
+    border-color: var(--success);
 }
 
 .notification-warning {
-  border-left-color: var(--warning);
+    border-color: var(--warning);
 }
 
 .notification-error {
-  border-left-color: var(--danger);
-}
-
-.notification-close {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 5px;
-  transition: color 0.2s ease;
-}
-
-.notification-close:hover {
-  color: var(--text-color);
+    border-color: var(--danger);
 }
 
 /* Lightbox */
@@ -2924,6 +2904,112 @@ body.dark-theme {
     }
 }
 /**
+ * Urbindex - Additional Enhanced Styles
+ * These styles complement the main CSS to add advanced visual effects
+ */
+
+/* Custom Cursor */
+.custom-cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--neon-blue);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    transition: width 0.2s, height 0.2s, border-color 0.2s;
+    mix-blend-mode: difference;
+}
+
+.cursor-trail {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background-color: rgba(0, 194, 255, 0.3);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 9998;
+    transition: opacity 0.5s;
+}
+
+.cursor-active {
+    width: 40px;
+    height: 40px;
+    border-color: var(--neon-purple);
+    background-color: rgba(174, 0, 255, 0.1);
+    mix-blend-mode: screen;
+}
+
+/* Dynamic Background Canvas */
+.background-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* Glitch Effect */
+.glitch-effect {
+    position: relative;
+    animation: glitch 0.5s infinite;
+}
+
+@keyframes glitch {
+    0% {
+        transform: translate(0);
+    }
+    20% {
+        transform: translate(-5px, 5px);
+    }
+    40% {
+        transform: translate(-5px, -5px);
+    }
+    60% {
+        transform: translate(5px, 5px);
+    }
+    80% {
+        transform: translate(5px, -5px);
+    }
+    100% {
+        transform: translate(0);
+    }
+}
+
+.glitch-effect::before,
+.glitch-effect::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.glitch-effect::before {
+    left: 2px;
+    text-shadow: -2px 0 var(--neon-pink);
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-before 5s infinite linear alternate-reverse;
+}
+
+.glitch-effect::after {
+    left: -2px;
+    text-shadow: -2px 0 var(--neon-blue);
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-after 5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-before {
+    0% {
+        clip: rect(132px, 350px, 101px, 30px);
+    }
+    100%/**
  * Urbindex - Additional Enhanced Styles
  * These styles complement the main CSS to add advanced visual effects
  */
