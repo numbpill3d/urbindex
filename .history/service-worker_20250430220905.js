@@ -1,4 +1,4 @@
-const CACHE_NAME = 'urbindex-cache-v9';
+const CACHE_NAME = 'urbindex-cache-v8';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -69,27 +69,11 @@ const STATIC_ASSETS = [
   'https://cdnjs.cloudflare.com/ajax/libs/Space-Grotesk/3.0.1/SpaceGrotesk[wght].woff2'
 ];
 
-// URLs for offline fallback content with enhanced options
+// URLs for offline fallback content
 const OFFLINE_FALLBACKS = {
   document: '/index.html',
-  image: '/images/icons/icon-192x192.png',
-  json: JSON.stringify({
-    error: 'You are currently offline',
-    code: 'OFFLINE_MODE',
-    timestamp: Date.now()
-  }),
-  map: '/images/icons/offline-map-placeholder.png'
+  image: '/images/icons/icon-192x192.png'
 };
-
-// URLs that should be available offline even if not explicitly cached
-const CRITICAL_ASSETS = [
-  '/index.html',
-  '/css/styles.css',
-  '/js/app.js',
-  '/js/map.js',
-  '/js/offline.js',
-  '/images/icons/icon-192x192.png'
-];
 
 // Install event - cache static assets
 self.addEventListener('install', event => {
@@ -228,13 +212,6 @@ async function cacheFirstWithUpdateStrategy(event) {
     if (event.request.destination === 'image') {
       const cache = await caches.open(CACHE_NAME);
       return cache.match(OFFLINE_FALLBACKS.image);
-    }
-    
-    // Special handling for map tile requests
-    if (event.request.url.includes('tile') &&
-       (event.request.url.includes('.png') || event.request.url.includes('.jpg'))) {
-      const cache = await caches.open(CACHE_NAME);
-      return cache.match(OFFLINE_FALLBACKS.map);
     }
     
     // For font requests
@@ -414,7 +391,7 @@ async function createOfflineFallbackPage() {
   
   const indexHtml = await indexResponse.text();
   
-  // Add offline indicator and enhanced styling
+  // Add offline indicator and custom styling
   const offlineHtml = indexHtml
     .replace('<body', `<body data-offline="true"`)
     .replace('</head>', `
@@ -436,48 +413,9 @@ async function createOfflineFallbackPage() {
           align-items: center;
           gap: 8px;
         }
-        
         .offline-indicator i {
           font-size: 16px;
         }
-        
-        .offline-map-message {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          background-color: rgba(10, 10, 30, 0.8);
-          padding: 20px 30px;
-          border-radius: 8px;
-          z-index: 500;
-          text-align: center;
-          color: #fff;
-          border: 1px solid #00e5ff;
-          max-width: 80%;
-        }
-        
-        .network-dependent {
-          opacity: 0.5;
-          pointer-events: none;
-        }
-        
-        .offline-button {
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          background: rgba(0, 229, 255, 0.2);
-          border: 1px solid #00e5ff;
-          color: #00e5ff;
-          padding: 10px 15px;
-          border-radius: 8px;
-          font-size: 14px;
-          z-index: 1000;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        
         @keyframes pulse {
           0% { opacity: 0.8; }
           100% { opacity: 1; }
@@ -491,9 +429,6 @@ async function createOfflineFallbackPage() {
     <div class="offline-indicator">
       <i class="fas fa-wifi"></i> You're offline
     </div>
-    <button class="offline-button" id="refresh-when-online">
-      <i class="fas fa-sync-alt"></i> Refresh when online
-    </button>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         // Set up the app to work in offline mode
@@ -521,56 +456,17 @@ async function createOfflineFallbackPage() {
           const offlineMapMsg = document.createElement('div');
           offlineMapMsg.className = 'offline-map-message';
           offlineMapMsg.innerHTML = '<i class="fas fa-map-marked-alt"></i> Map data unavailable offline';
+          offlineMapMsg.style.position = 'absolute';
+          offlineMapMsg.style.top = '50%';
+          offlineMapMsg.style.left = '50%';
+          offlineMapMsg.style.transform = 'translate(-50%, -50%)';
+          offlineMapMsg.style.backgroundColor = 'rgba(10, 10, 30, 0.8)';
+          offlineMapMsg.style.padding = '20px 30px';
+          offlineMapMsg.style.borderRadius = '8px';
+          offlineMapMsg.style.zIndex = '500';
           mapElement.style.position = 'relative';
           mapElement.appendChild(offlineMapMsg);
         }
-        
-        // Check for online status periodically
-        // Add refresh when online button handler
-        document.getElementById('refresh-when-online').addEventListener('click', function() {
-          this.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Waiting for network...';
-          
-          const checkOnline = setInterval(() => {
-            if (navigator.onLine) {
-              clearInterval(checkOnline);
-              window.location.reload();
-            }
-          }, 1000);
-        });
-        
-        window.addEventListener('online', function() {
-          document.querySelector('.offline-indicator').style.display = 'none';
-          // Reload fresh content or enable disabled features
-          if (window.URBINDEX_OFFLINE_MODE) {
-            window.URBINDEX_OFFLINE_MODE = false;
-            // Re-enable buttons
-            disabledButtons.forEach(selector => {
-              const elements = document.querySelectorAll(selector);
-              elements.forEach(el => {
-                el.disabled = false;
-                el.removeAttribute('title');
-                el.style.opacity = '1';
-              });
-            });
-            
-            // Remove offline map message if exists
-            const offlineMapMsg = document.querySelector('.offline-map-message');
-            if (offlineMapMsg) {
-              offlineMapMsg.remove();
-            }
-            
-            // Trigger a background sync
-            if ('serviceWorker' in navigator && 'SyncManager' in window) {
-              navigator.serviceWorker.ready.then(registration => {
-                registration.sync.register('sync-locations');
-              });
-            }
-          }
-        });
-        
-        window.addEventListener('offline', function() {
-          document.querySelector('.offline-indicator').style.display = 'flex';
-        });
       });
     </script>
   </body>`;
