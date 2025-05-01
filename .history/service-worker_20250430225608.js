@@ -200,6 +200,11 @@ function updateCacheInBackground(request) {
 
 // Cache-first strategy with network update and improved offline fallback
 async function cacheFirstWithUpdateStrategy(event) {
+  const cachedResponse = await caches.match(event.request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+  
   try {
     const cachedResponse = await caches.match(event.request);
     
@@ -242,6 +247,14 @@ async function cacheFirstWithUpdateStrategy(event) {
       return cache.match(OFFLINE_FALLBACKS.map);
     }
     
+    // For font requests
+    if (event.request.destination === 'font') {
+      return new Response('', {
+        status: 503,
+        statusText: 'Service Unavailable'
+      });
+    }
+    
     // For API or other requests
     return new Response(JSON.stringify({
       error: 'You are offline',
@@ -259,7 +272,7 @@ async function cacheFirstWithUpdateStrategy(event) {
 // Network-first strategy with better caching
 async function networkFirstStrategy(event) {
   try {
-    const networkResponse = await fetchWithTimeout(event.request);
+    const networkResponse = await fetch(event.request);
     
     // Cache valid responses for future use
     if (networkResponse && networkResponse.status === 200) {
@@ -327,51 +340,9 @@ function fetchAndUpdateCache(request) {
 async function syncLocations() {
   try {
     const db = await openIndexedDB();
-    
-    // Check if the offlineLocations store exists
-    if (!db.objectStoreNames.contains('offlineLocations')) {
-      console.log('No offlineLocations store found, skipping sync');
-      return;
-    }
-    
-    // Define getAllOfflineLocations if it doesn't exist
-    const getAllOfflineLocations = async (db) => {
-      return new Promise((resolve, reject) => {
-        try {
-          const transaction = db.transaction(['offlineLocations'], 'readonly');
-          const store = transaction.objectStore('offlineLocations');
-          const request = store.getAll();
-          
-          request.onsuccess = () => resolve(request.result || []);
-          request.onerror = (e) => reject(e.target.error);
-        } catch (error) {
-          console.error('Error getting offline locations:', error);
-          resolve([]);
-        }
-      });
-    };
-    
-    // Define deleteOfflineLocation if it doesn't exist
-    const deleteOfflineLocation = async (db, id) => {
-      return new Promise((resolve, reject) => {
-        try {
-          const transaction = db.transaction(['offlineLocations'], 'readwrite');
-          const store = transaction.objectStore('offlineLocations');
-          const request = store.delete(id);
-          
-          request.onsuccess = () => resolve();
-          request.onerror = (e) => reject(e.target.error);
-        } catch (error) {
-          console.error('Error deleting offline location:', error);
-          resolve();
-        }
-      });
-    };
-    
     const offlineLocations = await getAllOfflineLocations(db);
     
     if (offlineLocations.length === 0) {
-      db.close();
       return;
     }
     
@@ -834,24 +805,3 @@ self.addEventListener('navigate', event => {
 self.addEventListener('error', event => {
   console.error('Service worker error:', event.error);
 });
-
-// Function to fetch with timeout
-function fetchWithTimeout(request, timeout = 8000) {
-  return new Promise((resolve, reject) => {
-    // Set timeout
-    const timeoutId = setTimeout(() => {
-      reject(new Error('Request timeout'));
-    }, timeout);
-    
-    fetch(request).then(
-      (response) => {
-        clearTimeout(timeoutId);
-        resolve(response);
-      },
-      (err) => {
-        clearTimeout(timeoutId);
-        reject(err);
-      }
-    );
-  });
-}

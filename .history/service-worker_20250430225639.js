@@ -259,7 +259,7 @@ async function cacheFirstWithUpdateStrategy(event) {
 // Network-first strategy with better caching
 async function networkFirstStrategy(event) {
   try {
-    const networkResponse = await fetchWithTimeout(event.request);
+    const networkResponse = await fetch(event.request);
     
     // Cache valid responses for future use
     if (networkResponse && networkResponse.status === 200) {
@@ -834,24 +834,3 @@ self.addEventListener('navigate', event => {
 self.addEventListener('error', event => {
   console.error('Service worker error:', event.error);
 });
-
-// Function to fetch with timeout
-function fetchWithTimeout(request, timeout = 8000) {
-  return new Promise((resolve, reject) => {
-    // Set timeout
-    const timeoutId = setTimeout(() => {
-      reject(new Error('Request timeout'));
-    }, timeout);
-    
-    fetch(request).then(
-      (response) => {
-        clearTimeout(timeoutId);
-        resolve(response);
-      },
-      (err) => {
-        clearTimeout(timeoutId);
-        reject(err);
-      }
-    );
-  });
-}
