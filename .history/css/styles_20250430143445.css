@@ -2,59 +2,38 @@
 
 /* Base Variables */
 :root {
-  /* Modern Cyberpunk Color Palette */
-  --primary-bg: #0a0a1e;
-  --secondary-bg: #13132a;
-  --tertiary-bg: #1e1e36;
-  --card-bg: rgba(26, 26, 48, 0.8);
-  
-  /* Accent Colors */
+  --primary-bg: #0a0a20;
+  --secondary-bg: #1a1a30;
   --neon-pink: #ff2a6d;
   --neon-blue: #05d9e8;
   --neon-purple: #9d4edd;
   --neon-green: #39ff14;
-  --neon-yellow: #ffed4a;
-  
-  /* Text Colors */
   --text-color: #ffffff;
-  --text-secondary: #c5c5e0;
-  --text-muted: #8a8aa3;
-  
-  /* Functional Colors */
+  --text-secondary: #b3b3cc;
   --shadow-color: rgba(255, 42, 109, 0.5);
-  --success: #39ff14;
-  --warning: #ffed4a;
-  --danger: #ff2a6d;
-  --info: #05d9e8;
-  
-  /* Glass Effects */
-  --glass-bg: rgba(30, 30, 50, 0.6);
-  --glass-border: rgba(100, 100, 150, 0.2);
-  --glass-shadow: 0 8px 32px rgba(10, 10, 20, 0.5);
-  
-  /* Fonts */
-  --font-main: 'JetBrains Mono', 'Space Grotesk', 'Rajdhani', monospace;
-  --font-secondary: 'Space Grotesk', 'Orbitron', sans-serif;
-  
-  /* Layout */
-  --header-height: 70px;
-  --nav-height: 60px;
+  --font-main: 'Rajdhani', sans-serif;
+  --font-secondary: 'Orbitron', sans-serif;
+  --header-height: 200px; /* Increased from 60px to accommodate ASCII art */
+  --nav-height: 50px;
   --transition-speed: 0.3s;
-  --border-radius: 8px;
-  --border-radius-lg: 16px;
-  --border-radius-sm: 4px;
+  --border-radius: 0px; /* Hard edges for BBS/Neocities aesthetic */
   
-  /* Shadows & Effects */
-  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  --text-glow: 0 0 8px currentColor;
-  --element-glow: 0 0 15px currentColor;
-  --gradient-blue-purple: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-  --gradient-pink-purple: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-  --gradient-green-blue: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+  /* Risk level colors */
+  --risk-safe: #39ff14;
+  --risk-questionable: #fee440;
+  --risk-unknown: #b3b3cc;
+  --risk-hot: #ff9f1c;
+  --risk-high: #ff2a6d;
+  
+  /* BBS/Neocities theme colors */
+  --bbs-border: #05d9e8;
+  --bbs-header-bg: #1a1a30;
+  --bbs-panel-bg: rgba(10, 10, 32, 0.8);
+  --bbs-highlight: #ff2a6d;
 }
 
 /* Import Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 @import url('risk-indicators.css');
 
 /* Reset and Base Styles */
@@ -63,11 +42,11 @@
   padding: 0;
   box-sizing: border-box;
   scroll-behavior: smooth;
-  touch-action: pan-y pinch-zoom;
+  touch-action: pan-y pinch-zoom; /* Better cross-browser touch handling */
   -ms-scroll-chaining: none;
-  overscroll-behavior: contain;
+  overscroll-behavior: contain; /* Modern browsers */
   scrollbar-width: thin;
-  -webkit-scrollbar-width: thin;
+  -webkit-scrollbar-width: thin; /* Fallback */
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   -webkit-scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
@@ -76,28 +55,10 @@ html, body {
   height: 100%;
   width: 100%;
   overflow-x: hidden;
-  font-family: var(--font-secondary);
+  font-family: var(--font-main);
   background-color: var(--primary-bg);
   color: var(--text-color);
   line-height: 1.6;
-}
-
-/* Background Pattern */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image:
-    radial-gradient(circle at 20% 30%, rgba(157, 78, 221, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba(5, 217, 232, 0.1) 0%, transparent 40%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M20 20h60v60H20V20zm0 0v15h60M20 50h60M20 65h60' stroke='rgba(255,255,255,0.02)' fill='none' stroke-width='0.5'/%3E%3C/svg%3E");
-  background-size: 100% 100%, 100% 100%, 100px 100px;
-  z-index: -1;
-  opacity: 1;
-  pointer-events: none;
 }
 
 body {
@@ -186,31 +147,17 @@ h1, h2, h3, h4, h5, h6 {
 /* Neon Text Effect */
 .neon-text {
   color: var(--text-color);
-  text-shadow:
+  text-shadow: 
     0 0 5px var(--text-color),
     0 0 10px var(--neon-blue),
     0 0 20px var(--neon-blue),
-    0 0 30px var(--neon-blue);
-  animation: textFlicker 8s infinite alternate;
+    0 0 40px var(--neon-blue);
 }
 
 /* Animation only for splash screen, not for header */
 .splash-ascii.neon-text {
-  animation: neon-pulse 3s infinite alternate;
+  animation: neon-pulse 2s infinite alternate;
   margin-bottom: 20px;
-}
-
-@keyframes textFlicker {
-  0%, 18%, 22%, 25%, 53%, 57%, 100% {
-    text-shadow:
-      0 0 5px var(--text-color),
-      0 0 10px var(--neon-blue),
-      0 0 20px var(--neon-blue),
-      0 0 30px var(--neon-blue);
-  }
-  20%, 24%, 55% {
-    text-shadow: none;
-  }
 }
 
 /* Splash screen styling */
@@ -330,161 +277,115 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Neon Button - More Modern Style */
+/* Neon Button */
 .neon-button {
-  background-color: rgba(5, 217, 232, 0.1);
+  background-color: transparent;
   color: var(--neon-blue);
   border: 1px solid var(--neon-blue);
   border-radius: var(--border-radius);
-  padding: 10px 24px;
+  padding: 8px 16px;
   font-family: var(--font-secondary);
   font-size: 0.9rem;
-  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   position: relative;
   overflow: hidden;
-  transition: all 0.25s ease;
-  box-shadow: 0 0 12px rgba(5, 217, 232, 0.4);
+  transition: all var(--transition-speed) ease;
+  box-shadow: 0 0 10px rgba(5, 217, 232, 0.5);
   z-index: 1;
-  cursor: pointer;
 }
 
 .neon-button.small {
-  padding: 6px 14px;
+  padding: 4px 8px;
   font-size: 0.8rem;
 }
 
-.neon-button::before {
+.neon-button:before {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
+  left: -100%;
   width: 100%;
   height: 100%;
-  background: var(--neon-blue);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(5, 217, 232, 0.4),
+    transparent
+  );
+  transition: all 0.6s;
   z-index: -1;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s cubic-bezier(0.7, 0, 0.2, 1);
-}
-
-.neon-button::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  z-index: -1;
-  transform: translateX(-100%);
-  transition: transform 0.6s ease;
 }
 
 .neon-button:hover {
   color: var(--primary-bg);
-  box-shadow: 0 0 25px rgba(5, 217, 232, 0.7);
+  background-color: var(--neon-blue);
+  box-shadow: 0 0 20px var(--neon-blue);
   transform: translateY(-2px);
 }
 
-.neon-button:hover::before {
-  transform: scaleX(1);
-}
-
-.neon-button:hover::after {
-  transform: translateX(100%);
+.neon-button:hover:before {
+  left: 100%;
 }
 
 .neon-button:active {
-  transform: translateY(-1px);
+  transform: translateY(0);
 }
 
-/* Additional Button Styles */
-.btn-primary {
-  background-color: rgba(5, 217, 232, 0.1);
-  color: var(--neon-blue);
-  border-color: var(--neon-blue);
-  box-shadow: 0 0 12px rgba(5, 217, 232, 0.4);
-}
-
-.btn-secondary {
-  background-color: rgba(157, 78, 221, 0.1);
-  color: var(--neon-purple);
-  border-color: var(--neon-purple);
-  box-shadow: 0 0 12px rgba(157, 78, 221, 0.4);
-}
-
-.btn-danger {
-  background-color: rgba(255, 42, 109, 0.1);
-  color: var(--neon-pink);
-  border-color: var(--neon-pink);
-  box-shadow: 0 0 12px rgba(255, 42, 109, 0.4);
-}
-
-.btn-success {
-  background-color: rgba(57, 255, 20, 0.1);
-  color: var(--neon-green);
-  border-color: var(--neon-green);
-  box-shadow: 0 0 12px rgba(57, 255, 20, 0.4);
-}
-
-/* Layout - Modern Compact Header */
+/* Layout */
 #app {
-  min-height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
 header {
-  height: var(--header-height);
-  background-color: var(--glass-bg);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-bottom: 1px solid var(--glass-border);
+  min-height: var(--header-height);
+  height: auto; /* Allow dynamic height for ASCII art */
+  background-color: rgba(10, 10, 32, 0.9);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--bbs-border);
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0 2rem;
+  align-items: flex-start; /* Align to top instead of center */
+  padding: 2rem 1rem; /* Increased padding */
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: var(--glass-shadow);
+  box-shadow: 0 2px 10px rgba(5, 217, 232, 0.3);
+  overflow: visible; /* This is crucial */
 }
 
-/* Logo Container */
+/* ASCII Title Container */
 .ascii-title-container {
+  max-height: none; /* Remove max-height restriction */
+  overflow: visible; /* Ensure content isn't clipped */
   display: flex;
-  align-items: center;
-  height: 100%;
+  align-items: flex-start; /* Align to top */
+  width: 100%;
+  max-width: 400px;
+  height: auto; /* Allow container to expand with content */
+  padding: 10px 0; /* Increased padding to ensure content is visible */
+  margin-bottom: 20px; /* Add bottom margin for spacing */
 }
 
-/* Modern Logo */
+/* ASCII Title Itself */
 .ascii-title {
-  font-family: var(--font-secondary);
-  font-weight: 700;
-  font-size: 1.8rem;
+  font-family: monospace;
+  white-space: pre; /* Preserve formatting */
+  line-height: 1.2; /* Slightly increased line height */
+  font-size: 0.7rem; /* Slightly increased size */
   margin: 0;
   padding: 0;
-  background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 10px rgba(5, 217, 232, 0.5);
-  position: relative;
-}
-
-.ascii-title::after {
-  content: "URBINDEX";
-  position: absolute;
-  top: 0;
-  left: 0;
-  color: transparent;
-  background: none;
-  opacity: 0.5;
-  filter: blur(8px);
-  transform: translateZ(0);
-  z-index: -1;
+  color: var(--text-color);
+  text-shadow: 
+    0 0 5px var(--text-color),
+    0 0 10px var(--neon-blue),
+    0 0 20px var(--neon-blue);
+  height: auto; /* Allow height to adjust to content */
+  min-height: 200px; /* Further increased min-height to ensure full visibility */
+  overflow: visible; /* Ensure content isn't clipped */
 }
 
 header h1 {
@@ -492,28 +393,25 @@ header h1 {
   margin-bottom: 0;
 }
 
-/* Navigation - Modern Glass Nav */
 nav {
   height: var(--nav-height);
-  background-color: var(--glass-bg);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  background-color: var(--secondary-bg);
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
-  border-bottom: 1px solid var(--glass-border);
-  padding: 0 1rem;
+  border-bottom: 2px solid var(--bbs-border); /* Thicker border for BBS aesthetic */
   overflow-x: auto;
   white-space: nowrap;
-  scrollbar-width: none;
+  -ms-overflow-style: none; /* For IE and Edge */
+  scrollbar-width: none; /* Firefox */
   position: sticky;
   top: var(--header-height);
   z-index: 99;
-  box-shadow: var(--glass-shadow);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 nav::-webkit-scrollbar {
-  display: none;
+  display: none; /* Chrome, Safari, Edge */
 }
 
 .nav-btn {
@@ -522,48 +420,39 @@ nav::-webkit-scrollbar {
   color: var(--text-secondary);
   font-family: var(--font-secondary);
   font-size: 0.9rem;
-  font-weight: 500;
-  padding: 0.7rem 1.2rem;
-  margin: 0 0.3rem;
-  border-radius: var(--border-radius);
+  padding: 8px 12px;
   position: relative;
-  transition: all 0.25s ease;
-  letter-spacing: 0.5px;
+  transition: all var(--transition-speed) ease;
 }
 
-.nav-btn::before {
+.nav-btn:after {
   content: '';
   position: absolute;
-  bottom: 6px;
+  bottom: 0;
   left: 50%;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-  transition: all 0.25s ease;
+  background-color: var(--neon-blue);
+  transition: all var(--transition-speed) ease;
   transform: translateX(-50%);
-  opacity: 0;
 }
 
 .nav-btn:hover {
   color: var(--text-color);
-  background-color: rgba(255, 255, 255, 0.05);
 }
 
-.nav-btn:hover::before {
-  width: 70%;
-  opacity: 1;
+.nav-btn:hover:after {
+  width: 80%;
 }
 
 .nav-btn.active {
   color: var(--neon-blue);
-  background-color: rgba(5, 217, 232, 0.1);
 }
 
-.nav-btn.active::before {
-  width: 70%;
-  opacity: 1;
-  background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-  box-shadow: 0 0 10px rgba(5, 217, 232, 0.5);
+.nav-btn.active:after {
+  width: 80%;
+  background-color: var(--neon-blue);
+  box-shadow: 0 0 10px var(--neon-blue);
 }
 
 main {
@@ -4010,160 +3899,33 @@ body.dark-theme {
     --text-primary: #f0f0ff;
 }
 
-/* Enhanced Mobile Responsiveness */
+/* Mobile Responsiveness Enhancements */
 @media (max-width: 768px) {
-    /* Header & Navigation */
-    header {
-        padding: 0 1rem;
-    }
-    
-    .ascii-title {
-        font-size: 1.5rem;
-    }
-    
-    nav {
-        justify-content: flex-start;
-        padding: 0 0.5rem;
-    }
-    
-    .nav-btn {
-        padding: 0.7rem 1rem;
-        font-size: 0.8rem;
-    }
-    
-    /* Map & Panels */
-    #map-container {
-        height: calc(100vh - var(--header-height) - var(--nav-height) - 1rem);
-        margin: 0.5rem;
-    }
-    
-    .retro-layout {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    
-    .left-panel {
-        width: 100%;
-        order: 2;
-    }
-    
-    .right-panel {
-        order: 1;
-    }
-    
-    .map-hud {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.75rem;
-    }
-    
-    .map-info-panel {
-        max-width: calc(100% - 2rem);
-        width: auto;
-    }
-    
-    /* Cards & Content */
-    .announcement-board,
-    .activity-feed,
-    .chat-box {
-        padding: 0.75rem;
-    }
-    
-    .panel-title {
-        font-size: 0.9rem;
-    }
-    
-    /* Modals */
-    .modal-content {
-        padding: 1.5rem;
-        max-height: 90vh;
-    }
-    
-    .close-modal {
-        top: 0.75rem;
-        right: 0.75rem;
-    }
-    
-    /* Buttons */
-    .floating-btn {
-        width: 50px;
-        height: 50px;
-        bottom: 1.5rem;
-        right: 1.5rem;
-    }
-    
-    /* Data visualization responsiveness */
     .ar-scanner {
-        width: 120px;
-        height: 120px;
+        width: 150px;
+        height: 150px;
     }
     
     .ar-data-container {
-        width: 180px;
+        width: 200px;
         font-size: 10px;
     }
     
     .ar-corner {
-        width: 15px;
-        height: 15px;
+        width: 20px;
+        height: 20px;
     }
     
     .weather-notification {
-        max-width: 220px;
+        max-width: 250px;
     }
     
     .css-chart.activity-chart {
-        height: 140px;
+        height: 150px;
     }
     
     .viz-panel {
         height: auto;
-    }
-    
-    /* Form fields */
-    input, select, textarea {
-        font-size: 16px; /* Prevents iOS zoom on focus */
-    }
-}
-
-/* Small screen optimizations */
-@media (max-width: 480px) {
-    .ascii-title {
-        font-size: 1.3rem;
-    }
-    
-    #user-avatar {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .nav-btn {
-        padding: 0.5rem 0.7rem;
-        font-size: 0.75rem;
-    }
-    
-    .floating-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 1.2rem;
-    }
-    
-    .map-info-panel {
-        display: none;
-    }
-    
-    /* Make forum and spots lists more compact */
-    .forum-item, .spot-card {
-        padding: 0.75rem;
-    }
-    
-    /* Stack form actions */
-    .form-actions {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    
-    .neon-button {
-        width: 100%;
     }
 }
 

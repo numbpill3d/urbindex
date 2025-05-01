@@ -234,34 +234,11 @@ function initMap() {
       if (now - lastMoveUpdate > 100) {
         const coordsDisplay = document.getElementById('current-coordinates');
         if (coordsDisplay) {
-          // Modern coordinate display with icon
-          coordsDisplay.innerHTML = `
-            <i class="fas fa-location-dot"></i>
-            <span>${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}</span>
-          `;
+          coordsDisplay.textContent = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
         }
         lastMoveUpdate = now;
       }
     });
-    
-    // Add compass indicator for orientation if enabled
-    if (mapConfig.ui.showCompass) {
-      const compassControl = L.control({position: 'topright'});
-      compassControl.onAdd = function() {
-        const div = L.DomUtil.create('div', 'map-compass');
-        div.innerHTML = '<i class="fas fa-compass"></i>';
-        return div;
-      };
-      compassControl.addTo(map);
-      
-      // Update compass rotation based on map bearing
-      map.on('rotate', function(e) {
-        const compass = document.querySelector('.map-compass i');
-        if (compass) {
-          compass.style.transform = `rotate(${-e.bearing}deg)`;
-        }
-      });
-    }
     
     // Update zoom level display on zoom
     map.on('zoomend', () => {
@@ -310,211 +287,72 @@ function initMap() {
   }
 }
 
-// Set up responsive controls based on device type with better device detection
+// Set up responsive controls based on device type
 function setupResponsiveControls() {
-  // More accurate device detection
-  const isMobile = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const isTablet = /iPad|tablet|Tab/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && window.innerWidth > 768);
-  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   
-  // Add device class to map container for CSS targeting
-  const mapContainer = document.getElementById('map');
-  if (mapContainer) {
-    if (isMobile) mapContainer.classList.add('mobile-device');
-    if (isTablet) mapContainer.classList.add('tablet-device');
-    if (isTouchDevice) mapContainer.classList.add('touch-device');
-  }
-  
-  if (isMobile || isTablet) {
-    // Mobile/tablet-specific controls and behaviors
+  if (isMobile) {
+    // Mobile-specific controls and behaviors
     map.dragging.enable();
     map.touchZoom.enable();
     map.doubleClickZoom.enable();
     
-    // Disable unnecessary interactions for mobile
-    if (map.scrollWheelZoom) map.scrollWheelZoom.disable();
-    
-    // Add touch-optimized controls
-    addTouchControls();
-    
-    // Add performance optimizations for mobile
-    if (mapConfig.performanceMode === 'auto' || mapConfig.performanceMode === 'low') {
-      reduceMobileAnimations();
-    }
+    // Add simpler controls for mobile
+    addMobileControls();
   } else {
     // Desktop-specific controls
     addDesktopControls();
-    
-    // Enable keyboard navigation on desktop
-    if (!map.keyboard) map.keyboard.enable();
-  }
-  
-  // Add PWA-specific controls if in standalone mode (PWA)
-  if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
-    mapContainer.classList.add('pwa-mode');
-    addPWAControls();
   }
 }
 
-// Function to reduce animations on lower-end devices
-function reduceMobileAnimations() {
-  // Disable heavy animations
-  map.options.fadeAnimation = false;
-  map.options.zoomAnimation = window.devicePixelRatio >= 2; // Only on high-DPI screens
-  map.options.markerZoomAnimation = window.devicePixelRatio >= 2;
-  
-  // Reduce update frequency
-  if (watchPositionId && navigator.geolocation) {
-    navigator.geolocation.clearWatch(watchPositionId);
-    
-    watchPositionId = navigator.geolocation.watchPosition(
-      updateUserPosition,
-      handleGeolocationError,
-      {
-        enableHighAccuracy: false,
-        timeout: 30000,
-        maximumAge: 60000
-      }
-    );
-  }
-}
-
-// Add controls optimized for touch devices
-function addTouchControls() {
-  // Create touch-optimized controls
-  const touchControlsDiv = document.createElement('div');
-  touchControlsDiv.className = 'touch-map-controls';
-  touchControlsDiv.innerHTML = `
-    <button id="touch-location-btn" class="touch-control-btn" aria-label="Get My Location" title="Get My Location">
+// Add mobile-friendly controls
+function addMobileControls() {
+  // Create simplified controls for mobile
+  const mobileControlsDiv = document.createElement('div');
+  mobileControlsDiv.className = 'mobile-map-controls';
+  mobileControlsDiv.innerHTML = `
+    <button id="mobile-location-btn" class="mobile-control-btn" title="Get My Location">
       <i class="fas fa-crosshairs"></i>
     </button>
-    <button id="touch-add-btn" class="touch-control-btn" aria-label="Add Location" title="Add Location">
+    <button id="mobile-add-btn" class="mobile-control-btn" title="Add Location">
       <i class="fas fa-plus"></i>
     </button>
-    <button id="touch-layers-btn" class="touch-control-btn" aria-label="Map Layers" title="Map Layers">
-      <i class="fas fa-layer-group"></i>
-    </button>
-    <button id="touch-filter-btn" class="touch-control-btn" aria-label="Filter Locations" title="Filter Locations">
-      <i class="fas fa-filter"></i>
-    </button>
   `;
   
-  document.getElementById('map').appendChild(touchControlsDiv);
+  document.getElementById('map').appendChild(mobileControlsDiv);
   
-  // Set up event listeners for touch controls
-  document.getElementById('touch-location-btn').addEventListener('click', handleLocationButtonClick);
-  document.getElementById('touch-add-btn').addEventListener('click', handleAddButtonClick);
-  document.getElementById('touch-layers-btn').addEventListener('click', handleLayersButtonClick);
-  document.getElementById('touch-filter-btn').addEventListener('click', handleFilterButtonClick);
+  // Set up event listeners for mobile controls
+  document.getElementById('mobile-location-btn').addEventListener('click', () => {
+    getUserLocation().then(position => {
+      if (map && position) {
+        map.setView([position.lat, position.lng], mapConfig.initialZoom);
+      }
+    }).catch(err => {
+      console.error('Error getting location:', err);
+      showLocationError(err.message);
+    });
+  });
   
-  // Add bottom action bar for touch devices
-  const actionBarDiv = document.createElement('div');
-  actionBarDiv.className = 'touch-action-bar';
-  actionBarDiv.innerHTML = `
-    <button id="action-explore" class="action-bar-btn active">
-      <i class="fas fa-compass"></i>
-      <span>Explore</span>
-    </button>
-    <button id="action-nearby" class="action-bar-btn">
-      <i class="fas fa-location-arrow"></i>
-      <span>Nearby</span>
-    </button>
-    <button id="action-saved" class="action-bar-btn">
-      <i class="fas fa-bookmark"></i>
-      <span>Saved</span>
-    </button>
-    <button id="action-profile" class="action-bar-btn">
-      <i class="fas fa-user"></i>
-      <span>Profile</span>
-    </button>
-  `;
-  
-  document.getElementById('map').appendChild(actionBarDiv);
-  
-  // Set up event listeners for action bar
-  setupActionBarListeners();
-}
-
-// Handle location button click with haptic feedback if available
-function handleLocationButtonClick() {
-  // Provide haptic feedback if supported
-  if (navigator.vibrate) {
-    navigator.vibrate(10);
-  }
-  
-  // Add pressed effect
-  this.classList.add('pressed');
-  setTimeout(() => this.classList.remove('pressed'), 150);
-  
-  getUserLocation().then(position => {
-    if (map && position) {
-      map.setView([position.lat, position.lng], mapConfig.initialZoom);
+  document.getElementById('mobile-add-btn').addEventListener('click', () => {
+    if (!window.authModule?.isAuthenticated()) {
+      showAuthRequiredMessage('add locations');
+      return;
     }
-  }).catch(err => {
-    console.error('Error getting location:', err);
-    showLocationError(err.message);
+    
+    if (currentPosition) {
+      openAddLocationModal(currentPosition);
+    } else {
+      getUserLocation().then(position => {
+        openAddLocationModal(position);
+      }).catch(error => {
+        console.error('Error getting user location:', error);
+        showLocationError('Could not get your location. Please try again.');
+      });
+    }
   });
 }
 
-// Handle add button click
-function handleAddButtonClick() {
-  // Provide haptic feedback if supported
-  if (navigator.vibrate) {
-    navigator.vibrate(10);
-  }
-  
-  // Add pressed effect
-  this.classList.add('pressed');
-  setTimeout(() => this.classList.remove('pressed'), 150);
-  
-  if (!window.authModule?.isAuthenticated()) {
-    showAuthRequiredMessage('add locations');
-    return;
-  }
-  
-  if (currentPosition) {
-    openAddLocationModal(currentPosition);
-  } else {
-    getUserLocation().then(position => {
-      openAddLocationModal(position);
-    }).catch(error => {
-      console.error('Error getting user location:', error);
-      showLocationError('Could not get your location. Please try again.');
-    });
-  }
-}
-
-// Handle layers button click - shows layer options
-function handleLayersButtonClick() {
-  // Provide haptic feedback if supported
-  if (navigator.vibrate) {
-    navigator.vibrate(10);
-  }
-  
-  // Add pressed effect
-  this.classList.add('pressed');
-  setTimeout(() => this.classList.remove('pressed'), 150);
-  
-  // Show layer selection panel
-  toggleLayersPanel();
-}
-
-// Handle filter button click - shows filter options
-function handleFilterButtonClick() {
-  // Provide haptic feedback if supported
-  if (navigator.vibrate) {
-    navigator.vibrate(10);
-  }
-  
-  // Add pressed effect
-  this.classList.add('pressed');
-  setTimeout(() => this.classList.remove('pressed'), 150);
-  
-  // Show filter selection panel
-  toggleFilterPanel();
-}
-
-// Add desktop-specific controls with more options
+// Add desktop-specific controls
 function addDesktopControls() {
   // Add scale control
   L.control.scale({
@@ -523,270 +361,6 @@ function addDesktopControls() {
     metric: true,
     imperial: true
   }).addTo(map);
-  
-  // Add mouse coordinates in more details
-  const coordInfo = L.control({position: 'bottomleft'});
-  coordInfo.onAdd = function() {
-    const div = L.DomUtil.create('div', 'mouse-coord-info');
-    div.innerHTML = '<span class="coord-label">Position:</span> <span id="mouse-coordinates">--.---, --.---</span>';
-    div.style.fontSize = '11px';
-    div.style.background = 'rgba(0,0,0,0.6)';
-    div.style.padding = '3px 8px';
-    div.style.borderRadius = '4px';
-    div.style.marginBottom = '5px';
-    return div;
-  };
-  
-  if (mapConfig.ui.showCoordinates) {
-    coordInfo.addTo(map);
-    
-    map.on('mousemove', function(e) {
-      document.getElementById('mouse-coordinates').textContent =
-        `${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
-    });
-  }
-  
-  // Add mini-map for context if supported by browser
-  if (L.Control.MiniMap && window.innerWidth > 1024) {
-    try {
-      const miniMapLayer = L.tileLayer(mapConfig.tileLayer, {
-        minZoom: 0,
-        maxZoom: 13
-      });
-      
-      const miniMap = new L.Control.MiniMap(miniMapLayer, {
-        toggleDisplay: true,
-        minimized: true,
-        position: 'bottomright',
-        width: 150,
-        height: 150,
-        zoomLevelOffset: -5
-      }).addTo(map);
-    } catch (e) {
-      console.warn('MiniMap initialization failed:', e);
-    }
-  }
-}
-
-// Toggle layers panel visibility
-function toggleLayersPanel() {
-  let layersPanel = document.querySelector('.layers-panel');
-  
-  if (!layersPanel) {
-    // Create panel if it doesn't exist
-    layersPanel = document.createElement('div');
-    layersPanel.className = 'layers-panel slide-in';
-    layersPanel.innerHTML = `
-      <div class="panel-header">
-        <h3>Map Layers</h3>
-        <button class="close-panel-btn"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="panel-content">
-        <div class="layer-option">
-          <input type="checkbox" id="layer-markers" checked>
-          <label for="layer-markers">Location Markers</label>
-        </div>
-        <div class="layer-option">
-          <input type="checkbox" id="layer-heatmap">
-          <label for="layer-heatmap">Popularity Heatmap</label>
-        </div>
-        <div class="layer-option">
-          <input type="checkbox" id="layer-territories">
-          <label for="layer-territories">Territories</label>
-        </div>
-        <div class="layer-option">
-          <input type="checkbox" id="layer-trails">
-          <label for="layer-trails">User Trails</label>
-        </div>
-        <div class="layer-style">
-          <label>Map Style:</label>
-          <select id="map-style-selector">
-            <option value="dark" selected>Dark (Cyberpunk)</option>
-            <option value="light">Light</option>
-            <option value="satellite">Satellite</option>
-            <option value="standard">Standard</option>
-          </select>
-        </div>
-      </div>
-    `;
-    document.getElementById('map').appendChild(layersPanel);
-    
-    // Set up event listeners
-    layersPanel.querySelector('.close-panel-btn').addEventListener('click', () => {
-      layersPanel.classList.remove('slide-in');
-      layersPanel.classList.add('slide-out');
-      setTimeout(() => {
-        if (layersPanel.parentNode) {
-          layersPanel.parentNode.removeChild(layersPanel);
-        }
-      }, 300);
-    });
-    
-    // Set up layer toggle handlers
-    setupLayerToggles(layersPanel);
-  } else {
-    // Remove if already visible
-    layersPanel.classList.remove('slide-in');
-    layersPanel.classList.add('slide-out');
-    setTimeout(() => {
-      if (layersPanel.parentNode) {
-        layersPanel.parentNode.removeChild(layersPanel);
-      }
-    }, 300);
-  }
-}
-
-// Toggle filter panel visibility
-function toggleFilterPanel() {
-  let filterPanel = document.querySelector('.filter-panel');
-  
-  if (!filterPanel) {
-    // Create panel if it doesn't exist
-    filterPanel = document.createElement('div');
-    filterPanel.className = 'filter-panel slide-in';
-    filterPanel.innerHTML = `
-      <div class="panel-header">
-        <h3>Filters</h3>
-        <button class="close-panel-btn"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="panel-content">
-        <div class="filter-section">
-          <h4>Location Types</h4>
-          <div class="filter-option">
-            <input type="checkbox" id="filter-abandoned" checked>
-            <label for="filter-abandoned">Abandoned</label>
-          </div>
-          <div class="filter-option">
-            <input type="checkbox" id="filter-historical" checked>
-            <label for="filter-historical">Historical</label>
-          </div>
-          <div class="filter-option">
-            <input type="checkbox" id="filter-viewpoint" checked>
-            <label for="filter-viewpoint">Viewpoint</label>
-          </div>
-          <div class="filter-option">
-            <input type="checkbox" id="filter-water" checked>
-            <label for="filter-water">Water Feature</label>
-          </div>
-          <div class="filter-option">
-            <input type="checkbox" id="filter-camp" checked>
-            <label for="filter-camp">Camp</label>
-          </div>
-        </div>
-        <div class="filter-section">
-          <h4>Rating</h4>
-          <div class="filter-slider">
-            <label>Minimum Stars: <span id="min-rating-value">1</span>+</label>
-            <input type="range" id="min-rating" min="1" max="5" value="1" step="1">
-          </div>
-        </div>
-        <div class="filter-actions">
-          <button id="apply-filters-btn" class="neon-button small">Apply Filters</button>
-          <button id="reset-filters-btn" class="neon-button small">Reset</button>
-        </div>
-      </div>
-    `;
-    document.getElementById('map').appendChild(filterPanel);
-    
-    // Set up event listeners
-    filterPanel.querySelector('.close-panel-btn').addEventListener('click', () => {
-      filterPanel.classList.remove('slide-in');
-      filterPanel.classList.add('slide-out');
-      setTimeout(() => {
-        if (filterPanel.parentNode) {
-          filterPanel.parentNode.removeChild(filterPanel);
-        }
-      }, 300);
-    });
-    
-    // Set up filter handlers
-    setupFilterHandlers(filterPanel);
-  } else {
-    // Remove if already visible
-    filterPanel.classList.remove('slide-in');
-    filterPanel.classList.add('slide-out');
-    setTimeout(() => {
-      if (filterPanel.parentNode) {
-        filterPanel.parentNode.removeChild(filterPanel);
-      }
-    }, 300);
-  }
-}
-
-// Add PWA-specific controls when in standalone mode
-function addPWAControls() {
-  // Add offline map capability notification
-  const offlineCapabilityMsg = document.createElement('div');
-  offlineCapabilityMsg.className = 'pwa-notification';
-  offlineCapabilityMsg.innerHTML = `
-    <i class="fas fa-wifi"></i>
-    <span>Map available offline in this area</span>
-    <button id="save-offline-btn" class="small-btn">
-      <i class="fas fa-download"></i>
-    </button>
-  `;
-  
-  document.getElementById('map').appendChild(offlineCapabilityMsg);
-  
-  // Add save offline button handler
-  document.getElementById('save-offline-btn').addEventListener('click', () => {
-    saveCurrentAreaOffline();
-  });
-  
-  // Auto-hide after 5 seconds
-  setTimeout(() => {
-    offlineCapabilityMsg.classList.add('fade-out');
-    setTimeout(() => {
-      if (offlineCapabilityMsg.parentNode) {
-        offlineCapabilityMsg.parentNode.removeChild(offlineCapabilityMsg);
-      }
-    }, 500);
-  }, 5000);
-}
-
-// Set up action bar listeners
-function setupActionBarListeners() {
-  const actionBtns = document.querySelectorAll('.action-bar-btn');
-  
-  actionBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-      // Provide haptic feedback if supported
-      if (navigator.vibrate) {
-        navigator.vibrate(10);
-      }
-      
-      // Remove active class from all buttons
-      actionBtns.forEach(b => b.classList.remove('active'));
-      // Add active class to clicked button
-      this.classList.add('active');
-      
-      // Handle different actions
-      const action = this.id.replace('action-', '');
-      handleActionBarClick(action);
-    });
-  });
-}
-
-// Handle action bar button clicks
-function handleActionBarClick(action) {
-  switch (action) {
-    case 'explore':
-      // Default map view - already active
-      break;
-    case 'nearby':
-      // Center on user and show nearby locations
-      window.mapModule.centerOnUser();
-      showNearbyLocations();
-      break;
-    case 'saved':
-      // Show saved/bookmarked locations
-      showSavedLocations();
-      break;
-    case 'profile':
-      // Show user profile view
-      navigateToView('profile');
-      break;
-  }
 }
 
 // Track map interaction to optimize battery usage
