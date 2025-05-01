@@ -49,22 +49,11 @@ const mapConfig = {
 // Initialize map with enhanced error handling, performance improvements, and modern features
 function initMap() {
   try {
-    // Check if Leaflet is loaded
-    if (typeof L === 'undefined') {
-      console.error('Leaflet is not loaded');
-      return;
-    }
-
     // Check if map container exists
     const mapContainer = document.getElementById('map');
     if (!mapContainer) {
       console.error('Map container not found');
       return;
-    }
-
-    // Ensure map container has dimensions
-    if (!mapContainer.style.height) {
-      mapContainer.style.height = '100%';
     }
     
     // Show loading indicator
@@ -1893,4 +1882,6 @@ document.addEventListener('DOMContentLoaded', () => {
           e.preventDefault();
         }
       });
+    }
+  }, 500);
 });
