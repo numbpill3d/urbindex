@@ -2109,7 +2109,7 @@ function createFallbackLocationModal(position) {
   }
 }
 
-// Load locations from Firestore or other data source
+// Load locations from Firestore
 function loadLocations() {
   clearLocationMarkers();
 
@@ -2117,40 +2117,13 @@ function loadLocations() {
   const reloadEvent = new CustomEvent('locations-reloaded');
   document.dispatchEvent(reloadEvent);
 
-  // Show loading indicator
-  const mapContainer = document.getElementById('map');
-  let loadingIndicator;
-
-  if (mapContainer) {
-    loadingIndicator = document.createElement('div');
-    loadingIndicator.className = 'location-loading-indicator';
-    loadingIndicator.innerHTML = '<div class="loading-spinner"></div><div>Loading locations...</div>';
-    mapContainer.appendChild(loadingIndicator);
-  }
-
-  // Function to remove loading indicator
-  const removeLoadingIndicator = () => {
-    if (loadingIndicator && loadingIndicator.parentNode) {
-      loadingIndicator.parentNode.removeChild(loadingIndicator);
-    }
-  };
-
-  // Try to load from Firebase if available
+  // Load locations from Firestore
   try {
-    // Check if Firebase and Firestore are available
-    if (typeof firebase !== 'undefined' && firebase.firestore) {
-      const db = firebase.firestore();
+    // Check if db is defined
+    if (typeof db !== 'undefined') {
       const locationsRef = db.collection('locations');
-
       locationsRef.get()
         .then(snapshot => {
-          removeLoadingIndicator();
-
-          if (snapshot.empty) {
-            console.log('No locations found in database');
-            return;
-          }
-
           snapshot.forEach(doc => {
             const locationData = doc.data();
 
@@ -2163,65 +2136,15 @@ function loadLocations() {
               }
             });
           });
-
-          // Create heatmap if enabled
-          if (mapConfig.heatmapEnabled) {
-            createHeatmapLayer();
-          }
         })
         .catch(error => {
-          removeLoadingIndicator();
-          console.error('Error loading locations from Firestore:', error);
-          showLocationError('Error loading locations. Please try again.');
-
-          // Try to load from local storage as fallback
-          loadLocationsFromLocalStorage();
+          console.error('Error loading locations:', error);
         });
     } else {
-      removeLoadingIndicator();
-      console.warn('Firebase/Firestore is not available');
-
-      // Try to load from local storage as fallback
-      loadLocationsFromLocalStorage();
+      console.warn('db is not defined');
     }
   } catch (error) {
-    removeLoadingIndicator();
     console.error('Error in loadLocations:', error);
-
-    // Try to load from local storage as fallback
-    loadLocationsFromLocalStorage();
-  }
-}
-
-// Load locations from local storage as fallback
-function loadLocationsFromLocalStorage() {
-  try {
-    const savedLocations = localStorage.getItem('urbindex_locations');
-
-    if (savedLocations) {
-      const locations = JSON.parse(savedLocations);
-
-      if (Array.isArray(locations) && locations.length > 0) {
-        console.log(`Loading ${locations.length} locations from local storage`);
-
-        locations.forEach(location => {
-          addLocationMarker(location);
-        });
-
-        // Create heatmap if enabled
-        if (mapConfig.heatmapEnabled) {
-          createHeatmapLayer();
-        }
-
-        return true;
-      }
-    }
-
-    console.warn('No locations found in local storage');
-    return false;
-  } catch (error) {
-    console.error('Error loading locations from local storage:', error);
-    return false;
   }
 }
 

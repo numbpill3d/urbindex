@@ -2109,7 +2109,7 @@ function createFallbackLocationModal(position) {
   }
 }
 
-// Load locations from Firestore or other data source
+// Load locations from Firestore
 function loadLocations() {
   clearLocationMarkers();
 
@@ -2117,40 +2117,13 @@ function loadLocations() {
   const reloadEvent = new CustomEvent('locations-reloaded');
   document.dispatchEvent(reloadEvent);
 
-  // Show loading indicator
-  const mapContainer = document.getElementById('map');
-  let loadingIndicator;
-
-  if (mapContainer) {
-    loadingIndicator = document.createElement('div');
-    loadingIndicator.className = 'location-loading-indicator';
-    loadingIndicator.innerHTML = '<div class="loading-spinner"></div><div>Loading locations...</div>';
-    mapContainer.appendChild(loadingIndicator);
-  }
-
-  // Function to remove loading indicator
-  const removeLoadingIndicator = () => {
-    if (loadingIndicator && loadingIndicator.parentNode) {
-      loadingIndicator.parentNode.removeChild(loadingIndicator);
-    }
-  };
-
-  // Try to load from Firebase if available
+  // Load locations from Firestore
   try {
-    // Check if Firebase and Firestore are available
-    if (typeof firebase !== 'undefined' && firebase.firestore) {
-      const db = firebase.firestore();
+    // Check if db is defined
+    if (typeof db !== 'undefined') {
       const locationsRef = db.collection('locations');
-
       locationsRef.get()
         .then(snapshot => {
-          removeLoadingIndicator();
-
-          if (snapshot.empty) {
-            console.log('No locations found in database');
-            return;
-          }
-
           snapshot.forEach(doc => {
             const locationData = doc.data();
 
@@ -2163,65 +2136,15 @@ function loadLocations() {
               }
             });
           });
-
-          // Create heatmap if enabled
-          if (mapConfig.heatmapEnabled) {
-            createHeatmapLayer();
-          }
         })
         .catch(error => {
-          removeLoadingIndicator();
-          console.error('Error loading locations from Firestore:', error);
-          showLocationError('Error loading locations. Please try again.');
-
-          // Try to load from local storage as fallback
-          loadLocationsFromLocalStorage();
+          console.error('Error loading locations:', error);
         });
     } else {
-      removeLoadingIndicator();
-      console.warn('Firebase/Firestore is not available');
-
-      // Try to load from local storage as fallback
-      loadLocationsFromLocalStorage();
+      console.warn('db is not defined');
     }
   } catch (error) {
-    removeLoadingIndicator();
     console.error('Error in loadLocations:', error);
-
-    // Try to load from local storage as fallback
-    loadLocationsFromLocalStorage();
-  }
-}
-
-// Load locations from local storage as fallback
-function loadLocationsFromLocalStorage() {
-  try {
-    const savedLocations = localStorage.getItem('urbindex_locations');
-
-    if (savedLocations) {
-      const locations = JSON.parse(savedLocations);
-
-      if (Array.isArray(locations) && locations.length > 0) {
-        console.log(`Loading ${locations.length} locations from local storage`);
-
-        locations.forEach(location => {
-          addLocationMarker(location);
-        });
-
-        // Create heatmap if enabled
-        if (mapConfig.heatmapEnabled) {
-          createHeatmapLayer();
-        }
-
-        return true;
-      }
-    }
-
-    console.warn('No locations found in local storage');
-    return false;
-  } catch (error) {
-    console.error('Error loading locations from local storage:', error);
-    return false;
   }
 }
 
@@ -2247,54 +2170,7 @@ function addLocationMarker(location) {
     }
 
     const marker = L.marker([location.coordinates.lat, location.coordinates.lng], {
-      icon: createCustomIcon(iconType),
-      locationData: location // Store location data with the marker for filtering
-    });
-
-    // Add popup with location information
-    const popupContent = `
-      <div class="location-popup">
-        <h3>${location.name || 'Unnamed Location'}</h3>
-        ${location.description ? `<p>${location.description}</p>` : ''}
-        ${location.locationType ? `<div class="location-type">${location.locationType}</div>` : ''}
-        ${location.rating ? `<div class="location-rating">${'★'.repeat(Math.floor(location.rating))}${location.rating % 1 >= 0.5 ? '½' : ''}</div>` : ''}
-        <div class="popup-actions">
-          <button class="popup-action-btn view-details" data-id="${location.id}">
-            <i class="fas fa-info-circle"></i> Details
-          </button>
-          <button class="popup-action-btn directions" data-lat="${location.coordinates.lat}" data-lng="${location.coordinates.lng}">
-            <i class="fas fa-directions"></i> Directions
-          </button>
-        </div>
-      </div>
-    `;
-
-    marker.bindPopup(popupContent);
-
-    // Set up popup event listeners
-    marker.on('popupopen', () => {
-      // Find buttons in the popup
-      const viewDetailsBtn = document.querySelector(`.popup-action-btn.view-details[data-id="${location.id}"]`);
-      const directionsBtn = document.querySelector(`.popup-action-btn.directions[data-lat="${location.coordinates.lat}"]`);
-
-      // Add event listeners
-      if (viewDetailsBtn) {
-        viewDetailsBtn.addEventListener('click', () => {
-          // Navigate to location details page
-          if (window.appModule?.showLocationDetails) {
-            window.appModule.showLocationDetails(location.id);
-          } else {
-            console.warn('Location details view not available');
-          }
-        });
-      }
-
-      if (directionsBtn) {
-        directionsBtn.addEventListener('click', () => {
-          // Show directions to this location
-          showDirectionsToLocation(location.coordinates);
-        });
-      }
+      icon: createCustomIcon(iconType)
     });
 
     // Add marker to map
@@ -2305,156 +2181,6 @@ function addLocationMarker(location) {
   } catch (error) {
     console.error('Error adding location marker:', error);
     return null;
-  }
-}
-
-// Show directions to a location
-function showDirectionsToLocation(coordinates) {
-  if (!currentPosition) {
-    getUserLocation().then(() => {
-      calculateAndShowDirections(coordinates);
-    }).catch(err => {
-      console.error('Error getting user location for directions:', err);
-      showLocationError('Could not get your location for directions');
-    });
-  } else {
-    calculateAndShowDirections(coordinates);
-  }
-}
-
-// Calculate and show directions between current position and destination
-function calculateAndShowDirections(destination) {
-  if (!map || !currentPosition) {
-    console.warn('Cannot show directions: Map or position not available');
-    return;
-  }
-
-  // Check if routing plugin is available
-  if (typeof L.Routing === 'undefined') {
-    // Fallback to external maps
-    const url = `https://www.google.com/maps/dir/?api=1&origin=${currentPosition.lat},${currentPosition.lng}&destination=${destination.lat},${destination.lng}&travelmode=walking`;
-    window.open(url, '_blank');
-    return;
-  }
-
-  // Remove existing route if any
-  if (map._routingControl) {
-    map.removeControl(map._routingControl);
-  }
-
-  // Create routing control
-  const routingControl = L.Routing.control({
-    waypoints: [
-      L.latLng(currentPosition.lat, currentPosition.lng),
-      L.latLng(destination.lat, destination.lng)
-    ],
-    routeWhileDragging: true,
-    showAlternatives: true,
-    altLineOptions: {
-      styles: [
-        {color: 'black', opacity: 0.15, weight: 9},
-        {color: '#6c6c6c', opacity: 0.8, weight: 6},
-        {color: 'white', opacity: 0.9, weight: 2}
-      ]
-    },
-    lineOptions: {
-      styles: [
-        {color: 'black', opacity: 0.15, weight: 9},
-        {color: '#0078ff', opacity: 0.8, weight: 6},
-        {color: '#00eaff', opacity: 0.9, weight: 2}
-      ]
-    },
-    router: L.Routing.mapbox(mapConfig.mapboxToken || '', {
-      profile: 'mapbox/walking'
-    }),
-    createMarker: function() {
-      return null; // Don't create markers, we already have them
-    }
-  }).addTo(map);
-
-  // Store routing control for later removal
-  map._routingControl = routingControl;
-
-  // Show notification
-  const mapContainer = document.getElementById('map');
-  if (mapContainer) {
-    const notification = document.createElement('div');
-    notification.className = 'map-notification info';
-    notification.innerHTML = `
-      <i class="fas fa-directions"></i>
-      <span>Showing walking directions</span>
-    `;
-    mapContainer.appendChild(notification);
-
-    // Remove after 3 seconds
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.parentNode.removeChild(notification);
-      }
-    }, 3000);
-  }
-}
-
-// Create heatmap layer from location data
-function createHeatmapLayer() {
-  if (!map) return;
-
-  // Check if heatmap plugin is available
-  if (typeof L.heatLayer === 'undefined') {
-    console.warn('Heatmap plugin not available');
-    return;
-  }
-
-  // Collect points for heatmap
-  const heatPoints = [];
-
-  // Add all location markers to heatmap
-  Object.values(locationMarkers).forEach(marker => {
-    if (marker && marker.getLatLng) {
-      const latLng = marker.getLatLng();
-
-      // Get intensity based on location data if available
-      let intensity = 1;
-      if (marker.options && marker.options.locationData) {
-        const locationData = marker.options.locationData;
-
-        // Use rating or visit count for intensity if available
-        if (locationData.rating) {
-          intensity = locationData.rating / 5; // Normalize to 0-1 range
-        } else if (locationData.visitCount) {
-          intensity = Math.min(locationData.visitCount / 100, 1); // Cap at 1
-        }
-      }
-
-      heatPoints.push([latLng.lat, latLng.lng, intensity]);
-    }
-  });
-
-  // If we have points, create the heatmap layer
-  if (heatPoints.length > 0) {
-    // Remove existing heatmap if any
-    if (map._heatmapLayer) {
-      map.removeLayer(map._heatmapLayer);
-    }
-
-    // Create new heatmap layer
-    map._heatmapLayer = L.heatLayer(heatPoints, {
-      radius: 25,
-      blur: 15,
-      maxZoom: 17,
-      max: 1.0,
-      gradient: {
-        0.0: 'blue',
-        0.25: 'lime',
-        0.5: 'yellow',
-        0.75: 'orange',
-        1.0: 'red'
-      }
-    }).addTo(map);
-
-    console.log('Heatmap created with', heatPoints.length, 'points');
-  } else {
-    console.warn('No points available for heatmap');
   }
 }
 
