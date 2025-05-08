@@ -802,22 +802,17 @@ main {
   flex: 1;
   border: 2px solid var(--bbs-border);
   width: 100%;
-  height: calc(100% - 200px);
-  border-radius: var(--border-radius-sm);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
+  height: calc(100% - 180px);
 }
 
 .chat-box {
-  height: 180px;
+  height: 150px;
   background-color: var(--bbs-header-bg);
   border: 2px solid var(--bbs-border);
-  border-radius: var(--border-radius-sm);
-  margin-top: 15px;
+  border-top: none;
   display: flex;
   flex-direction: column;
   z-index: 10;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
 .chat-messages {

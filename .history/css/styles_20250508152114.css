@@ -701,30 +701,23 @@ main {
 .announcement-board {
   background-color: var(--bbs-header-bg);
   border: 2px solid var(--bbs-border);
-  margin-bottom: 15px;
-  min-height: 120px;
-  max-height: 200px;
+  margin-bottom: 10px;
+  height: 120px;
   overflow-y: auto;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  border-radius: var(--border-radius-sm);
 }
 
 .panel-title {
   background-color: var(--bbs-border);
   color: var(--primary-bg);
-  padding: 8px 12px;
-  margin: 0 0 10px 0;
+  padding: 5px 10px;
+  margin: 0;
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-weight: 600;
-  border-bottom: 2px solid var(--neon-blue);
 }
 
 .announcement-content {
-  padding: 12px 15px;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  padding: 10px;
 }
 
 .activity-feed {
@@ -734,9 +727,6 @@ main {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  border-radius: var(--border-radius-sm);
-  min-height: 200px;
 }
 
 .feed-list {
@@ -802,22 +792,17 @@ main {
   flex: 1;
   border: 2px solid var(--bbs-border);
   width: 100%;
-  height: calc(100% - 200px);
-  border-radius: var(--border-radius-sm);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
+  height: calc(100% - 180px);
 }
 
 .chat-box {
-  height: 180px;
+  height: 150px;
   background-color: var(--bbs-header-bg);
   border: 2px solid var(--bbs-border);
-  border-radius: var(--border-radius-sm);
-  margin-top: 15px;
+  border-top: none;
   display: flex;
   flex-direction: column;
   z-index: 10;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
 .chat-messages {
