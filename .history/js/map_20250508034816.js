@@ -49,13 +49,6 @@ const mapConfig = {
 // Initialize map with enhanced error handling, performance improvements, and modern features
 function initMap() {
   try {
-    // Check if map is already initialized
-    if (map) {
-      console.log('Map already initialized, invalidating size');
-      map.invalidateSize(true);
-      return map;
-    }
-
     // Check if Leaflet is loaded
     if (typeof L === 'undefined') {
       console.error('Leaflet is not loaded');
@@ -69,11 +62,10 @@ function initMap() {
       return;
     }
 
-    // Ensure map container has dimensions and is visible
-    if (!mapContainer.style.height || mapContainer.style.height === '0px') {
+    // Ensure map container has dimensions
+    if (!mapContainer.style.height) {
       mapContainer.style.height = '100%';
     }
-    mapContainer.style.display = 'block';
 
     // Show loading indicator
     const loadingIndicator = document.createElement('div');
@@ -304,14 +296,6 @@ function initMap() {
     });
 
     console.log('Map initialized successfully');
-
-    // Force a resize event after a short delay to ensure proper rendering
-    setTimeout(() => {
-      if (map) {
-        map.invalidateSize(true);
-        console.log('Map size invalidated after initialization');
-      }
-    }, 300);
 
     // Get user location after map initialization
     getUserLocation();
@@ -1526,15 +1510,12 @@ function createSVGMarkerForType(type) {
   }
 
   // Create SVG marker with pulsing animation
-  // Ensure Font Awesome is loaded by checking if the icon class exists
-  const iconClass = typeof FontAwesome !== 'undefined' ? `fas fa-${icon}` : 'fa fa-map-marker';
-
   return `
     <div class="marker-container">
       <div class="marker-pin" style="background-color: ${color}; box-shadow: 0 0 10px ${color};">
-        <i class="${iconClass}" style="color: white; transform: rotate(45deg); position: relative; z-index: 1;"></i>
+        <i class="fas fa-${icon}" style="color: white;"></i>
       </div>
-      <div class="marker-pulse" style="border-color: ${color}; animation: markerPulse 2s infinite;"></div>
+      <div class="marker-pulse" style="border-color: ${color};"></div>
     </div>
   `;
 }
@@ -1792,14 +1773,10 @@ window.mapModule = {
   map: () => map, // Return the map instance as a getter function
   refreshMap: () => {
     if (map) {
-      console.log('Refreshing map and invalidating size');
-      map.invalidateSize(true);
+      map.invalidateSize();
       if (currentPosition) {
         map.setView([currentPosition.lat, currentPosition.lng], map.getZoom());
       }
-    } else {
-      console.log('Map not initialized, initializing now');
-      initMap();
     }
   },
   // Add new exported functions

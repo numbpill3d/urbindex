@@ -1792,14 +1792,10 @@ window.mapModule = {
   map: () => map, // Return the map instance as a getter function
   refreshMap: () => {
     if (map) {
-      console.log('Refreshing map and invalidating size');
-      map.invalidateSize(true);
+      map.invalidateSize();
       if (currentPosition) {
         map.setView([currentPosition.lat, currentPosition.lng], map.getZoom());
       }
-    } else {
-      console.log('Map not initialized, initializing now');
-      initMap();
     }
   },
   // Add new exported functions

@@ -305,14 +305,6 @@ function initMap() {
 
     console.log('Map initialized successfully');
 
-    // Force a resize event after a short delay to ensure proper rendering
-    setTimeout(() => {
-      if (map) {
-        map.invalidateSize(true);
-        console.log('Map size invalidated after initialization');
-      }
-    }, 300);
-
     // Get user location after map initialization
     getUserLocation();
 
@@ -1792,14 +1784,10 @@ window.mapModule = {
   map: () => map, // Return the map instance as a getter function
   refreshMap: () => {
     if (map) {
-      console.log('Refreshing map and invalidating size');
-      map.invalidateSize(true);
+      map.invalidateSize();
       if (currentPosition) {
         map.setView([currentPosition.lat, currentPosition.lng], map.getZoom());
       }
-    } else {
-      console.log('Map not initialized, initializing now');
-      initMap();
     }
   },
   // Add new exported functions
