@@ -450,31 +450,19 @@ function clearUserSpecificMarkers() {
   }
 }
 
-/**
- * Show a notification indicator
- * @param {string} message - The message to display
- * @param {string} type - The type of notification ('offline', 'success', 'error', 'warning', 'info')
- * @param {number} duration - How long to show the notification in milliseconds
- * @returns {HTMLElement} - The created indicator element
- */
-function showNotificationIndicator(message, type = 'offline', duration = 5000) {
+// Show offline indicator
+function showOfflineIndicator() {
   try {
-    // Validate inputs
-    if (!message || typeof message !== 'string') {
-      console.error('Invalid message provided to showNotificationIndicator');
-      return null;
-    }
-
-    // Check if an indicator of the same type already exists and remove it
-    const existingIndicator = document.querySelector(`.${type}-indicator`);
+    // Check if an indicator already exists and remove it
+    const existingIndicator = document.querySelector('.offline-indicator');
     if (existingIndicator && existingIndicator.parentNode) {
       existingIndicator.parentNode.removeChild(existingIndicator);
     }
 
     // Create a new indicator
     const indicator = document.createElement('div');
-    indicator.className = `${type}-indicator notification-indicator`;
-    indicator.textContent = message;
+    indicator.className = 'offline-indicator';
+    indicator.textContent = 'Location saved offline. Will sync when online.';
     document.body.appendChild(indicator);
 
     // Add active class after a small delay to trigger animation
@@ -482,48 +470,30 @@ function showNotificationIndicator(message, type = 'offline', duration = 5000) {
       indicator.classList.add('active');
     }, 10);
 
-    // Hide after specified duration
-    if (duration > 0) {
+    // Hide after 5 seconds
+    setTimeout(() => {
+      indicator.classList.remove('active');
       setTimeout(() => {
-        indicator.classList.remove('active');
-        setTimeout(() => {
-          if (indicator.parentNode) {
-            indicator.parentNode.removeChild(indicator);
-          }
-        }, 500); // Animation duration
-      }, duration);
-    }
-
-    return indicator;
+        if (indicator.parentNode) {
+          indicator.parentNode.removeChild(indicator);
+        }
+      }, 500);
+    }, 5000);
   } catch (error) {
-    console.error('Error showing notification indicator:', error);
-    return null;
+    console.error('Error showing offline indicator:', error);
   }
-}
-
-// Show offline indicator (wrapper for backward compatibility)
-function showOfflineIndicator() {
-  return showNotificationIndicator('Location saved offline. Will sync when online.', 'offline');
 }
 
 // Export additional map functions to extend the map module
 // These functions will be available through the window.mapFunctions object
 window.mapFunctions = {
-  // Comments functions
   displayComments,
   submitComment,
-
-  // Location interaction functions
   claimTerritory,
   rateLocationWithStars,
-  rateLocation,
-
-  // UI update functions
   updateStarRatingUI,
+  rateLocation,
   refreshLocationMarker,
   clearUserSpecificMarkers,
-
-  // Notification functions
-  showOfflineIndicator,
-  showNotificationIndicator
+  showOfflineIndicator
 };

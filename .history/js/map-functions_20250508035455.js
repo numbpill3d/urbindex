@@ -1,10 +1,8 @@
-// Display comments in the UI for a location
-function displayComments(locationId) {
+// Load comments for a location
+function loadComments(locationId) {
   try {
     const commentsContainer = document.querySelector(`.comments-container[data-id="${locationId}"]`);
-    if (!commentsContainer) {
-      return;
-    }
+    if (!commentsContainer) return;
 
     commentsContainer.innerHTML = '<p class="loading-comments">Loading comments...</p>';
 
@@ -59,152 +57,85 @@ function displayComments(locationId) {
       commentsContainer.innerHTML = '<p class="error-message">Comments module not available</p>';
     }
   } catch (error) {
-    console.error('Error in displayComments:', error);
+    console.error('Error in loadComments:', error);
   }
 }
 
-// Submit a comment to a location
-function submitComment(locationId, text) {
+// Add a comment to a location
+function addComment(locationId, text) {
   if (!window.locationsModule?.addComment) {
     console.error('Comments module not available');
     return Promise.reject(new Error('Comments module not available'));
   }
 
-  return window.locationsModule.addComment(locationId, text)
-    .then(success => {
-      if (success) {
-        // Refresh the comments display
-        displayComments(locationId);
-        return true;
-      }
-      return false;
-    });
+  return window.locationsModule.addComment(locationId, text);
 }
 
-// Claim territory for a location
+// Claim territory
 function claimTerritory(locationId) {
-  // Validate input
-  if (!locationId || typeof locationId !== 'string') {
-    console.error('Invalid locationId provided to claimTerritory');
-    return Promise.reject(new Error('Invalid locationId'));
-  }
-
-  // Check authentication
   if (!window.authModule?.isAuthenticated()) {
-    const message = 'Please sign in to claim territories';
-    if (window.offlineModule?.showToast) {
-      window.offlineModule.showToast(message, 'warning');
-    } else {
-      alert(message);
-    }
-    return Promise.reject(new Error('User not authenticated'));
+    alert('Please sign in to claim territories');
+    return;
   }
 
-  // Check if location is offline
   if (locationId.startsWith('temp-')) {
-    const message = 'You cannot claim offline locations';
-    if (window.offlineModule?.showToast) {
-      window.offlineModule.showToast(message, 'warning');
-    } else {
-      alert(message);
-    }
-    return Promise.reject(new Error('Cannot claim offline location'));
+    alert('You cannot claim offline locations');
+    return;
   }
 
-  // Check if territories module is available
   if (!window.locationsModule?.claimLocation) {
     console.error('Territories module not available');
-    return Promise.reject(new Error('Territories module not available'));
+    return;
   }
 
-  // Claim the territory
-  return window.locationsModule.claimLocation(locationId)
+  window.locationsModule.claimLocation(locationId)
     .then(success => {
       if (success) {
-        // Update the marker on the map
         refreshLocationMarker(locationId);
-
-        // Show success message
-        if (window.offlineModule?.showToast) {
-          window.offlineModule.showToast('Territory claimed successfully!', 'success');
-        }
-        return true;
       }
-      return false;
     })
     .catch(error => {
       console.error('Error claiming territory:', error);
       if (window.offlineModule?.showToast) {
         window.offlineModule.showToast('Error claiming territory. Please try again.', 'error');
       }
-      throw error; // Re-throw to allow caller to handle
     });
 }
 
-// Rate a location with stars (1-5)
+// Rate a location with stars
 function rateLocationWithStars(locationId, rating) {
-  // Validate inputs
-  if (!locationId || typeof locationId !== 'string') {
-    console.error('Invalid locationId provided to rateLocationWithStars');
-    return Promise.reject(new Error('Invalid locationId'));
-  }
-
-  if (typeof rating !== 'number' || rating < 1 || rating > 5) {
-    console.error('Invalid rating value. Must be a number between 1 and 5');
-    return Promise.reject(new Error('Invalid rating value'));
-  }
-
-  // Check authentication
   if (!window.authModule?.isAuthenticated()) {
-    const message = 'Please sign in to rate locations';
-    if (window.offlineModule?.showToast) {
-      window.offlineModule.showToast(message, 'warning');
-    } else {
-      alert(message);
-    }
-    return Promise.reject(new Error('User not authenticated'));
+    alert('Please sign in to rate locations');
+    return;
   }
 
-  // Check if location is offline
   if (locationId.startsWith('temp-')) {
-    const message = 'You cannot rate offline locations';
-    if (window.offlineModule?.showToast) {
-      window.offlineModule.showToast(message, 'warning');
-    } else {
-      alert(message);
-    }
-    return Promise.reject(new Error('Cannot rate offline location'));
+    alert('You cannot rate offline locations');
+    return;
   }
 
-  // Check if ratings module is available
   if (!window.locationsModule?.rateLocationWithStars) {
     console.error('Ratings module not available');
-    return Promise.reject(new Error('Ratings module not available'));
+    return;
   }
 
-  // Rate the location
-  return window.locationsModule.rateLocationWithStars(locationId, rating)
+  window.locationsModule.rateLocationWithStars(locationId, rating)
     .then(success => {
       if (success) {
-        // Update UI
         updateStarRatingUI(locationId, rating);
-        return true;
       }
-      return false;
     })
     .catch(error => {
       console.error('Error rating location:', error);
       if (window.offlineModule?.showToast) {
         window.offlineModule.showToast('Error rating location. Please try again.', 'error');
       }
-      throw error; // Re-throw to allow caller to handle
     });
 }
 
 // Update star rating UI
 function updateStarRatingUI(locationId, rating) {
   try {
-    // Update star UI
     const stars = document.querySelectorAll(`.star-rating[data-id="${locationId}"] .star`);
     stars.forEach(star => {
       const starRating = parseInt(star.dataset.rating);
@@ -215,21 +146,10 @@ function updateStarRatingUI(locationId, rating) {
       }
     });
 
-    // Check if Firebase is available
-    if (!window.firebase || !window.db) {
-      console.error('Firebase not available for updateStarRatingUI');
-      return;
-    }
-
-    // Get the locations collection reference
-    const locationsRef = window.db.collection('locations');
-
-    // Get updated location data
     locationsRef.doc(locationId).get().then(doc => {
       if (doc.exists) {
         const locationData = doc.data();
 
-        // Update rating display
         const ratingValue = document.querySelector(`.star-rating[data-id="${locationId}"] .rating-value`);
         const ratingCount = document.querySelector(`.star-rating[data-id="${locationId}"] .rating-count`);
 
@@ -251,49 +171,26 @@ function updateStarRatingUI(locationId, rating) {
 
 // Rate a location with thumbs up/down
 function rateLocation(locationId, action) {
-  // Validate inputs
-  if (!locationId || typeof locationId !== 'string') {
-    console.error('Invalid locationId provided to rateLocation');
-    return Promise.reject(new Error('Invalid locationId'));
-  }
-
-  if (!action || (action !== 'upvote' && action !== 'downvote')) {
-    console.error('Invalid action provided to rateLocation. Must be "upvote" or "downvote"');
-    return Promise.reject(new Error('Invalid action'));
-  }
-
-  // Check authentication
   if (!window.authModule?.isAuthenticated()) {
-    const message = 'Please sign in to rate locations';
-    if (window.offlineModule?.showToast) {
-      window.offlineModule.showToast(message, 'warning');
-    } else {
-      alert(message);
-    }
-    return Promise.reject(new Error('User not authenticated'));
+    alert('Please sign in to rate locations');
+    return;
   }
 
-  // Check if location is offline
   if (locationId.startsWith('temp-')) {
-    const message = 'You cannot rate locations that are saved offline';
-    if (window.offlineModule?.showToast) {
-      window.offlineModule.showToast(message, 'warning');
-    } else {
-      alert(message);
-    }
-    return Promise.reject(new Error('Cannot rate offline location'));
+    alert('You cannot rate locations that are saved offline');
+    return;
   }
 
   // Check if Firebase is available
   if (!window.firebase || !window.db) {
     console.error('Firebase not available');
-    return Promise.reject(new Error('Firebase not available'));
+    return;
   }
 
   const user = window.authModule.getCurrentUser();
   if (!user) {
     console.error('User not available');
-    return Promise.reject(new Error('User not available'));
+    return;
   }
 
   // Get the collections references
@@ -302,7 +199,7 @@ function rateLocation(locationId, action) {
 
   const ratingRef = ratingsRef.doc(`${locationId}_${user.uid}`);
 
-  return ratingRef.get()
+  ratingRef.get()
     .then(doc => {
       const batch = window.db.batch();
 
@@ -352,22 +249,13 @@ function rateLocation(locationId, action) {
       return batch.commit();
     })
     .then(() => {
-      // Update the marker on the map
       refreshLocationMarker(locationId);
-
-      // Show success message
-      if (window.offlineModule?.showToast) {
-        window.offlineModule.showToast(`Location ${action}d successfully!`, 'success');
-      }
-
-      return true;
     })
     .catch(error => {
       console.error('Error rating location:', error);
       if (window.offlineModule?.showToast) {
         window.offlineModule.showToast('Error rating location. Please try again.', 'error');
       }
-      throw error; // Re-throw to allow caller to handle
     });
 }
 
@@ -450,31 +338,19 @@ function clearUserSpecificMarkers() {
   }
 }
 
-/**
- * Show a notification indicator
- * @param {string} message - The message to display
- * @param {string} type - The type of notification ('offline', 'success', 'error', 'warning', 'info')
- * @param {number} duration - How long to show the notification in milliseconds
- * @returns {HTMLElement} - The created indicator element
- */
-function showNotificationIndicator(message, type = 'offline', duration = 5000) {
+// Show offline indicator
+function showOfflineIndicator() {
   try {
-    // Validate inputs
-    if (!message || typeof message !== 'string') {
-      console.error('Invalid message provided to showNotificationIndicator');
-      return null;
-    }
-
-    // Check if an indicator of the same type already exists and remove it
-    const existingIndicator = document.querySelector(`.${type}-indicator`);
+    // Check if an indicator already exists and remove it
+    const existingIndicator = document.querySelector('.offline-indicator');
     if (existingIndicator && existingIndicator.parentNode) {
       existingIndicator.parentNode.removeChild(existingIndicator);
     }
 
     // Create a new indicator
     const indicator = document.createElement('div');
-    indicator.className = `${type}-indicator notification-indicator`;
-    indicator.textContent = message;
+    indicator.className = 'offline-indicator';
+    indicator.textContent = 'Location saved offline. Will sync when online.';
     document.body.appendChild(indicator);
 
     // Add active class after a small delay to trigger animation
@@ -482,48 +358,26 @@ function showNotificationIndicator(message, type = 'offline', duration = 5000) {
       indicator.classList.add('active');
     }, 10);
 
-    // Hide after specified duration
-    if (duration > 0) {
+    // Hide after 5 seconds
+    setTimeout(() => {
+      indicator.classList.remove('active');
       setTimeout(() => {
-        indicator.classList.remove('active');
-        setTimeout(() => {
-          if (indicator.parentNode) {
-            indicator.parentNode.removeChild(indicator);
-          }
-        }, 500); // Animation duration
-      }, duration);
-    }
-
-    return indicator;
+        if (indicator.parentNode) {
+          indicator.parentNode.removeChild(indicator);
+        }
+      }, 500);
+    }, 5000);
   } catch (error) {
-    console.error('Error showing notification indicator:', error);
-    return null;
+    console.error('Error showing offline indicator:', error);
   }
 }
 
-// Show offline indicator (wrapper for backward compatibility)
-function showOfflineIndicator() {
-  return showNotificationIndicator('Location saved offline. Will sync when online.', 'offline');
-}
-
-// Export additional map functions to extend the map module
-// These functions will be available through the window.mapFunctions object
-window.mapFunctions = {
-  // Comments functions
-  displayComments,
-  submitComment,
-
-  // Location interaction functions
-  claimTerritory,
-  rateLocationWithStars,
-  rateLocation,
-
-  // UI update functions
-  updateStarRatingUI,
-  refreshLocationMarker,
-  clearUserSpecificMarkers,
-
-  // Notification functions
-  showOfflineIndicator,
-  showNotificationIndicator
+// Export functions for use in other modules
+window.mapModule = {
+  initMap,
+  getUserLocation,
+  loadLocations,
+  clearLocationMarkers,
+  addLocationMarker,
+  map: () => map // Return the map instance as a getter function
 };

@@ -509,21 +509,13 @@ function showOfflineIndicator() {
 // Export additional map functions to extend the map module
 // These functions will be available through the window.mapFunctions object
 window.mapFunctions = {
-  // Comments functions
   displayComments,
   submitComment,
-
-  // Location interaction functions
   claimTerritory,
   rateLocationWithStars,
-  rateLocation,
-
-  // UI update functions
   updateStarRatingUI,
+  rateLocation,
   refreshLocationMarker,
   clearUserSpecificMarkers,
-
-  // Notification functions
-  showOfflineIndicator,
-  showNotificationIndicator
+  showOfflineIndicator
 };
