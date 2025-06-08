@@ -2274,7 +2274,7 @@ function debugDOMStructure() {
   
   // Check if main element exists
   const main = document.querySelector('main');
-  console.log(`Main element exists: ${!!main}`);
+  console.log(`Main element exists: ${Boolean(main)}`);
   
   console.log("=== END DOM STRUCTURE DEBUG ===");
 }
