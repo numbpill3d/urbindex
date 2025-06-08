@@ -412,7 +412,7 @@ async function loadUserTerritories(userId) {
             mapModule.map.setView([lat, lng], 16);
             
             // Open the popup if marker exists
-            if (mapModule.locationMarkers && mapModule.locationMarkers[territoryData.locationId]) {
+            if (mapModule.locationMarkers?.[territoryData.locationId]) {
               mapModule.locationMarkers[territoryData.locationId].openPopup();
             }
           }

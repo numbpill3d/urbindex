@@ -483,7 +483,7 @@ function handleNotificationClick(notification) {
   switch (notification.type) {
     case 'newLocations':
       // Navigate to map and show location
-      if (notification.data && notification.data.locationId) {
+      if (notification.data?.locationId) {
         document.getElementById('map-view-btn').click();
         
         // Show location on map
@@ -498,7 +498,7 @@ function handleNotificationClick(notification) {
       
     case 'comments':
       // Navigate to location with comments
-      if (notification.data && notification.data.locationId) {
+      if (notification.data?.locationId) {
         document.getElementById('map-view-btn').click();
         
         // Show location on map
@@ -515,7 +515,7 @@ function handleNotificationClick(notification) {
       
     case 'mentions':
       // Navigate to forum post
-      if (notification.data && notification.data.postId) {
+      if (notification.data?.postId) {
         document.getElementById('forum-btn').click();
         
         // Show post
@@ -577,7 +577,7 @@ function handleNotificationClick(notification) {
       
     case 'reminders':
       // Navigate to location
-      if (notification.data && notification.data.locationId) {
+      if (notification.data?.locationId) {
         document.getElementById('map-view-btn').click();
         
         // Show location on map
