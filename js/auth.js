@@ -187,7 +187,7 @@ function showAuthError(message) {
 
 // Check if user is authenticated
 function isAuthenticated() {
-  return !!currentUser;
+  return Boolean(currentUser);
 }
 
 // Get current user
