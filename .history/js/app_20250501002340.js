@@ -1095,7 +1095,7 @@ function switchView(targetViewId) {
     const mapView = document.getElementById('map-container');
     if (mapView) {
       mapView.classList.add('active');
-      history.pushState({ view: 'map' }, '', `?view=map`);
+      history.pushState({ view: 'map' }, '', "?view=map");
       
       // Force a resize event to make sure the map renders correctly
       setTimeout(() => {
