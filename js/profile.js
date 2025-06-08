@@ -332,7 +332,7 @@ function updateRankBadgeUI(rankBadge, score) {
     // No rank badge yet
     const nextRankProgress = window.achievementsModule?.getNextRankProgress(score);
     
-    if (nextRankProgress && nextRankProgress.next) {
+    if (nextRankProgress?.next) {
       rankBadgeContainer.innerHTML = `
         <div class="rank-badge-display">
           <div class="rank-badge-icon">?</div>
@@ -355,7 +355,7 @@ function updateRankBadgeUI(rankBadge, score) {
     const nextRankProgress = window.achievementsModule?.getNextRankProgress(score);
     
     let progressBar = '';
-    if (nextRankProgress && nextRankProgress.next) {
+    if (nextRankProgress?.next) {
       progressBar = `
         <div class="rank-progress">
           <div class="rank-progress-bar" style="width: ${nextRankProgress.progress}%"></div>

@@ -547,7 +547,7 @@ function addLocationToList(id, locationData, isOffline = false) {
       mapModule.map.setView([lat, lng], 16);
       
       // Open the popup if marker exists
-      if (mapModule.locationMarkers && mapModule.locationMarkers[id]) {
+      if (mapModule.locationMarkers?.[id]) {
         mapModule.locationMarkers[id].openPopup();
       }
     }

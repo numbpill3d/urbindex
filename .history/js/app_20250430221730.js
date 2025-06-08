@@ -186,7 +186,7 @@ function setupSwipeNavigation() {
   
   function handleBackNavigation() {
     // Custom back navigation logic
-    if (window.history.state && window.history.state.view) {
+    if (window.history.state?.view) {
       // Determine the previous view based on navigation order
       const views = ['map', 'forum', 'spots', 'profile', 'settings'];
       const currentViewIndex = views.indexOf(window.history.state.view);
@@ -203,7 +203,7 @@ function setupSwipeNavigation() {
   
   function handleForwardNavigation() {
     // Custom forward navigation logic
-    if (window.history.state && window.history.state.view) {
+    if (window.history.state?.view) {
       // Determine the next view based on navigation order
       const views = ['map', 'forum', 'spots', 'profile', 'settings'];
       const currentViewIndex = views.indexOf(window.history.state.view);
@@ -342,7 +342,7 @@ function processSharedContent(title, text, url) {
       if (coords) {
         // Wait for map to load
         setTimeout(() => {
-          if (window.mapModule && window.mapModule.map()) {
+          if (window.mapModule?.map()) {
             window.mapModule.map().setView([coords.lat, coords.lng], 16);
             openAddLocationModal(coords);
           }
@@ -1109,7 +1109,7 @@ function switchView(targetViewId) {
 // Handle back button
 function handleBackButton(event) {
   // If we have state, use it to determine which view to show
-  if (event.state && event.state.view) {
+  if (event.state?.view) {
     const targetViewId = `${event.state.view}-container`;
     
     // Update active button
@@ -1252,7 +1252,7 @@ function handleSharedContent(title, text, url) {
   console.log('Shared content:', { title, text, url });
   
   // For example, if the URL is a location, we could parse it and show that location
-  if (url && url.includes('location=')) {
+  if (url?.includes('location=')) {
     const locationId = url.split('location=')[1].split('&')[0];
     if (locationId) {
       // Show map view
@@ -1470,7 +1470,7 @@ function listenForChatMessages() {
           messageEl.className = 'chat-message';
           
           let timeString = 'Just now';
-          if (message.timestamp && message.timestamp.toDate) {
+          if (message.timestamp?.toDate) {
             const date = message.timestamp.toDate();
             timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           }
@@ -1624,7 +1624,7 @@ function createActivityFeedItem(id, locationData) {
           if (window.mapModule.map()) {
             window.mapModule.map().setView([lat, lng], 16);
             
-            if (window.locationMarkers && window.locationMarkers[id]) {
+            if (window.locationMarkers?.[id]) {
               window.locationMarkers[id].openPopup();
             }
           }

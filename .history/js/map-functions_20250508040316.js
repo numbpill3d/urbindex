@@ -445,7 +445,7 @@ function clearUserSpecificMarkers() {
   console.log('Clearing user-specific markers');
 
   // Use the map module's clearLocationMarkers function if available
-  if (window.mapModule && window.mapModule.clearLocationMarkers) {
+  if (window.mapModule?.clearLocationMarkers) {
     window.mapModule.clearLocationMarkers();
   }
 }
@@ -467,7 +467,7 @@ function showNotificationIndicator(message, type = 'offline', duration = 5000) {
 
     // Check if an indicator of the same type already exists and remove it
     const existingIndicator = document.querySelector(`.${type}-indicator`);
-    if (existingIndicator && existingIndicator.parentNode) {
+    if (existingIndicator?.parentNode) {
       existingIndicator.parentNode.removeChild(existingIndicator);
     }
 
