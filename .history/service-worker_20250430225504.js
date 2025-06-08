@@ -416,7 +416,7 @@ async function createOfflineFallbackPage() {
   
   // Add offline indicator and enhanced styling
   const offlineHtml = indexHtml
-    .replace('<body', `<body data-offline="true"`)
+    .replace('<body', '<body data-offline="true"')
     .replace('</head>', `
       <style>
         .offline-indicator {

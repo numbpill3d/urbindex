@@ -309,7 +309,7 @@ async function createOfflineFallbackPage() {
   // Add offline indicator
   const offlineHtml = indexHtml.replace(
     '<body',
-    `<body data-offline="true"`
+    '<body data-offline="true"'
   );
   
   // Store the offline version
