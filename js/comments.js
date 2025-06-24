@@ -278,6 +278,38 @@ function renderComments(locationId, container) {
             // Confirm deletion
             if (confirm('Are you sure you want to delete this comment?')) {
               const success = await deleteComment(commentId);
+              if (success) {
+                loadAndDisplayComments();
+              }
+            }
+          } else if (e.target.classList.contains('comment-reply')) {
+            // Focus on comment form for reply
+            const textarea = document.getElementById(`comment-text-${locationId}`);
+            if (textarea) {
+              textarea.focus();
+              textarea.value = `@${comment.userDisplayName} `;
+            }
+          }
+        });
+      });
+
+      commentsList.appendChild(commentElement);
+    });
+  };
+
+  // Load comments initially
+  loadAndDisplayComments();
+}
+
+// Export comments module
+window.commentsModule = {
+  initComments,
+  addComment,
+  loadComments,
+  deleteComment,
+  editComment,
+  renderComments
+};success = await deleteComment(commentId);
               
               if (success) {
                 // Reload comments

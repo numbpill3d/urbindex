@@ -2177,28 +2177,30 @@
                         </div>
                         <div class="panel-title">Activity Feed</div>
                         <div class="activity-feed">
-                            <ul class="feed-list">
-                                <li>John Doe commented on your post! 🎉</li>
-                                <li>Jane Smith liked your location! ❤️</li>
+                            <ul id="activity-feed-list" class="feed-list">
+                                <li class="feed-item">Loading recent activity...</li>
                             </ul>
                         </div>
                         <div class="panel-title">Online Users</div>
                         <div class="online-users-marquee">
-                            <div class="marquee-content">
-                                <span>John Doe</span> | <span>Jane Smith</span> | <span>Bob Johnson</span>
+                            <div class="marquee-content" id="online-users-list">
+                                Connecting...
                             </div>
                         </div>
                     </div>
                     <div class="right-panel">
                         <div id="map"></div>
                         <div class="chat-box">
-                            <div class="chat-messages">
-                                <p>John Doe: Hi! How's it going?</p>
-                                <p>You: I'm doing great! Thanks! 🌟</p>
+                            <div id="chat-messages" class="chat-messages">
+                                <div class="chat-message">
+                                    <span class="chat-user">System:</span>
+                                    <span class="chat-text">Welcome to Urbindex! Sign in to chat with other explorers.</span>
+                                    <span class="chat-time">Now</span>
+                                </div>
                             </div>
                             <div class="chat-input-container">
-                                <input type="text" class="chat-input" placeholder="Type a message...">
-                                <button class="chat-send-btn">Send</button>
+                                <input type="text" id="chat-input" class="chat-input" placeholder="Type a message...">
+                                <button id="chat-send-btn" class="chat-send-btn">Send</button>
                             </div>
                         </div>
                     </div>
@@ -2235,9 +2237,8 @@
                 </div>
                 <div class="forum-list">
                     <h3>Posts</h3>
-                    <ul>
-                        <li>Post 1: Introduction to Urbindex! 🌟</li>
-                        <li>Post 2: How to use the map! 🗺️</li>
+                    <ul id="forum-posts-list">
+                        <li class="forum-item loading">Loading posts...</li>
                     </ul>
                 </div>
             </div>
@@ -2264,10 +2265,9 @@
                     <input type="text" id="spots-search" placeholder="Search locations...">
                     <button id="spots-search-btn">Search</button>
                 </div>
-                <div class="spots-view active" id="my-locations-list">
-                    <ul>
-                        <li>Location 1: Abandoned Building</li>
-                        <li>Location 2: Hidden Waterfall</li>
+                <div class="spots-view active" id="my-locations-view">
+                    <ul id="my-locations-list">
+                        <li class="location-item loading">Loading your locations...</li>
                     </ul>
                 </div>
                 <div class="spots-view" id="spots-grid">
