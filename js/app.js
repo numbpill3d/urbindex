@@ -1251,7 +1251,8 @@ function initializeModules() {
       resolve();
     } catch (error) {
       console.error('Error initializing modules:', error);
-      reject(error);
+      console.warn('App will continue with limited functionality');
+      resolve();
     }
   });
 }
