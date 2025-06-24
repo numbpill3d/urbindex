@@ -1154,7 +1154,8 @@ function handleBackButton(event) {
     switchView(targetViewId);
   } else {
     // Default to map view
-    document.getElementById('map-view-btn').click();
+    const mapBtn = document.querySelector('[data-view="map"]');
+    if (mapBtn) mapBtn.click();
   }
 }
 
@@ -1252,7 +1253,8 @@ function checkUrlParameters() {
     }
   } else {
     // If no view parameter, ensure map view is active
-    document.getElementById('map-view-btn').click();
+    const mapBtn = document.querySelector('[data-view="map"]');
+    if (mapBtn) mapBtn.click();
   }
 
   // Handle share parameters
@@ -2188,7 +2190,7 @@ pwaCssStyles.textContent = `
   }
 `;
 
-document.head.appendChild(a2hsStyle);
+document.head.appendChild(pwaCssStyles);
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

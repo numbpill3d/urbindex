@@ -277,6 +277,31 @@ function renderComments(locationId, container) {
           } else if (e.target.classList.contains('comment-reply')) {
             // Scroll to comment form and focus
             const textarea = document.getElementById(`comment-text-${locationId}`);
+            if (textarea) {
+              textarea.focus();
+              textarea.value = `@${comment.userDisplayName} `;
+            }
+          }
+        });
+      });
+      
+      commentsList.appendChild(commentElement);
+    });
+  };
+  
+  // Initial load
+  loadAndDisplayComments();
+}
+
+// Export functions for use in other modules
+window.commentsModule = {
+  initComments,
+  addComment,
+  loadComments,
+  deleteComment,
+  editComment,
+  renderComments
+};;
             textarea.focus();
             textarea.value = `@${comment.userDisplayName} `;
             

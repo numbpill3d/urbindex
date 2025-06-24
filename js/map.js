@@ -2873,6 +2873,24 @@ window.mapModule = {
   }
 };
 
+// Add function to dynamically load Leaflet if needed
+function loadLeafletDynamically() {
+  console.log('Loading Leaflet dynamically');
+  
+  const leafletCSS = document.createElement('link');
+  leafletCSS.rel = 'stylesheet';
+  leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  document.head.appendChild(leafletCSS);
+  
+  const leafletScript = document.createElement('script');
+  leafletScript.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  leafletScript.onload = () => {
+    console.log('Leaflet loaded, initializing map');
+    setTimeout(initMap, 100);
+  };
+  document.head.appendChild(leafletScript);
+}
+
 // Initialize map when the script loads
 document.addEventListener('DOMContentLoaded', () => {
   // Add map-specific styles
@@ -2881,7 +2899,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check if Leaflet is loaded
   if (typeof L === 'undefined') {
     console.error('Leaflet is not loaded');
-    // Try to load Leaflet dynamically if not available
     loadLeafletDynamically();
     return;
   }

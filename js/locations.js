@@ -112,13 +112,13 @@ function handleImagePreview(event) {
 async function saveLocation(e) {
   e.preventDefault();
   
-  if (!authModule.isAuthenticated()) {
-    alert('Please sign in to add locations');
+  if (!window.authModule?.isAuthenticated()) {
+    window.offlineModule?.showToast('Please sign in to add locations', 'warning');
     return;
   }
   
   const form = document.getElementById('location-form');
-  const user = authModule.getCurrentUser();
+  const user = window.authModule.getCurrentUser();
   const imageInput = document.getElementById('location-image');
   
   // Get form values
@@ -309,7 +309,7 @@ function syncOfflineLocations() {
     return Promise.resolve();
   }
   
-  if (!authModule.isAuthenticated()) {
+  if (!window.authModule?.isAuthenticated()) {
     console.log('User not authenticated, cannot sync locations');
     return Promise.resolve();
   }
