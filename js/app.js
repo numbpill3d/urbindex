@@ -1177,6 +1177,10 @@ function handleBackButton(event) {
 function initializeModules() {
   return new Promise(async (resolve, reject) => {
     try {
+      // Check if Firebase is properly initialized
+      if (window.firebaseInitError) {
+        console.warn('Firebase initialization failed, continuing with limited functionality');
+      }
       // Define core modules that must be initialized first
       const coreModules = [
         { name: 'offline', init: window.offlineModule?.initOffline },
