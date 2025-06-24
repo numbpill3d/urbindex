@@ -49,6 +49,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/custom-markers.css">
     <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/ui-complete.css">
     <style>
         :root {
             /* Core Color Palette - Enhanced */
@@ -2147,14 +2148,40 @@
     </script>
     <div id="app">
         <header>
-            <div class="ascii-title-container">
-                <div class="ascii-title">Urbindex</div>
+            <div class="header-brand">
+                <div class="ascii-title-container">
+                    <div class="ascii-title">URBINDEX</div>
+                    <div class="brand-tagline">Urban Exploration Network</div>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="status-indicators">
+                    <div class="network-status online" title="Online">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <div class="sync-status" title="Data synced">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                </div>
             </div>
             <div id="user-profile">
                 <button id="login-button" class="neon-button">Login</button>
-                <div id="user-info">
-                    <img id="user-avatar" src="images/default-avatar.png" alt="User Avatar">
-                    <span id="user-name">Guest</span>
+                <div id="user-info" class="user-info-expanded">
+                    <div class="user-details">
+                        <img id="user-avatar" src="images/default-avatar.png" alt="User Avatar">
+                        <div class="user-text">
+                            <span id="user-name">Urban Explorer</span>
+                            <span class="user-level">Level 12</span>
+                        </div>
+                    </div>
+                    <div class="user-stats-mini">
+                        <span class="mini-stat" title="Locations discovered">
+                            <i class="fas fa-map-marker-alt"></i> 47
+                        </span>
+                        <span class="mini-stat" title="Current score">
+                            <i class="fas fa-star"></i> 12.8k
+                        </span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -2171,14 +2198,14 @@
                     <div class="left-panel">
                         <div class="panel-title">Announcements</div>
                         <div class="announcement-board">
-                            <div class="announcement-content">
-                                <p>Stay tuned! We're working on new features! 🚀</p>
+                            <div class="announcement-content" id="announcements-list">
+                                <div class="loading-placeholder">Loading announcements...</div>
                             </div>
                         </div>
                         <div class="panel-title">Activity Feed</div>
                         <div class="activity-feed">
                             <ul id="activity-feed-list" class="feed-list">
-                                <li class="feed-item">Loading recent activity...</li>
+                                <li class="loading-placeholder">Loading recent activity...</li>
                             </ul>
                         </div>
                         <div class="panel-title">Online Users</div>
@@ -2192,7 +2219,7 @@
                         <div id="map"></div>
                         <div class="chat-box">
                             <div id="chat-messages" class="chat-messages">
-                                <div class="chat-message">
+                                <div class="chat-message system-message">
                                     <span class="chat-user">System:</span>
                                     <span class="chat-text">Welcome to Urbindex! Sign in to chat with other explorers.</span>
                                     <span class="chat-time">Now</span>
@@ -2238,7 +2265,7 @@
                 <div class="forum-list">
                     <h3>Posts</h3>
                     <ul id="forum-posts-list">
-                        <li class="forum-item loading">Loading posts...</li>
+                        <li class="loading-placeholder">Loading forum posts...</li>
                     </ul>
                 </div>
             </div>
@@ -2267,21 +2294,55 @@
                 </div>
                 <div class="spots-view active" id="my-locations-view">
                     <ul id="my-locations-list">
-                        <li class="location-item loading">Loading your locations...</li>
+                        <li class="loading-placeholder">Loading your locations...</li>
                     </ul>
                 </div>
                 <div class="spots-view" id="spots-grid">
                     <div class="spot-card">
                         <div class="spot-image-container">
-                            <img src="/images/default-location.jpg" alt="Location" class="spot-image">
-                            <div class="spot-type-badge">Abandoned</div>
+                            <div class="spot-image-placeholder">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="spot-type-badge abandoned">Abandoned</div>
                         </div>
                         <div class="spot-content">
-                            <h3 class="spot-title">Sample Location</h3>
-                            <p class="spot-description">This is a sample location for demonstration.</p>
+                            <h3 class="spot-title">Old Factory Complex</h3>
+                            <p class="spot-description">Multi-story industrial complex with interesting architecture and urban decay. Multiple access points available.</p>
                             <div class="spot-meta">
                                 <span class="spot-rating">★★★★☆</span>
-                                <span class="spot-date">2 days ago</span>
+                                <span class="spot-date">3 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="spot-card">
+                        <div class="spot-image-container">
+                            <div class="spot-image-placeholder">
+                                <i class="fas fa-water"></i>
+                            </div>
+                            <div class="spot-type-badge water">Water</div>
+                        </div>
+                        <div class="spot-content">
+                            <h3 class="spot-title">Underground Reservoir</h3>
+                            <p class="spot-description">Hidden underground water reservoir with unique acoustics and architectural features. Bring waterproof gear.</p>
+                            <div class="spot-meta">
+                                <span class="spot-rating">★★★★★</span>
+                                <span class="spot-date">1 week ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="spot-card">
+                        <div class="spot-image-container">
+                            <div class="spot-image-placeholder">
+                                <i class="fas fa-campground"></i>
+                            </div>
+                            <div class="spot-type-badge camp">Camp</div>
+                        </div>
+                        <div class="spot-content">
+                            <h3 class="spot-title">Rooftop Basecamp</h3>
+                            <p class="spot-description">Secure rooftop location perfect for overnight urban camping. Great views and relatively safe access.</p>
+                            <div class="spot-meta">
+                                <span class="spot-rating">★★★☆☆</span>
+                                <span class="spot-date">2 weeks ago</span>
                             </div>
                         </div>
                     </div>
@@ -2310,19 +2371,108 @@
                             <button id="change-avatar-btn" class="neon-button small">Change</button>
                         </div>
                         <div class="profile-info">
-                            <h2 id="profile-name">Explorer</h2>
+                            <h2 id="profile-name">Urban Explorer</h2>
+                            <div class="profile-level">
+                                <span class="level-badge">Level 12 - Veteran Explorer</span>
+                                <div class="xp-bar">
+                                    <div class="xp-progress" style="width: 75%"></div>
+                                </div>
+                                <span class="xp-text">2,250 / 3,000 XP</span>
+                            </div>
                             <div class="profile-stats">
                                 <div class="stat-item">
-                                    <div class="stat-value" id="locations-count">0</div>
+                                    <div class="stat-value" id="locations-count">47</div>
                                     <div class="stat-label">Locations</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value" id="territories-count">0</div>
+                                    <div class="stat-value" id="territories-count">8</div>
                                     <div class="stat-label">Territories</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value" id="user-score">0</div>
+                                    <div class="stat-value" id="user-score">12,847</div>
                                     <div class="stat-label">Score</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="exploration-days">156</div>
+                                    <div class="stat-label">Days Active</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-achievements">
+                            <h3>Recent Achievements</h3>
+                            <div class="achievements-grid">
+                                <div class="achievement-badge earned">
+                                    <div class="achievement-icon">
+                                        <i class="fas fa-map-marked-alt"></i>
+                                    </div>
+                                    <div class="achievement-info">
+                                        <h4>Territory Master</h4>
+                                        <p>Mapped 5+ territories</p>
+                                    </div>
+                                </div>
+                                <div class="achievement-badge earned">
+                                    <div class="achievement-icon">
+                                        <i class="fas fa-camera"></i>
+                                    </div>
+                                    <div class="achievement-info">
+                                        <h4>Photographer</h4>
+                                        <p>Uploaded 50+ photos</p>
+                                    </div>
+                                </div>
+                                <div class="achievement-badge earned">
+                                    <div class="achievement-icon">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div class="achievement-info">
+                                        <h4>Safety First</h4>
+                                        <p>No incidents in 100 days</p>
+                                    </div>
+                                </div>
+                                <div class="achievement-badge">
+                                    <div class="achievement-icon">
+                                        <i class="fas fa-crown"></i>
+                                    </div>
+                                    <div class="achievement-info">
+                                        <h4>Legend</h4>
+                                        <p>Reach level 20</p>
+                                        <div class="progress-bar">
+                                            <div class="progress" style="width: 60%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-activity">
+                            <h3>Recent Activity</h3>
+                            <div class="activity-timeline">
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-plus"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p><strong>Added new location:</strong> Abandoned Metro Station</p>
+                                        <span class="activity-time">2 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-trophy"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p><strong>Achievement unlocked:</strong> Safety First</p>
+                                        <span class="activity-time">1 day ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-map"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p><strong>Updated territory:</strong> Industrial District East</p>
+                                        <span class="activity-time">3 days ago</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2344,6 +2494,27 @@
                 <div class="app-info">
                     <p>Urbindex v2.1</p>
                     <p>Urban Exploration Mapping Tool</p>
+                </div>
+            </div>
+            
+            <!-- Floating Action Button -->
+            <div class="floating-action-menu">
+                <button class="fab-main" id="main-fab" title="Quick Actions">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <div class="fab-menu" id="fab-menu">
+                    <button class="fab-item" id="add-location-fab" title="Add Location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Location</span>
+                    </button>
+                    <button class="fab-item" id="add-territory-fab" title="Add Territory">
+                        <i class="fas fa-map"></i>
+                        <span>Territory</span>
+                    </button>
+                    <button class="fab-item" id="quick-photo-fab" title="Quick Photo">
+                        <i class="fas fa-camera"></i>
+                        <span>Photo</span>
+                    </button>
                 </div>
             </div>
         </main>
@@ -2448,6 +2619,7 @@
     
     <!-- App Scripts -->
     <script src="js/config.js"></script>
+    <script src="js/real-data.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/offline.js"></script>
     <script src="js/auth.js"></script>
@@ -2458,6 +2630,7 @@
     <script src="js/profile.js"></script>
     <script src="js/search.js"></script>
     <script src="js/forum.js"></script>
+    <script src="js/ui-enhancements.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
