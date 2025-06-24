@@ -1,5 +1,5 @@
 // Firebase Configuration for Urbindex
-// Replace with your own Firebase project configuration
+// Using Firebase v9 SDK with compatibility mode
 
 const firebaseConfig = {
   apiKey: "AIzaSyCifqLPnCuvRVZ9hvHIJVBmHkzB5nJyqtc",
@@ -11,47 +11,60 @@ const firebaseConfig = {
   measurementId: "G-HFS8F0KZSH"
 };
 
-// NOTE: The above configuration is a placeholder.
-// To get your own Firebase configuration:
-// 1. Go to https://console.firebase.google.com/
-// 2. Create a new project or select an existing one
-// 3. Click on the web icon (</>) to add a web app to your project
-// 4. Register your app with a nickname
-// 5. Copy the firebaseConfig object and replace the above values
+// Initialize Firebase with error handling
+try {
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+    console.log('Firebase initialized successfully');
+  }
+} catch (error) {
+  console.error('Firebase initialization error:', error);
+}
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+// Initialize Firestore with enhanced error handling
+let db;
+try {
+  db = firebase.firestore();
+  
+  // Enable offline persistence with better error handling
+  db.enablePersistence({ synchronizeTabs: true })
+    .then(() => {
+      console.log('Firestore persistence enabled for offline use');
+    })
+    .catch((err) => {
+      if (err.code === 'failed-precondition') {
+        console.warn('Firestore persistence failed: Multiple tabs open');
+      } else if (err.code === 'unimplemented') {
+        console.warn('Firestore persistence not supported by this browser');
+      } else {
+        console.error('Firestore persistence error:', err);
+      }
+    });
+} catch (error) {
+  console.error('Firestore initialization error:', error);
+}
 
-// Initialize Firestore
-const db = firebase.firestore();
+// Export Firebase services with error handling
+let auth, storage;
+try {
+  auth = firebase.auth();
+  storage = firebase.storage();
+} catch (error) {
+  console.error('Firebase services initialization error:', error);
+}
 
-// Enable offline persistence
-db.enablePersistence()
-  .then(() => {
-    console.log('Firestore persistence enabled for offline use');
-  })
-  .catch((err) => {
-    if (err.code === 'failed-precondition') {
-      // Multiple tabs open, persistence can only be enabled in one tab at a time
-      console.warn('Firestore persistence failed: Multiple tabs open');
-    } else if (err.code === 'unimplemented') {
-      // The current browser does not support all of the features required for persistence
-      console.warn('Firestore persistence not supported by this browser');
-    } else {
-      console.error('Firestore persistence error:', err);
-    }
-  });
+// Collection references with null checks
+const locationsRef = db ? db.collection('locations') : null;
+const usersRef = db ? db.collection('users') : null;
+const ratingsRef = db ? db.collection('ratings') : null;
+const commentsRef = db ? db.collection('comments') : null;
+const territoriesRef = db ? db.collection('territories') : null;
+const crewsRef = db ? db.collection('crews') : null;
+const crewMembersRef = db ? db.collection('crewMembers') : null;
+const geocachesRef = db ? db.collection('geocaches') : null;
 
-// Export Firebase services
-const auth = firebase.auth();
-const storage = firebase.storage();
-
-// Collection references
-const locationsRef = db.collection('locations');
-const usersRef = db.collection('users');
-const ratingsRef = db.collection('ratings');
-const commentsRef = db.collection('comments');
-const territoriesRef = db.collection('territories');
-const crewsRef = db.collection('crews');
-const crewMembersRef = db.collection('crewMembers');
-const geocachesRef = db.collection('geocaches');
+// Export for global access
+window.firebaseConfig = firebaseConfig;
+window.db = db;
+window.auth = auth;
+window.storage = storage;

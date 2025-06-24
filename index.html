@@ -48,6 +48,7 @@
     <!-- Custom styles -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/custom-markers.css">
+    <link rel="stylesheet" href="css/toast.css">
     <style>
         :root {
             /* Core Color Palette - Enhanced */
@@ -2270,4 +2271,187 @@
                 <div class="spots-view" id="spots-grid">
                     <div class="spot-card">
                         <div class="spot-image-container">
-                            <img
+                            <img src="/images/default-location.jpg" alt="Location" class="spot-image">
+                            <div class="spot-type-badge">Abandoned</div>
+                        </div>
+                        <div class="spot-content">
+                            <h3 class="spot-title">Sample Location</h3>
+                            <p class="spot-description">This is a sample location for demonstration.</p>
+                            <div class="spot-meta">
+                                <span class="spot-rating">★★★★☆</span>
+                                <span class="spot-date">2 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spots-view" id="spots-map">
+                    <div id="spots-map-container"></div>
+                </div>
+                <div id="playlists-container">
+                    <div class="playlists-header">
+                        <h3>Location Playlists</h3>
+                        <button id="create-playlist-btn" class="neon-button small">Create Playlist</button>
+                    </div>
+                    <ul id="playlists-list">
+                        <li class="playlist-card">
+                            <h4>Favorite Spots</h4>
+                            <p>5 locations</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div id="profile-container" class="view">
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <div class="profile-avatar-container">
+                            <img id="profile-avatar" src="/images/default-avatar.png" alt="Profile Avatar">
+                            <button id="change-avatar-btn" class="neon-button small">Change</button>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="profile-name">Explorer</h2>
+                            <div class="profile-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="locations-count">0</div>
+                                    <div class="stat-label">Locations</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="territories-count">0</div>
+                                    <div class="stat-label">Territories</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="user-score">0</div>
+                                    <div class="stat-label">Score</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="settings-container" class="view">
+                <h2>Settings</h2>
+                <div class="setting-item">
+                    <label for="notifications-toggle">Enable Notifications</label>
+                    <input type="checkbox" id="notifications-toggle" class="toggle-checkbox">
+                    <label for="notifications-toggle" class="toggle-label"></label>
+                </div>
+                <div class="setting-item">
+                    <label for="location-sharing-toggle">Share Location</label>
+                    <input type="checkbox" id="location-sharing-toggle" class="toggle-checkbox">
+                    <label for="location-sharing-toggle" class="toggle-label"></label>
+                </div>
+                <div class="app-info">
+                    <p>Urbindex v2.1</p>
+                    <p>Urban Exploration Mapping Tool</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Location Modal -->
+    <div id="location-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3 id="modal-title">Add Location</h3>
+            <form id="location-form">
+                <div class="form-group">
+                    <label for="location-name">Name</label>
+                    <input type="text" id="location-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="location-description">Description</label>
+                    <textarea id="location-description" name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="location-category">Category</label>
+                    <select id="location-category" name="category">
+                        <option value="abandoned">Abandoned</option>
+                        <option value="historical">Historical</option>
+                        <option value="viewpoint">Viewpoint</option>
+                        <option value="water">Water Feature</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="location-risk">Risk Level</label>
+                    <select id="location-risk" name="riskLevel">
+                        <option value="safe">Safe</option>
+                        <option value="questionable">Questionable</option>
+                        <option value="unknown">Unknown</option>
+                        <option value="hot">Hot</option>
+                        <option value="high-risk">High Risk</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="location-type">Location Type</label>
+                    <select id="location-type" name="locationType">
+                        <option value="default">Default</option>
+                        <option value="water">Water Source</option>
+                        <option value="building">Building</option>
+                        <option value="power">Power Outlet</option>
+                        <option value="camp">Camp Spot</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="location-image">Images</label>
+                    <input type="file" id="location-image" name="images" multiple accept="image/*">
+                    <div id="image-preview-container"></div>
+                </div>
+                <div class="coordinates-display">
+                    <div>Latitude: <span id="location-lat">0</span></div>
+                    <div>Longitude: <span id="location-lng">0</span></div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="neon-button" onclick="document.getElementById('location-modal').classList.remove('active')">Cancel</button>
+                    <button type="submit" class="neon-button">Save Location</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="active">
+        <div class="splash-content">
+            <div class="splash-ascii">
+██╗   ██╗██████╗ ██████╗ ██╗███╗   ██╗██████╗ ███████╗██╗  ██╗
+██║   ██║██╔══██╗██╔══██╗██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝
+██║   ██║██████╔╝██████╔╝██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝ 
+██║   ██║██╔══██╗██╔══██╗██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗ 
+╚██████╔╝██║  ██║██████╔╝██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗
+ ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝
+            </div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <div class="tagline">URBAN EXPLORATION MAPPING</div>
+        </div>
+    </div>
+
+    <!-- Scanline Effect -->
+    <div class="scanline"></div>
+
+    <!-- Install Prompt -->
+    <div id="install-prompt">
+        <div id="install-prompt-text">Install Urbindex for the best experience</div>
+        <div id="install-prompt-buttons">
+            <button id="install-button" class="neon-button small">Install</button>
+            <button id="dismiss-install" class="neon-button small">Not Now</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/offline.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/locations.js"></script>
+    <script src="js/forum.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

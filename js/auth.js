@@ -1,11 +1,15 @@
 // Urbindex - Authentication Module
 
-// DOM Elements
-const loginButton = document.getElementById('login-button');
-const logoutButton = document.getElementById('logout-button');
-const userInfo = document.getElementById('user-info');
-const userName = document.getElementById('user-name');
-const userAvatar = document.getElementById('user-avatar');
+// DOM Elements with null checks
+let loginButton, logoutButton, userInfo, userName, userAvatar;
+
+function initDOMElements() {
+  loginButton = document.getElementById('login-button');
+  logoutButton = document.getElementById('logout-button');
+  userInfo = document.getElementById('user-info');
+  userName = document.getElementById('user-name');
+  userAvatar = document.getElementById('user-avatar');
+}
 
 // Current user state
 let currentUser = null;
@@ -15,6 +19,15 @@ const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
 
 // Initialize auth state observer
 function initAuth() {
+  // Initialize DOM elements
+  initDOMElements();
+  
+  // Check if Firebase auth is available
+  if (!auth) {
+    console.error('Firebase auth not initialized');
+    return;
+  }
+  
   // Listen for auth state changes
   auth.onAuthStateChanged(user => {
     if (user) {
@@ -28,9 +41,13 @@ function initAuth() {
     }
   });
 
-  // Set up event listeners
-  loginButton.addEventListener('click', signInWithGoogle);
-  logoutButton.addEventListener('click', signOut);
+  // Set up event listeners with null checks
+  if (loginButton) {
+    loginButton.addEventListener('click', signInWithGoogle);
+  }
+  if (logoutButton) {
+    logoutButton.addEventListener('click', signOut);
+  }
 }
 
 // Sign in with Google

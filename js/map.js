@@ -59,6 +59,7 @@ function initMap() {
     // Check if Leaflet is loaded
     if (typeof L === 'undefined') {
       console.error('Leaflet is not loaded');
+      loadLeafletDynamically();
       return;
     }
 

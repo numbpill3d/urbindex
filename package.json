@@ -22,8 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "firebase": "^9.23.0",
-    "leaflet": "^1.9.4",
-    "urbindex": "file:"
+    "leaflet": "^1.9.4"
   },
   "devDependencies": {
     "eslint": "^8.40.0",

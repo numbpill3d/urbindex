@@ -1162,11 +1162,16 @@ function handleBackButton(event) {
 function initializeModules() {
   return new Promise(async (resolve, reject) => {
     try {
-      // Define modules to initialize with proper error handling for undefined modules
-      const modules = [
+      // Define core modules that must be initialized first
+      const coreModules = [
+        { name: 'offline', init: window.offlineModule?.initOffline },
         { name: 'auth', init: window.authModule?.initAuth },
         { name: 'map', init: window.mapModule?.initMap },
-        { name: 'locations', init: window.locationsModule?.initLocations },
+        { name: 'locations', init: window.locationsModule?.initLocations }
+      ];
+      
+      // Define optional modules
+      const optionalModules = [
         { name: 'spots', init: window.spotsModule?.initSpots },
         { name: 'forum', init: window.forumModule?.initForum },
         { name: 'territories', init: window.territoriesModule?.initTerritories },
@@ -1179,9 +1184,10 @@ function initializeModules() {
         { name: 'search', init: window.searchModule?.initSearch },
         { name: 'media', init: window.mediaModule?.initMedia },
         { name: 'notifications', init: window.notificationsModule?.initNotifications },
-        { name: 'social', init: window.socialModule?.initSocial },
-        { name: 'offline', init: window.offlineModule?.initOffline }
+        { name: 'social', init: window.socialModule?.initSocial }
       ];
+      
+      const modules = [...coreModules, ...optionalModules];
 
       // Add auth state change listener to add placeholder forum posts when user is authenticated
       if (window.authModule) {
