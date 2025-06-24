@@ -12,6 +12,11 @@ function initProfile() {
 }
 
 async function loadUserProfile(userId) {
+  if (!usersRef) {
+    console.error('Users reference not available');
+    return;
+  }
+  
   try {
     const userDoc = await usersRef.doc(userId).get();
     if (!userDoc.exists) return;
@@ -39,6 +44,11 @@ function updateProfileUI(userData) {
 }
 
 async function loadUserStats(userId) {
+  if (!locationsRef || !usersRef) {
+    console.error('Firebase references not available');
+    return;
+  }
+  
   try {
     // Count user's locations
     const locationsSnapshot = await locationsRef.where('createdBy', '==', userId).get();

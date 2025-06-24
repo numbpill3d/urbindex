@@ -17,12 +17,17 @@ function initComments() {
 
 // Add comment to a location
 async function addComment(locationId, commentText) {
-  if (!authModule.isAuthenticated()) {
-    alert('Please sign in to add comments');
+  if (!window.authModule?.isAuthenticated()) {
+    window.offlineModule?.showToast('Please sign in to add comments', 'warning');
     return false;
   }
   
-  const user = authModule.getCurrentUser();
+  if (!commentsRef) {
+    console.error('Comments reference not available');
+    return false;
+  }
+  
+  const user = window.authModule.getCurrentUser();
   
   try {
     const commentData = {
@@ -45,6 +50,11 @@ async function addComment(locationId, commentText) {
 
 // Load comments for a location
 async function loadComments(locationId) {
+  if (!commentsRef) {
+    console.error('Comments reference not available');
+    return [];
+  }
+  
   try {
     const snapshot = await commentsRef
       .where('locationId', '==', locationId)
@@ -68,12 +78,12 @@ async function loadComments(locationId) {
 
 // Delete a comment
 async function deleteComment(commentId) {
-  if (!authModule.isAuthenticated()) {
-    alert('Please sign in to delete comments');
+  if (!window.authModule?.isAuthenticated()) {
+    window.offlineModule?.showToast('Please sign in to delete comments', 'warning');
     return false;
   }
   
-  const user = authModule.getCurrentUser();
+  const user = window.authModule.getCurrentUser();
   
   try {
     // Get the comment
@@ -104,12 +114,12 @@ async function deleteComment(commentId) {
 
 // Edit a comment
 async function editComment(commentId, newText) {
-  if (!authModule.isAuthenticated()) {
-    alert('Please sign in to edit comments');
+  if (!window.authModule?.isAuthenticated()) {
+    window.offlineModule?.showToast('Please sign in to edit comments', 'warning');
     return false;
   }
   
-  const user = authModule.getCurrentUser();
+  const user = window.authModule.getCurrentUser();
   
   try {
     // Get the comment
@@ -200,10 +210,10 @@ function renderComments(locationId, container) {
       commentElement.dataset.id = comment.id;
       
       // Format date
-      const dateDisplay = utilsModule.formatDate(comment.createdAt);
+      const dateDisplay = window.utilsModule?.formatDate(comment.createdAt) || 'Unknown date';
       
       // Check if user is the author
-      const user = authModule.getCurrentUser();
+      const user = window.authModule?.getCurrentUser();
       const isAuthor = user && comment.createdBy === user.uid;
       
       commentElement.innerHTML = `

@@ -941,7 +941,7 @@ function setupForumEventListeners() {
   if (newPostBtn) {
     newPostBtn.addEventListener('click', () => {
       if (!window.authModule?.isAuthenticated()) {
-        alert('Please sign in to create a post');
+        window.offlineModule?.showToast('Please sign in to create a post', 'warning');
         return;
       }
 
@@ -985,7 +985,7 @@ function setupAvatarUpload() {
   if (avatarUpload) {
     avatarUpload.addEventListener('change', (e) => {
       if (!window.authModule?.isAuthenticated()) {
-        alert('Please sign in to change your avatar');
+        window.offlineModule?.showToast('Please sign in to change your avatar', 'warning');
         return;
       }
 
@@ -994,13 +994,13 @@ function setupAvatarUpload() {
 
       // Check file type
       if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+        window.offlineModule?.showToast('Please select an image file', 'warning');
         return;
       }
 
       // Check file size (max 2MB)
       if (file.size > 2 * 1024 * 1024) {
-        alert('Image size should be less than 2MB');
+        window.offlineModule?.showToast('Image size should be less than 2MB', 'warning');
         return;
       }
 
@@ -1491,8 +1491,8 @@ function initChatUI() {
   if (!chatInput || !chatSendBtn) return;
 
   chatSendBtn.addEventListener('click', () => {
-    if (!authModule.isAuthenticated()) {
-      alert('Please sign in to send messages');
+    if (!window.authModule?.isAuthenticated()) {
+      window.offlineModule?.showToast('Please sign in to send messages', 'warning');
       return;
     }
 
@@ -1505,8 +1505,8 @@ function initChatUI() {
 
   chatInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-      if (!authModule.isAuthenticated()) {
-        alert('Please sign in to send messages');
+      if (!window.authModule?.isAuthenticated()) {
+        window.offlineModule?.showToast('Please sign in to send messages', 'warning');
         return;
       }
 

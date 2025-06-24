@@ -17,6 +17,11 @@ async function searchLocations(e) {
   const query = e.target.value.toLowerCase().trim();
   if (!query) return;
   
+  if (!locationsRef) {
+    console.error('Locations reference not available');
+    return;
+  }
+  
   try {
     const snapshot = await locationsRef
       .orderBy('name')
@@ -39,6 +44,11 @@ async function searchLocations(e) {
 async function searchForum(e) {
   const query = e.target.value.toLowerCase().trim();
   if (!query) return;
+  
+  if (!db) {
+    console.error('Database reference not available');
+    return;
+  }
   
   try {
     const snapshot = await db.collection('forum')

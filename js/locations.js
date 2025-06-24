@@ -488,11 +488,11 @@ function addLocationToList(id, locationData, isOffline = false) {
   
   // Get risk level indicator
   const riskLevel = locationData.riskLevel || 'unknown';
-  const riskIndicator = `<span class="risk-indicator risk-${riskLevel}">${utilsModule.getRiskLabel(riskLevel)}</span>`;
+  const riskIndicator = `<span class="risk-indicator risk-${riskLevel}">${window.utilsModule?.getRiskLabel(riskLevel) || riskLevel}</span>`;
   
   // Get location type
   const locationType = locationData.locationType || 'default';
-  const locationTypeLabel = utilsModule.getLocationTypeLabel(locationType);
+  const locationTypeLabel = window.utilsModule?.getLocationTypeLabel(locationType) || locationType;
   
   // Get first image if available
   const imageHtml = locationData.imageUrls && locationData.imageUrls.length > 0 
@@ -504,7 +504,7 @@ function addLocationToList(id, locationData, isOffline = false) {
     <div class="location-item-header">
       <h3>${locationData.name}</h3>
       <div class="location-badges">
-        <span class="location-category">${utilsModule.getCategoryLabel(locationData.category)}</span>
+        <span class="location-category">${window.utilsModule?.getCategoryLabel(locationData.category) || locationData.category}</span>
         ${riskIndicator}
       </div>
     </div>
@@ -605,12 +605,12 @@ function updateUserLocationCount(userId) {
 
 // Add comment to a location
 async function addComment(locationId, commentText) {
-  if (!authModule.isAuthenticated()) {
-    alert('Please sign in to add comments');
+  if (!window.authModule?.isAuthenticated()) {
+    window.offlineModule?.showToast('Please sign in to add comments', 'warning');
     return;
   }
   
-  const user = authModule.getCurrentUser();
+  const user = window.authModule.getCurrentUser();
   
   try {
     const commentData = {
@@ -656,12 +656,12 @@ async function loadComments(locationId) {
 
 // Claim a location
 async function claimLocation(locationId) {
-  if (!authModule.isAuthenticated()) {
-    alert('Please sign in to claim locations');
+  if (!window.authModule?.isAuthenticated()) {
+    window.offlineModule?.showToast('Please sign in to claim locations', 'warning');
     return false;
   }
   
-  const user = authModule.getCurrentUser();
+  const user = window.authModule.getCurrentUser();
   
   try {
     // Check if location is already claimed
@@ -703,8 +703,8 @@ async function claimLocation(locationId) {
 
 // Rate a location with stars (1-5)
 async function rateLocationWithStars(locationId, rating) {
-  if (!authModule.isAuthenticated()) {
-    alert('Please sign in to rate locations');
+  if (!window.authModule?.isAuthenticated()) {
+    window.offlineModule?.showToast('Please sign in to rate locations', 'warning');
     return false;
   }
   
@@ -713,7 +713,7 @@ async function rateLocationWithStars(locationId, rating) {
     return false;
   }
   
-  const user = authModule.getCurrentUser();
+  const user = window.authModule.getCurrentUser();
   
   try {
     // Check if user has already rated this location
@@ -775,12 +775,12 @@ async function rateLocationWithStars(locationId, rating) {
 
 // Save a location to user's saved locations
 async function saveLocationToFavorites(locationId) {
-  if (!authModule.isAuthenticated()) {
-    alert('Please sign in to save locations');
+  if (!window.authModule?.isAuthenticated()) {
+    window.offlineModule?.showToast('Please sign in to save locations', 'warning');
     return false;
   }
   
-  const user = authModule.getCurrentUser();
+  const user = window.authModule.getCurrentUser();
   
   try {
     // Check if location is already saved
@@ -810,12 +810,12 @@ async function saveLocationToFavorites(locationId) {
 
 // Remove a location from user's saved locations
 async function removeLocationFromFavorites(locationId) {
-  if (!authModule.isAuthenticated()) {
-    alert('Please sign in to manage saved locations');
+  if (!window.authModule?.isAuthenticated()) {
+    window.offlineModule?.showToast('Please sign in to manage saved locations', 'warning');
     return false;
   }
   
-  const user = authModule.getCurrentUser();
+  const user = window.authModule.getCurrentUser();
   
   try {
     // Delete from savedLocations collection
@@ -833,11 +833,11 @@ async function removeLocationFromFavorites(locationId) {
 
 // Check if a location is saved by the current user
 async function isLocationSaved(locationId) {
-  if (!authModule.isAuthenticated()) {
+  if (!window.authModule?.isAuthenticated()) {
     return false;
   }
   
-  const user = authModule.getCurrentUser();
+  const user = window.authModule.getCurrentUser();
   
   try {
     const savedLocationsRef = firebase.firestore().collection('savedLocations');

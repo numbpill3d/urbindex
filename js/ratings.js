@@ -11,6 +11,11 @@ async function voteLocation(locationId, action) {
     return false;
   }
   
+  if (!ratingsRef || !locationsRef) {
+    console.error('Firebase references not available');
+    return false;
+  }
+  
   const user = window.authModule.getCurrentUser();
   const voteId = `${locationId}_${user.uid}_vote`;
   
@@ -70,6 +75,11 @@ async function rateLocation(locationId, rating) {
   }
   
   if (rating < 1 || rating > 5) return false;
+  
+  if (!ratingsRef || !locationsRef) {
+    console.error('Firebase references not available');
+    return false;
+  }
   
   const user = window.authModule.getCurrentUser();
   const ratingId = `${locationId}_${user.uid}_stars`;

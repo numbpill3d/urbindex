@@ -2843,32 +2843,9 @@ window.mapModule = {
     map.addControl(control);
     return control;
   },
-  // Add missing functions
   saveCurrentAreaOffline: () => {
     if (!map) return false;
-
-    // Implementation for saving current map area for offline use
     console.log('Saving current map area for offline use');
-
-    // Show notification to user
-    const mapContainer = document.getElementById('map');
-    if (mapContainer) {
-      const notification = document.createElement('div');
-      notification.className = 'map-notification success';
-      notification.innerHTML = `
-        <i class="fas fa-check-circle"></i>
-        <span>Map area saved for offline use</span>
-      `;
-      mapContainer.appendChild(notification);
-
-      // Remove after 3 seconds
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.parentNode.removeChild(notification);
-        }
-      }, 3000);
-    }
-
     return true;
   }
 };
