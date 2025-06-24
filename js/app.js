@@ -907,15 +907,29 @@ function setupEventListeners() {
     button.addEventListener('click', () => {
       const modal = button.closest('.modal');
       if (modal) {
+        modal.classList.add('hidden');
         modal.classList.remove('active');
       }
     });
   });
+  
+  // Cancel location button
+  const cancelLocationBtn = document.getElementById('cancel-location-btn');
+  if (cancelLocationBtn) {
+    cancelLocationBtn.addEventListener('click', () => {
+      const modal = document.getElementById('location-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('active');
+      }
+    });
+  }
 
   // Close modal when clicking outside content
   document.querySelectorAll('.modal').forEach(modal => {
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
+        modal.classList.add('hidden');
         modal.classList.remove('active');
       }
     });

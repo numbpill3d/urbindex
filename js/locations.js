@@ -582,6 +582,7 @@ function showEmptyUserLocations() {
 function closeLocationModal() {
   const modal = document.getElementById('location-modal');
   if (modal) {
+    modal.classList.add('hidden');
     modal.classList.remove('active');
   }
 }

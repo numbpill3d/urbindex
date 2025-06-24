@@ -1811,13 +1811,9 @@ function updateUserPosition(position) {
 
 // Handle map click event
 function onMapClick(e) {
-  if (!window.authModule?.isAuthenticated()) {
-    alert('Please sign in to add locations');
-    return;
-  }
-
-  const { lat, lng } = e.latlng;
-  openAddLocationModal({ lat, lng });
+  // Don't automatically open modal on map click
+  // Users can use the add location button instead
+  console.log('Map clicked at:', e.latlng);
 }
 
 // Open add location modal with enhanced functionality
