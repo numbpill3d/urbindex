@@ -1017,7 +1017,7 @@ function getUserLocation() {
     }
 
     const removeLoadingIndicator = () => {
-      if (loadingIndicator && loadingIndicator.parentNode) {
+      if (loadingIndicator?.parentNode) {
         loadingIndicator.parentNode.removeChild(loadingIndicator);
       }
     };
@@ -1140,7 +1140,7 @@ function updateUserPosition(position) {
   currentPosition = { lat: latitude, lng: longitude, accuracy };
 
   // Set view center if this is first location or if we're actively following user
-  if (!userMarker || (map && map.hasLayer(userMarker) && map._following)) {
+  if (!userMarker || (map?.hasLayer(userMarker) && map._following)) {
     map.setView([latitude, longitude], mapConfig.initialZoom);
   }
 

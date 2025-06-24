@@ -489,7 +489,7 @@ function checkLocationAchievements(event) {
     }
     
     // Night Owl achievement (check if location was added during night hours)
-    if (event && event.detail && event.detail.timestamp) {
+    if (event?.detail && event.detail.timestamp) {
       const timestamp = event.detail.timestamp;
       const hour = timestamp.getHours();
       
@@ -726,7 +726,7 @@ function checkChallengeAchievements(event) {
     let pointsEarned = 0;
     
     // Weekly Explorer achievement (1 weekly challenge)
-    if (event && event.detail && event.detail.type === 'weekly' && !achievements.weekly_explorer) {
+    if (event?.detail && event.detail.type === 'weekly' && !achievements.weekly_explorer) {
       newAchievements.weekly_explorer = true;
       pointsEarned += ACHIEVEMENTS.weekly_explorer.points;
     }

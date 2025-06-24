@@ -1151,7 +1151,7 @@ function showNearbyLocations() {
 
   // Function to remove loading indicator
   const removeLoadingIndicator = () => {
-    if (loadingIndicator && loadingIndicator.parentNode) {
+    if (loadingIndicator?.parentNode) {
       loadingIndicator.parentNode.removeChild(loadingIndicator);
     }
   };
@@ -1357,7 +1357,7 @@ function showSavedLocations() {
 
   // Function to remove loading indicator
   const removeLoadingIndicator = () => {
-    if (loadingIndicator && loadingIndicator.parentNode) {
+    if (loadingIndicator?.parentNode) {
       loadingIndicator.parentNode.removeChild(loadingIndicator);
     }
   };
@@ -1623,7 +1623,7 @@ function getUserLocation() {
     }
 
     const removeLoadingIndicator = () => {
-      if (loadingIndicator && loadingIndicator.parentNode) {
+      if (loadingIndicator?.parentNode) {
         loadingIndicator.parentNode.removeChild(loadingIndicator);
       }
     };
@@ -1746,7 +1746,7 @@ function updateUserPosition(position) {
   currentPosition = { lat: latitude, lng: longitude, accuracy };
 
   // Set view center if this is first location or if we're actively following user
-  if (!userMarker || (map && map.hasLayer(userMarker) && map._following)) {
+  if (!userMarker || (map?.hasLayer(userMarker) && map._following)) {
     map.setView([latitude, longitude], mapConfig.initialZoom);
   }
 
@@ -2131,7 +2131,7 @@ function loadLocations() {
 
   // Function to remove loading indicator
   const removeLoadingIndicator = () => {
-    if (loadingIndicator && loadingIndicator.parentNode) {
+    if (loadingIndicator?.parentNode) {
       loadingIndicator.parentNode.removeChild(loadingIndicator);
     }
   };
@@ -2411,12 +2411,12 @@ function createHeatmapLayer() {
 
   // Add all location markers to heatmap
   Object.values(locationMarkers).forEach(marker => {
-    if (marker && marker.getLatLng) {
+    if (marker?.getLatLng) {
       const latLng = marker.getLatLng();
 
       // Get intensity based on location data if available
       let intensity = 1;
-      if (marker.options && marker.options.locationData) {
+      if (marker.options?.locationData) {
         const locationData = marker.options.locationData;
 
         // Use rating or visit count for intensity if available

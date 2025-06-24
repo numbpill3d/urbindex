@@ -294,7 +294,7 @@ function clearUserSpecificMarkers() {
   console.log('Clearing user-specific markers');
 
   // Use the map module's clearLocationMarkers function if available
-  if (window.mapModule && window.mapModule.clearLocationMarkers) {
+  if (window.mapModule?.clearLocationMarkers) {
     window.mapModule.clearLocationMarkers();
   }
 }

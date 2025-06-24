@@ -860,7 +860,7 @@ function loadPlaylistLocations(locationIds, container) {
               mapModule.map.setView([lat, lng], 16);
               
               // Open the popup if marker exists
-              if (mapModule.locationMarkers && mapModule.locationMarkers[location.id]) {
+              if (mapModule.locationMarkers?.[location.id]) {
                 mapModule.locationMarkers[location.id].openPopup();
               }
             }
@@ -1059,7 +1059,7 @@ function addLocationToPlaylist(locationId, playlistId) {
   }
   
   // Check if location is already in playlist
-  if (playlist.locationIds && playlist.locationIds.includes(locationId)) {
+  if (playlist.locationIds?.includes(locationId)) {
     alert('This location is already in the playlist');
     return;
   }
