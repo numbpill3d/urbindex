@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#00d5ff">
+    <meta name="description" content="Urbindex - Community-driven urban exploration mapping tool">
+    <title>Urbindex - Urban Exploration Network</title>
+    
+    <!-- External Dependencies -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-bg: #0a0a15;
+            --secondary-bg: #111122;
+            --tertiary-bg: #1a1a2e;
+            --neon-blue: #00d5ff;
+            --neon-purple: #ae00ff;
+            --text-primary: #f0f0ff;
+            --text-secondary: #b0b0d0;
+            --text-muted: #7a7a9a;
+            --border-color: #2a2a4a;
+            --danger: #ff3860;
+            --success: #23d160;
+            --warning: #ffdd57;
+            
+            --gradient-primary: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --border-radius: 8px;
+            --transition: 0.3s ease;
+            --spacing: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing);
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .loading::before {
+            content: '';
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--neon-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: rgba(255, 56, 96, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: var(--border-radius);
+            padding: var(--spacing);
+            color: var(--danger);
+            text-align: center;
+            margin: var(--spacing) 0;
+        }
+
+        /* Layout */
+        .app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(17, 17, 34, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 var(--spacing);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px var(--spacing);
+            display: flex;
+            gap: 8px;
+            position: sticky;
+            top: 60px;
+            z-index: 90;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover {
+            color: var(--text-primary);
+            background: rgba(0, 213, 255, 0.1);
+        }
+
+        .nav-btn.active {
+            color: var(--neon-blue);
+            background: rgba(0, 213, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .main {
+            flex: 1;
+            padding: var(--spacing);
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Map Layout */
+        .map-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: var(--spacing);
+            height: calc(100vh - 140px);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing);
+        }
+
+        .panel {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--spacing);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .panel-title {
+            font-weight: 600;
+            margin-bottom: var(--spacing);
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--neon-blue);
+        }
+
+        .map-container {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #map {
+            height: 100%;
+            min-height: 400px;
+        }
+
+        /* Interactive Elements */
+        .btn {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background: var(--neon-blue);
+            color: var(--primary-bg);
+            box-shadow: 0 0 15px rgba(0, 213, 255, 0.3);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            color: white;
+        }
+
+        .input {
+            background: var(--tertiary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 8px 12px;
+            color: var(--text-primary);
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 0 2px rgba(0, 213, 255, 0.2);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--spacing);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: var(--neon-blue);
+            box-shadow: var(--shadow-soft);
+            transform: translateY(-2px);
+        }
+
+        /* Activity Feed */
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--tertiary-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--neon-blue);
+            font-size: 0.8rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-user {
+            font-weight: 600;
+            color: var(--neon-blue);
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 213, 255, 0.4);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 213, 255, 0.6);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 21, 0.9);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: var(--spacing);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+            padding-top: var(--spacing);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .map-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+            
+            .sidebar {
+                order: 2;
+                max-height: 300px;
+                overflow-y: auto;
+            }
+            
+            .map-container {
+                order: 1;
+                height: 50vh;
+            }
+            
+            .nav {
+                padding: 8px;
+            }
+            
+            .nav-btn {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main {
+                padding: 8px;
+            }
+            
+            .map-layout {
+                gap: 8px;
+            }
+            
+            .panel {
+                padding: 12px;
+            }
+        }
+
+        /* View States */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Tooltips */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--tertiary-bg);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 1000;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Welcome Message */
+        .welcome {
+            background: linear-gradient(135deg, rgba(0, 213, 255, 0.1), rgba(174, 0, 255, 0.1));
+            border: 1px solid var(--neon-blue);
+            border-radius: var(--border-radius);
+            padding: var(--spacing);
+            margin-bottom: var(--spacing);
+            text-align: center;
+        }
+
+        .welcome h3 {
+            color: var(--neon-blue);
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Status Indicators */
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .status-dot.offline {
+            background: var(--danger);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus styles for keyboard navigation */
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 2px solid var(--neon-blue);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">URBINDEX</div>
+            <div class="status">
+                <div class="status-dot" id="connection-status"></div>
+                <span id="connection-text">Connected</span>
+            </div>
+            <button class="btn" id="auth-btn">Sign In</button>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-btn active" data-view="map">Map</button>
+            <button class="nav-btn" data-view="locations">Locations</button>
+            <button class="nav-btn" data-view="forum">Forum</button>
+            <button class="nav-btn" data-view="profile">Profile</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Map View -->
+            <div class="view active" id="map-view">
+                <div class="welcome" id="welcome-message">
+                    <h3>Welcome to Urbindex</h3>
+                    <p>Discover and share urban exploration locations with the community. Click on map markers to explore locations or use the + button to add new ones.</p>
+                </div>
+                
+                <div class="map-layout">
+                    <aside class="sidebar">
+                        <!-- Activity Feed -->
+                        <div class="panel">
+                            <div class="panel-title">Recent Activity</div>
+                            <div id="activity-feed" class="loading">Loading activity...</div>
+                        </div>
+
+                        <!-- Online Users -->
+                        <div class="panel">
+                            <div class="panel-title">Community</div>
+                            <div id="online-users" class="loading">Loading users...</div>
+                        </div>
+                    </aside>
+
+                    <div class="map-container">
+                        <div id="map"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Locations View -->
+            <div class="view" id="locations-view">
+                <h2>My Locations</h2>
+                <div id="locations-grid" class="loading">Loading your locations...</div>
+            </div>
+
+            <!-- Forum View -->
+            <div class="view" id="forum-view">
+                <h2>Community Forum</h2>
+                <div id="forum-posts" class="loading">Loading forum posts...</div>
+            </div>
+
+            <!-- Profile View -->
+            <div class="view" id="profile-view">
+                <h2>Profile</h2>
+                <div id="profile-content" class="loading">Loading profile...</div>
+            </div>
+        </main>
+
+        <!-- Floating Action Button -->
+        <button class="fab" id="add-location-btn" data-tooltip="Add Location">
+            <i class="fas fa-plus"></i>
+        </button>
+
+        <!-- Add Location Modal -->
+        <div class="modal" id="location-modal">
+            <div class="modal-content">
+                <button class="modal-close">&times;</button>
+                <h3>Add New Location</h3>
+                <form id="location-form">
+                    <div class="form-group">
+                        <label class="form-label" for="location-name">Name</label>
+                        <input class="input" type="text" id="location-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="location-description">Description</label>
+                        <textarea class="input" id="location-description" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="location-category">Category</label>
+                        <select class="input" id="location-category">
+                            <option value="abandoned">Abandoned Building</option>
+                            <option value="rooftop">Rooftop Access</option>
+                            <option value="tunnel">Underground/Tunnel</option>
+                            <option value="industrial">Industrial Site</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="location-risk">Risk Level</label>
+                        <select class="input" id="location-risk">
+                            <option value="low">Low - Safe access</option>
+                            <option value="moderate">Moderate - Some caution needed</option>
+                            <option value="high">High - Experienced only</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn" id="cancel-btn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Location</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCifqLPnCuvRVZ9hvHIJVBmHkzB5nJyqtc",
+            authDomain: "urbindex-d69e1.firebaseapp.com",
+            projectId: "urbindex-d69e1",
+            storageBucket: "urbindex-d69e1.firebasestorage.app",
+            messagingSenderId: "889914696327",
+            appId: "1:889914696327:web:351daa656a4d12fa828e22"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // App State
+        let map;
+        let currentUser = null;
+        let markers = [];
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        function initApp() {
+            initMap();
+            initNavigation();
+            initAuth();
+            initModal();
+            loadData();
+            
+            // Hide welcome message after 5 seconds
+            setTimeout(() => {
+                const welcome = document.getElementById('welcome-message');
+                if (welcome) welcome.style.display = 'none';
+            }, 5000);
+        }
+
+        // Map Initialization
+        function initMap() {
+            map = L.map('map').setView([40.7128, -74.0060], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add click handler for adding locations
+            map.on('click', onMapClick);
+        }
+
+        function onMapClick(e) {
+            if (currentUser) {
+                showLocationModal(e.latlng);
+            } else {
+                showToast('Please sign in to add locations', 'warning');
+            }
+        }
+
+        // Navigation
+        function initNavigation() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchView(btn.dataset.view));
+            });
+        }
+
+        function switchView(viewName) {
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === viewName);
+            });
+
+            // Update views
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.toggle('active', view.id === `${viewName}-view`);
+            });
+        }
+
+        // Authentication
+        function initAuth() {
+            const authBtn = document.getElementById('auth-btn');
+            
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                authBtn.textContent = user ? 'Sign Out' : 'Sign In';
+                updateConnectionStatus(true);
+                
+                if (user) {
+                    loadUserData();
+                }
+            });
+
+            authBtn.addEventListener('click', () => {
+                if (currentUser) {
+                    auth.signOut();
+                } else {
+                    signInAnonymously();
+                }
+            });
+        }
+
+        function signInAnonymously() {
+            auth.signInAnonymously()
+                .then(() => showToast('Signed in successfully', 'success'))
+                .catch(error => showToast('Sign in failed', 'error'));
+        }
+
+        // Modal Management
+        function initModal() {
+            const modal = document.getElementById('location-modal');
+            const closeBtn = modal.querySelector('.modal-close');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const form = document.getElementById('location-form');
+            const fabBtn = document.getElementById('add-location-btn');
+
+            closeBtn.addEventListener('click', hideLocationModal);
+            cancelBtn.addEventListener('click', hideLocationModal);
+            form.addEventListener('submit', handleLocationSubmit);
+            fabBtn.addEventListener('click', () => {
+                if (currentUser) {
+                    showLocationModal();
+                } else {
+                    showToast('Please sign in to add locations', 'warning');
+                }
+            });
+
+            // Close modal on outside click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) hideLocationModal();
+            });
+        }
+
+        let selectedLatLng = null;
+
+        function showLocationModal(latlng = null) {
+            selectedLatLng = latlng;
+            document.getElementById('location-modal').classList.add('active');
+            document.getElementById('location-name').focus();
+        }
+
+        function hideLocationModal() {
+            document.getElementById('location-modal').classList.remove('active');
+            document.getElementById('location-form').reset();
+            selectedLatLng = null;
+        }
+
+        function handleLocationSubmit(e) {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                showToast('Please sign in first', 'error');
+                return;
+            }
+
+            const formData = new FormData(e.target);
+            const locationData = {
+                name: document.getElementById('location-name').value,
+                description: document.getElementById('location-description').value,
+                category: document.getElementById('location-category').value,
+                riskLevel: document.getElementById('location-risk').value,
+                coordinates: selectedLatLng ? [selectedLatLng.lat, selectedLatLng.lng] : [40.7128, -74.0060],
+                createdBy: currentUser.uid,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'active'
+            };
+
+            db.collection('locations').add(locationData)
+                .then(() => {
+                    showToast('Location added successfully!', 'success');
+                    hideLocationModal();
+                    loadLocations();
+                })
+                .catch(error => {
+                    console.error('Error adding location:', error);
+                    showToast('Failed to add location', 'error');
+                });
+        }
+
+        // Data Loading
+        function loadData() {
+            loadLocations();
+            loadActivity();
+            loadOnlineUsers();
+        }
+
+        function loadLocations() {
+            db.collection('locations')
+                .where('status', '==', 'active')
+                .orderBy('createdAt', 'desc')
+                .limit(50)
+                .onSnapshot(snapshot => {
+                    // Clear existing markers
+                    markers.forEach(marker => map.removeLayer(marker));
+                    markers = [];
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.coordinates) {
+                            const marker = L.marker(data.coordinates)
+                                .bindPopup(`
+                                    <div class="popup-content">
+                                        <h4>${data.name}</h4>
+                                        <p>${data.description}</p>
+                                        <div class="popup-meta">
+                                            <span class="category">${data.category}</span>
+                                            <span class="risk risk-${data.riskLevel}">${data.riskLevel} risk</span>
+                                        </div>
+                                    </div>
+                                `)
+                                .addTo(map);
+                            markers.push(marker);
+                        }
+                    });
+
+                    updateLocationsList(snapshot);
+                }, error => {
+                    console.error('Error loading locations:', error);
+                    showError('Failed to load locations');
+                });
+        }
+
+        function updateLocationsList(snapshot) {
+            const grid = document.getElementById('locations-grid');
+            if (!grid) return;
+
+            if (snapshot.empty) {
+                grid.innerHTML = '<p class="text-muted">No locations found. Add your first location!</p>';
+                return;
+            }
+
+            const locations = [];
+            snapshot.forEach(doc => {
+                locations.push({ id: doc.id, ...doc.data() });
+            });
+
+            grid.innerHTML = locations.map(location => `
+                <div class="card fade-in">
+                    <h4>${location.name}</h4>
+                    <p>${location.description}</p>
+                    <div class="card-meta">
+                        <span class="category">${location.category}</span>
+                        <span class="risk risk-${location.riskLevel}">${location.riskLevel}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadActivity() {
+            db.collection('locations')
+                .orderBy('createdAt', 'desc')
+                .limit(10)
+                .onSnapshot(snapshot => {
+                    const feed = document.getElementById('activity-feed');
+                    if (!feed) return;
+
+                    if (snapshot.empty) {
+                        feed.innerHTML = '<p class="text-muted">No recent activity</p>';
+                        return;
+                    }
+
+                    const activities = [];
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        activities.push({
+                            type: 'location_added',
+                            user: 'Explorer',
+                            content: `Added "${data.name}"`,
+                            time: data.createdAt ? timeAgo(data.createdAt.toDate()) : 'Just now'
+                        });
+                    });
+
+                    feed.innerHTML = activities.map(activity => `
+                        <div class="activity-item fade-in">
+                            <div class="activity-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div><span class="activity-user">${activity.user}</span> ${activity.content}</div>
+                                <div class="activity-time">${activity.time}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }, error => {
+                    console.error('Error loading activity:', error);
+                    document.getElementById('activity-feed').innerHTML = '<div class="error">Failed to load activity</div>';
+                });
+        }
+
+        function loadOnlineUsers() {
+            const usersDiv = document.getElementById('online-users');
+            if (!usersDiv) return;
+
+            // Simulate online users for demo
+            usersDiv.innerHTML = `
+                <div class="status">
+                    <div class="status-dot"></div>
+                    <span>5 explorers online</span>
+                </div>
+                <div style="margin-top: 8px; font-size: 0.9rem; color: var(--text-secondary);">
+                    Join the community to see who's exploring!
+                </div>
+            `;
+        }
+
+        function loadUserData() {
+            if (!currentUser) return;
+
+            // Load user-specific data
+            const profileContent = document.getElementById('profile-content');
+            if (profileContent) {
+                profileContent.innerHTML = `
+                    <div class="card">
+                        <h3>Welcome, Explorer!</h3>
+                        <p>Your urban exploration journey starts here.</p>
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Locations</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Discoveries</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Utility Functions
+        function updateConnectionStatus(connected) {
+            const statusDot = document.getElementById('connection-status');
+            const statusText = document.getElementById('connection-text');
+            
+            if (connected) {
+                statusDot.classList.remove('offline');
+                statusText.textContent = 'Connected';
+            } else {
+                statusDot.classList.add('offline');
+                statusText.textContent = 'Offline';
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--secondary-bg);
+                color: var(--text-primary);
+                padding: 12px 16px;
+                border-radius: var(--border-radius);
+                border: 1px solid var(--border-color);
+                z-index: 3000;
+                animation: fadeIn 0.3s ease-out;
+            `;
+            
+            if (type === 'error') {
+                toast.style.borderColor = 'var(--danger)';
+                toast.style.color = 'var(--danger)';
+            } else if (type === 'success') {
+                toast.style.borderColor = 'var(--success)';
+                toast.style.color = 'var(--success)';
+            } else if (type === 'warning') {
+                toast.style.borderColor = 'var(--warning)';
+                toast.style.color = 'var(--warning)';
+            }
+
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function timeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            return `${diffDays}d ago`;
+        }
+
+        function showError(message) {
+            console.error(message);
+            showToast(message, 'error');
+        }
+
+        // Handle offline/online status
+        window.addEventListener('online', () => updateConnectionStatus(true));
+        window.addEventListener('offline', () => updateConnectionStatus(false));
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                hideLocationModal();
+            }
+            if (e.key === 'n' && e.ctrlKey) {
+                e.preventDefault();
+                if (currentUser) showLocationModal();
+            }
+        });
+    </script>
+
+    <style>
+        /* Additional popup styles */
+        .leaflet-popup-content {
+            margin: 8px 12px;
+        }
+
+        .popup-content h4 {
+            margin: 0 0 8px 0;
+            color: var(--neon-blue);
+        }
+
+        .popup-content p {
+            margin: 0 0 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .popup-meta {
+            display: flex;
+            gap: 8px;
+            font-size: 0.8rem;
+        }
+
+        .category {
+            background: var(--tertiary-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        .risk {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .risk-low { background: var(--success); color: white; }
+        .risk-moderate { background: var(--warning); color: var(--primary-bg); }
+        .risk-high { background: var(--danger); color: white; }
+
+        .profile-stats {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--neon-blue);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+            padding: 24px;
+        }
+    </style>
+</body>
+</html>

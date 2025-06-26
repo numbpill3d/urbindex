@@ -3,9 +3,9 @@
 // Load real announcements from Firebase
 function loadRealAnnouncements() {
     const announcementsList = document.getElementById('announcements-list');
-    if (!announcementsList || !db) return;
+    if (!announcementsList || !window.db) return;
 
-    db.collection('announcements')
+    window.db.collection('announcements')
         .orderBy('createdAt', 'desc')
         .limit(3)
         .onSnapshot(snapshot => {
@@ -44,9 +44,9 @@ function loadRealAnnouncements() {
 // Load real activity feed from locations
 function loadRealActivityFeed() {
     const feedList = document.getElementById('activity-feed-list');
-    if (!feedList || !db) return;
+    if (!feedList || !window.db) return;
 
-    db.collection('locations')
+    window.db.collection('locations')
         .orderBy('createdAt', 'desc')
         .limit(10)
         .onSnapshot(snapshot => {
@@ -88,9 +88,9 @@ function loadRealActivityFeed() {
 // Load real online users
 function loadRealOnlineUsers() {
     const onlineUsersList = document.getElementById('online-users-list');
-    if (!onlineUsersList || !db) return;
+    if (!onlineUsersList || !window.db) return;
 
-    db.collection('users')
+    window.db.collection('users')
         .where('online', '==', true)
         .where('lastSeen', '>', new Date(Date.now() - 5 * 60 * 1000)) // Last 5 minutes
         .onSnapshot(snapshot => {
@@ -114,9 +114,9 @@ function loadRealOnlineUsers() {
 // Load real forum posts
 function loadRealForumPosts() {
     const forumPostsList = document.getElementById('forum-posts-list');
-    if (!forumPostsList || !db) return;
+    if (!forumPostsList || !window.db) return;
 
-    db.collection('forumPosts')
+    window.db.collection('forumPosts')
         .orderBy('createdAt', 'desc')
         .limit(5)
         .onSnapshot(snapshot => {
@@ -159,11 +159,11 @@ function loadRealForumPosts() {
 // Load real user locations
 function loadRealUserLocations() {
     const locationsList = document.getElementById('my-locations-list');
-    if (!locationsList || !db || !window.authModule?.getCurrentUser()) return;
+    if (!locationsList || !window.db || !firebase.auth().currentUser) return;
 
-    const user = window.authModule.getCurrentUser();
+    const user = firebase.auth().currentUser;
     
-    db.collection('locations')
+    window.db.collection('locations')
         .where('userId', '==', user.uid)
         .orderBy('createdAt', 'desc')
         .onSnapshot(snapshot => {
@@ -208,12 +208,12 @@ function loadRealUserLocations() {
 
 // Load real user profile data
 function loadRealUserProfile() {
-    if (!window.authModule?.getCurrentUser() || !db) return;
+    if (!firebase.auth().currentUser || !window.db) return;
 
-    const user = window.authModule.getCurrentUser();
+    const user = firebase.auth().currentUser;
     
     // Load user document
-    db.collection('users').doc(user.uid).get().then(doc => {
+    window.db.collection('users').doc(user.uid).get().then(doc => {
         if (doc.exists) {
             const userData = doc.data();
             
@@ -284,25 +284,52 @@ function editLocation(locationId) {
 }
 
 // Initialize real data loading
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait for Firebase to be ready
-    if (typeof firebase !== 'undefined' && db) {
-        loadRealAnnouncements();
-        loadRealActivityFeed();
-        loadRealOnlineUsers();
-        loadRealForumPosts();
-        
-        // Load user-specific data when authenticated
-        firebase.auth().onAuthStateChanged(user => {
-            if (user) {
-                loadRealUserLocations();
-                loadRealUserProfile();
-            }
-        });
+function initRealData() {
+    if (typeof firebase !== 'undefined' && window.db) {
+        try {
+            loadRealAnnouncements();
+            loadRealActivityFeed();
+            loadRealOnlineUsers();
+            loadRealForumPosts();
+            
+            // Load user-specific data when authenticated
+            firebase.auth().onAuthStateChanged(user => {
+                if (user) {
+                    loadRealUserLocations();
+                    loadRealUserProfile();
+                }
+            });
+        } catch (error) {
+            console.error('Error initializing real data:', error);
+            showFallbackData();
+        }
     } else {
-        console.warn('Firebase not available, using placeholder data');
+        console.warn('Firebase not ready, showing fallback data');
+        showFallbackData();
     }
-});
+}
+
+// Show fallback data when Firebase is unavailable
+function showFallbackData() {
+    const announcements = document.getElementById('announcements-list');
+    const activity = document.getElementById('activity-feed-list');
+    const users = document.getElementById('online-users-list');
+    const forum = document.getElementById('forum-posts-list');
+    
+    if (announcements) announcements.innerHTML = '<div class="no-data">Connect to see announcements</div>';
+    if (activity) activity.innerHTML = '<li class="no-data">Connect to see activity</li>';
+    if (users) users.textContent = 'Connect to see online users';
+    if (forum) forum.innerHTML = '<li class="no-data">Connect to see forum posts</li>';
+}
+
+// Start initialization when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initRealData, 500);
+    });
+} else {
+    setTimeout(initRealData, 500);
+}
 
 // Export functions for use in other modules
 window.realDataModule = {

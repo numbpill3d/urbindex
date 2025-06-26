@@ -1,8 +1,5 @@
 {
   "projects": {
-    "default": "urbindex-d69e1",
-    "urbindex": "urbindex-d69e1"
-  },
-  "targets": {},
-  "etags": {}
+    "default": "urbindex-d69e1"
+  }
 }
