@@ -2,2635 +2,1274 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#00e5ff">
-    <meta name="description" content="Urbindex - Community-driven urban exploration mapping tool">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Urbindex">
-    <meta name="msapplication-TileColor" content="#00e5ff">
-    <meta name="msapplication-TileImage" content="images/icons/icon-144x144.png">
-    <meta name="msapplication-navbutton-color" content="#00e5ff">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="apple-mobile-web-app-title" content="Urbindex">
-    <meta name="msapplication-starturl" content="/">
-    <meta name="color-scheme" content="dark">
-    
-    <title>Urbindex</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="images/icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="images/icons/icon-192x192.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="images/icons/icon-152x152.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="images/icons/icon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="images/icons/icon-16x16.png">
-    <link rel="mask-icon" href="images/icons/safari-pinned-tab.svg" color="#00e5ff">
-    
-    <!-- Leaflet and plugins -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.css" />
-    <script src="https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.css" />
-    <script src="https://unpkg.com/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-    
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-    <!-- Fonts preload -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/JetBrainsMono/2.304/web/woff2/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/Space-Grotesk/3.0.1/SpaceGrotesk[wght].woff2" as="font" type="font/woff2" crossorigin>
-    
-    <!-- Custom styles -->
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/custom-markers.css">
-    <link rel="stylesheet" href="css/toast.css">
-    <link rel="stylesheet" href="css/ui-complete.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urbindex - Urban Exploration Network</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            /* Core Color Palette - Enhanced */
-            --primary-bg: #0c0c18;
-            --secondary-bg: #131328;
-            --tertiary-bg: #1a1a32;
-            --neon-blue: #00d5ff;
-            --neon-purple: #ae00ff;
-            --neon-pink: #ff00a0;
-            --neon-green: #00ffa2;
-            --neon-yellow: #f9ff00;
+            --bg-primary: #0a0a15;
+            --bg-secondary: #111122;
+            --bg-tertiary: #1a1a2e;
+            --accent-blue: #00d5ff;
+            --accent-purple: #ae00ff;
             --text-primary: #f0f0ff;
             --text-secondary: #b0b0d0;
             --text-muted: #7a7a9a;
-            --border-color: #2a2a4a;
-            --danger: #ff3860;
-            --warning: #ffdd57;
+            --border: #2a2a4a;
             --success: #23d160;
-            --info: #209cee;
-            
-            /* UI Elements - Improved */
-            --gradient-primary: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            --gradient-alt: linear-gradient(135deg, var(--neon-pink), var(--neon-blue));
-            --gradient-glass: linear-gradient(120deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.4);
-            --shadow-hard: 0 8px 24px rgba(0, 0, 0, 0.6);
-            --shadow-glow: 0 0 15px rgba(0, 213, 255, 0.3);
-            --border-radius: 10px;
-            --border-radius-lg: 16px;
-            --border-radius-sm: 6px;
-            
-            /* Typography */
-            --font-main: 'JetBrains Mono', 'Courier New', monospace;
-            --font-alt: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
-            --font-size-xs: 0.75rem;
-            --font-size-sm: 0.875rem;
-            --font-size-md: 1rem;
-            --font-size-lg: 1.125rem;
-            --font-size-xl: 1.25rem;
-            --font-size-2xl: 1.5rem;
-            --font-size-3xl: 1.875rem;
-            
-            /* Animation */
-            --transition-fast: 0.15s ease-in-out;
-            --transition-normal: 0.3s ease-in-out;
-            --transition-slow: 0.5s ease-in-out;
-            
-            /* Layout */
-            --header-height: 64px;
-            --nav-height: 60px;
-            --sidebar-width: 280px;
-            --modal-width: 650px;
-            --container-max-width: 1280px;
-            --spacing-xs: 4px;
-            --spacing-sm: 8px;
-            --spacing-md: 16px;
-            --spacing-lg: 24px;
-            --spacing-xl: 32px;
-            --spacing-2xl: 48px;
+            --warning: #ffdd57;
+            --danger: #ff3860;
+            --radius: 8px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.4);
+            --transition: 0.3s ease;
         }
 
-        @font-face {
-            font-family: 'JetBrains Mono';
-            src: url('https://cdnjs.cloudflare.com/ajax/libs/JetBrainsMono/2.304/web/woff2/JetBrainsMono-Regular.woff2') format('woff2');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
-        }
-
-        @font-face {
-            font-family: 'Space Grotesk';
-            src: url('https://cdnjs.cloudflare.com/ajax/libs/Space-Grotesk/3.0.1/SpaceGrotesk[wght].woff2') format('woff2');
-            font-weight: 300 700;
-            font-style: normal;
-            font-display: swap;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 194, 255, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 194, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 194, 255, 0); }
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-            100% { transform: translateY(0); }
-        }
-
-        @keyframes glow {
-            0% { text-shadow: 0 0 5px rgba(0, 194, 255, 0.8); }
-            50% { text-shadow: 0 0 15px rgba(0, 194, 255, 0.9), 0 0 25px rgba(0, 194, 255, 0.6); }
-            100% { text-shadow: 0 0 5px rgba(0, 194, 255, 0.8); }
-        }
-
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes flicker {
-            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
-                opacity: 0.99;
-                filter: drop-shadow(0 0 1px rgba(0, 194, 255, 0.8));
-            }
-            20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
-                opacity: 0.4;
-                filter: none;
-            }
-        }
-
-        /* Base Elements */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-            width: 100%;
-            font-family: var(--font-alt);
-            background-color: var(--primary-bg);
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
             color: var(--text-primary);
-            font-size: var(--font-size-md);
-            line-height: 1.5;
-            overflow-x: hidden;
-            scrollbar-width: thin;
-            scrollbar-color: var(--tertiary-bg) var(--primary-bg);
+            line-height: 1.6;
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image:
-                radial-gradient(circle at 15% 50%, rgba(174, 0, 255, 0.12) 0%, transparent 35%),
-                radial-gradient(circle at 85% 30%, rgba(0, 213, 255, 0.12) 0%, transparent 35%),
-                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h100v100H0z' fill='none'/%3E%3Cpath d='M0 25h100M0 50h100M0 75h100' stroke='rgba(255,255,255,0.03)' stroke-width='0.5'/%3E%3Cpath d='M25 0v100M50 0v100M75 0v100' stroke='rgba(255,255,255,0.03)' stroke-width='0.5'/%3E%3C/svg%3E");
-            z-index: -1;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--primary-bg);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background-color: var(--tertiary-bg);
-            border-radius: 4px;
-            border: 2px solid var(--primary-bg);
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: var(--neon-blue);
-        }
-
-        a {
-            color: var(--neon-blue);
-            text-decoration: none;
-            transition: all var(--transition-fast);
-        }
-
-        a:hover {
-            color: var(--neon-purple);
-            text-decoration: underline;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-alt);
-            font-weight: 700;
-            margin-bottom: var(--spacing-md);
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: inline-block;
-        }
-
-        h2 {
-            font-size: var(--font-size-2xl);
-            margin-bottom: var(--spacing-lg);
-            position: relative;
-        }
-
-        h2::after {
-            content: "";
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: var(--gradient-primary);
-            border-radius: 3px;
-        }
-
-        h3 {
-            font-size: var(--font-size-xl);
-            margin-bottom: var(--spacing-md);
-        }
-
-        button, .button {
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-family: var(--font-main);
-            transition: all var(--transition-fast);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        button::after, .button::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 5px;
-            height: 5px;
-            background: var(--neon-blue);
-            opacity: 0;
-            border-radius: 100%;
-            transform: scale(1, 1) translate(-50%, -50%);
-            transform-origin: 50% 50%;
-        }
-        
-        button:focus:not(:active)::after, .button:focus:not(:active)::after {
-            animation: ripple 1s ease-out;
-        }
-        
-        @keyframes ripple {
-            0% {
-                opacity: 0.4;
-                transform: scale(0, 0);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(25, 25);
-            }
-        }
-
-        input, select, textarea {
-            font-family: var(--font-main);
-            background-color: var(--tertiary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            color: var(--text-primary);
-            padding: var(--spacing-sm) var(--spacing-md);
-            font-size: var(--font-size-md);
-            transition: all var(--transition-fast);
-            width: 100%;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 0 2px rgba(0, 194, 255, 0.2);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a0a0c0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right var(--spacing-md) center;
-            background-size: 16px;
-            padding-right: var(--spacing-xl);
-        }
-
-        label {
-            display: block;
-            margin-bottom: var(--spacing-sm);
-            color: var(--text-secondary);
-            font-size: var(--font-size-sm);
-            font-weight: 500;
-        }
-
-        /* Layout */
-        #app {
+        .app {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out forwards;
-            max-width: 1920px;
-            margin: 0 auto;
-            position: relative;
-            width: 100%;
         }
 
-        #app.hidden {
-            display: none;
-        }
-
-        header {
-            height: var(--header-height);
-            background-color: rgba(19, 19, 40, 0.8);
+        .header {
+            background: rgba(17,17,34,0.95);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(42, 42, 74, 0.6);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 60px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 0 var(--spacing-xl);
-            box-shadow: var(--shadow-soft);
+            justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
-        .ascii-title-container {
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .status {
             display: flex;
             align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
         }
 
-        .ascii-title {
-            font-family: var(--font-main);
-            color: var(--neon-blue);
-            font-size: 14px;
-            line-height: 1.2;
-            margin: 0;
-            padding: 0;
-            white-space: pre;
-            animation: glow 3s infinite;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
         }
 
-        main {
-            flex: 1;
-            padding: var(--spacing-xl);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
+        .status-dot.offline { background: var(--danger); }
 
-        /* Navigation */
-        nav {
-            background: rgba(26, 26, 50, 0.8);
+        .nav {
+            background: rgba(26,26,46,0.95);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(42, 42, 74, 0.6);
+            border-bottom: 1px solid var(--border);
+            padding: 8px 24px;
             display: flex;
-            justify-content: center;
-            padding: var(--spacing-sm);
+            gap: 8px;
             position: sticky;
-            top: var(--header-height);
+            top: 60px;
             z-index: 90;
-            box-shadow: var(--shadow-soft);
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        
-        nav::-webkit-scrollbar {
-            display: none;
         }
 
         .nav-btn {
             background: transparent;
+            border: none;
             color: var(--text-secondary);
-            font-size: var(--font-size-sm);
-            font-weight: 600;
-            padding: var(--spacing-md) var(--spacing-lg);
-            border-radius: var(--border-radius);
-            position: relative;
-            overflow: hidden;
-            margin: 0 var(--spacing-sm);
-            transition: all var(--transition-fast);
-        }
-
-        .nav-btn::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-primary);
-            opacity: 0;
-            z-index: -1;
-            transition: opacity var(--transition-normal);
-            border-radius: var(--border-radius);
-        }
-
-        .nav-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .nav-btn:hover::before {
-            opacity: 0.1;
-        }
-
-        .nav-btn.active {
-            color: var(--neon-blue);
-            font-weight: 700;
-        }
-
-        .nav-btn.active::after {
-            content: "";
-            position: absolute;
-            bottom: -1px;
-            left: 25%;
-            width: 50%;
-            height: 2px;
-            background: var(--gradient-primary);
-            border-radius: 2px 2px 0 0;
-        }
-
-        /* User Profile Header */
-        #user-profile {
+            padding: 8px 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
             display: flex;
             align-items: center;
+            gap: 8px;
         }
 
-        #login-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--neon-blue);
-            color: var(--primary-bg);
-            font-weight: 600;
-            border-radius: var(--border-radius);
-            padding: var(--spacing-sm) var(--spacing-lg);
-            box-shadow: 0 0 15px rgba(0, 213, 255, 0.5);
-            transition: all var(--transition-fast);
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
+        .nav-btn:hover { color: var(--text-primary); }
+        .nav-btn.active { color: var(--accent-blue); font-weight: 600; }
 
-        #login-button::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-primary);
-            z-index: -1;
-            transform: scaleX(0);
-            transform-origin: right;
-            transition: transform var(--transition-fast);
-        }
-
-        #login-button:hover {
-            color: white;
-            box-shadow: 0 0 20px rgba(174, 0, 255, 0.7);
-            transform: translateY(-2px);
-        }
-        
-        #login-button:hover::before {
-            transform: scaleX(1);
-            transform-origin: left;
-        }
-
-        #user-info {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-        }
-
-        #user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid var(--neon-blue);
-            box-shadow: 0 0 10px rgba(0, 194, 255, 0.5);
-            object-fit: cover;
-        }
-
-        #user-name {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        /* Splash Screen */
-        #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--primary-bg);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity var(--transition-slow);
-        }
-
-        #splash-screen.active {
-            opacity: 1;
-        }
-
-        #splash-screen:not(.active) {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .splash-content {
-            text-align: center;
-            max-width: 800px;
-        }
-
-        .splash-ascii {
-            font-family: var(--font-main);
-            color: var(--neon-blue);
-            font-size: 14px;
-            line-height: 1.2;
-            margin-bottom: var(--spacing-xl);
-            animation: glow 2s infinite;
-            white-space: pre;
-            font-weight: bold;
-            text-shadow: 0 0 15px var(--neon-blue);
-        }
-
-        .loading-bar {
-            width: 300px;
-            height: 4px;
-            background-color: var(--tertiary-bg);
-            border-radius: 2px;
-            margin: var(--spacing-lg) auto;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .loading-progress {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 0;
-            background: var(--gradient-primary);
-            border-radius: 2px;
-            animation: loading 3s ease-in-out forwards;
-        }
-
-        @keyframes loading {
-            0% { width: 0; }
-            60% { width: 60%; }
-            80% { width: 80%; }
-            100% { width: 100%; }
-        }
-
-        .tagline {
-            color: var(--text-secondary);
-            font-size: var(--font-size-lg);
-            margin-top: var(--spacing-lg);
-            font-family: var(--font-alt);
-            font-weight: 300;
-            letter-spacing: 2px;
-            animation: fadeIn 2s ease-out;
-        }
-
-        /* Scanline Effect */
-        .scanline {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: rgba(0, 194, 255, 0.1);
-            z-index: 9998;
-            opacity: 0.7;
-            animation: scanline 8s linear infinite;
-            pointer-events: none;
-        }
-
-        /* View Containers */
-        .view {
-            display: none;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .view.active {
-            display: block;
-        }
-
-        /* Map Container */
-        #map-container {
-            height: calc(100vh - var(--header-height) - var(--nav-height) - 2 * var(--spacing-xl));
-            position: relative;
-        }
-
-        .retro-layout {
-            display: flex;
-            gap: var(--spacing-lg);
-            height: 100%;
-        }
-
-        .left-panel {
-            width: 280px;
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-lg);
-        }
-
-        .right-panel {
+        .main {
             flex: 1;
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .map-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+            height: calc(100vh - 140px);
+        }
+
+        .sidebar {
             display: flex;
             flex-direction: column;
-            gap: var(--spacing-lg);
+            gap: 16px;
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
         }
 
         .panel-title {
-            font-size: var(--font-size-md);
-            margin-bottom: var(--spacing-md);
-            padding-bottom: var(--spacing-sm);
-            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .announcement-board,
-        .activity-feed,
-        .chat-box {
-            background-color: var(--secondary-bg);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-md);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-soft);
-        }
-
-        .announcement-board {
-            position: relative;
+        .map-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             overflow: hidden;
-        }
-
-        .announcement-board::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--gradient-primary);
-        }
-
-        .announcement-content {
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-        }
-
-        .activity-feed {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .feed-list {
-            list-style: none;
-        }
-
-        .feed-list li {
-            padding: var(--spacing-sm) 0;
-            border-bottom: 1px solid var(--border-color);
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-        }
-
-        .feed-list li:last-child {
-            border-bottom: none;
-        }
-
-        .online-users-marquee {
-            background-color: var(--secondary-bg);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .marquee-content {
-            display: inline-block;
-            animation: marquee 20s linear infinite;
-        }
-
-        @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-
-        #map {
-            flex: 1;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            box-shadow: var(--shadow-soft);
             position: relative;
         }
 
-        .chat-box {
-            height: 200px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .chat-input-container {
-            display: flex;
-            gap: var(--spacing-sm);
-        }
-
-        .chat-input {
-            flex: 1;
-        }
-
-        .chat-send-btn {
-            background-color: var(--neon-blue);
-            color: var(--primary-bg);
-            border-radius: var(--border-radius-sm);
-            padding: var(--spacing-sm) var(--spacing-md);
-            font-weight: 600;
-            transition: all var(--transition-fast);
-        }
-
-        .chat-send-btn:hover {
-            background-color: var(--neon-purple);
-            box-shadow: 0 0 10px rgba(174, 0, 255, 0.3);
-        }
-
-        /* Map HUD Elements */
-        .map-hud {
-            position: absolute;
-            background-color: rgba(22, 22, 42, 0.8);
-            border: 1px solid var(--neon-blue);
-            -webkit-backdrop-filter: blur(8px);
-            backdrop-filter: blur(8px);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--border-radius-sm);
-            font-size: var(--font-size-sm);
-            font-family: var(--font-main);
-            color: var(--text-secondary);
-            z-index: 10;
-        }
-
-        .map-coordinates {
-            bottom: var(--spacing-lg);
-            left: var(--spacing-lg);
-        }
-
-        .map-zoom-level {
-            bottom: var(--spacing-lg);
-            right: var(--spacing-lg);
-        }
-
-        .map-info-panel {
-            top: var(--spacing-lg);
-            right: var(--spacing-lg);
-            width: 250px;
-        }
-
-        .map-info-header {
-            font-weight: 600;
-            color: var(--neon-blue);
-            margin-bottom: var(--spacing-sm);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: var(--spacing-xs);
-        }
-
-        .map-info-content {
-            font-size: var(--font-size-xs);
-        }
-
-        .map-legend {
-            bottom: var(--spacing-lg);
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: var(--spacing-md);
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 3px;
-        }
-
-        .legend-color.abandoned {
-            background-color: var(--danger);
-        }
-
-        .legend-color.water {
-            background-color: var(--info);
-        }
-
-        .legend-color.camp {
-            background-color: var(--success);
-        }
-
-        .legend-label {
-            font-size: var(--font-size-xs);
-        }
-
-        /* Floating Action Button */
-        .floating-btn {
-            position: absolute;
-            bottom: var(--spacing-xl);
-            right: var(--spacing-xl);
-            width: 60px;
-            height: 60px;
-            background: var(--gradient-primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0, 194, 255, 0.5);
-            transition: all var(--transition-normal);
-            z-index: 10;
-        }
-
-        .floating-btn:hover {
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 6px 20px rgba(174, 0, 255, 0.6);
-        }
-
-        /* Forum Container */
-        #forum-container {
-            max-width: var(--container-max-width);
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .forum-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .forum-categories {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .forum-category {
-            background-color: var(--tertiary-bg);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-sm) var(--spacing-md);
-            font-size: var(--font-size-sm);
-            transition: all var(--transition-fast);
-        }
-
-        .forum-category:hover {
-            background-color: var(--secondary-bg);
-            color: var(--text-primary);
-            border-color: var(--neon-blue);
-        }
-
-        .forum-category.active {
-            background-color: var(--neon-blue);
-            color: var(--primary-bg);
-            border-color: var(--neon-blue);
-            font-weight: 600;
-        }
-
-        .forum-search {
-            display: flex;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        #forum-search {
-            flex: 1;
-        }
-
-        #forum-search-btn {
-            background-color: var(--tertiary-bg);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            padding: var(--spacing-sm) var(--spacing-md);
-            transition: all var(--transition-fast);
-        }
-
-        #forum-search-btn:hover {
-            background-color: var(--neon-blue);
-            color: var(--primary-bg);
-            border-color: var(--neon-blue);
-        }
-
-        .forum-post-form {
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .forum-form-header {
-            margin-bottom: var(--spacing-lg);
-            padding-bottom: var(--spacing-sm);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .forum-form-group {
-            margin-bottom: var(--spacing-md);
-        }
-
-        .forum-form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: var(--spacing-md);
-        }
-
-        .forum-list {
-            list-style: none;
-        }
-
-        .forum-list li {
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            margin-bottom: var(--spacing-md);
-            padding: var(--spacing-md);
-            transition: all var(--transition-fast);
-        }
-
-        .forum-list li:hover {
-            border-color: var(--neon-blue);
-            box-shadow: var(--shadow-soft);
-        }
-
-        /* My Locations Container */
-        #my-locations-container {
-            max-width: var(--container-max-width);
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .spots-controls {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: var(--spacing-lg);
-            flex-wrap: wrap;
-            gap: var(--spacing-md);
-        }
-
-        .spots-filters {
-            display: flex;
-            gap: var(--spacing-sm);
-            flex-wrap: wrap;
-        }
-
-        .spots-filter {
-            min-width: 150px;
-            background-color: var(--tertiary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            padding: var(--spacing-sm) var(--spacing-md);
-            color: var(--text-secondary);
-            font-size: var(--font-size-sm);
-        }
-
-        .spots-view-toggle {
-            display: flex;
-            gap: 2px;
-        }
-
-        .view-toggle-btn {
-            background-color: var(--tertiary-bg);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            padding: var(--spacing-sm) var(--spacing-md);
-            font-size: var(--font-size-sm);
-            transition: all var(--transition-fast);
-        }
-
-        .view-toggle-btn:first-child {
-            border-radius: var(--border-radius-sm) 0 0 var(--border-radius-sm);
-        }
-
-        .view-toggle-btn:last-child {
-            border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
-        }
-
-        .view-toggle-btn.active {
-            background-color: var(--neon-blue);
-            color: var(--primary-bg);
-            border-color: var(--neon-blue);
-            font-weight: 600;
-        }
-
-        .spots-tabs {
-            display: flex;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-lg);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: var(--spacing-sm);
-        }
-
-        .spots-tab {
-            background: none;
-            color: var(--text-secondary);
-            font-size: var(--font-size-md);
-            padding: var(--spacing-sm) var(--spacing-md);
-            position: relative;
-            transition: all var(--transition-fast);
-        }
-
-        .spots-tab:hover {
-            color: var(--text-primary);
-        }
-
-        .spots-tab.active {
-            color: var(--neon-blue);
-            font-weight: 600;
-        }
-
-        .spots-tab.active::after {
-            content: "";
-            position: absolute;
-            bottom: -6px;
-            left: 25%;
-            width: 50%;
-            height: 3px;
-            background: var(--neon-blue);
-            border-radius: 3px 3px 0 0;
-        }
-
-        #spots-search-container {
-            display: flex;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        #spots-search {
-            flex: 1;
-        }
-
-        #spots-search-btn {
-            background-color: var(--tertiary-bg);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            padding: var(--spacing-sm) var(--spacing-md);
-            transition: all var(--transition-fast);
-        }
-
-        #spots-search-btn:hover {
-            background-color: var(--neon-blue);
-            color: var(--primary-bg);
-            border-color: var(--neon-blue);
-        }
-
-        .spots-view {
-            display: none;
-        }
-
-        .spots-view.active {
-            display: block;
-            animation: fadeIn var(--transition-normal);
-        }
-
-        #my-locations-list {
-            list-style: none;
-        }
-
-        #my-locations-list li {
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            margin-bottom: var(--spacing-md);
-            padding: var(--spacing-md);
-            transition: all var(--transition-fast);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        #my-locations-list li:hover {
-            border-color: var(--neon-blue);
-            box-shadow: var(--shadow-soft);
-            transform: translateY(-2px);
-        }
-
-        #spots-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: var(--spacing-md);
-        }
-
-        .spot-card {
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            transition: all var(--transition-fast);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .spot-card:hover {
-            border-color: var(--neon-blue);
-            box-shadow: var(--shadow-soft);
-            transform: translateY(-3px);
-        }
-
-        .spot-image-container {
-            position: relative;
-            height: 160px;
-            overflow: hidden;
-        }
-
-        .spot-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform var(--transition-normal);
-        }
-
-        .spot-card:hover .spot-image {
-            transform: scale(1.05);
-        }
-
-        .spot-type-badge {
-            position: absolute;
-            top: var(--spacing-sm);
-            right: var(--spacing-sm);
-            background-color: rgba(22, 22, 42, 0.8);
-            -webkit-backdrop-filter: blur(4px);
-            backdrop-filter: blur(4px);
-            color: var(--neon-blue);
-            font-size: var(--font-size-xs);
-            padding: 2px var(--spacing-sm);
-            border-radius: var(--border-radius-sm);
-            border: 1px solid var(--neon-blue);
-        }
-
-        .spot-content {
-            padding: var(--spacing-md);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .spot-title {
-            font-size: var(--font-size-md);
-            font-weight: 600;
-            margin-bottom: var(--spacing-sm);
-            color: var(--text-primary);
-        }
-
-        .spot-description {
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-            margin-bottom: var(--spacing-md);
-            flex: 1;
-        }
-
-        .spot-meta {
-            display: flex;
-            justify-content: space-between;
-            border-top: 1px solid var(--border-color);
-            padding-top: var(--spacing-sm);
-            font-size: var(--font-size-xs);
-            color: var(--text-muted);
-        }
-
-        .spot-rating {
-            color: var(--neon-yellow);
-        }
-
-        #spots-map {
-            height: 600px;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-        }
-
-        #playlists-container {
-            margin-top: var(--spacing-xl);
-        }
-
-        .playlists-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        #playlists-list {
-            list-style: none;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: var(--spacing-md);
-        }
-
-        .playlist-card {
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-md);
-            transition: all var(--transition-fast);
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-sm);
-        }
-
-        .playlist-card:hover {
-            border-color: var(--neon-blue);
-            box-shadow: var(--shadow-soft);
-        }
-
-        /* Profile Container */
-        #profile-container {
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .profile-section {
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-xl);
-            box-shadow: var(--shadow-soft);
-        }
-
-        .profile-header {
-            display: flex;
-            gap: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .profile-avatar-container {
-            position: relative;
-        }
-
-        #profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 194, 255, 0.5);
-            object-fit: cover;
-        }
-
-        #change-avatar-btn {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            padding: var(--spacing-xs) var(--spacing-sm);
-            font-size: var(--font-size-xs);
-        }
-
-        .profile-info {
-            flex: 1;
-        }
-
-        #profile-name {
-            font-size: var(--font-size-xl);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .profile-stats {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: var(--spacing-lg);
-            padding: var(--spacing-md) 0;
-            border-top: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .stat-value {
-            font-size: var(--font-size-2xl);
-            font-weight: 700;
-            color: var(--neon-blue);
-        }
-
-        .stat-label {
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-            margin-top: var(--spacing-xs);
-        }
-
-        #rank-badge-container {
-            display: flex;
-            justify-content: center;
-            margin: var(--spacing-lg) 0;
-        }
-
-        .rank-badge {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #333355, #1a1a2a);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 194, 255, 0.3);
-        }
-
-        .rank-badge::before {
-            content: "";
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            right: -5px;
-            bottom: -5px;
-            border-radius: 50%;
-            background: conic-gradient(
-                var(--neon-blue),
-                var(--neon-purple),
-                var(--neon-pink),
-                var(--neon-blue)
-            );
-            z-index: -1;
-            animation: rotate 10s linear infinite;
-        }
-
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .rank-level {
-            font-size: var(--font-size-2xl);
-            font-weight: 700;
-            color: var(--neon-blue);
-        }
-
-        .profile-customization {
-            margin-top: var(--spacing-lg);
-        }
-
-        .profile-customization h3 {
-            margin-bottom: var(--spacing-md);
-        }
-
-        .form-group {
-            margin-bottom: var(--spacing-md);
-        }
-
-        /* Achievements Section */
-        .achievements-section {
-            margin-top: var(--spacing-xl);
-        }
-
-        #achievements-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-            gap: var(--spacing-md);
-            margin-top: var(--spacing-md);
-        }
-
-        .achievement-card {
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-md);
-            transition: all var(--transition-fast);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: var(--spacing-sm);
-        }
-
-        .achievement-card:hover {
-            border-color: var(--neon-blue);
-            box-shadow: var(--shadow-soft);
-            transform: translateY(-3px);
-        }
-
-        .achievement-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: var(--tertiary-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: var(--font-size-xl);
-            margin-bottom: var(--spacing-sm);
-            border: 2px solid var(--neon-blue);
-            color: var(--neon-blue);
-        }
-
-        .achievement-title {
-            font-weight: 600;
-            font-size: var(--font-size-md);
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .achievement-description {
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-        }
-
-        .achievement-progress {
-            width: 100%;
-            height: 6px;
-            background-color: var(--tertiary-bg);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: var(--spacing-sm);
-        }
-
-        .achievement-progress-bar {
-            height: 100%;
-            background: var(--gradient-primary);
-            border-radius: 3px;
-        }
-
-        /* Badges Section */
-        .badges-section {
-            margin-top: var(--spacing-xl);
-        }
-
-        #badges-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-md);
-            margin-top: var(--spacing-md);
-        }
-
-        .badge-item {
-            width: 80px;
-            height: 80px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .badge-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: var(--tertiary-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid var(--border-color);
-            color: var(--text-secondary);
-            transition: all var(--transition-fast);
-        }
-
-        .badge-item.earned .badge-icon {
-            border-color: var(--neon-blue);
-            color: var(--neon-blue);
-            box-shadow: 0 0 10px rgba(0, 194, 255, 0.3);
-        }
-
-        .badge-name {
-            font-size: var(--font-size-xs);
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: var(--spacing-xs);
-        }
-
-        .badge-item.earned .badge-name {
-            color: var(--text-secondary);
-        }
-
-        /* Challenges Section */
-        .challenges-section {
-            margin-top: var(--spacing-xl);
-        }
-
-        #challenges-container {
-            margin-top: var(--spacing-md);
-        }
-
-        .challenge-item {
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-md);
-            margin-bottom: var(--spacing-md);
-            transition: all var(--transition-fast);
-        }
-
-        .challenge-item:hover {
-            border-color: var(--neon-blue);
-            box-shadow: var(--shadow-soft);
-        }
-
-        .challenge-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .challenge-title {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .challenge-reward {
-            background-color: var(--tertiary-bg);
-            color: var(--neon-green);
-            font-size: var(--font-size-xs);
-            padding: 2px var(--spacing-sm);
-            border-radius: var(--border-radius-sm);
-            border: 1px solid var(--neon-green);
-        }
-
-        .challenge-description {
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .challenge-progress {
-            margin-top: var(--spacing-sm);
-        }
-
-        .challenge-progress-bar {
-            width: 100%;
-            height: 6px;
-            background-color: var(--tertiary-bg);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .challenge-progress-fill {
-            height: 100%;
-            background: var(--gradient-primary);
-            border-radius: 3px;
-        }
-
-        .challenge-progress-text {
-            font-size: var(--font-size-xs);
-            color: var(--text-muted);
-            text-align: right;
-            margin-top: var(--spacing-xs);
-        }
-
-        /* Follow Sections */
-        .follow-sections {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--spacing-lg);
-            margin-top: var(--spacing-xl);
-        }
-
-        @media (max-width: 768px) {
-            .follow-sections {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .follow-container-header {
-            margin-bottom: var(--spacing-md);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .follow-count {
-            background-color: var(--tertiary-bg);
-            font-size: var(--font-size-xs);
-            padding: 2px var(--spacing-sm);
-            border-radius: var(--border-radius-sm);
-            color: var(--text-secondary);
-        }
-
-        .follow-list {
-            list-style: none;
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-        }
-
-        .follow-item {
-            display: flex;
-            align-items: center;
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-bottom: 1px solid var(--border-color);
-            transition: all var(--transition-fast);
-        }
-
-        .follow-item:last-child {
-            border-bottom: none;
-        }
-
-        .follow-item:hover {
-            background-color: var(--tertiary-bg);
-        }
-
-        .follow-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            margin-right: var(--spacing-md);
-            border: 1px solid var(--border-color);
-            object-fit: cover;
-        }
-
-        .follow-name {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        /* Settings Container */
-        #settings-container {
-            max-width: 600px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-md);
-            margin-bottom: var(--spacing-md);
-        }
-
-        .setting-item label {
-            margin-bottom: 0;
-            font-size: var(--font-size-md);
-            color: var(--text-primary);
-        }
-
-        /* Toggle Switch */
-        input[type="checkbox"] {
-            height: 0;
-            width: 0;
-            visibility: hidden;
-            position: absolute;
-        }
-
-        .toggle-checkbox + .toggle-label {
+        #map { height: 100%; min-height: 400px; }
+
+        .btn {
+            background: transparent;
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 8px 16px;
+            border-radius: var(--radius);
             cursor: pointer;
-            width: 50px;
-            height: 25px;
-            background: var(--tertiary-bg);
-            border: 1px solid var(--border-color);
-            display: block;
-            border-radius: 25px;
-            position: relative;
-            transition: var(--transition-fast);
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
         }
 
-        .toggle-checkbox + .toggle-label:after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 19px;
-            height: 19px;
-            background: var(--text-muted);
-            border-radius: 19px;
-            transition: var(--transition-fast);
+        .btn:hover {
+            background: var(--accent-blue);
+            color: var(--bg-primary);
         }
 
-        .toggle-checkbox:checked + .toggle-label {
-            background: var(--neon-blue);
+        .btn-primary {
+            background: var(--accent-blue);
+            color: var(--bg-primary);
         }
 
-        .toggle-checkbox:checked + .toggle-label:after {
-            left: calc(100% - 2px);
-            transform: translateX(-100%);
-            background: white;
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            z-index: 1000;
         }
 
-        .toggle-label:active:after {
-            width: 25px;
-        }
+        .fab:hover { transform: scale(1.1); }
 
-        .app-info {
-            text-align: center;
-            margin-top: var(--spacing-xl);
-            color: var(--text-muted);
-            font-size: var(--font-size-sm);
-        }
-
-        /* Modal */
         .modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(10, 10, 20, 0.85);
-            -webkit-backdrop-filter: blur(5px);
+            background: rgba(10,10,21,0.9);
             backdrop-filter: blur(5px);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            opacity: 1;
-            visibility: visible;
-            transition: all var(--transition-normal);
+            z-index: 2000;
         }
 
-        .modal.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .modal.active {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: all;
-        }
+        .modal.active { display: flex; }
 
         .modal-content {
-            width: var(--modal-width);
-            max-width: 90%;
-            max-height: 90vh;
-            background-color: var(--secondary-bg);
-            border-radius: var(--border-radius-lg);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-hard);
-            padding: var(--spacing-lg);
-            position: relative;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
             overflow-y: auto;
-            animation: slideIn var(--transition-normal);
+            position: relative;
         }
 
-        .close-modal {
+        .modal-close {
             position: absolute;
-            top: var(--spacing-md);
-            right: var(--spacing-md);
-            font-size: var(--font-size-xl);
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-
-        .close-modal:hover {
-            color: var(--danger);
-            transform: rotate(90deg);
-        }
-
-        #modal-title {
-            margin-bottom: var(--spacing-lg);
-            padding-bottom: var(--spacing-sm);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .form-tabs {
-            display: flex;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-lg);
-            overflow-x: auto;
-            padding-bottom: var(--spacing-sm);
-        }
-
-        .form-tab {
+            top: 16px;
+            right: 16px;
             background: none;
-            color: var(--text-secondary);
-            font-size: var(--font-size-sm);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--border-radius-sm);
-            border: 1px solid var(--border-color);
-            transition: all var(--transition-fast);
-            white-space: nowrap;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
         }
 
-        .form-tab:hover {
-            color: var(--text-primary);
-            border-color: var(--neon-blue);
-        }
+        .form-group { margin-bottom: 16px; }
 
-        .form-tab.active {
-            color: var(--primary-bg);
-            background-color: var(--neon-blue);
-            border-color: var(--neon-blue);
-            font-weight: 600;
-        }
-
-        .form-tab-content {
-            display: none;
-            animation: fadeIn var(--transition-normal);
-        }
-
-        .form-tab-content.active {
+        .form-label {
             display: block;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input, .textarea, .select {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            width: 100%;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        
+        .textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .input:focus, .textarea:focus, .select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(0,213,255,0.2);
         }
 
         .form-actions {
             display: flex;
-            justify-content: space-between;
-            margin-top: var(--spacing-lg);
-            padding-top: var(--spacing-md);
-            border-top: 1px solid var(--border-color);
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
         }
 
-        .coordinates-display {
-            background-color: var(--tertiary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            padding: var(--spacing-sm) var(--spacing-md);
-            font-family: var(--font-main);
-            color: var(--neon-blue);
-        }
-
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: var(--spacing-sm);
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .checkbox-item input[type="checkbox"] {
-            width: auto;
-            height: auto;
-            visibility: visible;
-            position: relative;
-            accent-color: var(--neon-blue);
-        }
-
-        .range-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: var(--font-size-xs);
-            color: var(--text-muted);
-            margin-top: var(--spacing-xs);
-        }
-
-        #image-preview-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-sm);
-            margin-top: var(--spacing-sm);
-        }
-
-        .image-preview {
-            width: 100px;
-            height: 100px;
-            border-radius: var(--border-radius-sm);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            position: relative;
-        }
-
-        .image-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .image-preview .remove-image {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
+        .loading {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            cursor: pointer;
+            padding: 24px;
+            color: var(--text-muted);
+            gap: 12px;
         }
 
-        .trail-path-info {
-            background-color: var(--tertiary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            padding: var(--spacing-md);
-        }
-
-        .trail-path-info p {
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        /* Neon Button */
-        .neon-button {
-            background-color: transparent;
-            color: var(--neon-blue);
-            border: 1px solid var(--neon-blue);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-sm) var(--spacing-lg);
-            font-weight: 600;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-            transition: all var(--transition-fast);
-            box-shadow: 0 0 8px rgba(0, 213, 255, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .neon-button::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--neon-blue);
-            z-index: -1;
-            transform: scaleX(0);
-            transform-origin: right;
-            transition: transform var(--transition-fast);
-        }
-        
-        .neon-button::after {
+        .loading::before {
             content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(0, 213, 255, 0.2), transparent);
-            transform: translateX(-100%);
-            transition: 0.6s;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top: 2px solid var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .neon-button:hover {
-            color: var(--primary-bg);
-            box-shadow: 0 0 20px rgba(0, 213, 255, 0.6);
-            text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .neon-button:hover::before {
-            transform: scaleX(1);
-            transform-origin: left;
-        }
-        
-        .neon-button:hover::after {
-            transform: translateX(100%);
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .neon-button.small {
-            padding: var(--spacing-xs) var(--spacing-md);
-            font-size: var(--font-size-xs);
+        .activity-item:last-child { border-bottom: none; }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-tertiary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-blue);
+            font-size: 0.8rem;
         }
-        
-        /* Install Prompt */
-        #install-prompt {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--neon-blue);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-md);
-            box-shadow: var(--shadow-soft);
-            max-width: 90%;
-            width: 320px;
-            z-index: 1000;
-            display: none;
+
+        .activity-content { flex: 1; }
+        .activity-user { font-weight: 600; color: var(--accent-blue); }
+        .activity-time { font-size: 0.8rem; color: var(--text-muted); }
+
+        .coordinates-display {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px;
+            font-family: monospace;
+            color: var(--accent-blue);
+            text-align: center;
         }
-        
-        #install-prompt.visible {
+
+        .locations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .location-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            transition: var(--transition);
+        }
+
+        .location-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .location-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .risk {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .risk-low { background: var(--success); color: white; }
+        .risk-moderate { background: var(--warning); color: var(--bg-primary); }
+        .risk-high { background: var(--danger); color: white; }
+
+        .error {
+            background: rgba(255, 56, 96, 0.1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            color: var(--danger);
+            text-align: center;
+        }
+
+        .announcements {
             display: flex;
             flex-direction: column;
-            animation: slideIn 0.3s ease-out;
+            gap: 8px;
         }
-        
-        #install-prompt-text {
-            margin-bottom: var(--spacing-md);
-            color: var(--text-primary);
-            text-align: center;
-        }
-        
-        #install-prompt-buttons {
+
+        .announcement {
             display: flex;
-            gap: var(--spacing-sm);
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255, 221, 87, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: var(--radius);
+            font-size: 0.85rem;
         }
-        
-        #install-button, #dismiss-install {
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--border-radius-sm);
+
+        .announcement-icon {
+            color: var(--warning);
+            font-size: 0.9rem;
+            margin-top: 2px;
+        }
+
+        .announcement-text {
             flex: 1;
+            line-height: 1.4;
+        }
+
+        .guest-welcome {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
             text-align: center;
         }
-        
-        #install-button {
-            background-color: var(--neon-blue);
-            color: var(--primary-bg);
-            border: none;
-            font-weight: bold;
+
+        .guest-welcome h3 {
+            color: var(--accent-blue);
+            margin-bottom: 12px;
         }
-        
-        #dismiss-install {
-            background-color: transparent;
-            border: 1px solid var(--border-color);
+
+        .guest-welcome p {
             color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .guest-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .demo-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .demo-stat {
+            text-align: center;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+        }
+
+        .demo-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .demo-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .profile-benefits {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .benefit-item i {
+            color: var(--accent-blue);
+            font-size: 1.2rem;
+            margin-top: 4px;
+        }
+
+        .benefit-item strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .benefit-item p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .profile-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
         
-        /* Safe Area Handling for Modern Devices (notches, etc.) */
-        @supports (padding: max(0px)) {
-            header, footer, nav {
-                padding-left: max(var(--spacing-xl), env(safe-area-inset-left));
-                padding-right: max(var(--spacing-xl), env(safe-area-inset-right));
+        @media (max-width: 768px) {
+            .main { padding: 16px; }
+            
+            .map-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+                gap: 16px;
             }
             
-            body {
-                padding-top: env(safe-area-inset-top);
-                padding-bottom: env(safe-area-inset-bottom);
-            }
-        }
-        
-        /* Web App Standalone Tweaks */
-        @media all and (display-mode: standalone) {
-            body {
-                background-color: var(--primary-bg);
-                overscroll-behavior-y: none;
+            .sidebar {
+                order: 2;
+                max-height: 300px;
+                overflow-y: auto;
+                flex-direction: row;
+                gap: 12px;
             }
             
-            header {
-                padding-top: max(var(--spacing-sm), env(safe-area-inset-top));
+            .panel {
+                min-width: 200px;
+                flex-shrink: 0;
             }
             
-            .standalone-hidden {
-                display: none !important;
+            .nav-btn span { display: none; }
+            
+            .locations-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <script>
-        // Service worker registration with fallback
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(function(registration) {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(function(error) {
-                        console.error('Service Worker registration failed:', error);
-                        // If service worker fails, still allow the app to work
-                        document.dispatchEvent(new CustomEvent('app-ready'));
-                    });
-            });
-        } else {
-            // For browsers that don't support Service Workers
-            window.addEventListener('load', function() {
-                document.dispatchEvent(new CustomEvent('app-ready'));
-            });
-        }
-    </script>
-    <div id="app">
-        <header>
-            <div class="header-brand">
-                <div class="ascii-title-container">
-                    <div class="ascii-title">URBINDEX</div>
-                    <div class="brand-tagline">Urban Exploration Network</div>
-                </div>
+    <div class="app">
+        <header class="header">
+            <div class="logo">URBINDEX</div>
+            <div class="status">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">Connected</span>
             </div>
-            <div class="header-center">
-                <div class="status-indicators">
-                    <div class="network-status online" title="Online">
-                        <i class="fas fa-wifi"></i>
-                    </div>
-                    <div class="sync-status" title="Data synced">
-                        <i class="fas fa-sync-alt"></i>
-                    </div>
-                </div>
-            </div>
-            <div id="user-profile">
-                <button id="login-button" class="neon-button">Login</button>
-                <div id="user-info" class="user-info-expanded">
-                    <div class="user-details">
-                        <img id="user-avatar" src="images/default-avatar.png" alt="User Avatar">
-                        <div class="user-text">
-                            <span id="user-name">Urban Explorer</span>
-                            <span class="user-level">Level 12</span>
-                        </div>
-                    </div>
-                    <div class="user-stats-mini">
-                        <span class="mini-stat" title="Locations discovered">
-                            <i class="fas fa-map-marker-alt"></i> 47
-                        </span>
-                        <span class="mini-stat" title="Current score">
-                            <i class="fas fa-star"></i> 12.8k
-                        </span>
-                    </div>
-                </div>
-            </div>
+            <button class="btn btn-primary" id="auth-btn">
+                <i class="fas fa-user"></i>
+                <span>Sign In</span>
+            </button>
         </header>
-        <nav>
-            <button class="nav-btn" data-view="map">Map</button>
-            <button class="nav-btn" data-view="forum">Forum</button>
-            <button class="nav-btn" data-view="my-locations">My Locations</button>
-            <button class="nav-btn" data-view="profile">Profile</button>
-            <button class="nav-btn" data-view="settings">Settings</button>
+
+        <nav class="nav">
+            <button class="nav-btn active" data-view="map">
+                <i class="fas fa-map"></i>
+                <span>Map</span>
+            </button>
+            <button class="nav-btn" data-view="locations">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Locations</span>
+            </button>
+            <button class="nav-btn" data-view="profile">
+                <i class="fas fa-user-circle"></i>
+                <span>Profile</span>
+            </button>
         </nav>
-        <main>
-            <div id="map-container" class="view active">
-                <div class="retro-layout">
-                    <div class="left-panel">
-                        <div class="panel-title">Announcements</div>
-                        <div class="announcement-board">
-                            <div class="announcement-content" id="announcements-list">
-                                <div class="loading-placeholder">Loading announcements...</div>
+
+        <main class="main">
+            <div class="view active" id="map-view">
+                <div class="map-layout">
+                    <aside class="sidebar">
+                        <div class="panel">
+                            <div class="panel-title">
+                                <i class="fas fa-bullhorn"></i>
+                                Announcements
+                            </div>
+                            <div id="announcements" class="announcements">
+                                <div class="announcement">
+                                    <div class="announcement-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                                    <div class="announcement-text">
+                                        <strong>Pre-Alpha Notice:</strong> Urbindex is in early development. Expect bugs and frequent updates.
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="panel-title">Activity Feed</div>
-                        <div class="activity-feed">
-                            <ul id="activity-feed-list" class="feed-list">
-                                <li class="loading-placeholder">Loading recent activity...</li>
-                            </ul>
+
+                        <div class="panel">
+                            <div class="panel-title">
+                                <i class="fas fa-activity"></i>
+                                Recent Activity
+                            </div>
+                            <div id="activity-feed" class="loading">Loading...</div>
                         </div>
-                        <div class="panel-title">Online Users</div>
-                        <div class="online-users-marquee">
-                            <div class="marquee-content" id="online-users-list">
-                                Connecting...
+
+                        <div class="panel">
+                            <div class="panel-title">
+                                <i class="fas fa-chart-bar"></i>
+                                Network Stats
+                            </div>
+                            <div id="network-stats">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center;">
+                                    <div>
+                                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-blue);" id="total-locations">0</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">Locations</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-blue);" id="active-users">0</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">Explorers</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="right-panel">
+                    </aside>
+
+                    <div class="map-container">
                         <div id="map"></div>
-                        <div class="chat-box">
-                            <div id="chat-messages" class="chat-messages">
-                                <div class="chat-message system-message">
-                                    <span class="chat-user">System:</span>
-                                    <span class="chat-text">Welcome to Urbindex! Sign in to chat with other explorers.</span>
-                                    <span class="chat-time">Now</span>
-                                </div>
-                            </div>
-                            <div class="chat-input-container">
-                                <input type="text" id="chat-input" class="chat-input" placeholder="Type a message...">
-                                <button id="chat-send-btn" class="chat-send-btn">Send</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-            <div id="forum-container" class="view">
-                <div class="forum-header">
-                    <h2>Forum</h2>
-                    <div class="forum-search">
-                        <input type="text" id="forum-search" placeholder="Search...">
-                        <button id="forum-search-btn">Search</button>
-                    </div>
-                </div>
-                <div class="forum-categories">
-                    <div class="forum-category active" data-category="general">General</div>
-                    <div class="forum-category" data-category="announcements">Announcements</div>
-                    <div class="forum-category" data-category="help">Help</div>
-                </div>
-                <div class="forum-post-form">
-                    <h3>Create New Post</h3>
-                    <form id="new-post-form">
-                        <div class="forum-form-group">
-                            <label for="post-title">Title</label>
-                            <input type="text" id="post-title" name="title" required>
-                        </div>
-                        <div class="forum-form-group">
-                            <label for="post-content">Content</label>
-                            <textarea id="post-content" name="content" required></textarea>
-                        </div>
-                        <div class="forum-form-actions">
-                            <button type="submit" class="neon-button">Post</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="forum-list">
-                    <h3>Posts</h3>
-                    <ul id="forum-posts-list">
-                        <li class="loading-placeholder">Loading forum posts...</li>
-                    </ul>
-                </div>
-            </div>
-            <div id="my-locations-container" class="view">
-                <div class="spots-controls">
-                    <div class="spots-filters">
-                        <div class="spots-filter" data-filter="all">All</div>
-                        <div class="spots-filter" data-filter="abandoned">Abandoned</div>
-                        <div class="spots-filter" data-filter="water">Water</div>
-                        <div class="spots-filter" data-filter="camp">Camp</div>
-                    </div>
-                    <div class="spots-view-toggle">
-                        <button class="view-toggle-btn active" data-view="list">List</button>
-                        <button class="view-toggle-btn" data-view="grid">Grid</button>
-                    </div>
-                </div>
-                <div class="spots-tabs">
-                    <div class="spots-tab active" data-tab="all">All</div>
-                    <div class="spots-tab" data-tab="abandoned">Abandoned</div>
-                    <div class="spots-tab" data-tab="water">Water</div>
-                    <div class="spots-tab" data-tab="camp">Camp</div>
-                </div>
-                <div id="spots-search-container">
-                    <input type="text" id="spots-search" placeholder="Search locations...">
-                    <button id="spots-search-btn">Search</button>
-                </div>
-                <div class="spots-view active" id="my-locations-view">
-                    <ul id="my-locations-list">
-                        <li class="loading-placeholder">Loading your locations...</li>
-                    </ul>
-                </div>
-                <div class="spots-view" id="spots-grid">
-                    <div class="spot-card">
-                        <div class="spot-image-container">
-                            <div class="spot-image-placeholder">
-                                <i class="fas fa-building"></i>
-                            </div>
-                            <div class="spot-type-badge abandoned">Abandoned</div>
-                        </div>
-                        <div class="spot-content">
-                            <h3 class="spot-title">Old Factory Complex</h3>
-                            <p class="spot-description">Multi-story industrial complex with interesting architecture and urban decay. Multiple access points available.</p>
-                            <div class="spot-meta">
-                                <span class="spot-rating">★★★★☆</span>
-                                <span class="spot-date">3 days ago</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="spot-card">
-                        <div class="spot-image-container">
-                            <div class="spot-image-placeholder">
-                                <i class="fas fa-water"></i>
-                            </div>
-                            <div class="spot-type-badge water">Water</div>
-                        </div>
-                        <div class="spot-content">
-                            <h3 class="spot-title">Underground Reservoir</h3>
-                            <p class="spot-description">Hidden underground water reservoir with unique acoustics and architectural features. Bring waterproof gear.</p>
-                            <div class="spot-meta">
-                                <span class="spot-rating">★★★★★</span>
-                                <span class="spot-date">1 week ago</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="spot-card">
-                        <div class="spot-image-container">
-                            <div class="spot-image-placeholder">
-                                <i class="fas fa-campground"></i>
-                            </div>
-                            <div class="spot-type-badge camp">Camp</div>
-                        </div>
-                        <div class="spot-content">
-                            <h3 class="spot-title">Rooftop Basecamp</h3>
-                            <p class="spot-description">Secure rooftop location perfect for overnight urban camping. Great views and relatively safe access.</p>
-                            <div class="spot-meta">
-                                <span class="spot-rating">★★★☆☆</span>
-                                <span class="spot-date">2 weeks ago</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="spots-view" id="spots-map">
-                    <div id="spots-map-container"></div>
-                </div>
-                <div id="playlists-container">
-                    <div class="playlists-header">
-                        <h3>Location Playlists</h3>
-                        <button id="create-playlist-btn" class="neon-button small">Create Playlist</button>
-                    </div>
-                    <ul id="playlists-list">
-                        <li class="playlist-card">
-                            <h4>Favorite Spots</h4>
-                            <p>5 locations</p>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div id="profile-container" class="view">
-                <div class="profile-section">
-                    <div class="profile-header">
-                        <div class="profile-avatar-container">
-                            <img id="profile-avatar" src="/images/default-avatar.png" alt="Profile Avatar">
-                            <button id="change-avatar-btn" class="neon-button small">Change</button>
-                        </div>
-                        <div class="profile-info">
-                            <h2 id="profile-name">Urban Explorer</h2>
-                            <div class="profile-level">
-                                <span class="level-badge">Level 12 - Veteran Explorer</span>
-                                <div class="xp-bar">
-                                    <div class="xp-progress" style="width: 75%"></div>
-                                </div>
-                                <span class="xp-text">2,250 / 3,000 XP</span>
-                            </div>
-                            <div class="profile-stats">
-                                <div class="stat-item">
-                                    <div class="stat-value" id="locations-count">47</div>
-                                    <div class="stat-label">Locations</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="territories-count">8</div>
-                                    <div class="stat-label">Territories</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="user-score">12,847</div>
-                                    <div class="stat-label">Score</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="exploration-days">156</div>
-                                    <div class="stat-label">Days Active</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="profile-achievements">
-                            <h3>Recent Achievements</h3>
-                            <div class="achievements-grid">
-                                <div class="achievement-badge earned">
-                                    <div class="achievement-icon">
-                                        <i class="fas fa-map-marked-alt"></i>
-                                    </div>
-                                    <div class="achievement-info">
-                                        <h4>Territory Master</h4>
-                                        <p>Mapped 5+ territories</p>
-                                    </div>
-                                </div>
-                                <div class="achievement-badge earned">
-                                    <div class="achievement-icon">
-                                        <i class="fas fa-camera"></i>
-                                    </div>
-                                    <div class="achievement-info">
-                                        <h4>Photographer</h4>
-                                        <p>Uploaded 50+ photos</p>
-                                    </div>
-                                </div>
-                                <div class="achievement-badge earned">
-                                    <div class="achievement-icon">
-                                        <i class="fas fa-shield-alt"></i>
-                                    </div>
-                                    <div class="achievement-info">
-                                        <h4>Safety First</h4>
-                                        <p>No incidents in 100 days</p>
-                                    </div>
-                                </div>
-                                <div class="achievement-badge">
-                                    <div class="achievement-icon">
-                                        <i class="fas fa-crown"></i>
-                                    </div>
-                                    <div class="achievement-info">
-                                        <h4>Legend</h4>
-                                        <p>Reach level 20</p>
-                                        <div class="progress-bar">
-                                            <div class="progress" style="width: 60%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="profile-activity">
-                            <h3>Recent Activity</h3>
-                            <div class="activity-timeline">
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="fas fa-plus"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <p><strong>Added new location:</strong> Abandoned Metro Station</p>
-                                        <span class="activity-time">2 hours ago</span>
-                                    </div>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="fas fa-trophy"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <p><strong>Achievement unlocked:</strong> Safety First</p>
-                                        <span class="activity-time">1 day ago</span>
-                                    </div>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="fas fa-map"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <p><strong>Updated territory:</strong> Industrial District East</p>
-                                        <span class="activity-time">3 days ago</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="settings-container" class="view">
-                <h2>Settings</h2>
-                <div class="setting-item">
-                    <label for="notifications-toggle">Enable Notifications</label>
-                    <input type="checkbox" id="notifications-toggle" class="toggle-checkbox">
-                    <label for="notifications-toggle" class="toggle-label"></label>
-                </div>
-                <div class="setting-item">
-                    <label for="location-sharing-toggle">Share Location</label>
-                    <input type="checkbox" id="location-sharing-toggle" class="toggle-checkbox">
-                    <label for="location-sharing-toggle" class="toggle-label"></label>
-                </div>
-                <div class="app-info">
-                    <p>Urbindex v2.1</p>
-                    <p>Urban Exploration Mapping Tool</p>
-                </div>
-            </div>
-            
-            <!-- Floating Action Button -->
-            <div class="floating-action-menu">
-                <button class="fab-main" id="main-fab" title="Quick Actions">
-                    <i class="fas fa-plus"></i>
-                </button>
-                <div class="fab-menu" id="fab-menu">
-                    <button class="fab-item" id="add-location-fab" title="Add Location">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Location</span>
-                    </button>
-                    <button class="fab-item" id="add-territory-fab" title="Add Territory">
-                        <i class="fas fa-map"></i>
-                        <span>Territory</span>
-                    </button>
-                    <button class="fab-item" id="quick-photo-fab" title="Quick Photo">
-                        <i class="fas fa-camera"></i>
-                        <span>Photo</span>
+
+            <div class="view" id="locations-view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2>My Locations</h2>
+                    <button class="btn btn-primary" onclick="app.showAddLocationModal()">
+                        <i class="fas fa-plus"></i>
+                        Add Location
                     </button>
                 </div>
+                <div id="locations-grid" class="loading">Loading your locations...</div>
+            </div>
+
+            <div class="view" id="profile-view">
+                <h2>Profile</h2>
+                <div id="profile-content" class="loading">Loading profile...</div>
             </div>
         </main>
+
+        <button class="fab" onclick="app.showAddLocationModal()">
+            <i class="fas fa-plus"></i>
+        </button>
     </div>
 
-    <!-- Location Modal -->
-    <div id="location-modal" class="modal hidden">
+    <div class="modal" id="location-modal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h3 id="modal-title">Add Location</h3>
+            <button class="modal-close" onclick="app.hideModal()">&times;</button>
+            <h3>Add Location</h3>
             <form id="location-form">
                 <div class="form-group">
-                    <label for="location-name">Name</label>
-                    <input type="text" id="location-name" name="name" required>
+                    <label class="form-label">
+                        <i class="fas fa-tag"></i>
+                        Name *
+                    </label>
+                    <input class="input" type="text" id="location-name" required>
                 </div>
+                
                 <div class="form-group">
-                    <label for="location-description">Description</label>
-                    <textarea id="location-description" name="description" required></textarea>
+                    <label class="form-label">
+                        <i class="fas fa-align-left"></i>
+                        Description *
+                    </label>
+                    <textarea class="textarea" id="location-description" required></textarea>
                 </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select class="select" id="location-category">
+                            <option value="abandoned">Abandoned</option>
+                            <option value="rooftop">Rooftop</option>
+                            <option value="tunnel">Tunnel</option>
+                            <option value="industrial">Industrial</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Risk Level</label>
+                        <select class="select" id="location-risk">
+                            <option value="low">Low</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="form-group">
-                    <label for="location-category">Category</label>
-                    <select id="location-category" name="category">
-                        <option value="abandoned">Abandoned</option>
-                        <option value="historical">Historical</option>
-                        <option value="viewpoint">Viewpoint</option>
-                        <option value="water">Water Feature</option>
-                        <option value="other">Other</option>
-                    </select>
+                    <label class="form-label">Coordinates</label>
+                    <div class="coordinates-display" id="coordinates-display">
+                        Click on map to set location
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="location-risk">Risk Level</label>
-                    <select id="location-risk" name="riskLevel">
-                        <option value="safe">Safe</option>
-                        <option value="questionable">Questionable</option>
-                        <option value="unknown">Unknown</option>
-                        <option value="hot">Hot</option>
-                        <option value="high-risk">High Risk</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="location-type">Location Type</label>
-                    <select id="location-type" name="locationType">
-                        <option value="default">Default</option>
-                        <option value="water">Water Source</option>
-                        <option value="building">Building</option>
-                        <option value="power">Power Outlet</option>
-                        <option value="camp">Camp Spot</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="location-image">Images</label>
-                    <input type="file" id="location-image" name="images" multiple accept="image/*">
-                    <div id="image-preview-container"></div>
-                </div>
-                <div class="coordinates-display">
-                    <div>Latitude: <span id="location-lat">0</span></div>
-                    <div>Longitude: <span id="location-lng">0</span></div>
-                </div>
+                
                 <div class="form-actions">
-                    <button type="button" class="neon-button" id="cancel-location-btn">Cancel</button>
-                    <button type="submit" class="neon-button">Save Location</button>
+                    <button type="button" class="btn" onclick="app.hideModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Splash Screen -->
-    <div id="splash-screen" class="active">
-        <div class="splash-content">
-            <div class="splash-ascii">
-██╗   ██╗██████╗ ██████╗ ██╗███╗   ██╗██████╗ ███████╗██╗  ██╗
-██║   ██║██╔══██╗██╔══██╗██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝
-██║   ██║██████╔╝██████╔╝██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝ 
-██║   ██║██╔══██╗██╔══██╗██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗ 
-╚██████╔╝██║  ██║██████╔╝██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗
- ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝
-            </div>
-            <div class="loading-bar">
-                <div class="loading-progress"></div>
-            </div>
-            <div class="tagline">URBAN EXPLORATION MAPPING</div>
-        </div>
-    </div>
-
-    <!-- Scanline Effect -->
-    <div class="scanline"></div>
-
-    <!-- Install Prompt -->
-    <div id="install-prompt">
-        <div id="install-prompt-text">Install Urbindex for the best experience</div>
-        <div id="install-prompt-buttons">
-            <button id="install-button" class="neon-button small">Install</button>
-            <button id="dismiss-install" class="neon-button small">Not Now</button>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     
-    <!-- App Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/real-data.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/offline.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/locations.js"></script>
-    <script src="js/comments.js"></script>
-    <script src="js/ratings.js"></script>
-    <script src="js/profile.js"></script>
-    <script src="js/search.js"></script>
-    <script src="js/forum.js"></script>
-    <script src="js/ui-enhancements.js"></script>
-    <script src="js/app.js"></script>
+    <script>
+        class UrbindexApp {
+            constructor() {
+                this.map = null;
+                this.currentUser = null;
+                this.markers = new Map();
+                this.selectedLatLng = null;
+                this.init();
+            }
+
+            async init() {
+                await this.initFirebase();
+                this.initMap();
+                this.initUI();
+                this.initAuth();
+                this.loadData();
+            }
+
+            async initFirebase() {
+                const config = {
+                    apiKey: "AIzaSyCifqLPnCuvRVZ9hvHIJVBmHkzB5nJyqtc",
+                    authDomain: "urbindex-d69e1.firebaseapp.com",
+                    projectId: "urbindex-d69e1",
+                    storageBucket: "urbindex-d69e1.firebasestorage.app",
+                    messagingSenderId: "889914696327",
+                    appId: "1:889914696327:web:351daa656a4d12fa828e22"
+                };
+
+                firebase.initializeApp(config);
+                this.db = firebase.firestore();
+                this.auth = firebase.auth();
+            }
+
+            initMap() {
+                this.map = L.map('map').setView([40.7128, -74.0060], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
+                this.map.on('click', (e) => this.handleMapClick(e));
+            }
+
+            initUI() {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.addEventListener('click', () => this.switchView(btn.dataset.view));
+                });
+
+                document.getElementById('location-form').addEventListener('submit', (e) => this.handleLocationSubmit(e));
+            }
+
+            initAuth() {
+                this.auth.onAuthStateChanged(user => {
+                    this.currentUser = user;
+                    this.updateAuthUI();
+                    if (user) this.loadUserData();
+                });
+
+                document.getElementById('auth-btn').addEventListener('click', () => this.handleAuth());
+            }
+
+            async loadData() {
+                this.loadLocations();
+                this.loadStats();
+                this.loadActivity();
+            }
+
+            loadLocations() {
+                this.db.collection('locations')
+                    .where('status', '==', 'active')
+                    .onSnapshot(snapshot => {
+                        this.markers.forEach(marker => this.map.removeLayer(marker));
+                        this.markers.clear();
+
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            if (data.coordinates && Array.isArray(data.coordinates) && data.coordinates.length === 2) {
+                                const marker = L.marker(data.coordinates)
+                                    .bindPopup(`
+                                        <div style="min-width: 200px;">
+                                            <strong>${this.escapeHtml(data.name)}</strong><br>
+                                            <p style="margin: 8px 0; color: #666;">${this.escapeHtml(data.description)}</p>
+                                            <div style="display: flex; gap: 8px; font-size: 0.8rem; margin-top: 8px;">
+                                                <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; color: #333;">${data.category}</span>
+                                                <span style="background: ${this.getRiskColor(data.riskLevel)}; padding: 2px 6px; border-radius: 4px; color: white;">${data.riskLevel}</span>
+                                            </div>
+                                        </div>
+                                    `)
+                                    .addTo(this.map);
+                                this.markers.set(doc.id, marker);
+                            }
+                        });
+                    }, error => {
+                        console.error('Error loading locations:', error);
+                    });
+            }
+
+            async loadStats() {
+                try {
+                    const [locationsSnap, usersSnap] = await Promise.all([
+                        this.db.collection('locations').where('status', '==', 'active').get(),
+                        this.db.collection('users').where('lastSeen', '>', new Date(Date.now() - 86400000)).get()
+                    ]);
+
+                    document.getElementById('total-locations').textContent = locationsSnap.size;
+                    document.getElementById('active-users').textContent = usersSnap.size;
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            }
+
+            loadActivity() {
+                this.db.collection('locations')
+                    .where('status', '==', 'active')
+                    .orderBy('createdAt', 'desc')
+                    .limit(10)
+                    .onSnapshot(snapshot => {
+                        const feed = document.getElementById('activity-feed');
+                        if (snapshot.empty) {
+                            feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">No recent activity</div>';
+                            return;
+                        }
+
+                        feed.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            const item = document.createElement('div');
+                            item.className = 'activity-item';
+                            item.innerHTML = `
+                                <div class="activity-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                <div class="activity-content">
+                                    <div><span class="activity-user">Explorer</span> added "${this.escapeHtml(data.name)}"</div>
+                                    <div class="activity-time">${this.timeAgo(data.createdAt?.toDate())}</div>
+                                </div>
+                            `;
+                            feed.appendChild(item);
+                        });
+                    }, error => {
+                        console.error('Error loading activity:', error);
+                        document.getElementById('activity-feed').innerHTML = '<div class="error">Failed to load activity</div>';
+                    });
+            }
+
+            switchView(viewName) {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === viewName);
+                });
+
+                document.querySelectorAll('.view').forEach(view => {
+                    view.classList.toggle('active', view.id === `${viewName}-view`);
+                });
+
+                if (viewName === 'map' && this.map) {
+                    setTimeout(() => this.map.invalidateSize(), 100);
+                } else if (viewName === 'locations') {
+                    this.loadUserLocations();
+                } else if (viewName === 'profile') {
+                    this.loadProfile();
+                }
+            }
+
+            async loadUserLocations() {
+                const grid = document.getElementById('locations-grid');
+                if (!this.currentUser) {
+                    grid.innerHTML = `
+                        <div class="guest-welcome">
+                            <h3><i class="fas fa-map-marker-alt"></i> Your Location Collection</h3>
+                            <p>Sign in to start building your personal collection of urban exploration locations. Track discoveries, add notes, and share with the community.</p>
+                            <div class="demo-stats">
+                                <div class="demo-stat">
+                                    <div class="demo-stat-value"><i class="fas fa-plus"></i></div>
+                                    <div class="demo-stat-label">Add Locations</div>
+                                </div>
+                                <div class="demo-stat">
+                                    <div class="demo-stat-value"><i class="fas fa-camera"></i></div>
+                                    <div class="demo-stat-label">Upload Photos</div>
+                                </div>
+                                <div class="demo-stat">
+                                    <div class="demo-stat-value"><i class="fas fa-share"></i></div>
+                                    <div class="demo-stat-label">Share Discoveries</div>
+                                </div>
+                            </div>
+                            <div class="guest-actions">
+                                <button class="btn btn-primary" onclick="document.getElementById('auth-btn').click()">
+                                    <i class="fas fa-sign-in-alt"></i> Sign In to Begin
+                                </button>
+                                <button class="btn" onclick="app.switchView('map')">
+                                    <i class="fas fa-map"></i> Explore Map
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                try {
+                    const snapshot = await this.db.collection('locations')
+                        .where('createdBy', '==', this.currentUser.uid)
+                        .where('status', '==', 'active')
+                        .get();
+
+                    if (snapshot.empty) {
+                        grid.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--text-muted);">No locations yet. Add your first location!</div>';
+                        return;
+                    }
+
+                    grid.innerHTML = '';
+                    grid.className = 'locations-grid';
+                    
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const card = document.createElement('div');
+                        card.className = 'location-card';
+                        card.innerHTML = `
+                            <div class="location-header">
+                                <h4>${data.name}</h4>
+                                <span class="risk risk-${data.riskLevel}">${data.riskLevel}</span>
+                            </div>
+                            <p style="color: var(--text-secondary); margin-bottom: 12px;">${data.description}</p>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">${data.category}</div>
+                            <div class="location-actions">
+                                <button class="btn" style="font-size: 0.8rem; padding: 4px 8px;" onclick="app.deleteLocation('${doc.id}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                } catch (error) {
+                    console.error('Error loading locations:', error);
+                    grid.innerHTML = '<div class="error">Failed to load locations</div>';
+                }
+            }
+
+            async loadProfile() {
+                const content = document.getElementById('profile-content');
+                if (!this.currentUser) {
+                    content.innerHTML = `
+                        <div class="guest-welcome">
+                            <div style="text-align: center; margin-bottom: 24px;">
+                                <i class="fas fa-user-lock" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 16px;"></i>
+                                <h3>Create Your Explorer Profile</h3>
+                                <p>Join the Urbindex community to track your discoveries, share locations, and connect with fellow urban explorers.</p>
+                            </div>
+                            
+                            <div class="profile-benefits">
+                                <div class="benefit-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div>
+                                        <strong>Track Locations</strong>
+                                        <p>Save and organize your urban exploration discoveries</p>
+                                    </div>
+                                </div>
+                                <div class="benefit-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div>
+                                        <strong>Progress Tracking</strong>
+                                        <p>Monitor your exploration stats and achievements</p>
+                                    </div>
+                                </div>
+                                <div class="benefit-item">
+                                    <i class="fas fa-users"></i>
+                                    <div>
+                                        <strong>Community Access</strong>
+                                        <p>Connect with other explorers and share experiences</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="guest-actions">
+                                <button class="btn btn-primary" onclick="document.getElementById('auth-btn').click()">
+                                    <i class="fas fa-user-plus"></i> Create Account
+                                </button>
+                                <button class="btn" onclick="app.switchView('map')">
+                                    <i class="fas fa-map"></i> Explore First
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                try {
+                    // Get user's actual data from multiple collections
+                    const [locationsSnapshot, userDoc] = await Promise.all([
+                        this.db.collection('locations')
+                            .where('createdBy', '==', this.currentUser.uid)
+                            .where('status', '==', 'active')
+                            .get(),
+                        this.db.collection('users').doc(this.currentUser.uid).get()
+                    ]);
+
+                    const userData = userDoc.exists ? userDoc.data() : {};
+                    const locationsCount = locationsSnapshot.size;
+                    const joinDate = this.currentUser.metadata.creationTime ? 
+                        new Date(this.currentUser.metadata.creationTime).toLocaleDateString() : 'Unknown';
+                    const lastActive = userData.lastSeen ? 
+                        this.timeAgo(userData.lastSeen.toDate()) : 'Just now';
+                    
+                    // Calculate real stats
+                    const explorerScore = locationsCount * 10 + (userData.forumPosts || 0) * 5;
+                    const explorationDays = userData.createdAt ? 
+                        Math.floor((Date.now() - userData.createdAt.toDate().getTime()) / (1000 * 60 * 60 * 24)) : 0;
+
+                    content.innerHTML = `
+                        <div class="profile-card">
+                            <div class="profile-header">
+                                <div class="profile-avatar">
+                                    <img src="${userData.avatar || 'https://files.catbox.moe/vczof0.png'}" alt="Profile Avatar" 
+                                         style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-blue);">
+                                </div>
+                                <div class="profile-info">
+                                    <h3>${userData.displayName || 'Urban Explorer'}</h3>
+                                    <p style="color: var(--text-secondary); margin: 4px 0;">Member since ${joinDate}</p>
+                                    <p style="color: var(--text-muted); font-size: 0.9rem;">Last active ${lastActive}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">${locationsCount}</div>
+                                    <div class="stat-label">Locations Added</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${explorerScore}</div>
+                                    <div class="stat-label">Explorer Score</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${explorationDays}</div>
+                                    <div class="stat-label">Days Active</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${userData.forumPosts || 0}</div>
+                                    <div class="stat-label">Forum Posts</div>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-actions">
+                                <button class="btn" onclick="app.switchView('locations')">
+                                    <i class="fas fa-map-marker-alt"></i> View My Locations
+                                </button>
+                                <button class="btn" onclick="app.switchView('map')">
+                                    <i class="fas fa-map"></i> Explore Map
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                    content.innerHTML = '<div class="error">Failed to load profile data. Please try refreshing the page.</div>';
+                }
+            }
+
+            showAddLocationModal() {
+                if (!this.currentUser) {
+                    if (confirm('Sign in required to add locations. Would you like to sign in now?')) {
+                        this.handleAuth();
+                    }
+                    return;
+                }
+                document.getElementById('location-modal').classList.add('active');
+            }
+
+            hideModal() {
+                document.getElementById('location-modal').classList.remove('active');
+                document.getElementById('location-form').reset();
+                this.selectedLatLng = null;
+                document.getElementById('coordinates-display').textContent = 'Click on map to set location';
+            }
+
+            handleMapClick(e) {
+                if (document.getElementById('location-modal').classList.contains('active')) {
+                    this.selectedLatLng = e.latlng;
+                    document.getElementById('coordinates-display').textContent = 
+                        `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
+                }
+            }
+
+            async handleLocationSubmit(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('location-name').value.trim();
+                const description = document.getElementById('location-description').value.trim();
+                
+                if (!name || !description) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                if (!this.selectedLatLng) {
+                    alert('Please select a location on the map');
+                    return;
+                }
+
+                const data = {
+                    name,
+                    description,
+                    category: document.getElementById('location-category').value,
+                    riskLevel: document.getElementById('location-risk').value,
+                    coordinates: [this.selectedLatLng.lat, this.selectedLatLng.lng],
+                    createdBy: this.currentUser.uid,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'active'
+                };
+
+                try {
+                    await this.db.collection('locations').add(data);
+                    this.hideModal();
+                    this.loadStats();
+                } catch (error) {
+                    console.error('Error adding location:', error);
+                    alert('Failed to add location');
+                }
+            }
+
+            async deleteLocation(id) {
+                if (!confirm('Delete this location?')) return;
+                
+                try {
+                    await this.db.collection('locations').doc(id).update({
+                        status: 'deleted',
+                        deletedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    this.loadUserLocations();
+                    this.loadStats();
+                } catch (error) {
+                    console.error('Error deleting location:', error);
+                    alert('Failed to delete location');
+                }
+            }
+
+            async handleAuth() {
+                if (this.currentUser) {
+                    await this.auth.signOut();
+                } else {
+                    await this.auth.signInAnonymously();
+                }
+            }
+
+            updateAuthUI() {
+                const btn = document.getElementById('auth-btn');
+                const span = btn.querySelector('span');
+                const icon = btn.querySelector('i');
+                
+                if (this.currentUser) {
+                    span.textContent = 'Sign Out';
+                    icon.className = 'fas fa-sign-out-alt';
+                    btn.title = 'Sign out of your account';
+                } else {
+                    span.textContent = 'Sign In';
+                    icon.className = 'fas fa-sign-in-alt';
+                    btn.title = 'Sign in to unlock full features';
+                }
+                
+                const dot = document.getElementById('status-dot');
+                const text = document.getElementById('status-text');
+                if (this.currentUser) {
+                    dot.classList.remove('offline');
+                    text.textContent = 'Connected';
+                } else {
+                    dot.classList.add('offline');
+                    text.textContent = 'Guest Mode';
+                }
+            }
+
+            async loadUserData() {
+                if (!this.currentUser) return;
+                
+                try {
+                    // Update user presence and create user document if it doesn't exist
+                    await this.db.collection('users').doc(this.currentUser.uid).set({
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                        online: true,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        displayName: this.currentUser.displayName || 'Urban Explorer',
+                        email: this.currentUser.email || null
+                    }, { merge: true });
+                } catch (error) {
+                    console.error('Error updating user data:', error);
+                }
+            }
+
+            timeAgo(date) {
+                if (!date) return 'Unknown';
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                return `${diffDays}d ago`;
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            getRiskColor(riskLevel) {
+                const colors = {
+                    low: '#23d160',
+                    moderate: '#ffdd57', 
+                    high: '#ff3860'
+                };
+                return colors[riskLevel] || '#7a7a9a';
+            }
+        }
+
+        let app;
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new UrbindexApp();
+        });
+    </script>
 </body>
 </html>

@@ -260,6 +260,12 @@
             padding: 8px 12px;
             width: 100%;
             transition: var(--transition);
+            font-family: inherit;
+        }
+        
+        .textarea {
+            resize: vertical;
+            min-height: 80px;
         }
 
         .input:focus, .textarea:focus, .select:focus {
@@ -381,19 +387,42 @@
         .risk-moderate { background: var(--warning); color: var(--bg-primary); }
         .risk-high { background: var(--danger); color: white; }
 
+        .error {
+            background: rgba(255, 56, 96, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: var(--radius);
+            padding: 16px;
+            color: var(--danger);
+            text-align: center;
+        }
+        
         @media (max-width: 768px) {
+            .main { padding: 16px; }
+            
             .map-layout {
                 grid-template-columns: 1fr;
                 grid-template-rows: auto 1fr;
+                gap: 16px;
             }
             
             .sidebar {
                 order: 2;
                 max-height: 300px;
                 overflow-y: auto;
+                flex-direction: row;
+                gap: 12px;
+            }
+            
+            .panel {
+                min-width: 200px;
+                flex-shrink: 0;
             }
             
             .nav-btn span { display: none; }
+            
+            .locations-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -621,13 +650,24 @@
 
                         snapshot.forEach(doc => {
                             const data = doc.data();
-                            if (data.coordinates) {
+                            if (data.coordinates && Array.isArray(data.coordinates) && data.coordinates.length === 2) {
                                 const marker = L.marker(data.coordinates)
-                                    .bindPopup(`<strong>${data.name}</strong><br>${data.description}`)
+                                    .bindPopup(`
+                                        <div style="min-width: 200px;">
+                                            <strong>${this.escapeHtml(data.name)}</strong><br>
+                                            <p style="margin: 8px 0; color: #666;">${this.escapeHtml(data.description)}</p>
+                                            <div style="display: flex; gap: 8px; font-size: 0.8rem; margin-top: 8px;">
+                                                <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; color: #333;">${data.category}</span>
+                                                <span style="background: ${this.getRiskColor(data.riskLevel)}; padding: 2px 6px; border-radius: 4px; color: white;">${data.riskLevel}</span>
+                                            </div>
+                                        </div>
+                                    `)
                                     .addTo(this.map);
                                 this.markers.set(doc.id, marker);
                             }
                         });
+                    }, error => {
+                        console.error('Error loading locations:', error);
                     });
             }
 
@@ -647,12 +687,13 @@
 
             loadActivity() {
                 this.db.collection('locations')
+                    .where('status', '==', 'active')
                     .orderBy('createdAt', 'desc')
                     .limit(10)
                     .onSnapshot(snapshot => {
                         const feed = document.getElementById('activity-feed');
                         if (snapshot.empty) {
-                            feed.innerHTML = '<div style="text-align: center; color: var(--text-muted);">No recent activity</div>';
+                            feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">No recent activity</div>';
                             return;
                         }
 
@@ -664,12 +705,15 @@
                             item.innerHTML = `
                                 <div class="activity-icon"><i class="fas fa-map-marker-alt"></i></div>
                                 <div class="activity-content">
-                                    <div><span class="activity-user">Explorer</span> added "${data.name}"</div>
+                                    <div><span class="activity-user">Explorer</span> added "${this.escapeHtml(data.name)}"</div>
                                     <div class="activity-time">${this.timeAgo(data.createdAt?.toDate())}</div>
                                 </div>
                             `;
                             feed.appendChild(item);
                         });
+                    }, error => {
+                        console.error('Error loading activity:', error);
+                        document.getElementById('activity-feed').innerHTML = '<div class="error">Failed to load activity</div>';
                     });
             }
 
@@ -682,8 +726,13 @@
                     view.classList.toggle('active', view.id === `${viewName}-view`);
                 });
 
-                if (viewName === 'locations') this.loadUserLocations();
-                if (viewName === 'profile') this.loadProfile();
+                if (viewName === 'map' && this.map) {
+                    setTimeout(() => this.map.invalidateSize(), 100);
+                } else if (viewName === 'locations') {
+                    this.loadUserLocations();
+                } else if (viewName === 'profile') {
+                    this.loadProfile();
+                }
             }
 
             async loadUserLocations() {
@@ -796,14 +845,22 @@
             async handleLocationSubmit(e) {
                 e.preventDefault();
                 
+                const name = document.getElementById('location-name').value.trim();
+                const description = document.getElementById('location-description').value.trim();
+                
+                if (!name || !description) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
                 if (!this.selectedLatLng) {
                     alert('Please select a location on the map');
                     return;
                 }
 
                 const data = {
-                    name: document.getElementById('location-name').value,
-                    description: document.getElementById('location-description').value,
+                    name,
+                    description,
                     category: document.getElementById('location-category').value,
                     riskLevel: document.getElementById('location-risk').value,
                     coordinates: [this.selectedLatLng.lat, this.selectedLatLng.lng],
@@ -887,9 +944,27 @@
                 if (diffHours < 24) return `${diffHours}h ago`;
                 return `${diffDays}d ago`;
             }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            getRiskColor(riskLevel) {
+                const colors = {
+                    low: '#23d160',
+                    moderate: '#ffdd57', 
+                    high: '#ff3860'
+                };
+                return colors[riskLevel] || '#7a7a9a';
+            }
         }
 
-        const app = new UrbindexApp();
+        let app;
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new UrbindexApp();
+        });
     </script>
 </body>
 </html>
