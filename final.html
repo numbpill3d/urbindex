@@ -308,6 +308,28 @@
             100% { transform: rotate(360deg); }
         }
 
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
         .activity-item {
             display: flex;
             align-items: center;
@@ -551,7 +573,7 @@
             </div>
         </main>
 
-        <button class="fab" onclick="app.showAddLocationModal()">
+        <button class="fab" id="add-location-fab" onclick="app.showAddLocationModal()" style="display:none;">
             <i class="fas fa-plus"></i>
         </button>
     </div>
@@ -659,7 +681,7 @@
                     this.loadData();
                 } catch (error) {
                     console.error('App initialization failed:', error);
-                    this.showError('Failed to initialize app');
+                    this.showError(`Failed to initialize app: ${error.message}`);
                 }
             }
 
@@ -735,28 +757,48 @@
                 this.auth.onAuthStateChanged(user => {
                     this.currentUser = user;
                     this.updateAuthUI();
-                    if (user) this.loadUserData();
+                    if (user) {
+                        console.log('User authenticated:', user.uid, user.isAnonymous ? '(anonymous)' : '(registered)');
+                        this.loadUserData();
+                        // Load data after authentication
+                        this.loadData();
+                    } else {
+                        console.log('User not authenticated');
+                    }
                 });
 
                 document.getElementById('auth-btn').addEventListener('click', () => this.handleAuth());
             }
 
             async loadData() {
+                // Only load data if authenticated
+                if (!this.currentUser) {
+                    console.log('Skipping data load - user not authenticated');
+                    return;
+                }
                 this.loadLocations();
                 this.loadStats();
                 this.loadActivity();
             }
 
             loadLocations() {
+                // Don't load locations until authenticated
+                if (!this.auth.currentUser) {
+                    console.log('Waiting for authentication before loading locations...');
+                    return;
+                }
+
                 this.db.collection('locations')
                     .where('status', '==', 'active')
                     .onSnapshot(snapshot => {
                         this.markers.forEach(marker => this.map.removeLayer(marker));
                         this.markers.clear();
 
+                        let locationCount = 0;
                         snapshot.forEach(doc => {
                             const data = doc.data();
                             if (data.coordinates && Array.isArray(data.coordinates) && data.coordinates.length === 2) {
+                                locationCount++;
                                 const marker = L.marker(data.coordinates)
                                     .bindPopup(`
                                         <div style="min-width: 200px;">
@@ -772,8 +814,14 @@
                                 this.markers.set(doc.id, marker);
                             }
                         });
+                        console.log(`Loaded ${locationCount} locations on map`);
                     }, error => {
                         console.error('Error loading locations:', error);
+                        if (error.code === 'permission-denied') {
+                            this.showToast('Please sign in to view locations', 'warning');
+                        } else {
+                            this.showToast('Failed to load locations', 'error');
+                        }
                     });
             }
 
@@ -792,6 +840,14 @@
             }
 
             loadActivity() {
+                if (!this.auth.currentUser) {
+                    const feed = document.getElementById('activity-feed');
+                    if (feed) {
+                        feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">Sign in to view activity</div>';
+                    }
+                    return;
+                }
+
                 try {
                     this.db.collection('locations')
                         .where('status', '==', 'active')
@@ -824,7 +880,11 @@
                             console.error('Error loading activity:', error);
                             const feed = document.getElementById('activity-feed');
                             if (feed) {
-                                feed.innerHTML = '<div class="error">Failed to load activity</div>';
+                                if (error.code === 'permission-denied') {
+                                    feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">Sign in to view activity</div>';
+                                } else {
+                                    feed.innerHTML = '<div class="error">Failed to load activity</div>';
+                                }
                             }
                         });
                 } catch (error) {
@@ -859,7 +919,16 @@
                 if (!grid) return;
                 
                 if (!this.currentUser) {
-                    grid.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--text-muted);">Sign in to view your locations</div>';
+                    grid.innerHTML = `
+                        <div style="text-align: center; padding: 48px;">
+                            <i class="fas fa-lock" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px; display: block;"></i>
+                            <h3 style="color: var(--text-secondary); margin-bottom: 12px;">Sign In Required</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 20px;">Create an account to start tracking your urban exploration locations</p>
+                            <button class="btn btn-primary" onclick="app.handleAuth()">
+                                <i class="fas fa-sign-in-alt"></i> Sign In Now
+                            </button>
+                        </div>
+                    `;
                     return;
                 }
 
@@ -906,8 +975,19 @@
 
             async loadProfile() {
                 const content = document.getElementById('profile-content');
+                if (!content) return;
+                
                 if (!this.currentUser) {
-                    content.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--text-muted);">Sign in to view your profile</div>';
+                    content.innerHTML = `
+                        <div style="text-align: center; padding: 48px;">
+                            <i class="fas fa-user-circle" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 16px; display: block;"></i>
+                            <h3 style="color: var(--text-secondary); margin-bottom: 12px;">Create Your Profile</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 20px;">Join the Urbindex community to track your discoveries and connect with fellow explorers</p>
+                            <button class="btn btn-primary" onclick="app.handleAuth()">
+                                <i class="fas fa-user-plus"></i> Get Started
+                            </button>
+                        </div>
+                    `;
                     return;
                 }
 
@@ -944,7 +1024,9 @@
 
             showAddLocationModal() {
                 if (!this.currentUser) {
-                    alert('Please sign in to add locations');
+                    if (confirm('Sign in required to add locations. Would you like to sign in now?')) {
+                        this.handleAuth();
+                    }
                     return;
                 }
                 document.getElementById('location-modal').classList.add('active');
@@ -1006,10 +1088,16 @@
                     await this.db.collection('locations').add(data);
                     this.hideModal();
                     this.loadStats();
-                    alert('Location added successfully!');
+                    this.showToast('Location added successfully!', 'success');
+                    
+                    // Refresh user locations if on that view
+                    const locationsView = document.getElementById('locations-view');
+                    if (locationsView && locationsView.classList.contains('active')) {
+                        this.loadUserLocations();
+                    }
                 } catch (error) {
                     console.error('Error adding location:', error);
-                    alert('Failed to add location');
+                    this.showToast(error.message || 'Failed to add location. Please try again.', 'error');
                 } finally {
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
@@ -1023,16 +1111,52 @@
             }
             
             showError(message) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error';
-                errorDiv.textContent = message;
-                errorDiv.style.margin = '16px 0';
+                this.showToast(message, 'error');
+            }
+
+            showToast(message, type = 'info', duration = 3000) {
+                // Remove any existing toasts
+                document.querySelectorAll('.toast').forEach(t => t.remove());
                 
-                const main = document.querySelector('.main');
-                if (main) {
-                    main.insertBefore(errorDiv, main.firstChild);
-                    setTimeout(() => errorDiv.remove(), 5000);
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.textContent = message;
+                
+                const styles = {
+                    position: 'fixed',
+                    top: '20px',
+                    right: '20px',
+                    background: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    padding: '12px 20px',
+                    borderRadius: 'var(--radius)',
+                    border: '1px solid var(--border)',
+                    zIndex: '3000',
+                    boxShadow: 'var(--shadow)',
+                    maxWidth: '90vw',
+                    animation: 'slideIn 0.3s ease-out'
+                };
+
+                Object.assign(toast.style, styles);
+
+                // Type-specific styling
+                const typeConfigs = {
+                    error: { borderColor: 'var(--danger)', color: 'var(--danger)' },
+                    success: { borderColor: 'var(--success)', color: 'var(--success)' },
+                    warning: { borderColor: 'var(--warning)', color: 'var(--warning)' },
+                    info: { borderColor: 'var(--accent-blue)', color: 'var(--accent-blue)' }
+                };
+
+                if (typeConfigs[type]) {
+                    Object.assign(toast.style, typeConfigs[type]);
                 }
+
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease-out';
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
             }
 
             async deleteLocation(id) {
@@ -1045,25 +1169,56 @@
                     });
                     this.loadUserLocations();
                     this.loadStats();
+                    this.showToast('Location deleted successfully', 'success');
                 } catch (error) {
                     console.error('Error deleting location:', error);
-                    alert('Failed to delete location');
+                    this.showToast('Failed to delete location. Please try again.', 'error');
                 }
             }
 
             async handleAuth() {
-                if (this.currentUser) {
-                    await this.auth.signOut();
-                } else {
-                    await this.auth.signInAnonymously();
+                const btn = document.getElementById('auth-btn');
+                const originalText = btn?.querySelector('span')?.textContent || 'Sign In';
+                
+                try {
+                    if (btn) {
+                        btn.disabled = true;
+                        const span = btn.querySelector('span');
+                        if (span) span.textContent = 'Processing...';
+                    }
+                    
+                    if (this.currentUser) {
+                        await this.auth.signOut();
+                        this.showToast('Signed out successfully', 'success');
+                    } else {
+                        await this.auth.signInAnonymously();
+                        this.showToast('Signed in successfully', 'success');
+                    }
+                } catch (error) {
+                    console.error('Auth error:', error);
+                    this.showToast(error.message || 'Authentication failed', 'error');
+                } finally {
+                    if (btn) {
+                        btn.disabled = false;
+                        const span = btn.querySelector('span');
+                        if (span) span.textContent = originalText;
+                    }
                 }
             }
 
             updateAuthUI() {
                 const btn = document.getElementById('auth-btn');
                 const span = btn?.querySelector('span');
-                if (span) {
-                    span.textContent = this.currentUser ? 'Sign Out' : 'Sign In';
+                const icon = btn?.querySelector('i');
+                
+                if (this.currentUser) {
+                    if (span) span.textContent = 'Sign Out';
+                    if (icon) icon.className = 'fas fa-sign-out-alt';
+                    btn?.setAttribute('title', 'Sign out of your account');
+                } else {
+                    if (span) span.textContent = 'Sign In';
+                    if (icon) icon.className = 'fas fa-sign-in-alt';
+                    btn?.setAttribute('title', 'Sign in to unlock full features');
                 }
                 
                 const dot = document.getElementById('status-dot');
@@ -1073,7 +1228,13 @@
                     if (text) text.textContent = 'Connected';
                 } else {
                     dot?.classList.add('offline');
-                    if (text) text.textContent = 'Offline';
+                    if (text) text.textContent = 'Guest Mode';
+                }
+                
+                // Update FAB visibility
+                const fab = document.getElementById('add-location-fab');
+                if (fab) {
+                    fab.style.display = this.currentUser ? '' : 'none';
                 }
             }
 
