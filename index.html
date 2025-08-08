@@ -690,9 +690,31 @@
             </div>
         </main>
 
-        <button class="fab" onclick="app.showAddLocationModal()">
+        <button class="fab" id="add-location-fab" onclick="app.showAddLocationModal()" style="display:none;">
             <i class="fas fa-plus"></i>
         </button>
+    <script>
+    // Hide/show FAB based on login state
+    document.addEventListener('DOMContentLoaded', function() {
+        function updateFabVisibility() {
+            var fab = document.getElementById('add-location-fab');
+            if (window.app && app.currentUser) {
+                fab.style.display = '';
+            } else {
+                fab.style.display = 'none';
+            }
+        }
+        // Listen for auth changes
+        if (window.app) {
+            var origUpdateAuthUI = app.updateAuthUI.bind(app);
+            app.updateAuthUI = function() {
+                origUpdateAuthUI();
+                updateFabVisibility();
+            };
+        }
+        updateFabVisibility();
+    });
+    </script>
     </div>
 
     <div class="modal" id="location-modal">
