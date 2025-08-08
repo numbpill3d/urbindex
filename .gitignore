@@ -12,6 +12,9 @@ firebase-debug.log
 firestore-debug.log
 ui-debug.log
 
+# Firebase Token (NEVER commit this!)
+FIREBASE_TOKEN.txt
+
 # Environment variables
 .env
 .env.local

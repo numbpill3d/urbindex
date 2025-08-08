@@ -22,28 +22,40 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
 
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Run Tests (if any)
-        run: npm test || true  # Continue even if no tests
+      - name: Install Firebase Tools
+        run: npm install -g firebase-tools
 
       - name: Deploy to Firebase Hosting Preview (PR only)
         if: github.event_name == 'pull_request'
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          channelId: preview
-          projectId: urbindex-d69e1
+        run: |
+          firebase hosting:channel:deploy preview --project urbindex-d69e1 --token "${{ secrets.FIREBASE_TOKEN }}"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Deploy to Firebase Hosting Production
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        uses: FirebaseExtended/action-hosting-deploy@v0
+        run: |
+          firebase deploy --only hosting --project urbindex-d69e1 --token "${{ secrets.FIREBASE_TOKEN }}"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Deploy Firestore Rules
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: |
+          firebase deploy --only firestore:rules --project urbindex-d69e1 --token "${{ secrets.FIREBASE_TOKEN }}"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Comment PR with Preview URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          channelId: live
-          projectId: urbindex-d69e1
+          script: |
+            const preview_url = `https://urbindex-d69e1--preview-${context.payload.pull_request.number}.web.app`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Firebase Preview Channel deployed!\n\nView your changes at: ${preview_url}`
+            })

@@ -123,7 +123,6 @@
             grid-template-columns: 300px 1fr;
             gap: 24px;
             height: calc(100vh - 140px);
-            min-height: 500px;
         }
 
         .sidebar {
@@ -308,28 +307,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-
         .activity-item {
             display: flex;
             align-items: center;
@@ -412,38 +389,178 @@
 
         .error {
             background: rgba(255, 56, 96, 0.1);
-            border: 1px solid var(--danger);
+            border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 16px;
             color: var(--danger);
             text-align: center;
-            margin: 16px 0;
         }
-        
-        .no-data {
+
+        .announcements {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .announcement {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255, 221, 87, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+        }
+
+        .announcement-icon {
+            color: var(--warning);
+            font-size: 0.9rem;
+            margin-top: 2px;
+        }
+
+        .announcement-text {
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .guest-welcome {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
             text-align: center;
-            color: var(--text-muted);
-            padding: 24px;
-            font-style: italic;
         }
-        
-        /* Fix button states */
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+
+        .guest-welcome h3 {
+            color: var(--accent-blue);
+            margin-bottom: 12px;
         }
-        
-        .btn:disabled:hover {
-            background: transparent;
+
+        .guest-welcome p {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .guest-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .demo-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .demo-stat {
+            text-align: center;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+        }
+
+        .demo-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
             color: var(--accent-blue);
         }
-        
-        .btn-primary:disabled:hover {
-            background: var(--accent-blue);
-            color: var(--bg-primary);
+
+        .demo-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .profile-benefits {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .benefit-item i {
+            color: var(--accent-blue);
+            font-size: 1.2rem;
+            margin-top: 4px;
+        }
+
+        .benefit-item strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .benefit-item p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .profile-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
         
-        /* Fix for mobile layout */
         @media (max-width: 768px) {
             .main { padding: 16px; }
             
@@ -451,12 +568,11 @@
                 grid-template-columns: 1fr;
                 grid-template-rows: auto 1fr;
                 gap: 16px;
-                height: calc(100vh - 120px);
             }
             
             .sidebar {
                 order: 2;
-                max-height: 200px;
+                max-height: 300px;
                 overflow-y: auto;
                 flex-direction: row;
                 gap: 12px;
@@ -471,20 +587,6 @@
             
             .locations-grid {
                 grid-template-columns: 1fr;
-            }
-            
-            .modal-content {
-                width: 95%;
-                margin: 20px;
-                max-height: 90vh;
-            }
-            
-            .fab {
-                bottom: 16px;
-                right: 16px;
-                width: 48px;
-                height: 48px;
-                font-size: 1.2rem;
             }
         }
     </style>
@@ -522,6 +624,21 @@
             <div class="view active" id="map-view">
                 <div class="map-layout">
                     <aside class="sidebar">
+                        <div class="panel">
+                            <div class="panel-title">
+                                <i class="fas fa-bullhorn"></i>
+                                Announcements
+                            </div>
+                            <div id="announcements" class="announcements">
+                                <div class="announcement">
+                                    <div class="announcement-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                                    <div class="announcement-text">
+                                        <strong>Pre-Alpha Notice:</strong> Urbindex is in early development. Expect bugs and frequent updates.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="panel">
                             <div class="panel-title">
                                 <i class="fas fa-activity"></i>
@@ -576,6 +693,28 @@
         <button class="fab" id="add-location-fab" onclick="app.showAddLocationModal()" style="display:none;">
             <i class="fas fa-plus"></i>
         </button>
+    <script>
+    // Hide/show FAB based on login state
+    document.addEventListener('DOMContentLoaded', function() {
+        function updateFabVisibility() {
+            var fab = document.getElementById('add-location-fab');
+            if (window.app && app.currentUser) {
+                fab.style.display = '';
+            } else {
+                fab.style.display = 'none';
+            }
+        }
+        // Listen for auth changes
+        if (window.app) {
+            var origUpdateAuthUI = app.updateAuthUI.bind(app);
+            app.updateAuthUI = function() {
+                origUpdateAuthUI();
+                updateFabVisibility();
+            };
+        }
+        updateFabVisibility();
+    });
+    </script>
     </div>
 
     <div class="modal" id="location-modal">
@@ -636,29 +775,8 @@
         </div>
     </div>
 
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => console.log('SW registered'))
-                    .catch(error => console.log('SW registration failed'));
-            });
-        }
-        
-        // Global error handling
-        window.addEventListener('error', (e) => {
-            console.error('Global error:', e.error);
-        });
-        
-        window.addEventListener('unhandledrejection', (e) => {
-            console.error('Unhandled promise rejection:', e.reason);
-            e.preventDefault();
-        });
-    </script>
-    
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onerror="console.error('Failed to load Leaflet')"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" onerror="console.error('Failed to load Firebase')"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
@@ -673,16 +791,11 @@
             }
 
             async init() {
-                try {
-                    await this.initFirebase();
-                    this.initMap();
-                    this.initUI();
-                    this.initAuth();
-                    this.loadData();
-                } catch (error) {
-                    console.error('App initialization failed:', error);
-                    this.showError(`Failed to initialize app: ${error.message}`);
-                }
+                await this.initFirebase();
+                this.initMap();
+                this.initUI();
+                this.initAuth();
+                this.loadData();
             }
 
             async initFirebase() {
@@ -695,43 +808,14 @@
                     appId: "1:889914696327:web:351daa656a4d12fa828e22"
                 };
 
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(config);
-                }
+                firebase.initializeApp(config);
                 this.db = firebase.firestore();
                 this.auth = firebase.auth();
-                
-                // Enable offline persistence
-                try {
-                    await this.db.enablePersistence({ synchronizeTabs: true });
-                } catch (err) {
-                    if (err.code === 'failed-precondition') {
-                        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-                    } else if (err.code === 'unimplemented') {
-                        console.warn('The current browser does not support persistence.');
-                    }
-                }
             }
 
             initMap() {
-                const mapElement = document.getElementById('map');
-                if (!mapElement) {
-                    console.error('Map element not found');
-                    return;
-                }
-
-                this.map = L.map('map', {
-                    center: [40.7128, -74.0060],
-                    zoom: 13,
-                    zoomControl: true,
-                    attributionControl: false
-                });
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap',
-                    maxZoom: 18
-                }).addTo(this.map);
-                
+                this.map = L.map('map').setView([40.7128, -74.0060], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
                 this.map.on('click', (e) => this.handleMapClick(e));
             }
 
@@ -740,65 +824,35 @@
                     btn.addEventListener('click', () => this.switchView(btn.dataset.view));
                 });
 
-                const form = document.getElementById('location-form');
-                if (form) {
-                    form.addEventListener('submit', (e) => this.handleLocationSubmit(e));
-                }
-                
-                // Add keyboard shortcuts
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        this.hideModal();
-                    }
-                });
+                document.getElementById('location-form').addEventListener('submit', (e) => this.handleLocationSubmit(e));
             }
 
             initAuth() {
                 this.auth.onAuthStateChanged(user => {
                     this.currentUser = user;
                     this.updateAuthUI();
-                    if (user) {
-                        console.log('User authenticated:', user.uid, user.isAnonymous ? '(anonymous)' : '(registered)');
-                        this.loadUserData();
-                        // Load data after authentication
-                        this.loadData();
-                    } else {
-                        console.log('User not authenticated');
-                    }
+                    if (user) this.loadUserData();
                 });
 
                 document.getElementById('auth-btn').addEventListener('click', () => this.handleAuth());
             }
 
             async loadData() {
-                // Only load data if authenticated
-                if (!this.currentUser) {
-                    console.log('Skipping data load - user not authenticated');
-                    return;
-                }
                 this.loadLocations();
                 this.loadStats();
                 this.loadActivity();
             }
 
             loadLocations() {
-                // Don't load locations until authenticated
-                if (!this.auth.currentUser) {
-                    console.log('Waiting for authentication before loading locations...');
-                    return;
-                }
-
                 this.db.collection('locations')
                     .where('status', '==', 'active')
                     .onSnapshot(snapshot => {
                         this.markers.forEach(marker => this.map.removeLayer(marker));
                         this.markers.clear();
 
-                        let locationCount = 0;
                         snapshot.forEach(doc => {
                             const data = doc.data();
                             if (data.coordinates && Array.isArray(data.coordinates) && data.coordinates.length === 2) {
-                                locationCount++;
                                 const marker = L.marker(data.coordinates)
                                     .bindPopup(`
                                         <div style="min-width: 200px;">
@@ -814,14 +868,8 @@
                                 this.markers.set(doc.id, marker);
                             }
                         });
-                        console.log(`Loaded ${locationCount} locations on map`);
                     }, error => {
                         console.error('Error loading locations:', error);
-                        if (error.code === 'permission-denied') {
-                            this.showToast('Please sign in to view locations', 'warning');
-                        } else {
-                            this.showToast('Failed to load locations', 'error');
-                        }
                     });
             }
 
@@ -840,60 +888,35 @@
             }
 
             loadActivity() {
-                if (!this.auth.currentUser) {
-                    const feed = document.getElementById('activity-feed');
-                    if (feed) {
-                        feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">Sign in to view activity</div>';
-                    }
-                    return;
-                }
+                this.db.collection('locations')
+                    .where('status', '==', 'active')
+                    .orderBy('createdAt', 'desc')
+                    .limit(10)
+                    .onSnapshot(snapshot => {
+                        const feed = document.getElementById('activity-feed');
+                        if (snapshot.empty) {
+                            feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">No recent activity</div>';
+                            return;
+                        }
 
-                try {
-                    this.db.collection('locations')
-                        .where('status', '==', 'active')
-                        .orderBy('createdAt', 'desc')
-                        .limit(10)
-                        .onSnapshot(snapshot => {
-                            const feed = document.getElementById('activity-feed');
-                            if (!feed) return;
-                            
-                            if (snapshot.empty) {
-                                feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">No recent activity</div>';
-                                return;
-                            }
-
-                            feed.innerHTML = '';
-                            snapshot.forEach(doc => {
-                                const data = doc.data();
-                                const item = document.createElement('div');
-                                item.className = 'activity-item';
-                                item.innerHTML = `
-                                    <div class="activity-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                    <div class="activity-content">
-                                        <div><span class="activity-user">Explorer</span> added "${this.escapeHtml(data.name)}"</div>
-                                        <div class="activity-time">${this.timeAgo(data.createdAt?.toDate())}</div>
-                                    </div>
-                                `;
-                                feed.appendChild(item);
-                            });
-                        }, error => {
-                            console.error('Error loading activity:', error);
-                            const feed = document.getElementById('activity-feed');
-                            if (feed) {
-                                if (error.code === 'permission-denied') {
-                                    feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">Sign in to view activity</div>';
-                                } else {
-                                    feed.innerHTML = '<div class="error">Failed to load activity</div>';
-                                }
-                            }
+                        feed.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            const item = document.createElement('div');
+                            item.className = 'activity-item';
+                            item.innerHTML = `
+                                <div class="activity-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                <div class="activity-content">
+                                    <div><span class="activity-user">Explorer</span> added "${this.escapeHtml(data.name)}"</div>
+                                    <div class="activity-time">${this.timeAgo(data.createdAt?.toDate())}</div>
+                                </div>
+                            `;
+                            feed.appendChild(item);
                         });
-                } catch (error) {
-                    console.error('Error setting up activity listener:', error);
-                    const feed = document.getElementById('activity-feed');
-                    if (feed) {
-                        feed.innerHTML = '<div class="error">Failed to load activity</div>';
-                    }
-                }
+                    }, error => {
+                        console.error('Error loading activity:', error);
+                        document.getElementById('activity-feed').innerHTML = '<div class="error">Failed to load activity</div>';
+                    });
             }
 
             switchView(viewName) {
@@ -916,23 +939,37 @@
 
             async loadUserLocations() {
                 const grid = document.getElementById('locations-grid');
-                if (!grid) return;
-                
                 if (!this.currentUser) {
                     grid.innerHTML = `
-                        <div style="text-align: center; padding: 48px;">
-                            <i class="fas fa-lock" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px; display: block;"></i>
-                            <h3 style="color: var(--text-secondary); margin-bottom: 12px;">Sign In Required</h3>
-                            <p style="color: var(--text-muted); margin-bottom: 20px;">Create an account to start tracking your urban exploration locations</p>
-                            <button class="btn btn-primary" onclick="app.handleAuth()">
-                                <i class="fas fa-sign-in-alt"></i> Sign In Now
-                            </button>
+                        <div class="guest-welcome">
+                            <h3><i class="fas fa-map-marker-alt"></i> Your Location Collection</h3>
+                            <p>Sign in to start building your personal collection of urban exploration locations. Track discoveries, add notes, and share with the community.</p>
+                            <div class="demo-stats">
+                                <div class="demo-stat">
+                                    <div class="demo-stat-value"><i class="fas fa-plus"></i></div>
+                                    <div class="demo-stat-label">Add Locations</div>
+                                </div>
+                                <div class="demo-stat">
+                                    <div class="demo-stat-value"><i class="fas fa-camera"></i></div>
+                                    <div class="demo-stat-label">Upload Photos</div>
+                                </div>
+                                <div class="demo-stat">
+                                    <div class="demo-stat-value"><i class="fas fa-share"></i></div>
+                                    <div class="demo-stat-label">Share Discoveries</div>
+                                </div>
+                            </div>
+                            <div class="guest-actions">
+                                <button class="btn btn-primary" onclick="document.getElementById('auth-btn').click()">
+                                    <i class="fas fa-sign-in-alt"></i> Sign In to Begin
+                                </button>
+                                <button class="btn" onclick="app.switchView('map')">
+                                    <i class="fas fa-map"></i> Explore Map
+                                </button>
+                            </div>
                         </div>
                     `;
                     return;
                 }
-
-                grid.innerHTML = '<div class="loading">Loading your locations...</div>';
 
                 try {
                     const snapshot = await this.db.collection('locations')
@@ -954,11 +991,11 @@
                         card.className = 'location-card';
                         card.innerHTML = `
                             <div class="location-header">
-                                <h4>${this.escapeHtml(data.name)}</h4>
+                                <h4>${data.name}</h4>
                                 <span class="risk risk-${data.riskLevel}">${data.riskLevel}</span>
                             </div>
-                            <p style="color: var(--text-secondary); margin-bottom: 12px;">${this.escapeHtml(data.description)}</p>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">${this.escapeHtml(data.category)}</div>
+                            <p style="color: var(--text-secondary); margin-bottom: 12px;">${data.description}</p>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">${data.category}</div>
                             <div class="location-actions">
                                 <button class="btn" style="font-size: 0.8rem; padding: 4px 8px;" onclick="app.deleteLocation('${doc.id}')">
                                     <i class="fas fa-trash"></i> Delete
@@ -975,50 +1012,120 @@
 
             async loadProfile() {
                 const content = document.getElementById('profile-content');
-                if (!content) return;
-                
                 if (!this.currentUser) {
                     content.innerHTML = `
-                        <div style="text-align: center; padding: 48px;">
-                            <i class="fas fa-user-circle" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 16px; display: block;"></i>
-                            <h3 style="color: var(--text-secondary); margin-bottom: 12px;">Create Your Profile</h3>
-                            <p style="color: var(--text-muted); margin-bottom: 20px;">Join the Urbindex community to track your discoveries and connect with fellow explorers</p>
-                            <button class="btn btn-primary" onclick="app.handleAuth()">
-                                <i class="fas fa-user-plus"></i> Get Started
-                            </button>
+                        <div class="guest-welcome">
+                            <div style="text-align: center; margin-bottom: 24px;">
+                                <i class="fas fa-user-lock" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 16px;"></i>
+                                <h3>Create Your Explorer Profile</h3>
+                                <p>Join the Urbindex community to track your discoveries, share locations, and connect with fellow urban explorers.</p>
+                            </div>
+                            
+                            <div class="profile-benefits">
+                                <div class="benefit-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div>
+                                        <strong>Track Locations</strong>
+                                        <p>Save and organize your urban exploration discoveries</p>
+                                    </div>
+                                </div>
+                                <div class="benefit-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div>
+                                        <strong>Progress Tracking</strong>
+                                        <p>Monitor your exploration stats and achievements</p>
+                                    </div>
+                                </div>
+                                <div class="benefit-item">
+                                    <i class="fas fa-users"></i>
+                                    <div>
+                                        <strong>Community Access</strong>
+                                        <p>Connect with other explorers and share experiences</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="guest-actions">
+                                <button class="btn btn-primary" onclick="document.getElementById('auth-btn').click()">
+                                    <i class="fas fa-user-plus"></i> Create Account
+                                </button>
+                                <button class="btn" onclick="app.switchView('map')">
+                                    <i class="fas fa-map"></i> Explore First
+                                </button>
+                            </div>
                         </div>
                     `;
                     return;
                 }
 
                 try {
-                    const snapshot = await this.db.collection('locations')
-                        .where('createdBy', '==', this.currentUser.uid)
-                        .where('status', '==', 'active')
-                        .get();
+                    // Get user's actual data from multiple collections
+                    const [locationsSnapshot, userDoc] = await Promise.all([
+                        this.db.collection('locations')
+                            .where('createdBy', '==', this.currentUser.uid)
+                            .where('status', '==', 'active')
+                            .get(),
+                        this.db.collection('users').doc(this.currentUser.uid).get()
+                    ]);
+
+                    const userData = userDoc.exists ? userDoc.data() : {};
+                    const locationsCount = locationsSnapshot.size;
+                    const joinDate = this.currentUser.metadata.creationTime ? 
+                        new Date(this.currentUser.metadata.creationTime).toLocaleDateString() : 'Unknown';
+                    const lastActive = userData.lastSeen ? 
+                        this.timeAgo(userData.lastSeen.toDate()) : 'Just now';
+                    
+                    // Calculate real stats
+                    const explorerScore = locationsCount * 10 + (userData.forumPosts || 0) * 5;
+                    const explorationDays = userData.createdAt ? 
+                        Math.floor((Date.now() - userData.createdAt.toDate().getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
                     content.innerHTML = `
-                        <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
-                            <h3>Urban Explorer</h3>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 24px; text-align: center;">
-                                <div>
-                                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-blue);">${snapshot.size}</div>
-                                    <div style="color: var(--text-muted);">Locations</div>
+                        <div class="profile-card">
+                            <div class="profile-header">
+                                <div class="profile-avatar">
+                                    <img src="${userData.avatar || 'https://files.catbox.moe/vczof0.png'}" alt="Profile Avatar" 
+                                         style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-blue);">
                                 </div>
-                                <div>
-                                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-blue);">${snapshot.size * 10}</div>
-                                    <div style="color: var(--text-muted);">Score</div>
+                                <div class="profile-info">
+                                    <h3>${userData.displayName || 'Urban Explorer'}</h3>
+                                    <p style="color: var(--text-secondary); margin: 4px 0;">Member since ${joinDate}</p>
+                                    <p style="color: var(--text-muted); font-size: 0.9rem;">Last active ${lastActive}</p>
                                 </div>
-                                <div>
-                                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-blue);">${Math.floor(snapshot.size * 1.5)}</div>
-                                    <div style="color: var(--text-muted);">Explorations</div>
+                            </div>
+                            
+                            <div class="profile-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">${locationsCount}</div>
+                                    <div class="stat-label">Locations Added</div>
                                 </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${explorerScore}</div>
+                                    <div class="stat-label">Explorer Score</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${explorationDays}</div>
+                                    <div class="stat-label">Days Active</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${userData.forumPosts || 0}</div>
+                                    <div class="stat-label">Forum Posts</div>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-actions">
+                                <button class="btn" onclick="app.switchView('locations')">
+                                    <i class="fas fa-map-marker-alt"></i> View My Locations
+                                </button>
+                                <button class="btn" onclick="app.switchView('map')">
+                                    <i class="fas fa-map"></i> Explore Map
+                                </button>
                             </div>
                         </div>
                     `;
                 } catch (error) {
                     console.error('Error loading profile:', error);
-                    content.innerHTML = '<div class="error">Failed to load profile</div>';
+                    content.innerHTML = '<div class="error">Failed to load profile data. Please try refreshing the page.</div>';
                 }
             }
 
@@ -1050,11 +1157,6 @@
             async handleLocationSubmit(e) {
                 e.preventDefault();
                 
-                if (!this.currentUser) {
-                    alert('Please sign in to add locations');
-                    return;
-                }
-                
                 const name = document.getElementById('location-name').value.trim();
                 const description = document.getElementById('location-description').value.trim();
                 
@@ -1068,14 +1170,9 @@
                     return;
                 }
 
-                const submitBtn = e.target.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Saving...';
-                submitBtn.disabled = true;
-
                 const data = {
-                    name: this.sanitizeInput(name),
-                    description: this.sanitizeInput(description),
+                    name,
+                    description,
                     category: document.getElementById('location-category').value,
                     riskLevel: document.getElementById('location-risk').value,
                     coordinates: [this.selectedLatLng.lat, this.selectedLatLng.lng],
@@ -1088,75 +1185,10 @@
                     await this.db.collection('locations').add(data);
                     this.hideModal();
                     this.loadStats();
-                    this.showToast('Location added successfully!', 'success');
-                    
-                    // Refresh user locations if on that view
-                    const locationsView = document.getElementById('locations-view');
-                    if (locationsView && locationsView.classList.contains('active')) {
-                        this.loadUserLocations();
-                    }
                 } catch (error) {
                     console.error('Error adding location:', error);
-                    this.showToast(error.message || 'Failed to add location. Please try again.', 'error');
-                } finally {
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
+                    alert('Failed to add location');
                 }
-            }
-            
-            sanitizeInput(input) {
-                return input.replace(/<script[^>]*>.*?<\/script>/gi, '')
-                           .replace(/<[^>]*>/g, '')
-                           .trim();
-            }
-            
-            showError(message) {
-                this.showToast(message, 'error');
-            }
-
-            showToast(message, type = 'info', duration = 3000) {
-                // Remove any existing toasts
-                document.querySelectorAll('.toast').forEach(t => t.remove());
-                
-                const toast = document.createElement('div');
-                toast.className = `toast toast-${type}`;
-                toast.textContent = message;
-                
-                const styles = {
-                    position: 'fixed',
-                    top: '20px',
-                    right: '20px',
-                    background: 'var(--bg-secondary)',
-                    color: 'var(--text-primary)',
-                    padding: '12px 20px',
-                    borderRadius: 'var(--radius)',
-                    border: '1px solid var(--border)',
-                    zIndex: '3000',
-                    boxShadow: 'var(--shadow)',
-                    maxWidth: '90vw',
-                    animation: 'slideIn 0.3s ease-out'
-                };
-
-                Object.assign(toast.style, styles);
-
-                // Type-specific styling
-                const typeConfigs = {
-                    error: { borderColor: 'var(--danger)', color: 'var(--danger)' },
-                    success: { borderColor: 'var(--success)', color: 'var(--success)' },
-                    warning: { borderColor: 'var(--warning)', color: 'var(--warning)' },
-                    info: { borderColor: 'var(--accent-blue)', color: 'var(--accent-blue)' }
-                };
-
-                if (typeConfigs[type]) {
-                    Object.assign(toast.style, typeConfigs[type]);
-                }
-
-                document.body.appendChild(toast);
-                
-                setTimeout(() => {
-                    toast.style.animation = 'slideOut 0.3s ease-out';
-                    setTimeout(() => toast.remove(), 300);
-                }, duration);
             }
 
             async deleteLocation(id) {
@@ -1169,72 +1201,43 @@
                     });
                     this.loadUserLocations();
                     this.loadStats();
-                    this.showToast('Location deleted successfully', 'success');
                 } catch (error) {
                     console.error('Error deleting location:', error);
-                    this.showToast('Failed to delete location. Please try again.', 'error');
+                    alert('Failed to delete location');
                 }
             }
 
             async handleAuth() {
-                const btn = document.getElementById('auth-btn');
-                const originalText = btn?.querySelector('span')?.textContent || 'Sign In';
-                
-                try {
-                    if (btn) {
-                        btn.disabled = true;
-                        const span = btn.querySelector('span');
-                        if (span) span.textContent = 'Processing...';
-                    }
-                    
-                    if (this.currentUser) {
-                        await this.auth.signOut();
-                        this.showToast('Signed out successfully', 'success');
-                    } else {
-                        await this.auth.signInAnonymously();
-                        this.showToast('Signed in successfully', 'success');
-                    }
-                } catch (error) {
-                    console.error('Auth error:', error);
-                    this.showToast(error.message || 'Authentication failed', 'error');
-                } finally {
-                    if (btn) {
-                        btn.disabled = false;
-                        const span = btn.querySelector('span');
-                        if (span) span.textContent = originalText;
-                    }
+                if (this.currentUser) {
+                    await this.auth.signOut();
+                } else {
+                    await this.auth.signInAnonymously();
                 }
             }
 
             updateAuthUI() {
                 const btn = document.getElementById('auth-btn');
-                const span = btn?.querySelector('span');
-                const icon = btn?.querySelector('i');
+                const span = btn.querySelector('span');
+                const icon = btn.querySelector('i');
                 
                 if (this.currentUser) {
-                    if (span) span.textContent = 'Sign Out';
-                    if (icon) icon.className = 'fas fa-sign-out-alt';
-                    btn?.setAttribute('title', 'Sign out of your account');
+                    span.textContent = 'Sign Out';
+                    icon.className = 'fas fa-sign-out-alt';
+                    btn.title = 'Sign out of your account';
                 } else {
-                    if (span) span.textContent = 'Sign In';
-                    if (icon) icon.className = 'fas fa-sign-in-alt';
-                    btn?.setAttribute('title', 'Sign in to unlock full features');
+                    span.textContent = 'Sign In';
+                    icon.className = 'fas fa-sign-in-alt';
+                    btn.title = 'Sign in to unlock full features';
                 }
                 
                 const dot = document.getElementById('status-dot');
                 const text = document.getElementById('status-text');
                 if (this.currentUser) {
-                    dot?.classList.remove('offline');
-                    if (text) text.textContent = 'Connected';
+                    dot.classList.remove('offline');
+                    text.textContent = 'Connected';
                 } else {
-                    dot?.classList.add('offline');
-                    if (text) text.textContent = 'Guest Mode';
-                }
-                
-                // Update FAB visibility
-                const fab = document.getElementById('add-location-fab');
-                if (fab) {
-                    fab.style.display = this.currentUser ? '' : 'none';
+                    dot.classList.add('offline');
+                    text.textContent = 'Guest Mode';
                 }
             }
 
@@ -1242,9 +1245,13 @@
                 if (!this.currentUser) return;
                 
                 try {
+                    // Update user presence and create user document if it doesn't exist
                     await this.db.collection('users').doc(this.currentUser.uid).set({
                         lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
-                        online: true
+                        online: true,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        displayName: this.currentUser.displayName || 'Urban Explorer',
+                        email: this.currentUser.email || null
                     }, { merge: true });
                 } catch (error) {
                     console.error('Error updating user data:', error);
