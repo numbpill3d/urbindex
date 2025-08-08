@@ -37,6 +37,14 @@ Thumbs.db
 *.tmp
 .cache/
 
+# Cleanup files (as per README)
+.history/
+css/
+js/
+index.html
+production.html
+index-optimized.html
+
 # Actual icon files (placeholder READMEs are included)
 images/icons/*.png
 images/icons/*.jpg

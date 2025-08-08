@@ -425,7 +425,31 @@ class UrbindexApp {
     updateAuthUI() {
         const authBtn = document.getElementById('auth-btn');
         if (authBtn) {
-            authBtn.textContent = this.currentUser ? 'Sign Out' : 'Sign In';
+            // Update button text and icon
+            const span = authBtn.querySelector('span');
+            const icon = authBtn.querySelector('i');
+            if (span) {
+                span.textContent = this.currentUser ? 'Sign Out' : 'Sign In';
+            }
+            if (icon) {
+                icon.className = this.currentUser ? 'fas fa-sign-out-alt' : 'fas fa-sign-in-alt';
+            }
+            authBtn.title = this.currentUser
+                ? 'Sign out of your account'
+                : 'Sign in to unlock full features';
+        }
+
+        // Update status dot and text
+        const dot = document.getElementById('status-dot');
+        const text = document.getElementById('status-text');
+        if (dot && text) {
+            if (this.currentUser) {
+                dot.classList.remove('offline');
+                text.textContent = 'Connected';
+            } else {
+                dot.classList.add('offline');
+                text.textContent = 'Guest Mode';
+            }
         }
     }
 
@@ -478,9 +502,9 @@ class UrbindexApp {
 
     // Utility Methods
     updateConnectionStatus() {
-        const statusDot = document.getElementById('connection-status');
-        const statusText = document.getElementById('connection-text');
-        
+        // Use main status dot/text in header
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
         if (statusDot && statusText) {
             if (this.isOnline) {
                 statusDot.classList.remove('offline');
@@ -501,27 +525,27 @@ class UrbindexApp {
             position: 'fixed',
             top: '20px',
             right: '20px',
-            background: 'var(--secondary-bg)',
+            background: 'var(--bg-secondary)',
             color: 'var(--text-primary)',
             padding: '12px 16px',
-            borderRadius: 'var(--border-radius)',
-            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius)',
+            border: '1px solid var(--border)',
             zIndex: '3000',
             animation: 'fadeIn 0.3s ease-out',
-            maxWidth: '300px',
+            maxWidth: '90vw',
             wordWrap: 'break-word'
         };
 
         Object.assign(toast.style, styles);
-        
+
         // Type-specific styling
         const typeColors = {
             error: 'var(--danger)',
             success: 'var(--success)',
             warning: 'var(--warning)',
-            info: 'var(--neon-blue)'
+            info: 'var(--accent-blue)'
         };
-        
+
         if (typeColors[type]) {
             toast.style.borderColor = typeColors[type];
             toast.style.color = typeColors[type];
@@ -630,9 +654,15 @@ class UrbindexApp {
     updateUserProfile(userData) {
         const profileContent = document.getElementById('profile-content');
         if (profileContent) {
+            let name = 'Explorer';
+            if (userData.displayName) {
+                name = userData.displayName;
+            } else if (userData.isAnonymous) {
+                name = 'Guest';
+            }
             profileContent.innerHTML = `
                 <div class="card">
-                    <h3>Welcome, ${userData.displayName || 'Explorer'}!</h3>
+                    <h3>Welcome, ${name}!</h3>
                     <p>Your urban exploration journey continues.</p>
                     <div class="profile-stats">
                         <div class="stat">

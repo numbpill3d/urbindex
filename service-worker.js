@@ -1,22 +1,9 @@
-const CACHE_NAME = 'urbindex-cache-v11';
+const CACHE_NAME = 'urbindex-cache-v12';
 const STATIC_ASSETS = [
-  './index.html',
+  './final.html',
   './manifest.json',
-  './css/styles.css',
-  './css/custom-markers.css',
-  './css/toast.css',
-  './js/app.js',
-  './js/auth.js',
-  './js/config.js',
-  './js/map.js',
-  './js/locations.js',
-  './js/comments.js',
-  './js/forum.js',
-  './js/offline.js',
-  './js/utils.js',
   './images/icons/icon-192x192.png',
   './images/icons/icon-512x512.png',
-  './images/default-avatar.png',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
@@ -24,7 +11,7 @@ const STATIC_ASSETS = [
 
 // URLs for offline fallback content with enhanced options
 const OFFLINE_FALLBACKS = {
-  document: '/index.html',
+  document: '/final.html',
   image: '/images/icons/icon-192x192.png',
   json: JSON.stringify({
     error: 'You are currently offline',
@@ -36,11 +23,7 @@ const OFFLINE_FALLBACKS = {
 
 // URLs that should be available offline even if not explicitly cached
 const CRITICAL_ASSETS = [
-  '/index.html',
-  '/css/styles.css',
-  '/js/app.js',
-  '/js/map.js',
-  '/js/offline.js',
+  '/final.html',
   '/images/icons/icon-192x192.png'
 ];
 

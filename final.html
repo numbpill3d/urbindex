@@ -123,6 +123,7 @@
             grid-template-columns: 300px 1fr;
             gap: 24px;
             height: calc(100vh - 140px);
+            min-height: 500px;
         }
 
         .sidebar {
@@ -394,8 +395,33 @@
             padding: 16px;
             color: var(--danger);
             text-align: center;
+            margin: 16px 0;
         }
         
+        .no-data {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 24px;
+            font-style: italic;
+        }
+        
+        /* Fix button states */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn:disabled:hover {
+            background: transparent;
+            color: var(--accent-blue);
+        }
+        
+        .btn-primary:disabled:hover {
+            background: var(--accent-blue);
+            color: var(--bg-primary);
+        }
+        
+        /* Fix for mobile layout */
         @media (max-width: 768px) {
             .main { padding: 16px; }
             
@@ -403,11 +429,12 @@
                 grid-template-columns: 1fr;
                 grid-template-rows: auto 1fr;
                 gap: 16px;
+                height: calc(100vh - 120px);
             }
             
             .sidebar {
                 order: 2;
-                max-height: 300px;
+                max-height: 200px;
                 overflow-y: auto;
                 flex-direction: row;
                 gap: 12px;
@@ -422,6 +449,20 @@
             
             .locations-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+                max-height: 90vh;
+            }
+            
+            .fab {
+                bottom: 16px;
+                right: 16px;
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
             }
         }
     </style>
@@ -573,8 +614,29 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+            });
+        }
+        
+        // Global error handling
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.error);
+        });
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            e.preventDefault();
+        });
+    </script>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onerror="console.error('Failed to load Leaflet')"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" onerror="console.error('Failed to load Firebase')"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
@@ -589,11 +651,16 @@
             }
 
             async init() {
-                await this.initFirebase();
-                this.initMap();
-                this.initUI();
-                this.initAuth();
-                this.loadData();
+                try {
+                    await this.initFirebase();
+                    this.initMap();
+                    this.initUI();
+                    this.initAuth();
+                    this.loadData();
+                } catch (error) {
+                    console.error('App initialization failed:', error);
+                    this.showError('Failed to initialize app');
+                }
             }
 
             async initFirebase() {
@@ -606,14 +673,43 @@
                     appId: "1:889914696327:web:351daa656a4d12fa828e22"
                 };
 
-                firebase.initializeApp(config);
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(config);
+                }
                 this.db = firebase.firestore();
                 this.auth = firebase.auth();
+                
+                // Enable offline persistence
+                try {
+                    await this.db.enablePersistence({ synchronizeTabs: true });
+                } catch (err) {
+                    if (err.code === 'failed-precondition') {
+                        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+                    } else if (err.code === 'unimplemented') {
+                        console.warn('The current browser does not support persistence.');
+                    }
+                }
             }
 
             initMap() {
-                this.map = L.map('map').setView([40.7128, -74.0060], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
+                const mapElement = document.getElementById('map');
+                if (!mapElement) {
+                    console.error('Map element not found');
+                    return;
+                }
+
+                this.map = L.map('map', {
+                    center: [40.7128, -74.0060],
+                    zoom: 13,
+                    zoomControl: true,
+                    attributionControl: false
+                });
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap',
+                    maxZoom: 18
+                }).addTo(this.map);
+                
                 this.map.on('click', (e) => this.handleMapClick(e));
             }
 
@@ -622,7 +718,17 @@
                     btn.addEventListener('click', () => this.switchView(btn.dataset.view));
                 });
 
-                document.getElementById('location-form').addEventListener('submit', (e) => this.handleLocationSubmit(e));
+                const form = document.getElementById('location-form');
+                if (form) {
+                    form.addEventListener('submit', (e) => this.handleLocationSubmit(e));
+                }
+                
+                // Add keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.hideModal();
+                    }
+                });
             }
 
             initAuth() {
@@ -686,35 +792,48 @@
             }
 
             loadActivity() {
-                this.db.collection('locations')
-                    .where('status', '==', 'active')
-                    .orderBy('createdAt', 'desc')
-                    .limit(10)
-                    .onSnapshot(snapshot => {
-                        const feed = document.getElementById('activity-feed');
-                        if (snapshot.empty) {
-                            feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">No recent activity</div>';
-                            return;
-                        }
+                try {
+                    this.db.collection('locations')
+                        .where('status', '==', 'active')
+                        .orderBy('createdAt', 'desc')
+                        .limit(10)
+                        .onSnapshot(snapshot => {
+                            const feed = document.getElementById('activity-feed');
+                            if (!feed) return;
+                            
+                            if (snapshot.empty) {
+                                feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">No recent activity</div>';
+                                return;
+                            }
 
-                        feed.innerHTML = '';
-                        snapshot.forEach(doc => {
-                            const data = doc.data();
-                            const item = document.createElement('div');
-                            item.className = 'activity-item';
-                            item.innerHTML = `
-                                <div class="activity-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                <div class="activity-content">
-                                    <div><span class="activity-user">Explorer</span> added "${this.escapeHtml(data.name)}"</div>
-                                    <div class="activity-time">${this.timeAgo(data.createdAt?.toDate())}</div>
-                                </div>
-                            `;
-                            feed.appendChild(item);
+                            feed.innerHTML = '';
+                            snapshot.forEach(doc => {
+                                const data = doc.data();
+                                const item = document.createElement('div');
+                                item.className = 'activity-item';
+                                item.innerHTML = `
+                                    <div class="activity-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                    <div class="activity-content">
+                                        <div><span class="activity-user">Explorer</span> added "${this.escapeHtml(data.name)}"</div>
+                                        <div class="activity-time">${this.timeAgo(data.createdAt?.toDate())}</div>
+                                    </div>
+                                `;
+                                feed.appendChild(item);
+                            });
+                        }, error => {
+                            console.error('Error loading activity:', error);
+                            const feed = document.getElementById('activity-feed');
+                            if (feed) {
+                                feed.innerHTML = '<div class="error">Failed to load activity</div>';
+                            }
                         });
-                    }, error => {
-                        console.error('Error loading activity:', error);
-                        document.getElementById('activity-feed').innerHTML = '<div class="error">Failed to load activity</div>';
-                    });
+                } catch (error) {
+                    console.error('Error setting up activity listener:', error);
+                    const feed = document.getElementById('activity-feed');
+                    if (feed) {
+                        feed.innerHTML = '<div class="error">Failed to load activity</div>';
+                    }
+                }
             }
 
             switchView(viewName) {
@@ -737,10 +856,14 @@
 
             async loadUserLocations() {
                 const grid = document.getElementById('locations-grid');
+                if (!grid) return;
+                
                 if (!this.currentUser) {
                     grid.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--text-muted);">Sign in to view your locations</div>';
                     return;
                 }
+
+                grid.innerHTML = '<div class="loading">Loading your locations...</div>';
 
                 try {
                     const snapshot = await this.db.collection('locations')
@@ -762,11 +885,11 @@
                         card.className = 'location-card';
                         card.innerHTML = `
                             <div class="location-header">
-                                <h4>${data.name}</h4>
+                                <h4>${this.escapeHtml(data.name)}</h4>
                                 <span class="risk risk-${data.riskLevel}">${data.riskLevel}</span>
                             </div>
-                            <p style="color: var(--text-secondary); margin-bottom: 12px;">${data.description}</p>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">${data.category}</div>
+                            <p style="color: var(--text-secondary); margin-bottom: 12px;">${this.escapeHtml(data.description)}</p>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">${this.escapeHtml(data.category)}</div>
                             <div class="location-actions">
                                 <button class="btn" style="font-size: 0.8rem; padding: 4px 8px;" onclick="app.deleteLocation('${doc.id}')">
                                     <i class="fas fa-trash"></i> Delete
@@ -845,6 +968,11 @@
             async handleLocationSubmit(e) {
                 e.preventDefault();
                 
+                if (!this.currentUser) {
+                    alert('Please sign in to add locations');
+                    return;
+                }
+                
                 const name = document.getElementById('location-name').value.trim();
                 const description = document.getElementById('location-description').value.trim();
                 
@@ -858,9 +986,14 @@
                     return;
                 }
 
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Saving...';
+                submitBtn.disabled = true;
+
                 const data = {
-                    name,
-                    description,
+                    name: this.sanitizeInput(name),
+                    description: this.sanitizeInput(description),
                     category: document.getElementById('location-category').value,
                     riskLevel: document.getElementById('location-risk').value,
                     coordinates: [this.selectedLatLng.lat, this.selectedLatLng.lng],
@@ -873,9 +1006,32 @@
                     await this.db.collection('locations').add(data);
                     this.hideModal();
                     this.loadStats();
+                    alert('Location added successfully!');
                 } catch (error) {
                     console.error('Error adding location:', error);
                     alert('Failed to add location');
+                } finally {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            }
+            
+            sanitizeInput(input) {
+                return input.replace(/<script[^>]*>.*?<\/script>/gi, '')
+                           .replace(/<[^>]*>/g, '')
+                           .trim();
+            }
+            
+            showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = message;
+                errorDiv.style.margin = '16px 0';
+                
+                const main = document.querySelector('.main');
+                if (main) {
+                    main.insertBefore(errorDiv, main.firstChild);
+                    setTimeout(() => errorDiv.remove(), 5000);
                 }
             }
 
@@ -905,16 +1061,19 @@
 
             updateAuthUI() {
                 const btn = document.getElementById('auth-btn');
-                const span = btn.querySelector('span');
-                span.textContent = this.currentUser ? 'Sign Out' : 'Sign In';
+                const span = btn?.querySelector('span');
+                if (span) {
+                    span.textContent = this.currentUser ? 'Sign Out' : 'Sign In';
+                }
                 
                 const dot = document.getElementById('status-dot');
                 const text = document.getElementById('status-text');
                 if (this.currentUser) {
-                    dot.classList.remove('offline');
-                    text.textContent = 'Connected';
+                    dot?.classList.remove('offline');
+                    if (text) text.textContent = 'Connected';
                 } else {
-                    text.textContent = 'Offline';
+                    dot?.classList.add('offline');
+                    if (text) text.textContent = 'Offline';
                 }
             }
 

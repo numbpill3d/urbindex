@@ -2,7 +2,7 @@
   "name": "Urbindex",
   "short_name": "Urbindex",
   "description": "Community-driven urban exploration mapping tool",
-  "start_url": "/index.html",
+  "start_url": "/final.html",
   "id": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "minimal-ui", "standalone", "browser"],
@@ -80,28 +80,28 @@
       "name": "View Map",
       "short_name": "Map",
       "description": "Open the map view",
-      "url": "/index.html?view=map",
+      "url": "/final.html?view=map",
       "icons": [{ "src": "images/icons/map-icon.png", "sizes": "96x96" }]
     },
     {
       "name": "Forum",
       "short_name": "Forum",
       "description": "Community discussions",
-      "url": "/index.html?view=forum",
+      "url": "/final.html?view=forum",
       "icons": [{ "src": "images/icons/forum-icon.png", "sizes": "96x96" }]
     },
     {
       "name": "My Locations",
       "short_name": "Spots",
       "description": "View your saved locations",
-      "url": "/index.html?view=spots",
+      "url": "/final.html?view=spots",
       "icons": [{ "src": "images/icons/map-icon.png", "sizes": "96x96" }]
     },
     {
       "name": "Profile",
       "short_name": "Profile",
       "description": "View your profile",
-      "url": "/index.html?view=profile",
+      "url": "/final.html?view=profile",
       "icons": [{ "src": "images/icons/map-icon.png", "sizes": "96x96" }]
     }
   ],
@@ -126,7 +126,7 @@
   "prefer_related_applications": false,
   "iarc_rating_id": "",
   "share_target": {
-    "action": "/index.html?share",
+    "action": "/final.html?share",
     "method": "GET",
     "enctype": "application/x-www-form-urlencoded",
     "params": {
@@ -146,15 +146,15 @@
   "protocol_handlers": [
     {
       "protocol": "web+urbindex",
-      "url": "/index.html?protocol=%s"
+      "url": "/final.html?protocol=%s"
     }
   ],
   "note_taking": {
-    "new_note_url": "/index.html?new-note=true"
+    "new_note_url": "/final.html?new-note=true"
   },
   "file_handlers": [
     {
-      "action": "/index.html?import",
+      "action": "/final.html?import",
       "accept": {
         "application/gpx+xml": [".gpx"],
         "application/geo+json": [".geojson"]
