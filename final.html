@@ -760,34 +760,30 @@
                     if (user) {
                         console.log('User authenticated:', user.uid, user.isAnonymous ? '(anonymous)' : '(registered)');
                         this.loadUserData();
-                        // Load data after authentication
-                        this.loadData();
                     } else {
-                        console.log('User not authenticated');
+                        console.log('User not authenticated - auto-signing in anonymously');
+                        // Auto sign-in anonymously for seamless experience
+                        this.auth.signInAnonymously().catch(error => {
+                            console.error('Auto sign-in failed:', error);
+                        });
                     }
+                    // Always load public data regardless of auth state
+                    this.loadData();
                 });
 
                 document.getElementById('auth-btn').addEventListener('click', () => this.handleAuth());
             }
 
             async loadData() {
-                // Only load data if authenticated
-                if (!this.currentUser) {
-                    console.log('Skipping data load - user not authenticated');
-                    return;
-                }
+                // Load public data (locations, stats) regardless of auth state
+                // Activity feed will handle auth requirements internally
                 this.loadLocations();
                 this.loadStats();
                 this.loadActivity();
             }
 
             loadLocations() {
-                // Don't load locations until authenticated
-                if (!this.auth.currentUser) {
-                    console.log('Waiting for authentication before loading locations...');
-                    return;
-                }
-
+                // Load locations for public viewing (rules now allow public read)
                 this.db.collection('locations')
                     .where('status', '==', 'active')
                     .onSnapshot(snapshot => {
