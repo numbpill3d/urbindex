@@ -2,8 +2,6 @@ const CACHE_NAME = 'urbindex-cache-v12';
 const STATIC_ASSETS = [
   './final.html',
   './manifest.json',
-  './images/icons/icon-192x192.png',
-  './images/icons/icon-512x512.png',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
@@ -12,19 +10,16 @@ const STATIC_ASSETS = [
 // URLs for offline fallback content with enhanced options
 const OFFLINE_FALLBACKS = {
   document: '/final.html',
-  image: '/images/icons/icon-192x192.png',
   json: JSON.stringify({
     error: 'You are currently offline',
     code: 'OFFLINE_MODE',
     timestamp: Date.now()
-  }),
-  map: '/images/icons/offline-map-placeholder.png'
+  })
 };
 
 // URLs that should be available offline even if not explicitly cached
 const CRITICAL_ASSETS = [
-  '/final.html',
-  '/images/icons/icon-192x192.png'
+  '/final.html'
 ];
 
 // Install event - cache static assets
@@ -165,17 +160,21 @@ async function cacheFirstWithUpdateStrategy(event) {
       return cache.match(OFFLINE_FALLBACKS.document);
     }
     
-    // For image requests, return fallback image
+    // For image requests, return a simple response
     if (event.request.destination === 'image') {
-      const cache = await caches.open(CACHE_NAME);
-      return cache.match(OFFLINE_FALLBACKS.image);
+      return new Response('Image unavailable offline', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain' }
+      });
     }
     
     // Special handling for map tile requests
     if (event.request.url.includes('tile') &&
        (event.request.url.includes('.png') || event.request.url.includes('.jpg'))) {
-      const cache = await caches.open(CACHE_NAME);
-      return cache.match(OFFLINE_FALLBACKS.map);
+      return new Response('Map tiles unavailable offline', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain' }
+      });
     }
     
     // For API or other requests
@@ -576,8 +575,6 @@ self.addEventListener('push', event => {
   
   const options = {
     body: data.body,
-    icon: '/images/icons/icon-192x192.png',
-    badge: '/images/icons/badge-72x72.png',
     vibrate: [100, 50, 100],
     renotify: true,
     requireInteraction: data.requireInteraction || false,
