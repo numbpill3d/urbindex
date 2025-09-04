@@ -202,6 +202,62 @@
 
         .fab:hover { transform: scale(1.1); }
 
+        /* Auth Modal Styles */
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .auth-tab {
+            background: none;
+            border: none;
+            padding: 12px 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .auth-tab.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        .auth-tab:hover { color: var(--text-primary); }
+
+        .auth-form { display: none; }
+        .auth-form.active { display: block; }
+
+        .auth-form h3 {
+            margin-bottom: 24px;
+            color: var(--accent-blue);
+            text-align: center;
+        }
+
+        .auth-alternatives {
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--accent-blue);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.9rem;
+        }
+
+        .btn-link:hover {
+            color: var(--accent-purple);
+            text-decoration: none;
+        }
+
         .modal {
             position: fixed;
             top: 0;
@@ -446,14 +502,14 @@
         /* Fix for mobile layout */
         @media (max-width: 768px) {
             .main { padding: 16px; }
-            
+
             .map-layout {
                 grid-template-columns: 1fr;
                 grid-template-rows: auto 1fr;
                 gap: 16px;
                 height: calc(100vh - 120px);
             }
-            
+
             .sidebar {
                 order: 2;
                 max-height: 200px;
@@ -461,30 +517,101 @@
                 flex-direction: row;
                 gap: 12px;
             }
-            
+
             .panel {
                 min-width: 200px;
                 flex-shrink: 0;
             }
-            
+
             .nav-btn span { display: none; }
-            
+
             .locations-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .modal-content {
                 width: 95%;
                 margin: 20px;
                 max-height: 90vh;
             }
-            
+
             .fab {
                 bottom: 16px;
                 right: 16px;
                 width: 48px;
                 height: 48px;
                 font-size: 1.2rem;
+            }
+
+            /* Mobile search and filter layout */
+            .panel:has(#location-search) {
+                padding: 12px;
+            }
+
+            .panel:has(#location-search) .form-group {
+                margin-bottom: 12px;
+            }
+
+            .panel:has(#location-search) > div {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .panel:has(#location-search) .form-label {
+                font-size: 0.8rem;
+            }
+
+            .panel:has(#location-search) .input,
+            .panel:has(#location-search) .select {
+                font-size: 0.9rem;
+                padding: 6px 10px;
+            }
+        }
+
+        /* Additional mobile improvements */
+        @media (max-width: 480px) {
+            .header {
+                padding: 0 12px;
+                height: 56px;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+            }
+
+            .status {
+                font-size: 0.8rem;
+            }
+
+            .nav {
+                padding: 6px 12px;
+            }
+
+            .main {
+                padding: 12px;
+            }
+
+            .btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            .panel {
+                padding: 12px;
+            }
+
+            .location-card {
+                padding: 12px;
+            }
+
+            .location-actions {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .location-actions .btn {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -501,6 +628,77 @@
                 <i class="fas fa-user"></i>
                 <span>Sign In</span>
             </button>
+
+            <!-- Auth Modal -->
+            <div class="modal" id="auth-modal">
+                <div class="modal-content">
+                    <button class="modal-close" onclick="app.hideAuthModal()">&times;</button>
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="signin">Sign In</button>
+                        <button class="auth-tab" data-tab="signup">Sign Up</button>
+                    </div>
+
+                    <div class="auth-form active" id="signin-form">
+                        <h3>Sign In to Urbindex</h3>
+                        <form id="signin-form-element">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-envelope"></i>
+                                    Email
+                                </label>
+                                <input class="input" type="email" id="signin-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-lock"></i>
+                                    Password
+                                </label>
+                                <input class="input" type="password" id="signin-password" required>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Sign In</button>
+                            </div>
+                        </form>
+                        <div class="auth-alternatives">
+                            <button class="btn btn-link" onclick="app.signInAnonymously()">
+                                <i class="fas fa-user-secret"></i> Continue as Guest
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="auth-form" id="signup-form">
+                        <h3>Create Account</h3>
+                        <form id="signup-form-element">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-envelope"></i>
+                                    Email *
+                                </label>
+                                <input class="input" type="email" id="signup-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-lock"></i>
+                                    Password *
+                                </label>
+                                <input class="input" type="password" id="signup-password" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-lock"></i>
+                                    Confirm Password *
+                                </label>
+                                <input class="input" type="password" id="signup-confirm-password" required minlength="6">
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Create Account</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </header>
 
         <nav class="nav">
@@ -564,6 +762,48 @@
                         Add Location
                     </button>
                 </div>
+
+                <!-- Search and Filter Controls -->
+                <div class="panel" style="margin-bottom: 24px;">
+                    <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: center;">
+                        <div class="form-group" style="margin: 0;">
+                            <div class="form-label" style="margin-bottom: 4px;">
+                                <i class="fas fa-search"></i>
+                                Search Locations
+                            </div>
+                            <input class="input" type="text" id="location-search" placeholder="Search by name or description..." style="margin: 0;">
+                        </div>
+
+                        <div class="form-group" style="margin: 0;">
+                            <div class="form-label" style="margin-bottom: 4px;">
+                                <i class="fas fa-filter"></i>
+                                Category
+                            </div>
+                            <select class="select" id="category-filter" style="margin: 0;">
+                                <option value="">All Categories</option>
+                                <option value="abandoned">Abandoned</option>
+                                <option value="rooftop">Rooftop</option>
+                                <option value="tunnel">Tunnel</option>
+                                <option value="industrial">Industrial</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin: 0;">
+                            <div class="form-label" style="margin-bottom: 4px;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Risk Level
+                            </div>
+                            <select class="select" id="risk-filter" style="margin: 0;">
+                                <option value="">All Risks</option>
+                                <option value="low">Low</option>
+                                <option value="moderate">Moderate</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="locations-grid" class="loading">Loading your locations...</div>
             </div>
 
@@ -717,22 +957,49 @@
                 const mapElement = document.getElementById('map');
                 if (!mapElement) {
                     console.error('Map element not found');
+                    this.showError('Map could not be loaded. Please refresh the page.');
                     return;
                 }
 
-                this.map = L.map('map', {
-                    center: [40.7128, -74.0060],
-                    zoom: 13,
-                    zoomControl: true,
-                    attributionControl: false
-                });
+                try {
+                    this.map = L.map('map', {
+                        center: [40.7128, -74.0060],
+                        zoom: 13,
+                        zoomControl: true,
+                        attributionControl: false,
+                        maxBounds: [[-90, -180], [90, 180]], // Prevent panning outside world bounds
+                        maxBoundsViscosity: 1.0
+                    });
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap',
-                    maxZoom: 18
-                }).addTo(this.map);
-                
-                this.map.on('click', (e) => this.handleMapClick(e));
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 18,
+                        errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' // Transparent fallback
+                    }).addTo(this.map);
+
+                    // Add loading/error handling for tiles
+                    this.map.on('tileerror', (e) => {
+                        console.warn('Tile loading error:', e);
+                    });
+
+                    this.map.on('load', () => {
+                        console.log('Map loaded successfully');
+                        this.showToast('Map loaded successfully', 'success');
+                    });
+
+                    this.map.on('click', (e) => this.handleMapClick(e));
+
+                    // Handle map resize
+                    window.addEventListener('resize', () => {
+                        if (this.map) {
+                            setTimeout(() => this.map.invalidateSize(), 100);
+                        }
+                    });
+
+                } catch (error) {
+                    console.error('Map initialization failed:', error);
+                    this.showError('Failed to initialize map. Please check your internet connection and refresh the page.');
+                }
             }
 
             initUI() {
@@ -761,17 +1028,28 @@
                         console.log('User authenticated:', user.uid, user.isAnonymous ? '(anonymous)' : '(registered)');
                         this.loadUserData();
                     } else {
-                        console.log('User not authenticated - auto-signing in anonymously');
-                        // Auto sign-in anonymously for seamless experience
-                        this.auth.signInAnonymously().catch(error => {
-                            console.error('Auto sign-in failed:', error);
-                        });
+                        console.log('User not authenticated');
                     }
                     // Always load public data regardless of auth state
                     this.loadData();
                 });
 
                 document.getElementById('auth-btn').addEventListener('click', () => this.handleAuth());
+
+                // Auth modal event listeners
+                document.querySelectorAll('.auth-tab').forEach(tab => {
+                    tab.addEventListener('click', () => this.switchAuthTab(tab.dataset.tab));
+                });
+
+                const signinForm = document.getElementById('signin-form-element');
+                if (signinForm) {
+                    signinForm.addEventListener('submit', (e) => this.handleSignIn(e));
+                }
+
+                const signupForm = document.getElementById('signup-form-element');
+                if (signupForm) {
+                    signupForm.addEventListener('submit', (e) => this.handleSignUp(e));
+                }
             }
 
             async loadData() {
@@ -783,42 +1061,108 @@
             }
 
             loadLocations() {
-                // Load locations for public viewing (rules now allow public read)
-                this.db.collection('locations')
-                    .where('status', '==', 'active')
-                    .onSnapshot(snapshot => {
-                        this.markers.forEach(marker => this.map.removeLayer(marker));
-                        this.markers.clear();
+                if (!this.map) {
+                    console.warn('Map not initialized, skipping location loading');
+                    return;
+                }
 
-                        let locationCount = 0;
-                        snapshot.forEach(doc => {
-                            const data = doc.data();
-                            if (data.coordinates && Array.isArray(data.coordinates) && data.coordinates.length === 2) {
-                                locationCount++;
-                                const marker = L.marker(data.coordinates)
-                                    .bindPopup(`
-                                        <div style="min-width: 200px;">
-                                            <strong>${this.escapeHtml(data.name)}</strong><br>
-                                            <p style="margin: 8px 0; color: #666;">${this.escapeHtml(data.description)}</p>
-                                            <div style="display: flex; gap: 8px; font-size: 0.8rem; margin-top: 8px;">
-                                                <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; color: #333;">${data.category}</span>
-                                                <span style="background: ${this.getRiskColor(data.riskLevel)}; padding: 2px 6px; border-radius: 4px; color: white;">${data.riskLevel}</span>
-                                            </div>
-                                        </div>
-                                    `)
-                                    .addTo(this.map);
-                                this.markers.set(doc.id, marker);
+                try {
+                    // Load locations for public viewing (rules now allow public read)
+                    this.db.collection('locations')
+                        .where('status', '==', 'active')
+                        .orderBy('createdAt', 'desc')
+                        .onSnapshot(snapshot => {
+                            // Clear existing markers
+                            this.markers.forEach(marker => {
+                                if (this.map && this.map.hasLayer(marker)) {
+                                    this.map.removeLayer(marker);
+                                }
+                            });
+                            this.markers.clear();
+
+                            let locationCount = 0;
+                            let invalidLocations = 0;
+
+                            snapshot.forEach(doc => {
+                                try {
+                                    const data = doc.data();
+                                    if (data.coordinates && Array.isArray(data.coordinates) && data.coordinates.length === 2) {
+                                        const [lat, lng] = data.coordinates;
+
+                                        // Validate coordinates
+                                        if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                                            locationCount++;
+
+                                            const marker = L.marker([lat, lng])
+                                                .bindPopup(this.createLocationPopup(data, doc.id))
+                                                .addTo(this.map);
+
+                                            this.markers.set(doc.id, marker);
+                                        } else {
+                                            invalidLocations++;
+                                            console.warn(`Invalid coordinates for location ${doc.id}:`, data.coordinates);
+                                        }
+                                    } else {
+                                        invalidLocations++;
+                                        console.warn(`Missing or invalid coordinates for location ${doc.id}`);
+                                    }
+                                } catch (docError) {
+                                    console.error(`Error processing location ${doc.id}:`, docError);
+                                    invalidLocations++;
+                                }
+                            });
+
+                            console.log(`Loaded ${locationCount} locations on map${invalidLocations > 0 ? ` (${invalidLocations} invalid locations skipped)` : ''}`);
+
+                            if (locationCount === 0 && snapshot.size > 0) {
+                                this.showToast(`Loaded ${snapshot.size} locations but none could be displayed due to invalid data`, 'warning');
                             }
+                        }, error => {
+                            console.error('Error loading locations:', error);
+                            let message = 'Failed to load locations';
+
+                            if (error.code === 'permission-denied') {
+                                message = 'Please sign in to view locations';
+                            } else if (error.code === 'failed-precondition') {
+                                message = 'Location data is temporarily unavailable';
+                            } else if (error.code === 'unavailable') {
+                                message = 'Network error. Please check your connection.';
+                            }
+
+                            this.showToast(message, 'error');
                         });
-                        console.log(`Loaded ${locationCount} locations on map`);
-                    }, error => {
-                        console.error('Error loading locations:', error);
-                        if (error.code === 'permission-denied') {
-                            this.showToast('Please sign in to view locations', 'warning');
-                        } else {
-                            this.showToast('Failed to load locations', 'error');
-                        }
-                    });
+                } catch (error) {
+                    console.error('Error setting up location listener:', error);
+                    this.showToast('Failed to initialize location loading', 'error');
+                }
+            }
+
+            createLocationPopup(data, docId) {
+                const riskColor = this.getRiskColor(data.riskLevel);
+                const escapedName = this.escapeHtml(data.name || 'Unnamed Location');
+                const escapedDescription = this.escapeHtml(data.description || 'No description available');
+                const category = this.escapeHtml(data.category || 'other');
+
+                return `
+                    <div style="min-width: 200px; max-width: 300px;">
+                        <div style="margin-bottom: 8px;">
+                            <strong style="font-size: 1.1em; color: var(--accent-blue);">${escapedName}</strong>
+                        </div>
+                        <div style="margin-bottom: 8px; color: #666; font-size: 0.9em; line-height: 1.4;">
+                            ${escapedDescription}
+                        </div>
+                        <div style="display: flex; gap: 6px; font-size: 0.8em; margin-bottom: 8px;">
+                            <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; color: #333;">${category}</span>
+                            <span style="background: ${riskColor}; padding: 2px 6px; border-radius: 4px; color: white;">${data.riskLevel || 'unknown'}</span>
+                        </div>
+                        ${this.currentUser ? `
+                            <div style="display: flex; gap: 4px; margin-top: 8px;">
+                                <button onclick="app.editLocation('${docId}')" style="font-size: 0.8em; padding: 4px 8px;">Edit</button>
+                                <button onclick="app.deleteLocation('${docId}')" style="font-size: 0.8em; padding: 4px 8px; background: #ff3860; color: white;">Delete</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
             }
 
             async loadStats() {
@@ -913,7 +1257,7 @@
             async loadUserLocations() {
                 const grid = document.getElementById('locations-grid');
                 if (!grid) return;
-                
+
                 if (!this.currentUser) {
                     grid.innerHTML = `
                         <div style="text-align: center; padding: 48px;">
@@ -934,6 +1278,7 @@
                     const snapshot = await this.db.collection('locations')
                         .where('createdBy', '==', this.currentUser.uid)
                         .where('status', '==', 'active')
+                        .orderBy('createdAt', 'desc')
                         .get();
 
                     if (snapshot.empty) {
@@ -941,32 +1286,99 @@
                         return;
                     }
 
-                    grid.innerHTML = '';
-                    grid.className = 'locations-grid';
-                    
+                    // Store all locations for filtering
+                    this.allUserLocations = [];
                     snapshot.forEach(doc => {
-                        const data = doc.data();
-                        const card = document.createElement('div');
-                        card.className = 'location-card';
-                        card.innerHTML = `
-                            <div class="location-header">
-                                <h4>${this.escapeHtml(data.name)}</h4>
-                                <span class="risk risk-${data.riskLevel}">${data.riskLevel}</span>
-                            </div>
-                            <p style="color: var(--text-secondary); margin-bottom: 12px;">${this.escapeHtml(data.description)}</p>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">${this.escapeHtml(data.category)}</div>
-                            <div class="location-actions">
-                                <button class="btn" style="font-size: 0.8rem; padding: 4px 8px;" onclick="app.deleteLocation('${doc.id}')">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </div>
-                        `;
-                        grid.appendChild(card);
+                        this.allUserLocations.push({ id: doc.id, data: doc.data() });
                     });
+
+                    this.renderFilteredLocations();
+
+                    // Set up search and filter event listeners
+                    this.setupSearchAndFilters();
+
                 } catch (error) {
                     console.error('Error loading locations:', error);
                     grid.innerHTML = '<div class="error">Failed to load locations</div>';
                 }
+            }
+
+            setupSearchAndFilters() {
+                const searchInput = document.getElementById('location-search');
+                const categoryFilter = document.getElementById('category-filter');
+                const riskFilter = document.getElementById('risk-filter');
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', () => this.renderFilteredLocations());
+                }
+
+                if (categoryFilter) {
+                    categoryFilter.addEventListener('change', () => this.renderFilteredLocations());
+                }
+
+                if (riskFilter) {
+                    riskFilter.addEventListener('change', () => this.renderFilteredLocations());
+                }
+            }
+
+            renderFilteredLocations() {
+                if (!this.allUserLocations) return;
+
+                const searchTerm = (document.getElementById('location-search')?.value || '').toLowerCase();
+                const categoryFilter = document.getElementById('category-filter')?.value || '';
+                const riskFilter = document.getElementById('risk-filter')?.value || '';
+
+                const filteredLocations = this.allUserLocations.filter(({ data }) => {
+                    // Search filter
+                    const matchesSearch = !searchTerm ||
+                        data.name?.toLowerCase().includes(searchTerm) ||
+                        data.description?.toLowerCase().includes(searchTerm) ||
+                        data.category?.toLowerCase().includes(searchTerm);
+
+                    // Category filter
+                    const matchesCategory = !categoryFilter || data.category === categoryFilter;
+
+                    // Risk filter
+                    const matchesRisk = !riskFilter || data.riskLevel === riskFilter;
+
+                    return matchesSearch && matchesCategory && matchesRisk;
+                });
+
+                const grid = document.getElementById('locations-grid');
+                if (!grid) return;
+
+                if (filteredLocations.length === 0) {
+                    grid.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--text-muted);">No locations match your search criteria.</div>';
+                    return;
+                }
+
+                grid.innerHTML = '';
+                grid.className = 'locations-grid';
+
+                filteredLocations.forEach(({ id, data }) => {
+                    const card = document.createElement('div');
+                    card.className = 'location-card';
+                    card.innerHTML = `
+                        <div class="location-header">
+                            <h4>${this.escapeHtml(data.name)}</h4>
+                            <span class="risk risk-${data.riskLevel}">${data.riskLevel}</span>
+                        </div>
+                        <p style="color: var(--text-secondary); margin-bottom: 12px;">${this.escapeHtml(data.description)}</p>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                            <i class="fas fa-tag"></i> ${this.escapeHtml(data.category)}
+                            ${data.coordinates ? ` • <i class="fas fa-map-marker-alt"></i> ${data.coordinates[0].toFixed(4)}, ${data.coordinates[1].toFixed(4)}` : ''}
+                        </div>
+                        <div class="location-actions">
+                            <button class="btn" style="font-size: 0.8rem; padding: 4px 8px;" onclick="app.editLocation('${id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn" style="font-size: 0.8rem; padding: 4px 8px; background: var(--danger); color: white;" onclick="app.deleteLocation('${id}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
             }
 
             async loadProfile() {
@@ -1029,10 +1441,30 @@
             }
 
             hideModal() {
-                document.getElementById('location-modal').classList.remove('active');
-                document.getElementById('location-form').reset();
+                const modal = document.getElementById('location-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                }
+
+                const form = document.getElementById('location-form');
+                if (form) {
+                    form.reset();
+                    // Clear edit mode
+                    delete form.dataset.editId;
+                }
+
+                // Reset modal title and button text
+                const title = document.querySelector('#location-modal h3');
+                if (title) title.textContent = 'Add Location';
+
+                const submitBtn = document.querySelector('#location-form button[type="submit"]');
+                if (submitBtn) submitBtn.textContent = 'Save';
+
                 this.selectedLatLng = null;
-                document.getElementById('coordinates-display').textContent = 'Click on map to set location';
+                const coordsDisplay = document.getElementById('coordinates-display');
+                if (coordsDisplay) {
+                    coordsDisplay.textContent = 'Click on map to set location';
+                }
             }
 
             handleMapClick(e) {
@@ -1045,22 +1477,22 @@
 
             async handleLocationSubmit(e) {
                 e.preventDefault();
-                
+
                 if (!this.currentUser) {
-                    alert('Please sign in to add locations');
+                    this.showToast('Please sign in to manage locations', 'warning');
                     return;
                 }
-                
+
                 const name = document.getElementById('location-name').value.trim();
                 const description = document.getElementById('location-description').value.trim();
-                
+
                 if (!name || !description) {
-                    alert('Please fill in all required fields');
+                    this.showToast('Please fill in all required fields', 'warning');
                     return;
                 }
-                
+
                 if (!this.selectedLatLng) {
-                    alert('Please select a location on the map');
+                    this.showToast('Please select a location on the map', 'warning');
                     return;
                 }
 
@@ -1069,31 +1501,49 @@
                 submitBtn.textContent = 'Saving...';
                 submitBtn.disabled = true;
 
-                const data = {
+                const formData = {
                     name: this.sanitizeInput(name),
                     description: this.sanitizeInput(description),
                     category: document.getElementById('location-category').value,
                     riskLevel: document.getElementById('location-risk').value,
                     coordinates: [this.selectedLatLng.lat, this.selectedLatLng.lng],
-                    createdBy: this.currentUser.uid,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    status: 'active'
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
                 try {
-                    await this.db.collection('locations').add(data);
+                    const editId = e.target.dataset.editId;
+
+                    if (editId) {
+                        // Update existing location
+                        await this.db.collection('locations').doc(editId).update(formData);
+                        this.showToast('Location updated successfully!', 'success');
+                    } else {
+                        // Create new location
+                        formData.createdBy = this.currentUser.uid;
+                        formData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                        formData.status = 'active';
+                        await this.db.collection('locations').add(formData);
+                        this.showToast('Location added successfully!', 'success');
+                    }
+
                     this.hideModal();
                     this.loadStats();
-                    this.showToast('Location added successfully!', 'success');
-                    
+
                     // Refresh user locations if on that view
                     const locationsView = document.getElementById('locations-view');
                     if (locationsView && locationsView.classList.contains('active')) {
                         this.loadUserLocations();
                     }
+
                 } catch (error) {
-                    console.error('Error adding location:', error);
-                    this.showToast(error.message || 'Failed to add location. Please try again.', 'error');
+                    console.error('Error saving location:', error);
+                    let message = 'Failed to save location';
+                    if (error.code === 'permission-denied') {
+                        message = 'You do not have permission to modify this location';
+                    } else if (error.code === 'not-found') {
+                        message = 'Location not found';
+                    }
+                    this.showToast(message, 'error');
                 } finally {
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
@@ -1156,8 +1606,8 @@
             }
 
             async deleteLocation(id) {
-                if (!confirm('Delete this location?')) return;
-                
+                if (!confirm('Are you sure you want to delete this location? This action cannot be undone.')) return;
+
                 try {
                     await this.db.collection('locations').doc(id).update({
                         status: 'deleted',
@@ -1172,32 +1622,213 @@
                 }
             }
 
-            async handleAuth() {
-                const btn = document.getElementById('auth-btn');
-                const originalText = btn?.querySelector('span')?.textContent || 'Sign In';
-                
+            async editLocation(id) {
                 try {
-                    if (btn) {
-                        btn.disabled = true;
-                        const span = btn.querySelector('span');
-                        if (span) span.textContent = 'Processing...';
+                    const doc = await this.db.collection('locations').doc(id).get();
+                    if (!doc.exists) {
+                        this.showToast('Location not found', 'error');
+                        return;
                     }
-                    
-                    if (this.currentUser) {
+
+                    const data = doc.data();
+
+                    // Check if user owns this location
+                    if (data.createdBy !== this.currentUser.uid) {
+                        this.showToast('You can only edit your own locations', 'error');
+                        return;
+                    }
+
+                    // Populate the form with existing data
+                    document.getElementById('location-name').value = data.name || '';
+                    document.getElementById('location-description').value = data.description || '';
+                    document.getElementById('location-category').value = data.category || 'other';
+                    document.getElementById('location-risk').value = data.riskLevel || 'moderate';
+
+                    // Set coordinates if available
+                    if (data.coordinates && Array.isArray(data.coordinates) && data.coordinates.length === 2) {
+                        this.selectedLatLng = { lat: data.coordinates[0], lng: data.coordinates[1] };
+                        document.getElementById('coordinates-display').textContent =
+                            `${data.coordinates[0].toFixed(6)}, ${data.coordinates[1].toFixed(6)}`;
+                    }
+
+                    // Change form title and button
+                    document.querySelector('#location-modal h3').textContent = 'Edit Location';
+                    document.querySelector('#location-form button[type="submit"]').textContent = 'Update Location';
+
+                    // Store the location ID for update
+                    document.getElementById('location-form').dataset.editId = id;
+
+                    this.showAddLocationModal();
+
+                } catch (error) {
+                    console.error('Error loading location for edit:', error);
+                    this.showToast('Failed to load location for editing', 'error');
+                }
+            }
+
+            async handleAuth() {
+                if (this.currentUser) {
+                    // Sign out
+                    try {
                         await this.auth.signOut();
                         this.showToast('Signed out successfully', 'success');
-                    } else {
-                        await this.auth.signInAnonymously();
-                        this.showToast('Signed in successfully', 'success');
+                    } catch (error) {
+                        console.error('Sign out error:', error);
+                        this.showToast('Failed to sign out', 'error');
                     }
+                } else {
+                    // Show auth modal
+                    this.showAuthModal();
+                }
+            }
+
+            showAuthModal() {
+                const modal = document.getElementById('auth-modal');
+                if (modal) {
+                    modal.classList.add('active');
+                    // Focus on first input
+                    const firstInput = modal.querySelector('input');
+                    if (firstInput) firstInput.focus();
+                }
+            }
+
+            hideAuthModal() {
+                const modal = document.getElementById('auth-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    // Reset forms
+                    const forms = modal.querySelectorAll('form');
+                    forms.forEach(form => form.reset());
+                    // Reset to sign-in tab
+                    this.switchAuthTab('signin');
+                }
+            }
+
+            switchAuthTab(tabName) {
+                // Update tab buttons
+                document.querySelectorAll('.auth-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.tab === tabName);
+                });
+
+                // Update form visibility
+                document.querySelectorAll('.auth-form').forEach(form => {
+                    form.classList.toggle('active', form.id === `${tabName}-form`);
+                });
+            }
+
+            async handleSignIn(e) {
+                e.preventDefault();
+
+                const email = document.getElementById('signin-email').value.trim();
+                const password = document.getElementById('signin-password').value.trim();
+
+                if (!email || !password) {
+                    this.showToast('Please fill in all fields', 'warning');
+                    return;
+                }
+
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Signing In...';
+                submitBtn.disabled = true;
+
+                try {
+                    await this.auth.signInWithEmailAndPassword(email, password);
+                    this.hideAuthModal();
+                    this.showToast('Signed in successfully!', 'success');
                 } catch (error) {
-                    console.error('Auth error:', error);
-                    this.showToast(error.message || 'Authentication failed', 'error');
+                    console.error('Sign in error:', error);
+                    let message = 'Failed to sign in';
+                    switch (error.code) {
+                        case 'auth/user-not-found':
+                            message = 'No account found with this email';
+                            break;
+                        case 'auth/wrong-password':
+                            message = 'Incorrect password';
+                            break;
+                        case 'auth/invalid-email':
+                            message = 'Invalid email address';
+                            break;
+                        case 'auth/user-disabled':
+                            message = 'This account has been disabled';
+                            break;
+                        default:
+                            message = error.message;
+                    }
+                    this.showToast(message, 'error');
                 } finally {
-                    if (btn) {
-                        btn.disabled = false;
-                        const span = btn.querySelector('span');
-                        if (span) span.textContent = originalText;
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async handleSignUp(e) {
+                e.preventDefault();
+
+                const email = document.getElementById('signup-email').value.trim();
+                const password = document.getElementById('signup-password').value.trim();
+                const confirmPassword = document.getElementById('signup-confirm-password').value.trim();
+
+                if (!email || !password || !confirmPassword) {
+                    this.showToast('Please fill in all fields', 'warning');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    this.showToast('Passwords do not match', 'error');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    this.showToast('Password must be at least 6 characters', 'warning');
+                    return;
+                }
+
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Creating Account...';
+                submitBtn.disabled = true;
+
+                try {
+                    const result = await this.auth.createUserWithEmailAndPassword(email, password);
+                    // Send email verification
+                    await result.user.sendEmailVerification();
+                    this.hideAuthModal();
+                    this.showToast('Account created! Please check your email to verify your account.', 'success');
+                } catch (error) {
+                    console.error('Sign up error:', error);
+                    let message = 'Failed to create account';
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            message = 'An account with this email already exists';
+                            break;
+                        case 'auth/invalid-email':
+                            message = 'Invalid email address';
+                            break;
+                        case 'auth/weak-password':
+                            message = 'Password is too weak';
+                            break;
+                        default:
+                            message = error.message;
+                    }
+                    this.showToast(message, 'error');
+                } finally {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async signInAnonymously() {
+                try {
+                    await this.auth.signInAnonymously();
+                    this.hideAuthModal();
+                    this.showToast('Signed in as guest', 'success');
+                } catch (error) {
+                    console.error('Anonymous sign in error:', error);
+                    if (error.code === 'auth/admin-restricted-operation') {
+                        this.showToast('Anonymous sign-in is currently disabled. Please use email sign-in.', 'warning');
+                    } else {
+                        this.showToast('Failed to sign in anonymously', 'error');
                     }
                 }
             }

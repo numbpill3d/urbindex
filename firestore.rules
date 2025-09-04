@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // User profiles - users can read all profiles but only edit their own
     match /users/{userId} {
-      allow read: if true; // Allow anonymous read for user presence
+      allow read: if true; // Allow public read for user presence and stats
       allow create: if request.auth != null && request.auth.uid == userId;
       allow update: if request.auth != null && request.auth.uid == userId;
       allow delete: if request.auth != null && request.auth.uid == userId;
