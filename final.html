@@ -1047,9 +1047,13 @@
                         console.log('User not authenticated');
                     }
                     // Always load public data regardless of auth state
-                    this.loadData();
                 }, error => {
                     console.error('Auth state change error:', error);
+                    this.showError('Authentication error occurred. Please refresh the page.');
+                    // Add retry mechanism for transient errors
+                    if (error.code === 'auth/network-request-failed') {
+                        setTimeout(() => this.initAuth(), 5000); // Retry after 5 seconds
+                    }
                     this.showError('Authentication error occurred. Please refresh the page.');
                 });
 
