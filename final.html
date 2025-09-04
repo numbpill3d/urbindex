@@ -898,9 +898,9 @@
     </script>
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onerror="console.error('Failed to load Leaflet')"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" onerror="console.error('Failed to load Firebase')"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" onerror="console.error('Failed to load Firebase App')"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" onerror="console.error('Failed to load Firebase Auth')"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" onerror="console.error('Failed to load Firebase Firestore')"></script>
     
     <script>
         class UrbindexApp {
@@ -926,6 +926,11 @@
             }
 
             async initFirebase() {
+                // Check if Firebase is loaded
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase SDK failed to load. Please check your internet connection and refresh the page.');
+                }
+
                 const config = {
                     apiKey: "AIzaSyCifqLPnCuvRVZ9hvHIJVBmHkzB5nJyqtc",
                     authDomain: "urbindex-d69e1.firebaseapp.com",
@@ -935,11 +940,16 @@
                     appId: "1:889914696327:web:351daa656a4d12fa828e22"
                 };
 
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(config);
+                try {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(config);
+                    }
+                    this.db = firebase.firestore();
+                    this.auth = firebase.auth();
+                } catch (error) {
+                    console.error('Firebase initialization error:', error);
+                    throw new Error('Failed to initialize Firebase. Please check your internet connection and refresh the page.');
                 }
-                this.db = firebase.firestore();
-                this.auth = firebase.auth();
                 
                 // Enable offline persistence
                 try {
@@ -1021,6 +1031,12 @@
             }
 
             initAuth() {
+                if (!this.auth) {
+                    console.error('Firebase Auth not initialized');
+                    this.showError('Authentication system failed to initialize. Please refresh the page.');
+                    return;
+                }
+
                 this.auth.onAuthStateChanged(user => {
                     this.currentUser = user;
                     this.updateAuthUI();
@@ -1032,6 +1048,9 @@
                     }
                     // Always load public data regardless of auth state
                     this.loadData();
+                }, error => {
+                    console.error('Auth state change error:', error);
+                    this.showError('Authentication error occurred. Please refresh the page.');
                 });
 
                 document.getElementById('auth-btn').addEventListener('click', () => this.handleAuth());
