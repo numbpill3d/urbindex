@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth Test</title>
+</head>
+<body>
+    <h1>Firebase Auth Test</h1>
+    <div id="status">Testing...</div>
+    <button id="signIn">Sign In Anonymously</button>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    
+    <script>
+        const config = {
+            apiKey: "AIzaSyCifqLPnCuvRVZ9hvHIJVBmHkzB5nJyqtc",
+            authDomain: "urbindex-d69e1.firebaseapp.com",
+            projectId: "urbindex-d69e1"
+        };
+
+        firebase.initializeApp(config);
+        const auth = firebase.auth();
+        const status = document.getElementById('status');
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                status.innerHTML = `✅ Signed in as: ${user.uid} (${user.isAnonymous ? 'Anonymous' : 'Registered'})`;
+            } else {
+                status.innerHTML = '❌ Not signed in';
+            }
+        });
+
+        document.getElementById('signIn').onclick = async () => {
+            try {
+                await auth.signInAnonymously();
+                status.innerHTML = '✅ Sign in successful!';
+            } catch (error) {
+                status.innerHTML = `❌ Error: ${error.message}`;
+                console.error(error);
+            }
+        };
+    </script>
+</body>
+</html>
