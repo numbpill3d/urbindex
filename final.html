@@ -497,6 +497,15 @@
         .btn-primary:disabled:hover {
             background: var(--accent-blue);
             color: var(--bg-primary);
+        .btn:focus, .nav-btn:focus, .auth-tab:focus, .fab:focus {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
+        }
+
+        .input:focus, .textarea:focus, .select:focus {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
+        }
         }
         
         /* Fix for mobile layout */
@@ -618,13 +627,13 @@
 </head>
 <body>
     <div class="app">
-        <header class="header">
+        <header class="header" role="banner">
             <div class="logo">URBINDEX</div>
             <div class="status">
                 <div class="status-dot" id="status-dot"></div>
                 <span id="status-text">Connected</span>
             </div>
-            <button class="btn btn-primary" id="auth-btn">
+            <button class="btn btn-primary" id="auth-btn" aria-label="Authentication">
                 <i class="fas fa-user"></i>
                 <span>Sign In</span>
             </button>
@@ -701,22 +710,22 @@
             </div>
         </header>
 
-        <nav class="nav">
-            <button class="nav-btn active" data-view="map">
+        <nav class="nav" role="navigation" aria-label="Main Navigation">
+            <button class="nav-btn active" data-view="map" aria-label="Map View">
                 <i class="fas fa-map"></i>
                 <span>Map</span>
             </button>
-            <button class="nav-btn" data-view="locations">
+            <button class="nav-btn" data-view="locations" aria-label="Locations View">
                 <i class="fas fa-map-marker-alt"></i>
                 <span>Locations</span>
             </button>
-            <button class="nav-btn" data-view="profile">
+            <button class="nav-btn" data-view="profile" aria-label="Profile View">
                 <i class="fas fa-user-circle"></i>
                 <span>Profile</span>
             </button>
         </nav>
 
-        <main class="main">
+        <main class="main" role="main">
             <div class="view active" id="map-view">
                 <div class="map-layout">
                     <aside class="sidebar">
@@ -748,8 +757,9 @@
                         </div>
                     </aside>
 
-                    <div class="map-container">
-                        <div id="map"></div>
+                    <div class="map-container" role="application" aria-label="Interactive Map for Urban Exploration">
+                        <div id="map" tabindex="0" aria-describedby="map-description"></div>
+                        <div id="map-description" style="position: absolute; left: -10000px;">Interactive map showing locations. Use mouse or keyboard to navigate.</div>
                     </div>
                 </div>
             </div>
@@ -813,7 +823,7 @@
             </div>
         </main>
 
-        <button class="fab" id="add-location-fab" onclick="app.showAddLocationModal()" style="display:none;">
+        <button class="fab" id="add-location-fab" onclick="app.showAddLocationModal()" style="display:none;" aria-label="Add New Location">
             <i class="fas fa-plus"></i>
         </button>
     </div>
@@ -993,7 +1003,7 @@ async initFirebase() {
                         maxBoundsViscosity: 1.0
                     });
 
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '© OpenStreetMap contributors',
                         maxZoom: 18,
                         errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' // Transparent fallback
