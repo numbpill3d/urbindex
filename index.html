@@ -6,112 +6,75 @@
     <title>Urbindex - Urban Exploration Network</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         /* ============================================
-           THEME SYSTEM - Three Modern Themes
+           Y2K MAC OS CLASSIC THEME
         ============================================ */
 
         :root {
-            /* Cyberpunk Theme (Default) */
-            --bg-primary: #0a0e27;
-            --bg-secondary: #1a1f3a;
-            --bg-tertiary: #252b47;
-            --bg-elevated: #2d3454;
-            --accent-primary: #00d9ff;
-            --accent-secondary: #7b2cbf;
-            --accent-tertiary: #ff006e;
-            --text-primary: #e0e7ff;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: rgba(0, 217, 255, 0.2);
-            --success: #00ff88;
-            --warning: #ffaa00;
-            --danger: #ff006e;
-            --overlay: rgba(10, 14, 39, 0.95);
-
-            /* Effects */
-            --glow: 0 0 20px currentColor;
-            --glow-strong: 0 0 30px currentColor, 0 0 60px currentColor;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.6);
-
-            /* Spacing */
-            --spacing-xs: 4px;
-            --spacing-sm: 8px;
-            --spacing-md: 16px;
-            --spacing-lg: 24px;
-            --spacing-xl: 32px;
-
-            /* Border Radius */
-            --radius-sm: 4px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --radius-full: 9999px;
+            /* Y2K Mac OS Classic Color Palette */
+            --mac-platinum: #C0C0C0;
+            --mac-steel: #505050;
+            --mac-charcoal: #2A2A2A;
+            --mac-blue: #007AFF;
+            --mac-pink: #FF006E;
+            --mac-purple: #8B5CF6;
+            --mac-green: #00FF88;
+            --mac-orange: #FFA500;
 
             /* Typography */
-            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-display: 'Space Grotesk', sans-serif;
-            --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+            --font-chicago: 'Chicago', 'Arial', sans-serif;
+            --font-geneva: 'Geneva', 'Arial', sans-serif;
+            --font-mono: 'Monaco', 'Courier New', monospace;
+            --font-impact: 'Impact', 'Arial Black', sans-serif;
 
-            /* Transitions */
-            --transition-fast: 150ms ease;
-            --transition-base: 250ms ease;
-            --transition-slow: 350ms ease;
+            /* Y2K Mac OS Classic Theme */
+            --bg-primary: var(--mac-charcoal);
+            --bg-secondary: var(--mac-steel);
+            --bg-tertiary: var(--mac-platinum);
+            --accent-blue: var(--mac-blue);
+            --accent-purple: var(--mac-purple);
+            --text-primary: #FFFFFF;
+            --text-secondary: var(--mac-platinum);
+            --text-muted: #A0A0A0;
+            --border: var(--mac-steel);
+            --success: var(--mac-green);
+            --warning: var(--mac-orange);
+            --danger: #FF4444;
+
+            /* Classic Mac OS Effects */
+            --bevel-light: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+            --bevel-dark: inset -1px -1px 0 #FFFFFF, inset 1px 1px 0 #808080;
+            --shadow-mac: 2px 2px 4px rgba(0,0,0,0.3);
+            --shadow-neon: 0 0 10px currentColor;
+
+            /* Classic Mac OS Styling */
+            --radius: 0;
+            --shadow: var(--shadow-mac);
+            --transition: 0.2s ease;
         }
 
-        /* Retro Theme */
-        [data-theme="retro"] {
-            --bg-primary: #1e1e1e;
-            --bg-secondary: #2d2d2d;
-            --bg-tertiary: #3a3a3a;
-            --bg-elevated: #474747;
-            --accent-primary: #00ff88;
-            --accent-secondary: #ffaa00;
-            --accent-tertiary: #00d9ff;
-            --text-primary: #00ff88;
-            --text-secondary: #c0c0c0;
-            --text-muted: #808080;
-            --border: rgba(0, 255, 136, 0.3);
-            --success: #00ff88;
-            --warning: #ffaa00;
-            --danger: #ff006e;
-            --overlay: rgba(30, 30, 30, 0.95);
-            --glow: 0 0 10px currentColor;
-            --glow-strong: 0 0 20px currentColor;
+        /* Dark Mode Variant (Y2K Nightcore) */
+        [data-theme="dark"] {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --mac-charcoal: #0a0a0a;
+            --mac-steel: #1a1a1a;
+            --mac-platinum: #3a3a3a;
         }
 
-        /* Minimal Theme */
-        [data-theme="minimal"] {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-tertiary: #f1f5f9;
-            --bg-elevated: #ffffff;
-            --accent-primary: #000000;
-            --accent-secondary: #475569;
-            --accent-tertiary: #64748b;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #94a3b8;
-            --border: rgba(15, 23, 42, 0.1);
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --overlay: rgba(255, 255, 255, 0.95);
-            --glow: none;
-            --glow-strong: none;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            --shadow-strong: 0 4px 16px rgba(0, 0, 0, 0.12);
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
+        /* Light Mode Variant (Classic Mac OS) */
+        [data-theme="light"] {
+            --bg-primary: #EEEEEE;
+            --bg-secondary: #CCCCCC;
+            --bg-tertiary: #AAAAAA;
+            --mac-charcoal: #000000;
+            --mac-steel: #666666;
+            --mac-platinum: #DDDDDD;
+            --text-primary: #000000;
+            --text-secondary: #333333;
         }
-
-        /* ============================================
-           GLOBAL STYLES
-        ============================================ */
 
         * {
             margin: 0;
@@ -120,890 +83,268 @@
         }
 
         body {
-            font-family: var(--font-primary);
+            font-family: var(--font-chicago), 'Arial', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.6;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
             overflow-x: hidden;
-            transition: background var(--transition-base), color var(--transition-base);
         }
 
-        /* Cyberpunk theme effects */
-        body:not([data-theme])::before,
-        [data-theme="cyberpunk"]::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                repeating-linear-gradient(
-                    0deg,
-                    rgba(0, 217, 255, 0.03) 0px,
-                    transparent 1px,
-                    transparent 2px,
-                    rgba(0, 217, 255, 0.03) 3px
-                );
-            pointer-events: none;
-            z-index: 1;
-            animation: scanlines 8s linear infinite;
-        }
-
-        @keyframes scanlines {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(100%); }
-        }
-
-        /* Retro theme effects */
-        [data-theme="retro"]::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                repeating-linear-gradient(
-                    0deg,
-                    transparent 0px,
-                    rgba(0, 255, 136, 0.02) 1px,
-                    transparent 2px
-                );
-            pointer-events: none;
-            z-index: 1;
-        }
-
+        /* Classic Mac OS Typography */
         h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-display);
-            font-weight: 700;
-            letter-spacing: -0.02em;
+            font-family: var(--font-impact), 'Arial Black', sans-serif;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
-        /* ============================================
-           APP LAYOUT
-        ============================================ */
-
-        .app-container {
-            position: relative;
-            z-index: 2;
-        }
+        h1 { font-size: 24px; margin-bottom: 16px; }
+        h2 { font-size: 20px; margin-bottom: 14px; }
+        h3 { font-size: 16px; margin-bottom: 12px; }
+        h4 { font-size: 14px; margin-bottom: 10px; }
 
         /* ============================================
-           MODERN NAVIGATION BAR
+           HEADER / NAVIGATION
         ============================================ */
 
-        .nav-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 64px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            backdrop-filter: blur(10px);
+        .header {
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+            border-bottom: 2px solid var(--mac-charcoal);
+            padding: 0 20px;
+            height: 50px;
             display: flex;
             align-items: center;
-            padding: 0 var(--spacing-lg);
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
             z-index: 100;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-mac);
         }
 
-        .nav-logo {
-            font-family: var(--font-display);
-            font-size: 24px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #FFFFFF, transparent);
+        }
+
+        .logo {
+            font-family: var(--font-impact), 'Arial Black', sans-serif;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: var(--glow);
-            letter-spacing: -0.05em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .nav-center {
-            flex: 1;
+        .header-right {
             display: flex;
-            justify-content: center;
-            padding: 0 var(--spacing-lg);
-        }
-
-        .nav-search {
-            max-width: 400px;
-            width: 100%;
-            position: relative;
-        }
-
-        .nav-search input {
-            width: 100%;
-            padding: var(--spacing-sm) var(--spacing-md);
-            padding-left: 40px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-full);
-            color: var(--text-primary);
-            font-size: 14px;
-            transition: all var(--transition-fast);
-        }
-
-        .nav-search input:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
-        }
-
-        .nav-search i {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: var(--spacing-sm);
             align-items: center;
+            gap: 16px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--mac-green);
+            box-shadow: 0 0 5px var(--mac-green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.offline {
+            background: var(--danger);
+            box-shadow: 0 0 5px var(--danger);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .nav {
+            background: linear-gradient(to bottom, var(--mac-steel), var(--mac-charcoal));
+            border-bottom: 2px solid var(--mac-platinum);
+            padding: 6px 20px;
+            display: flex;
+            gap: 4px;
+            position: sticky;
+            top: 50px;
+            z-index: 90;
+            box-shadow: var(--shadow-mac);
         }
 
         .nav-btn {
-            padding: var(--spacing-sm) var(--spacing-md);
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
+            background: var(--mac-steel);
+            border: 2px solid var(--mac-charcoal);
+            color: var(--text-secondary);
+            padding: 6px 12px;
             cursor: pointer;
-            transition: all var(--transition-fast);
+            transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: var(--spacing-sm);
-            font-size: 14px;
-            font-weight: 500;
+            gap: 6px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: var(--bevel-light);
         }
 
         .nav-btn:hover {
-            background: var(--bg-elevated);
-            border-color: var(--accent-primary);
+            background: var(--mac-platinum);
+            color: var(--mac-charcoal);
+            box-shadow: var(--bevel-dark);
             transform: translateY(-1px);
         }
 
-        .nav-btn i {
-            font-size: 16px;
+        .nav-btn.active {
+            background: var(--mac-blue);
+            color: white;
+            border-color: var(--mac-blue);
+            box-shadow: var(--bevel-dark);
         }
 
-        /* Hamburger menu for mobile */
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            gap: 4px;
-            cursor: pointer;
-            padding: var(--spacing-sm);
-        }
-
-        .hamburger span {
-            width: 24px;
-            height: 2px;
-            background: var(--text-primary);
-            transition: all var(--transition-fast);
+        .nav-btn:active {
+            box-shadow: var(--bevel-light);
+            transform: translateY(0);
         }
 
         /* ============================================
-           COLLAPSIBLE SIDEBAR
+           MAIN LAYOUT
         ============================================ */
 
-        .main-content {
-            display: flex;
-            margin-top: 64px;
-            height: calc(100vh - 64px);
+        .main {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 16px;
+            padding: 20px;
+            height: calc(100vh - 108px);
+            max-width: 1800px;
+            margin: 0 auto;
         }
+
+        /* ============================================
+           SIDEBAR
+        ============================================ */
 
         .sidebar {
-            width: 320px;
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             overflow-y: auto;
-            transition: transform var(--transition-base);
         }
 
-        .sidebar.collapsed {
-            transform: translateX(-100%);
+        .panel {
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+            border: 2px solid var(--mac-charcoal);
+            padding: 12px;
+            box-shadow: var(--shadow-mac);
+            position: relative;
         }
 
-        .sidebar-header {
-            padding: var(--spacing-lg);
-            border-bottom: 1px solid var(--border);
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #FFFFFF, transparent);
         }
 
-        .sidebar-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .sidebar-subtitle {
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        .sidebar-section {
-            padding: var(--spacing-lg);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .section-title {
-            font-size: 12px;
-            font-weight: 600;
+        .panel-title {
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--mac-blue);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-            margin-bottom: var(--spacing-md);
+            letter-spacing: 1px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: var(--spacing-sm);
+            gap: 8px;
         }
 
         .filter-option {
             display: flex;
             align-items: center;
-            gap: var(--spacing-sm);
-            padding: var(--spacing-sm);
-            border-radius: var(--radius-sm);
+            gap: 8px;
+            padding: 4px;
             cursor: pointer;
-            transition: background var(--transition-fast);
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+            transition: var(--transition);
         }
 
         .filter-option:hover {
-            background: var(--bg-tertiary);
+            background: rgba(255,255,255,0.1);
         }
 
         .filter-option input[type="checkbox"],
         .filter-option input[type="radio"] {
-            accent-color: var(--accent-primary);
+            accent-color: var(--mac-blue);
         }
 
         /* ============================================
-           MAP CONTAINER
+           MAP
         ============================================ */
 
-        .map-wrapper {
-            flex: 1;
-            position: relative;
+        .map-container {
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+            border: 2px solid var(--mac-charcoal);
             overflow: hidden;
-        }
-
-        #map {
-            width: 100%;
+            position: relative;
+            box-shadow: var(--shadow-mac);
             height: 100%;
         }
 
-        /* Map loading skeleton */
-        .map-skeleton {
+        .map-container::before {
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: var(--bg-tertiary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        .map-skeleton.hidden {
-            display: none;
-        }
-
-        /* ============================================
-           FLOATING ACTION BUTTONS
-        ============================================ */
-
-        .fab-container {
-            position: fixed;
-            bottom: var(--spacing-lg);
-            right: var(--spacing-lg);
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-md);
-            z-index: 90;
-        }
-
-        .fab {
-            width: 56px;
-            height: 56px;
-            border-radius: var(--radius-full);
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: var(--shadow-strong);
-            transition: all var(--transition-fast);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .fab:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: var(--glow-strong), var(--shadow-strong);
-        }
-
-        .fab:active {
-            transform: scale(0.95);
-        }
-
-        .fab.secondary {
-            background: var(--bg-elevated);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        /* ============================================
-           QUICK ADD MODAL
-        ============================================ */
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--overlay);
-            backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #FFFFFF, transparent);
             z-index: 1000;
-            animation: fadeIn var(--transition-base);
         }
 
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-strong);
-            animation: slideUp var(--transition-base);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            padding: var(--spacing-lg);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border-radius: var(--radius-full);
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition-fast);
-        }
-
-        .modal-close:hover {
-            background: var(--bg-elevated);
-            transform: rotate(90deg);
-        }
-
-        .modal-body {
-            padding: var(--spacing-lg);
-        }
-
-        .modal-footer {
-            padding: var(--spacing-lg);
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: var(--spacing-sm);
-            justify-content: flex-end;
-        }
-
-        /* ============================================
-           FORMS
-        ============================================ */
-
-        .form-group {
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: var(--spacing-sm);
-            color: var(--text-secondary);
-        }
-
-        .form-input,
-        .form-textarea,
-        .form-select {
+        #map {
+            height: 100%;
             width: 100%;
-            padding: var(--spacing-md);
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-size: 14px;
-            font-family: var(--font-primary);
-            transition: all var(--transition-fast);
         }
 
-        .form-input:focus,
-        .form-textarea:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-hint {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: var(--spacing-xs);
-        }
-
-        /* ============================================
-           BUTTONS
-        ============================================ */
-
-        .btn {
-            padding: var(--spacing-md) var(--spacing-lg);
-            border-radius: var(--radius-md);
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            transition: all var(--transition-fast);
-            display: inline-flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            justify-content: center;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--glow), var(--shadow);
-        }
-
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-elevated);
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* ============================================
-           THEME SELECTOR
-        ============================================ */
-
-        .theme-selector {
-            position: fixed;
-            top: 80px;
-            right: var(--spacing-lg);
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-md);
-            box-shadow: var(--shadow-strong);
-            display: none;
-            flex-direction: column;
-            gap: var(--spacing-sm);
-            z-index: 95;
-            animation: slideInRight var(--transition-base);
-        }
-
-        .theme-selector.active {
-            display: flex;
-        }
-
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .theme-option {
-            padding: var(--spacing-md);
-            border: 2px solid var(--border);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-        }
-
-        .theme-option:hover {
-            border-color: var(--accent-primary);
-            transform: translateX(-2px);
-        }
-
-        .theme-option.active {
-            border-color: var(--accent-primary);
-            background: var(--bg-tertiary);
-        }
-
-        .theme-preview {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-sm);
-            display: flex;
-            overflow: hidden;
-        }
-
-        .theme-preview-color {
-            flex: 1;
-        }
-
-        .theme-info {
-            flex: 1;
-        }
-
-        .theme-name {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .theme-description {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        /* ============================================
-           NOTIFICATION SYSTEM
-        ============================================ */
-
-        .notification-container {
-            position: fixed;
-            top: 80px;
-            right: var(--spacing-lg);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-sm);
-            max-width: 400px;
-        }
-
-        .notification {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-left: 4px solid var(--accent-primary);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-md);
-            box-shadow: var(--shadow-strong);
-            display: flex;
-            align-items: flex-start;
-            gap: var(--spacing-md);
-            animation: slideInRight var(--transition-base);
-        }
-
-        .notification.success {
-            border-left-color: var(--success);
-        }
-
-        .notification.warning {
-            border-left-color: var(--warning);
-        }
-
-        .notification.error {
-            border-left-color: var(--danger);
-        }
-
-        .notification-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: var(--radius-full);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .notification.success .notification-icon {
-            background: var(--success);
-            color: white;
-        }
-
-        .notification.warning .notification-icon {
-            background: var(--warning);
-            color: white;
-        }
-
-        .notification.error .notification-icon {
-            background: var(--danger);
-            color: white;
-        }
-
-        .notification.info .notification-icon {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .notification-content {
-            flex: 1;
-        }
-
-        .notification-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .notification-message {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .notification-close {
-            width: 20px;
-            height: 20px;
-            border-radius: var(--radius-full);
-            background: var(--bg-tertiary);
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-size: 12px;
-            transition: all var(--transition-fast);
-        }
-
-        .notification-close:hover {
-            background: var(--bg-elevated);
-            color: var(--text-primary);
-        }
-
-        /* ============================================
-           ONBOARDING
-        ============================================ */
-
-        .onboarding-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--overlay);
-            backdrop-filter: blur(10px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            animation: fadeIn var(--transition-base);
-        }
-
-        .onboarding-overlay.active {
-            display: flex;
-        }
-
-        .onboarding-modal {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            max-width: 600px;
-            width: 90%;
-            box-shadow: var(--glow-strong), var(--shadow-strong);
-            overflow: hidden;
-        }
-
-        .onboarding-slide {
-            display: none;
-            padding: var(--spacing-xl);
-            text-align: center;
-        }
-
-        .onboarding-slide.active {
-            display: block;
-            animation: fadeIn var(--transition-base);
-        }
-
-        .onboarding-icon {
-            font-size: 80px;
-            margin-bottom: var(--spacing-lg);
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .onboarding-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .onboarding-description {
-            font-size: 16px;
-            color: var(--text-secondary);
-            margin-bottom: var(--spacing-xl);
-            line-height: 1.6;
-        }
-
-        .onboarding-dots {
-            display: flex;
-            gap: var(--spacing-sm);
-            justify-content: center;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .onboarding-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: var(--radius-full);
-            background: var(--bg-tertiary);
-            transition: all var(--transition-fast);
-        }
-
-        .onboarding-dot.active {
-            background: var(--accent-primary);
-            width: 24px;
-        }
-
-        .onboarding-actions {
-            display: flex;
-            gap: var(--spacing-md);
-            justify-content: center;
-        }
-
-        /* ============================================
-           OFFLINE BANNER
-        ============================================ */
-
-        .offline-banner {
-            position: fixed;
-            top: 64px;
-            left: 0;
-            right: 0;
-            background: var(--warning);
-            color: var(--bg-primary);
-            padding: var(--spacing-md);
-            text-align: center;
-            font-weight: 600;
-            font-size: 14px;
-            display: none;
-            z-index: 99;
-            animation: slideDown var(--transition-base);
-        }
-
-        .offline-banner.active {
-            display: block;
-        }
-
-        @keyframes slideDown {
-            from {
-                transform: translateY(-100%);
-            }
-            to {
-                transform: translateY(0);
-            }
-        }
-
-        /* ============================================
-           LOADING STATES
-        ============================================ */
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--bg-tertiary);
-            border-top: 3px solid var(--accent-primary);
-            border-radius: var(--radius-full);
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .skeleton {
-            background: linear-gradient(
-                90deg,
-                var(--bg-tertiary) 0%,
-                var(--bg-elevated) 50%,
-                var(--bg-tertiary) 100%
-            );
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* ============================================
-           CUSTOM MARKER ANIMATIONS
-        ============================================ */
-
+        /* Custom Marker Styles */
         .custom-marker {
             position: relative;
         }
@@ -1025,6 +366,7 @@
             justify-content: center;
             border: 2px solid rgba(255, 255, 255, 0.3);
             position: relative;
+            animation: markerBounce 0.6s ease-out;
         }
 
         .marker-pin i {
@@ -1041,60 +383,614 @@
         }
 
         @keyframes markerBounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            30% {
-                transform: translateY(-20px);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-            70% {
-                transform: translateY(-15px);
-            }
+            0%, 100% { transform: translateY(0) rotate(-45deg); }
+            30% { transform: translateY(-20px) rotate(-45deg); }
+            50% { transform: translateY(-10px) rotate(-45deg); }
+            70% { transform: translateY(-15px) rotate(-45deg); }
         }
 
         @keyframes shadowPulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 0.3;
-            }
-            50% {
-                transform: scale(1.2);
-                opacity: 0.5;
-            }
-        }
-
-        @keyframes particleFade {
-            0% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0) translateY(-100px);
-            }
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.5; }
         }
 
         /* Enhanced popup styling */
         .leaflet-popup-content-wrapper {
-            background: var(--bg-secondary) !important;
-            border: 1px solid var(--border) !important;
-            border-radius: 12px !important;
-            box-shadow: var(--shadow-strong) !important;
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel)) !important;
+            border: 2px solid var(--mac-charcoal) !important;
+            border-radius: 0 !important;
+            box-shadow: var(--shadow-mac) !important;
             padding: 0 !important;
         }
 
         .leaflet-popup-content {
             margin: 0 !important;
-            padding: 16px !important;
+            padding: 12px !important;
             color: var(--text-primary) !important;
+            font-family: var(--font-geneva), 'Arial', sans-serif !important;
         }
 
         .leaflet-popup-tip {
-            background: var(--bg-secondary) !important;
-            border: 1px solid var(--border) !important;
+            background: var(--mac-steel) !important;
+            border: 2px solid var(--mac-charcoal) !important;
+        }
+
+        /* ============================================
+           BUTTONS
+        ============================================ */
+
+        .btn {
+            background: var(--mac-steel);
+            border: 2px solid var(--mac-charcoal);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: var(--bevel-light);
+        }
+
+        .btn:hover {
+            background: var(--mac-platinum);
+            color: var(--mac-charcoal);
+            box-shadow: var(--bevel-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            box-shadow: var(--bevel-light);
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--mac-blue);
+            color: white;
+            border-color: var(--mac-blue);
+        }
+
+        .btn-primary:hover {
+            background: #0088FF;
+            border-color: #0088FF;
+            color: white;
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ============================================
+           FLOATING ACTION BUTTON
+        ============================================ */
+
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
+            border: 2px solid var(--mac-charcoal);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-mac), 0 0 20px rgba(0, 122, 255, 0.5);
+            transition: var(--transition);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: var(--shadow-mac), 0 0 30px rgba(0, 122, 255, 0.8);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        /* ============================================
+           MODALS
+        ============================================ */
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(42,42,42,0.95);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+            border: 2px solid var(--mac-charcoal);
+            padding: 20px;
+            max-width: 480px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: var(--shadow-mac);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #FFFFFF, transparent);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--mac-steel);
+            border: 2px solid var(--mac-charcoal);
+            color: var(--text-secondary);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--bevel-light);
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-weight: 700;
+        }
+
+        .modal-close:hover {
+            background: var(--mac-platinum);
+            color: var(--mac-charcoal);
+            box-shadow: var(--bevel-dark);
+        }
+
+        .modal-title {
+            font-family: var(--font-impact), 'Arial Black', sans-serif;
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: var(--mac-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        /* ============================================
+           AUTH MODAL
+        ============================================ */
+
+        .auth-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--mac-charcoal);
+            margin-bottom: 16px;
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .auth-tab {
+            background: var(--mac-steel);
+            border: 2px solid var(--mac-charcoal);
+            padding: 8px 16px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: var(--bevel-light);
+            flex: 1;
+            text-align: center;
+        }
+
+        .auth-tab.active {
+            background: var(--mac-blue);
+            color: white;
+            border-color: var(--mac-blue);
+            box-shadow: var(--bevel-dark);
+        }
+
+        .auth-tab:hover {
+            background: var(--mac-platinum);
+            color: var(--mac-charcoal);
+            box-shadow: var(--bevel-dark);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-alternatives {
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 2px solid var(--mac-charcoal);
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--mac-blue);
+            cursor: pointer;
+            text-decoration: underline;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-link:hover {
+            color: var(--mac-purple);
+            text-decoration: none;
+        }
+
+        /* ============================================
+           FORMS
+        ============================================ */
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 8px;
+            background: var(--mac-charcoal);
+            border: 2px solid var(--mac-steel);
+            color: var(--text-primary);
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 12px;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);
+            transition: var(--transition);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--mac-blue);
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3), 0 0 5px var(--mac-blue);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-hint {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+        }
+
+        /* ============================================
+           TOAST NOTIFICATIONS
+        ============================================ */
+
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 400px;
+        }
+
+        .toast {
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+            border: 2px solid var(--mac-charcoal);
+            padding: 12px;
+            box-shadow: var(--shadow-mac);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: slideInRight 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #FFFFFF, transparent);
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 12px;
+        }
+
+        .toast.success .toast-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .toast.error .toast-icon {
+            background: var(--danger);
+            color: white;
+        }
+
+        .toast.warning .toast-icon {
+            background: var(--warning);
+            color: white;
+        }
+
+        .toast.info .toast-icon {
+            background: var(--mac-blue);
+            color: white;
+        }
+
+        .toast-content {
+            flex: 1;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .toast-close:hover {
+            color: var(--text-primary);
+        }
+
+        /* ============================================
+           ONBOARDING
+        ============================================ */
+
+        .onboarding-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(42,42,42,0.98);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .onboarding-overlay.active {
+            display: flex;
+        }
+
+        .onboarding-modal {
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+            border: 2px solid var(--mac-charcoal);
+            max-width: 600px;
+            width: 90%;
+            box-shadow: var(--shadow-mac), 0 0 30px rgba(0, 122, 255, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .onboarding-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #FFFFFF, transparent);
+        }
+
+        .onboarding-slide {
+            display: none;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .onboarding-slide.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .onboarding-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .onboarding-title {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 16px;
+            font-family: var(--font-impact), 'Arial Black', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .onboarding-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            line-height: 1.6;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+        }
+
+        .onboarding-dots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .onboarding-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--mac-steel);
+            border: 2px solid var(--mac-charcoal);
+            transition: var(--transition);
+        }
+
+        .onboarding-dot.active {
+            background: var(--mac-blue);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .onboarding-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        /* ============================================
+           THEME SELECTOR
+        ============================================ */
+
+        .theme-popup {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+            border: 2px solid var(--mac-charcoal);
+            padding: 12px;
+            box-shadow: var(--shadow-mac);
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 95;
+            animation: slideInRight 0.3s ease;
+            min-width: 200px;
+        }
+
+        .theme-popup.active {
+            display: flex;
+        }
+
+        .theme-popup::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #FFFFFF, transparent);
+        }
+
+        .theme-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: var(--mac-steel);
+            border: 2px solid var(--mac-charcoal);
+            box-shadow: var(--bevel-light);
+            transition: var(--transition);
+        }
+
+        .theme-option:hover {
+            background: var(--mac-platinum);
+            box-shadow: var(--bevel-dark);
+        }
+
+        .theme-option.active {
+            background: var(--mac-blue);
+            color: white;
+            border-color: var(--mac-blue);
         }
 
         /* ============================================
@@ -1102,74 +998,20 @@
         ============================================ */
 
         @media (max-width: 768px) {
-            .nav-center {
-                display: none;
-            }
-
-            .hamburger {
-                display: flex;
+            .main {
+                grid-template-columns: 1fr;
             }
 
             .sidebar {
-                position: fixed;
-                top: 64px;
-                left: 0;
-                bottom: 0;
-                z-index: 90;
-                transform: translateX(-100%);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .fab-container {
-                bottom: var(--spacing-md);
-                right: var(--spacing-md);
-            }
-
-            .fab {
-                width: 48px;
-                height: 48px;
-                font-size: 18px;
-            }
-
-            .theme-selector {
-                right: var(--spacing-md);
-            }
-
-            .notification-container {
-                right: var(--spacing-md);
-                left: var(--spacing-md);
-                max-width: none;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .nav-bar {
-                padding: 0 var(--spacing-md);
-            }
-
-            .nav-logo {
-                font-size: 20px;
-            }
-
-            .nav-actions span {
                 display: none;
             }
 
-            .modal {
-                width: 100%;
-                height: 100%;
-                max-height: 100vh;
-                border-radius: 0;
+            .nav {
+                overflow-x: auto;
             }
 
-            .onboarding-modal {
-                width: 100%;
-                height: 100%;
-                max-height: 100vh;
-                border-radius: 0;
+            .status span {
+                display: none;
             }
         }
 
@@ -1177,51 +1019,13 @@
            UTILITY CLASSES
         ============================================ */
 
-        .hidden {
-            display: none !important;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .flex {
-            display: flex;
-        }
-
-        .items-center {
-            align-items: center;
-        }
-
-        .justify-center {
-            justify-content: center;
-        }
-
-        .gap-sm {
-            gap: var(--spacing-sm);
-        }
-
-        .gap-md {
-            gap: var(--spacing-md);
-        }
-
-        .mt-md {
-            margin-top: var(--spacing-md);
-        }
-
-        .mb-md {
-            margin-bottom: var(--spacing-md);
-        }
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
     </style>
 </head>
 <body>
-    <!-- Notification Container -->
-    <div class="notification-container" id="notification-container"></div>
-
-    <!-- Offline Banner -->
-    <div class="offline-banner" id="offline-banner">
-        <i class="fas fa-wifi-slash"></i> You're offline. Changes will sync when you're back online.
-    </div>
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
 
     <!-- Onboarding -->
     <div class="onboarding-overlay" id="onboarding">
@@ -1232,7 +1036,7 @@
                 </div>
                 <h2 class="onboarding-title">Welcome to Urbindex</h2>
                 <p class="onboarding-description">
-                    Discover and share urban exploration spots. Map your adventures, connect with explorers, and build your legacy.
+                    Discover and share urban exploration spots. Map your adventures, connect with explorers, and build your legacy in the Y2K style.
                 </p>
                 <div class="onboarding-dots">
                     <div class="onboarding-dot active"></div>
@@ -1240,7 +1044,7 @@
                     <div class="onboarding-dot"></div>
                 </div>
                 <div class="onboarding-actions">
-                    <button class="btn btn-secondary" onclick="app.skipOnboarding()">Skip</button>
+                    <button class="btn" onclick="app.skipOnboarding()">Skip</button>
                     <button class="btn btn-primary" onclick="app.nextOnboardingSlide()">
                         Next <i class="fas fa-arrow-right"></i>
                     </button>
@@ -1261,7 +1065,7 @@
                     <div class="onboarding-dot"></div>
                 </div>
                 <div class="onboarding-actions">
-                    <button class="btn btn-secondary" onclick="app.prevOnboardingSlide()">
+                    <button class="btn" onclick="app.prevOnboardingSlide()">
                         <i class="fas fa-arrow-left"></i> Back
                     </button>
                     <button class="btn btn-primary" onclick="app.nextOnboardingSlide()">
@@ -1284,7 +1088,7 @@
                     <div class="onboarding-dot active"></div>
                 </div>
                 <div class="onboarding-actions">
-                    <button class="btn btn-secondary" onclick="app.prevOnboardingSlide()">
+                    <button class="btn" onclick="app.prevOnboardingSlide()">
                         <i class="fas fa-arrow-left"></i> Back
                     </button>
                     <button class="btn btn-primary" onclick="app.completeOnboarding()">
@@ -1295,264 +1099,296 @@
         </div>
     </div>
 
-    <!-- App Container -->
-    <div class="app-container">
-        <!-- Navigation Bar -->
-        <nav class="nav-bar">
-            <div class="hamburger" id="hamburger" onclick="app.toggleSidebar()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-
-            <div class="nav-logo">URBINDEX</div>
-
-            <div class="nav-center">
-                <div class="nav-search">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search locations..." id="search-input">
-                </div>
-            </div>
-
-            <div class="nav-actions">
-                <button class="nav-btn" id="theme-toggle" onclick="app.toggleThemeSelector()">
-                    <i class="fas fa-palette"></i>
-                    <span>Theme</span>
-                </button>
-                <button class="nav-btn" id="auth-btn" onclick="app.showAuth()">
-                    <i class="fas fa-user"></i>
-                    <span id="auth-btn-text">Sign In</span>
-                </button>
-            </div>
-        </nav>
-
-        <!-- Theme Selector -->
-        <div class="theme-selector" id="theme-selector">
-            <div class="theme-option active" data-theme="cyberpunk" onclick="app.setTheme('cyberpunk')">
-                <div class="theme-preview">
-                    <div class="theme-preview-color" style="background: #0a0e27;"></div>
-                    <div class="theme-preview-color" style="background: #00d9ff;"></div>
-                    <div class="theme-preview-color" style="background: #7b2cbf;"></div>
-                </div>
-                <div class="theme-info">
-                    <div class="theme-name">Cyberpunk</div>
-                    <div class="theme-description">Electric & futuristic</div>
-                </div>
-            </div>
-
-            <div class="theme-option" data-theme="retro" onclick="app.setTheme('retro')">
-                <div class="theme-preview">
-                    <div class="theme-preview-color" style="background: #1e1e1e;"></div>
-                    <div class="theme-preview-color" style="background: #00ff88;"></div>
-                    <div class="theme-preview-color" style="background: #ffaa00;"></div>
-                </div>
-                <div class="theme-info">
-                    <div class="theme-name">Retro</div>
-                    <div class="theme-description">Terminal vibes</div>
-                </div>
-            </div>
-
-            <div class="theme-option" data-theme="minimal" onclick="app.setTheme('minimal')">
-                <div class="theme-preview">
-                    <div class="theme-preview-color" style="background: #ffffff;"></div>
-                    <div class="theme-preview-color" style="background: #000000;"></div>
-                    <div class="theme-preview-color" style="background: #475569;"></div>
-                </div>
-                <div class="theme-info">
-                    <div class="theme-name">Minimal</div>
-                    <div class="theme-description">Clean & simple</div>
-                </div>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">URBINDEX</div>
+        <div class="header-right">
+            <div class="status">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">Guest Mode</span>
             </div>
         </div>
+    </header>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Sidebar -->
-            <aside class="sidebar" id="sidebar">
-                <div class="sidebar-header">
-                    <div class="sidebar-title">Filters</div>
-                    <div class="sidebar-subtitle">Refine your search</div>
-                </div>
+    <!-- Navigation -->
+    <nav class="nav">
+        <button class="nav-btn active" onclick="app.showMapView()">
+            <i class="fas fa-map"></i> Map
+        </button>
+        <button class="nav-btn" onclick="app.showLeaderboard()">
+            <i class="fas fa-trophy"></i> Leaderboard
+        </button>
+        <button class="nav-btn" id="theme-btn" onclick="app.toggleThemeSelector()">
+            <i class="fas fa-palette"></i> Theme
+        </button>
+        <button class="nav-btn" id="auth-btn" onclick="app.handleAuth()">
+            <i class="fas fa-user"></i> <span>Sign In / Register</span>
+        </button>
+    </nav>
 
-                <div class="sidebar-section">
-                    <div class="section-title">Quick Filters</div>
-                    <div class="filter-group">
-                        <label class="filter-option">
-                            <input type="checkbox" id="filter-near-me">
-                            <span><i class="fas fa-location-crosshairs"></i> Near Me (5km)</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="checkbox" id="filter-recent">
-                            <span><i class="fas fa-clock"></i> Recently Added</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="section-title">Category</div>
-                    <div class="filter-group">
-                        <label class="filter-option">
-                            <input type="radio" name="category" value="all" checked>
-                            <span>All Categories</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="category" value="abandoned">
-                            <span><i class="fas fa-building"></i> Abandoned</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="category" value="rooftop">
-                            <span><i class="fas fa-city"></i> Rooftop</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="category" value="tunnel">
-                            <span><i class="fas fa-subway"></i> Tunnel</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="category" value="industrial">
-                            <span><i class="fas fa-industry"></i> Industrial</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="category" value="other">
-                            <span><i class="fas fa-map-marker"></i> Other</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="section-title">Risk Level</div>
-                    <div class="filter-group">
-                        <label class="filter-option">
-                            <input type="radio" name="risk" value="all" checked>
-                            <span>All Levels</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="risk" value="low">
-                            <span><i class="fas fa-shield" style="color: var(--success);"></i> Low</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="risk" value="moderate">
-                            <span><i class="fas fa-shield" style="color: var(--warning);"></i> Moderate</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="risk" value="high">
-                            <span><i class="fas fa-shield" style="color: var(--danger);"></i> High</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <button class="btn btn-secondary" style="width: 100%;" onclick="app.clearFilters()">
-                        <i class="fas fa-times"></i> Clear All Filters
-                    </button>
-                </div>
-            </aside>
-
-            <!-- Map Wrapper -->
-            <div class="map-wrapper">
-                <div class="map-skeleton" id="map-skeleton">
-                    <div class="loading-spinner"></div>
-                </div>
-                <div id="map"></div>
-            </div>
+    <!-- Theme Selector Popup -->
+    <div class="theme-popup" id="theme-popup">
+        <div class="theme-option active" data-theme="y2k" onclick="app.setTheme('y2k')">
+            Y2K Mac OS (Default)
         </div>
-
-        <!-- Floating Action Buttons -->
-        <div class="fab-container">
-            <button class="fab secondary" title="Center on my location" onclick="app.centerOnUser()">
-                <i class="fas fa-location-crosshairs"></i>
-            </button>
-            <button class="fab secondary" title="View leaderboard" onclick="app.showLeaderboard()">
-                <i class="fas fa-trophy"></i>
-            </button>
-            <button class="fab" title="Add new location" onclick="app.showQuickAdd()">
-                <i class="fas fa-plus"></i>
-            </button>
+        <div class="theme-option" data-theme="dark" onclick="app.setTheme('dark')">
+            Dark Nightcore
         </div>
-
-        <!-- Quick Add Modal -->
-        <div class="modal-overlay" id="quick-add-modal">
-            <div class="modal">
-                <div class="modal-header">
-                    <h3 class="modal-title">Quick Add Location</h3>
-                    <button class="modal-close" onclick="app.hideQuickAdd()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="quick-add-form">
-                        <div class="form-group">
-                            <label class="form-label">Location Name *</label>
-                            <input type="text" class="form-input" id="quick-name" placeholder="e.g., Abandoned Factory" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Category *</label>
-                            <select class="form-select" id="quick-category" required>
-                                <option value="">Select category...</option>
-                                <option value="abandoned">Abandoned</option>
-                                <option value="rooftop">Rooftop</option>
-                                <option value="tunnel">Tunnel</option>
-                                <option value="industrial">Industrial</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Coordinates</label>
-                            <input type="text" class="form-input" id="quick-coords" readonly placeholder="Detecting your location...">
-                            <div class="form-hint">
-                                <i class="fas fa-location-dot"></i> Auto-detected from your device
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="app.showFullForm()">
-                                <i class="fas fa-expand"></i> Add More Details
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="app.hideQuickAdd()">Cancel</button>
-                    <button class="btn btn-primary" onclick="app.submitQuickAdd()">
-                        <i class="fas fa-check"></i> Add Location
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Auth Modal (placeholder - integrate your existing auth) -->
-        <div class="modal-overlay" id="auth-modal">
-            <div class="modal">
-                <div class="modal-header">
-                    <h3 class="modal-title">Sign In / Register</h3>
-                    <button class="modal-close" onclick="app.hideAuth()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-center" style="color: var(--text-secondary); margin-bottom: var(--spacing-lg);">
-                        Sign in to save locations, view your profile, and compete on the leaderboard.
-                    </p>
-                    <button class="btn btn-primary" style="width: 100%; margin-bottom: var(--spacing-sm);">
-                        <i class="fab fa-google"></i> Continue with Google
-                    </button>
-                    <button class="btn btn-secondary" style="width: 100%;">
-                        <i class="fas fa-envelope"></i> Continue with Email
-                    </button>
-                </div>
-            </div>
+        <div class="theme-option" data-theme="light" onclick="app.setTheme('light')">
+            Classic Light
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-filter"></i> Quick Filters
+                </div>
+                <div class="filter-group">
+                    <label class="filter-option">
+                        <input type="checkbox" id="filter-near-me">
+                        <span><i class="fas fa-location-crosshairs"></i> Near Me (5km)</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" id="filter-recent">
+                        <span><i class="fas fa-clock"></i> Recently Added</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-tag"></i> Category
+                </div>
+                <div class="filter-group">
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="all" checked>
+                        <span>All Categories</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="abandoned">
+                        <span><i class="fas fa-building"></i> Abandoned</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="rooftop">
+                        <span><i class="fas fa-city"></i> Rooftop</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="tunnel">
+                        <span><i class="fas fa-subway"></i> Tunnel</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="industrial">
+                        <span><i class="fas fa-industry"></i> Industrial</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="other">
+                        <span><i class="fas fa-map-marker"></i> Other</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-shield"></i> Risk Level
+                </div>
+                <div class="filter-group">
+                    <label class="filter-option">
+                        <input type="radio" name="risk" value="all" checked>
+                        <span>All Levels</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="risk" value="low">
+                        <span><i class="fas fa-shield" style="color: var(--success);"></i> Low</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="risk" value="moderate">
+                        <span><i class="fas fa-shield" style="color: var(--warning);"></i> Moderate</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="risk" value="high">
+                        <span><i class="fas fa-shield" style="color: var(--danger);"></i> High</span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn btn-full" onclick="app.clearFilters()">
+                <i class="fas fa-times"></i> Clear Filters
+            </button>
+        </aside>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="add-location-fab" onclick="app.showQuickAdd()" title="Add new location">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Quick Add Modal -->
+    <div class="modal" id="quick-add-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="app.hideQuickAdd()">×</button>
+            <h2 class="modal-title">Quick Add Location</h2>
+            <form id="quick-add-form" onsubmit="app.submitQuickAdd(event)">
+                <div class="form-group">
+                    <label class="form-label">Location Name *</label>
+                    <input type="text" class="form-input" id="quick-name" placeholder="e.g., Abandoned Factory" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Category *</label>
+                    <select class="form-select" id="quick-category" required>
+                        <option value="">Select category...</option>
+                        <option value="abandoned">Abandoned</option>
+                        <option value="rooftop">Rooftop</option>
+                        <option value="tunnel">Tunnel</option>
+                        <option value="industrial">Industrial</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Risk Level *</label>
+                    <select class="form-select" id="quick-risk" required>
+                        <option value="low">Low</option>
+                        <option value="moderate" selected>Moderate</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Coordinates</label>
+                    <input type="text" class="form-input" id="quick-coords" readonly placeholder="Detecting your location...">
+                    <div class="form-hint">
+                        <i class="fas fa-location-dot"></i> Auto-detected from your device
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description (Optional)</label>
+                    <textarea class="form-textarea" id="quick-description" placeholder="Add details about this location..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-check"></i> Add Location
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal" id="auth-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="app.hideAuthModal()">×</button>
+            <h2 class="modal-title">Authentication</h2>
+
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="signin" onclick="app.switchAuthTab('signin')">
+                    Sign In
+                </div>
+                <div class="auth-tab" data-tab="signup" onclick="app.switchAuthTab('signup')">
+                    Sign Up
+                </div>
+            </div>
+
+            <!-- Sign In Form -->
+            <form id="signin-form" class="auth-form active" onsubmit="app.handleSignIn(event)">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" id="signin-email" placeholder="your@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="signin-password" placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+
+                <div class="auth-alternatives">
+                    <button type="button" class="btn-link" onclick="app.showPasswordResetModal()">
+                        Forgot Password?
+                    </button>
+                    <br><br>
+                    <button type="button" class="btn btn-full" onclick="app.signInAnonymously()">
+                        <i class="fas fa-user-secret"></i> Continue as Guest
+                    </button>
+                </div>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="signup-form" class="auth-form" onsubmit="app.handleSignUp(event)">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" id="signup-email" placeholder="your@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="signup-password" placeholder="Choose a password" required minlength="6">
+                    <div class="form-hint">Must be at least 6 characters</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" class="form-input" id="signup-confirm-password" placeholder="Confirm your password" required minlength="6">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+
+                <div class="auth-alternatives">
+                    <button type="button" class="btn btn-full" onclick="app.signInAnonymously()">
+                        <i class="fas fa-user-secret"></i> Continue as Guest
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Password Reset Modal -->
+    <div class="modal" id="password-reset-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="app.hidePasswordResetModal()">×</button>
+            <h2 class="modal-title">Reset Password</h2>
+            <form id="password-reset-form" onsubmit="app.handlePasswordReset(event)">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" id="reset-email" placeholder="your@email.com" required>
+                    <div class="form-hint">We'll send you a password reset link</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-envelope"></i> Send Reset Link
+                </button>
+
+                <div class="auth-alternatives">
+                    <button type="button" class="btn-link" onclick="app.hidePasswordResetModal(); app.showAuthModal();">
+                        Back to Sign In
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script>
-        class UrbindexModern {
+        class UrbindexApp {
             constructor() {
                 this.map = null;
                 this.currentUser = null;
@@ -1567,22 +1403,18 @@
                 await this.initFirebase();
 
                 // Check if onboarding needed
-                if (!localStorage.getItem('onboarding-complete')) {
+                if (!localStorage.getItem('urbindex-onboarding-complete')) {
                     this.showOnboarding();
                 } else {
-                    // Initialize map immediately
                     this.initMap();
                 }
 
                 // Load theme
-                const savedTheme = localStorage.getItem('theme') || 'cyberpunk';
-                this.setTheme(savedTheme);
+                const savedTheme = localStorage.getItem('urbindex-theme') || 'y2k';
+                this.setTheme(savedTheme, false);
 
                 // Setup event listeners
                 this.setupEventListeners();
-
-                // Check online status
-                this.checkOnlineStatus();
 
                 // Request geolocation
                 this.getUserLocation();
@@ -1609,16 +1441,13 @@
                 this.auth.onAuthStateChanged(user => {
                     this.currentUser = user;
                     this.updateAuthUI();
+                    if (user) {
+                        this.loadUserData();
+                    }
                 });
             }
 
             initMap() {
-                const mapEl = document.getElementById('map');
-                if (!mapEl) return;
-
-                // Show loading
-                const skeleton = document.getElementById('map-skeleton');
-
                 try {
                     this.map = L.map('map', {
                         center: [40.7128, -74.0060],
@@ -1631,38 +1460,17 @@
                         maxZoom: 18
                     }).addTo(this.map);
 
-                    // Hide loading after map loads
-                    this.map.whenReady(() => {
-                        setTimeout(() => {
-                            skeleton.classList.add('hidden');
-                        }, 500);
-                    });
-
                     // Load locations
                     this.loadLocations();
+
+                    this.showToast('Map loaded successfully', 'success');
                 } catch (error) {
                     console.error('Map initialization failed:', error);
-                    this.showNotification('Failed to load map', 'error');
-                    skeleton.classList.add('hidden');
+                    this.showToast('Failed to load map', 'error');
                 }
             }
 
             setupEventListeners() {
-                // Online/offline detection
-                window.addEventListener('online', () => {
-                    document.getElementById('offline-banner').classList.remove('active');
-                    this.showNotification('Back online', 'success');
-                });
-
-                window.addEventListener('offline', () => {
-                    document.getElementById('offline-banner').classList.add('active');
-                });
-
-                // Search
-                document.getElementById('search-input')?.addEventListener('input', (e) => {
-                    this.handleSearch(e.target.value);
-                });
-
                 // Filter changes
                 document.querySelectorAll('.filter-option input').forEach(input => {
                     input.addEventListener('change', () => this.applyFilters());
@@ -1672,19 +1480,20 @@
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         this.hideQuickAdd();
-                        this.hideAuth();
-                        document.getElementById('theme-selector').classList.remove('active');
+                        this.hideAuthModal();
+                        this.hidePasswordResetModal();
+                        document.getElementById('theme-popup').classList.remove('active');
                     }
                 });
-            }
 
-            // ============================================
-            // THEME SYSTEM
-            // ============================================
-
-            toggleThemeSelector() {
-                const selector = document.getElementById('theme-selector');
-                selector.classList.toggle('active');
+                // Click outside to close theme popup
+                document.addEventListener('click', (e) => {
+                    const themePopup = document.getElementById('theme-popup');
+                    const themeBtn = document.getElementById('theme-btn');
+                    if (!themePopup.contains(e.target) && !themeBtn.contains(e.target)) {
+                        themePopup.classList.remove('active');
+                    }
+                });
             }
 
             // ============================================
@@ -1724,11 +1533,9 @@
             }
 
             completeOnboarding() {
-                localStorage.setItem('onboarding-complete', 'true');
+                localStorage.setItem('urbindex-onboarding-complete', 'true');
                 document.getElementById('onboarding').classList.remove('active');
-                this.showNotification('Welcome to Urbindex!', 'success');
-
-                // Initialize map after onboarding
+                this.showToast('Welcome to Urbindex!', 'success');
                 this.initMap();
             }
 
@@ -1737,48 +1544,277 @@
             }
 
             // ============================================
-            // NOTIFICATIONS
+            // AUTHENTICATION
             // ============================================
 
-            showNotification(message, type = 'info', title = '') {
-                const container = document.getElementById('notification-container');
-                const notification = document.createElement('div');
-                notification.className = `notification ${type}`;
+            async handleAuth() {
+                if (this.currentUser) {
+                    // Sign out
+                    try {
+                        await this.auth.signOut();
+                        this.showToast('Signed out successfully', 'success');
+                    } catch (error) {
+                        console.error('Sign out error:', error);
+                        this.showToast('Failed to sign out', 'error');
+                    }
+                } else {
+                    // Show auth modal
+                    this.showAuthModal();
+                }
+            }
 
-                const icons = {
-                    success: 'fa-check-circle',
-                    error: 'fa-exclamation-circle',
-                    warning: 'fa-exclamation-triangle',
-                    info: 'fa-info-circle'
-                };
+            showAuthModal() {
+                const modal = document.getElementById('auth-modal');
+                if (modal) {
+                    modal.classList.add('active');
+                    const firstInput = modal.querySelector('input');
+                    if (firstInput) firstInput.focus();
+                }
+            }
 
-                const titles = {
-                    success: title || 'Success',
-                    error: title || 'Error',
-                    warning: title || 'Warning',
-                    info: title || 'Info'
-                };
+            hideAuthModal() {
+                const modal = document.getElementById('auth-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    const forms = modal.querySelectorAll('form');
+                    forms.forEach(form => form.reset());
+                    this.switchAuthTab('signin');
+                }
+            }
 
-                notification.innerHTML = `
-                    <div class="notification-icon">
-                        <i class="fas ${icons[type]}"></i>
-                    </div>
-                    <div class="notification-content">
-                        <div class="notification-title">${titles[type]}</div>
-                        <div class="notification-message">${message}</div>
-                    </div>
-                    <button class="notification-close" onclick="this.parentElement.remove()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
+            switchAuthTab(tabName) {
+                document.querySelectorAll('.auth-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.tab === tabName);
+                });
 
-                container.appendChild(notification);
+                document.querySelectorAll('.auth-form').forEach(form => {
+                    form.classList.toggle('active', form.id === `${tabName}-form`);
+                });
+            }
 
-                // Auto-dismiss after 5 seconds
-                setTimeout(() => {
-                    notification.style.opacity = '0';
-                    setTimeout(() => notification.remove(), 300);
-                }, 5000);
+            async handleSignIn(e) {
+                e.preventDefault();
+
+                const email = document.getElementById('signin-email').value.trim();
+                const password = document.getElementById('signin-password').value.trim();
+
+                if (!email || !password) {
+                    this.showToast('Please fill in all fields', 'warning');
+                    return;
+                }
+
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+                submitBtn.disabled = true;
+
+                try {
+                    await this.auth.signInWithEmailAndPassword(email, password);
+                    this.hideAuthModal();
+                    this.showToast('Signed in successfully!', 'success');
+                } catch (error) {
+                    console.error('Sign in error:', error);
+                    let message = 'Failed to sign in';
+                    switch (error.code) {
+                        case 'auth/user-not-found':
+                            message = 'No account found with this email';
+                            break;
+                        case 'auth/wrong-password':
+                            message = 'Incorrect password';
+                            break;
+                        case 'auth/invalid-email':
+                            message = 'Invalid email address';
+                            break;
+                        case 'auth/user-disabled':
+                            message = 'This account has been disabled';
+                            break;
+                        default:
+                            message = error.message;
+                    }
+                    this.showToast(message, 'error');
+                } finally {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async handleSignUp(e) {
+                e.preventDefault();
+
+                const email = document.getElementById('signup-email').value.trim();
+                const password = document.getElementById('signup-password').value.trim();
+                const confirmPassword = document.getElementById('signup-confirm-password').value.trim();
+
+                if (!email || !password || !confirmPassword) {
+                    this.showToast('Please fill in all fields', 'warning');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    this.showToast('Passwords do not match', 'error');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    this.showToast('Password must be at least 6 characters', 'warning');
+                    return;
+                }
+
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+                submitBtn.disabled = true;
+
+                try {
+                    const result = await this.auth.createUserWithEmailAndPassword(email, password);
+                    await result.user.sendEmailVerification();
+                    this.hideAuthModal();
+                    this.showToast('Account created! Please check your email to verify.', 'success');
+                } catch (error) {
+                    console.error('Sign up error:', error);
+                    let message = 'Failed to create account';
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            message = 'An account with this email already exists';
+                            break;
+                        case 'auth/invalid-email':
+                            message = 'Invalid email address';
+                            break;
+                        case 'auth/weak-password':
+                            message = 'Password is too weak';
+                            break;
+                        default:
+                            message = error.message;
+                    }
+                    this.showToast(message, 'error');
+                } finally {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async signInAnonymously() {
+                try {
+                    await this.auth.signInAnonymously();
+                    this.hideAuthModal();
+                    this.showToast('Signed in as guest', 'success');
+                } catch (error) {
+                    console.error('Anonymous sign in error:', error);
+                    if (error.code === 'auth/admin-restricted-operation') {
+                        this.showToast('Anonymous sign-in is currently disabled. Please use email sign-in.', 'warning');
+                    } else {
+                        this.showToast('Failed to sign in anonymously', 'error');
+                    }
+                }
+            }
+
+            showPasswordResetModal() {
+                this.hideAuthModal();
+                const modal = document.getElementById('password-reset-modal');
+                if (modal) {
+                    modal.classList.add('active');
+                    const emailInput = document.getElementById('reset-email');
+                    if (emailInput && this.currentUser && this.currentUser.email) {
+                        emailInput.value = this.currentUser.email;
+                    }
+                    emailInput?.focus();
+                }
+            }
+
+            hidePasswordResetModal() {
+                const modal = document.getElementById('password-reset-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    const form = document.getElementById('password-reset-form');
+                    if (form) form.reset();
+                }
+            }
+
+            async handlePasswordReset(e) {
+                e.preventDefault();
+
+                const email = document.getElementById('reset-email').value.trim();
+
+                if (!email) {
+                    this.showToast('Please enter your email address', 'warning');
+                    return;
+                }
+
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                submitBtn.disabled = true;
+
+                try {
+                    await this.auth.sendPasswordResetEmail(email);
+                    this.hidePasswordResetModal();
+                    this.showToast('Password reset email sent! Check your inbox.', 'success');
+                } catch (error) {
+                    console.error('Password reset error:', error);
+                    let message = 'Failed to send password reset email';
+                    switch (error.code) {
+                        case 'auth/user-not-found':
+                            message = 'No account found with this email address';
+                            break;
+                        case 'auth/invalid-email':
+                            message = 'Invalid email address';
+                            break;
+                        case 'auth/too-many-requests':
+                            message = 'Too many requests. Please try again later.';
+                            break;
+                        default:
+                            message = error.message;
+                    }
+                    this.showToast(message, 'error');
+                } finally {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            }
+
+            updateAuthUI() {
+                const btn = document.getElementById('auth-btn');
+                const span = btn?.querySelector('span');
+                const icon = btn?.querySelector('i');
+
+                if (this.currentUser) {
+                    if (span) span.textContent = 'Sign Out';
+                    if (icon) icon.className = 'fas fa-sign-out-alt';
+                    btn?.setAttribute('title', 'Sign out of your account');
+                } else {
+                    if (span) span.textContent = 'Sign In / Register';
+                    if (icon) icon.className = 'fas fa-user';
+                    btn?.setAttribute('title', 'Sign in or create an account');
+                }
+
+                const dot = document.getElementById('status-dot');
+                const text = document.getElementById('status-text');
+                if (this.currentUser) {
+                    dot?.classList.remove('offline');
+                    if (text) text.textContent = 'Connected';
+                } else {
+                    dot?.classList.add('offline');
+                    if (text) text.textContent = 'Guest Mode';
+                }
+
+                // Update FAB visibility
+                const fab = document.getElementById('add-location-fab');
+                if (fab) {
+                    fab.style.display = this.currentUser ? 'flex' : 'none';
+                }
+            }
+
+            async loadUserData() {
+                if (!this.currentUser) return;
+
+                try {
+                    await this.db.collection('users').doc(this.currentUser.uid).set({
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                        online: true
+                    }, { merge: true });
+                } catch (error) {
+                    console.error('Error updating user data:', error);
+                }
             }
 
             // ============================================
@@ -1794,40 +1830,23 @@
                                 lng: position.coords.longitude
                             };
 
-                            // Update quick add form
                             const coordsInput = document.getElementById('quick-coords');
                             if (coordsInput) {
                                 coordsInput.value = `${this.userLocation.lat.toFixed(6)}, ${this.userLocation.lng.toFixed(6)}`;
                             }
 
-                            this.showNotification('Location detected', 'success');
+                            // Center map on user location
+                            if (this.map) {
+                                this.map.setView([this.userLocation.lat, this.userLocation.lng], 13);
+                            }
+
+                            this.showToast('Location detected', 'success');
                         },
                         (error) => {
                             console.error('Geolocation error:', error);
-                            this.showNotification('Please enable location services for auto-detect', 'warning');
+                            this.showToast('Location services disabled. Using default location.', 'info');
                         }
                     );
-                }
-            }
-
-            centerOnUser() {
-                if (this.userLocation && this.map) {
-                    this.map.setView([this.userLocation.lat, this.userLocation.lng], 15);
-
-                    // Add temporary marker
-                    const marker = L.marker([this.userLocation.lat, this.userLocation.lng], {
-                        icon: L.divIcon({
-                            className: 'user-location-marker',
-                            html: '<i class="fas fa-location-dot" style="color: var(--accent-primary); font-size: 24px;"></i>',
-                            iconSize: [24, 24]
-                        })
-                    }).addTo(this.map);
-
-                    setTimeout(() => marker.remove(), 3000);
-                    this.showNotification('Centered on your location', 'info');
-                } else {
-                    this.showNotification('Location not available', 'warning');
-                    this.getUserLocation();
                 }
             }
 
@@ -1836,7 +1855,12 @@
             // ============================================
 
             showQuickAdd() {
-                // Request location if not already have it
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to add locations', 'warning');
+                    this.showAuthModal();
+                    return;
+                }
+
                 if (!this.userLocation) {
                     this.getUserLocation();
                 }
@@ -1849,69 +1873,72 @@
                 document.getElementById('quick-add-form').reset();
             }
 
-            async submitQuickAdd() {
+            async submitQuickAdd(e) {
+                e.preventDefault();
+
                 const name = document.getElementById('quick-name').value.trim();
                 const category = document.getElementById('quick-category').value;
+                const riskLevel = document.getElementById('quick-risk').value;
+                const description = document.getElementById('quick-description').value.trim();
 
                 if (!name || !category) {
-                    this.showNotification('Please fill in all required fields', 'warning');
+                    this.showToast('Please fill in all required fields', 'warning');
                     return;
                 }
 
                 if (!this.userLocation) {
-                    this.showNotification('Please enable location services', 'warning');
+                    this.showToast('Please enable location services', 'warning');
                     return;
                 }
 
                 if (!this.currentUser) {
-                    this.showNotification('Please sign in to add locations', 'warning');
-                    this.showAuth();
+                    this.showToast('Please sign in to add locations', 'warning');
+                    this.showAuthModal();
                     return;
                 }
+
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+                submitBtn.disabled = true;
 
                 try {
                     const locationData = {
                         name: name,
                         category: category,
+                        riskLevel: riskLevel,
+                        description: description || '',
                         coordinates: [this.userLocation.lat, this.userLocation.lng],
                         createdBy: this.currentUser.uid,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        status: 'active',
-                        riskLevel: 'moderate',
-                        description: ''
+                        status: 'active'
                     };
 
                     await this.db.collection('locations').add(locationData);
 
                     this.hideQuickAdd();
-                    this.showNotification('Location added successfully!', 'success');
+                    this.showToast('Location added successfully!', 'success');
                     this.loadLocations();
                 } catch (error) {
                     console.error('Error adding location:', error);
-                    this.showNotification('Failed to add location. Please try again.', 'error');
+                    this.showToast('Failed to add location. Please try again.', 'error');
+                } finally {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
                 }
             }
 
-            showFullForm() {
-                // TODO: Expand to full form
-                this.showNotification('Full form coming soon!', 'info');
-            }
-
             // ============================================
-            // FIREBASE DATA
+            // MAP & MARKERS
             // ============================================
 
-            // Custom marker icon system
             getMarkerIcon(category) {
                 const iconMap = {
-                    'rooftop': { icon: 'fa-building', color: '#00d9ff' },
-                    'abandoned': { icon: 'fa-house-chimney-crack', color: '#7b2cbf' },
-                    'tunnel': { icon: 'fa-train-subway', color: '#ff006e' },
-                    'bridge': { icon: 'fa-bridge', color: '#00ff88' },
-                    'industrial': { icon: 'fa-industry', color: '#ffaa00' },
-                    'street-art': { icon: 'fa-spray-can', color: '#ff006e' },
-                    'viewpoint': { icon: 'fa-mountain-sun', color: '#00d9ff' },
-                    'other': { icon: 'fa-location-dot', color: '#94a3b8' }
+                    'rooftop': { icon: 'fa-building', color: '#007AFF' },
+                    'abandoned': { icon: 'fa-house-chimney-crack', color: '#8B5CF6' },
+                    'tunnel': { icon: 'fa-train-subway', color: '#FF006E' },
+                    'industrial': { icon: 'fa-industry', color: '#FFA500' },
+                    'other': { icon: 'fa-location-dot', color: '#A0A0A0' }
                 };
 
                 const { icon, color } = iconMap[category] || iconMap['other'];
@@ -1919,7 +1946,7 @@
                 return L.divIcon({
                     className: 'custom-marker',
                     html: `
-                        <div class="marker-icon" style="animation: markerBounce 0.6s ease-out;">
+                        <div class="marker-icon">
                             <div class="marker-pin" style="background: ${color}; box-shadow: 0 0 20px ${color};">
                                 <i class="fas ${icon}" style="color: white;"></i>
                             </div>
@@ -1939,6 +1966,7 @@
                     const snapshot = await this.db.collection('locations')
                         .where('status', '==', 'active')
                         .orderBy('createdAt', 'desc')
+                        .limit(100)
                         .get();
 
                     // Clear existing markers
@@ -1955,7 +1983,6 @@
                         if (data.coordinates && Array.isArray(data.coordinates)) {
                             const [lat, lng] = data.coordinates;
 
-                            // Stagger marker animations
                             setTimeout(() => {
                                 const marker = L.marker([lat, lng], {
                                     icon: this.getMarkerIcon(data.category)
@@ -1963,22 +1990,23 @@
                                     .bindPopup(this.createPopupContent(data, doc.id))
                                     .addTo(this.map);
 
-                                // Add hover effect
                                 marker.on('mouseover', function() {
                                     this.openPopup();
                                 });
 
                                 this.markers.set(doc.id, marker);
-                            }, index * 50); // Stagger by 50ms
+                            }, index * 50);
 
                             index++;
                         }
                     });
 
-                    this.showNotification(`Loaded ${snapshot.size} locations`, 'info');
+                    if (snapshot.size > 0) {
+                        this.showToast(`Loaded ${snapshot.size} locations`, 'info');
+                    }
                 } catch (error) {
                     console.error('Error loading locations:', error);
-                    this.showNotification('Failed to load locations', 'error');
+                    this.showToast('Failed to load locations', 'error');
                 }
             }
 
@@ -1989,71 +2017,52 @@
                     high: 'var(--danger)'
                 };
 
-                const riskIcons = {
-                    low: 'fa-circle-check',
-                    moderate: 'fa-triangle-exclamation',
-                    high: 'fa-skull-crossbones'
-                };
-
                 const categoryIcons = {
                     'rooftop': 'fa-building',
                     'abandoned': 'fa-house-chimney-crack',
                     'tunnel': 'fa-train-subway',
-                    'bridge': 'fa-bridge',
                     'industrial': 'fa-industry',
-                    'street-art': 'fa-spray-can',
-                    'viewpoint': 'fa-mountain-sun',
                     'other': 'fa-location-dot'
                 };
 
                 return `
-                    <div class="location-popup" style="min-width: 280px; font-family: var(--font-primary);">
-                        <div class="popup-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
-                            <div class="popup-icon" style="width: 40px; height: 40px; background: var(--accent-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas ${categoryIcons[data.category] || categoryIcons['other']}" style="color: white; font-size: 18px;"></i>
+                    <div style="min-width: 250px; font-family: var(--font-geneva), Arial, sans-serif;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div style="width: 36px; height: 36px; background: var(--mac-blue); display: flex; align-items: center; justify-content: center;">
+                                <i class="fas ${categoryIcons[data.category] || categoryIcons['other']}" style="color: white;"></i>
                             </div>
                             <div style="flex: 1;">
-                                <h4 style="margin: 0 0 4px 0; color: var(--text-primary); font-size: 16px; font-weight: 600;">${data.name}</h4>
-                                <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
-                                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--bg-secondary); border-radius: 12px; color: var(--text-secondary);">
-                                        <i class="fas fa-tag" style="font-size: 10px;"></i>
-                                        ${data.category}
-                                    </span>
-                                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: ${riskColors[data.riskLevel]}20; border-radius: 12px; color: ${riskColors[data.riskLevel]};">
-                                        <i class="fas ${riskIcons[data.riskLevel] || riskIcons['moderate']}" style="font-size: 10px;"></i>
-                                        ${data.riskLevel}
-                                    </span>
+                                <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700;">${data.name}</h4>
+                                <div style="display: flex; gap: 6px; font-size: 10px;">
+                                    <span style="padding: 2px 6px; background: var(--mac-steel); text-transform: uppercase;">${data.category}</span>
+                                    <span style="padding: 2px 6px; background: ${riskColors[data.riskLevel]}; color: white; text-transform: uppercase;">${data.riskLevel}</span>
                                 </div>
                             </div>
                         </div>
-                        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 12px 0; line-height: 1.5;">${data.description || 'No description provided.'}</p>
-                        <div style="display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border);">
-                            <button onclick="app.viewLocationDetails('${id}')" style="flex: 1; padding: 8px; background: var(--accent-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s;">
-                                <i class="fas fa-eye"></i> View Details
-                            </button>
-                            <button onclick="app.navigateToLocation(${data.coordinates[0]}, ${data.coordinates[1]})" style="flex: 1; padding: 8px; background: var(--bg-tertiary); color: var(--text-primary); border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s;">
-                                <i class="fas fa-directions"></i> Navigate
-                            </button>
-                        </div>
-                        <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                            <span style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: 4px; font-size: 11px;">${data.category}</span>
-                            <span style="padding: 2px 8px; background: ${riskColors[data.riskLevel]}; border-radius: 4px; font-size: 11px; color: white;">${data.riskLevel}</span>
-                        </div>
+                        <p style="font-size: 11px; margin: 0 0 12px 0; line-height: 1.4;">${data.description || 'No description provided.'}</p>
+                        <button onclick="app.navigateToLocation(${data.coordinates[0]}, ${data.coordinates[1]})" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                            <i class="fas fa-directions"></i> Navigate
+                        </button>
                     </div>
                 `;
             }
 
-            // ============================================
-            // FILTERS & SEARCH
-            // ============================================
-
-            handleSearch(query) {
-                // TODO: Implement search
-                console.log('Search:', query);
+            navigateToLocation(lat, lng) {
+                if (this.map) {
+                    this.map.setView([lat, lng], 17, {
+                        animate: true,
+                        duration: 1.0
+                    });
+                    this.showToast('Navigating to location...', 'info');
+                }
             }
 
+            // ============================================
+            // FILTERS
+            // ============================================
+
             applyFilters() {
-                // TODO: Implement filters
+                // TODO: Implement filter logic
                 console.log('Applying filters...');
             }
 
@@ -2066,115 +2075,88 @@
                     }
                 });
                 this.applyFilters();
+                this.showToast('Filters cleared', 'info');
             }
 
             // ============================================
-            // UI CONTROLS
+            // THEME SYSTEM
             // ============================================
 
-            toggleSidebar() {
-                document.getElementById('sidebar').classList.toggle('active');
+            toggleThemeSelector() {
+                const popup = document.getElementById('theme-popup');
+                popup.classList.toggle('active');
             }
 
-            showAuth() {
-                document.getElementById('auth-modal').classList.add('active');
-            }
-
-            hideAuth() {
-                document.getElementById('auth-modal').classList.remove('active');
-            }
-
-            updateAuthUI() {
-                const authBtn = document.getElementById('auth-btn-text');
-                if (authBtn) {
-                    authBtn.textContent = this.currentUser ? 'Profile' : 'Sign In';
+            setTheme(theme, showNotification = true) {
+                if (theme === 'y2k') {
+                    document.body.removeAttribute('data-theme');
+                } else {
+                    document.body.setAttribute('data-theme', theme);
                 }
-            }
 
-            showLeaderboard() {
-                this.showNotification('Leaderboard coming soon!', 'info');
-            }
+                localStorage.setItem('urbindex-theme', theme);
 
-            checkOnlineStatus() {
-                const banner = document.getElementById('offline-banner');
-                if (!navigator.onLine) {
-                    banner.classList.add('active');
-                }
-            }
-
-            // ============================================
-            // ENHANCED MAP INTERACTIONS
-            // ============================================
-
-            viewLocationDetails(locationId) {
-                this.showNotification('Loading location details...', 'info');
-                // TODO: Implement full location details modal
-                setTimeout(() => {
-                    this.showNotification('Location details view coming soon!', 'info');
-                }, 500);
-            }
-
-            navigateToLocation(lat, lng) {
-                if (this.map) {
-                    this.map.setView([lat, lng], 17, {
-                        animate: true,
-                        duration: 1.0
-                    });
-                    this.showNotification('Navigating to location...', 'info');
-                }
-            }
-
-            // Enhanced theme switching with particle effect
-            setTheme(theme) {
-                // Create particle effect
-                this.createThemeParticles();
-
-                document.body.setAttribute('data-theme', theme);
-                localStorage.setItem('theme', theme);
-
-                // Update active theme option
                 document.querySelectorAll('.theme-option').forEach(opt => {
                     opt.classList.toggle('active', opt.dataset.theme === theme);
                 });
 
-                this.showNotification(`Switched to ${theme} theme`, 'success');
+                if (showNotification) {
+                    this.showToast(`Switched to ${theme.toUpperCase()} theme`, 'success');
+                }
             }
 
-            createThemeParticles() {
-                const container = document.body;
-                const colors = [
-                    'var(--accent-primary)',
-                    'var(--accent-secondary)',
-                    'var(--accent-tertiary)'
-                ];
+            // ============================================
+            // TOAST NOTIFICATIONS
+            // ============================================
 
-                for (let i = 0; i < 20; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'theme-particle';
-                    particle.style.cssText = `
-                        position: fixed;
-                        width: 10px;
-                        height: 10px;
-                        background: ${colors[Math.floor(Math.random() * colors.length)]};
-                        border-radius: 50%;
-                        pointer-events: none;
-                        z-index: 10000;
-                        left: ${Math.random() * 100}%;
-                        top: ${Math.random() * 100}%;
-                        animation: particleFade 1s ease-out forwards;
-                        box-shadow: 0 0 10px currentColor;
-                    `;
-                    container.appendChild(particle);
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
 
-                    setTimeout(() => particle.remove(), 1000);
-                }
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-circle',
+                    warning: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">${message}</div>
+                    <button class="toast-close" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, 5000);
+            }
+
+            // ============================================
+            // OTHER FEATURES
+            // ============================================
+
+            showMapView() {
+                // Already on map view
+                this.showToast('Map view active', 'info');
+            }
+
+            showLeaderboard() {
+                this.showToast('Leaderboard coming soon!', 'info');
             }
         }
 
         // Initialize app
         let app;
         document.addEventListener('DOMContentLoaded', () => {
-            app = new UrbindexModern();
+            app = new UrbindexApp();
         });
     </script>
 </body>
