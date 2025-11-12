@@ -1001,6 +1001,103 @@
         }
 
         /* ============================================
+           CUSTOM MARKER ANIMATIONS
+        ============================================ */
+
+        .custom-marker {
+            position: relative;
+        }
+
+        .marker-icon {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .marker-pin {
+            width: 32px;
+            height: 32px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .marker-pin i {
+            transform: rotate(45deg);
+        }
+
+        .marker-shadow {
+            width: 20px;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            margin-top: 2px;
+            animation: shadowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes markerBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-20px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            70% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes shadowPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes particleFade {
+            0% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0) translateY(-100px);
+            }
+        }
+
+        /* Enhanced popup styling */
+        .leaflet-popup-content-wrapper {
+            background: var(--bg-secondary) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 12px !important;
+            box-shadow: var(--shadow-strong) !important;
+            padding: 0 !important;
+        }
+
+        .leaflet-popup-content {
+            margin: 0 !important;
+            padding: 16px !important;
+            color: var(--text-primary) !important;
+        }
+
+        .leaflet-popup-tip {
+            background: var(--bg-secondary) !important;
+            border: 1px solid var(--border) !important;
+        }
+
+        /* ============================================
            RESPONSIVE DESIGN
         ============================================ */
 
@@ -1585,16 +1682,6 @@
             // THEME SYSTEM
             // ============================================
 
-            setTheme(theme) {
-                document.body.setAttribute('data-theme', theme);
-                localStorage.setItem('theme', theme);
-
-                // Update active theme option
-                document.querySelectorAll('.theme-option').forEach(opt => {
-                    opt.classList.toggle('active', opt.dataset.theme === theme);
-                });
-            }
-
             toggleThemeSelector() {
                 const selector = document.getElementById('theme-selector');
                 selector.classList.toggle('active');
@@ -1814,6 +1901,37 @@
             // FIREBASE DATA
             // ============================================
 
+            // Custom marker icon system
+            getMarkerIcon(category) {
+                const iconMap = {
+                    'rooftop': { icon: 'fa-building', color: '#00d9ff' },
+                    'abandoned': { icon: 'fa-house-chimney-crack', color: '#7b2cbf' },
+                    'tunnel': { icon: 'fa-train-subway', color: '#ff006e' },
+                    'bridge': { icon: 'fa-bridge', color: '#00ff88' },
+                    'industrial': { icon: 'fa-industry', color: '#ffaa00' },
+                    'street-art': { icon: 'fa-spray-can', color: '#ff006e' },
+                    'viewpoint': { icon: 'fa-mountain-sun', color: '#00d9ff' },
+                    'other': { icon: 'fa-location-dot', color: '#94a3b8' }
+                };
+
+                const { icon, color } = iconMap[category] || iconMap['other'];
+
+                return L.divIcon({
+                    className: 'custom-marker',
+                    html: `
+                        <div class="marker-icon" style="animation: markerBounce 0.6s ease-out;">
+                            <div class="marker-pin" style="background: ${color}; box-shadow: 0 0 20px ${color};">
+                                <i class="fas ${icon}" style="color: white;"></i>
+                            </div>
+                            <div class="marker-shadow"></div>
+                        </div>
+                    `,
+                    iconSize: [40, 50],
+                    iconAnchor: [20, 50],
+                    popupAnchor: [0, -50]
+                });
+            }
+
             async loadLocations() {
                 if (!this.map) return;
 
@@ -1831,16 +1949,29 @@
                     });
                     this.markers.clear();
 
+                    let index = 0;
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         if (data.coordinates && Array.isArray(data.coordinates)) {
                             const [lat, lng] = data.coordinates;
 
-                            const marker = L.marker([lat, lng])
-                                .bindPopup(this.createPopupContent(data, doc.id))
-                                .addTo(this.map);
+                            // Stagger marker animations
+                            setTimeout(() => {
+                                const marker = L.marker([lat, lng], {
+                                    icon: this.getMarkerIcon(data.category)
+                                })
+                                    .bindPopup(this.createPopupContent(data, doc.id))
+                                    .addTo(this.map);
 
-                            this.markers.set(doc.id, marker);
+                                // Add hover effect
+                                marker.on('mouseover', function() {
+                                    this.openPopup();
+                                });
+
+                                this.markers.set(doc.id, marker);
+                            }, index * 50); // Stagger by 50ms
+
+                            index++;
                         }
                     });
 
@@ -1858,10 +1989,52 @@
                     high: 'var(--danger)'
                 };
 
+                const riskIcons = {
+                    low: 'fa-circle-check',
+                    moderate: 'fa-triangle-exclamation',
+                    high: 'fa-skull-crossbones'
+                };
+
+                const categoryIcons = {
+                    'rooftop': 'fa-building',
+                    'abandoned': 'fa-house-chimney-crack',
+                    'tunnel': 'fa-train-subway',
+                    'bridge': 'fa-bridge',
+                    'industrial': 'fa-industry',
+                    'street-art': 'fa-spray-can',
+                    'viewpoint': 'fa-mountain-sun',
+                    'other': 'fa-location-dot'
+                };
+
                 return `
-                    <div style="min-width: 200px;">
-                        <h4 style="margin-bottom: 8px; color: var(--accent-primary);">${data.name}</h4>
-                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">${data.description || 'No description'}</p>
+                    <div class="location-popup" style="min-width: 280px; font-family: var(--font-primary);">
+                        <div class="popup-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                            <div class="popup-icon" style="width: 40px; height: 40px; background: var(--accent-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas ${categoryIcons[data.category] || categoryIcons['other']}" style="color: white; font-size: 18px;"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0 0 4px 0; color: var(--text-primary); font-size: 16px; font-weight: 600;">${data.name}</h4>
+                                <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+                                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--bg-secondary); border-radius: 12px; color: var(--text-secondary);">
+                                        <i class="fas fa-tag" style="font-size: 10px;"></i>
+                                        ${data.category}
+                                    </span>
+                                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: ${riskColors[data.riskLevel]}20; border-radius: 12px; color: ${riskColors[data.riskLevel]};">
+                                        <i class="fas ${riskIcons[data.riskLevel] || riskIcons['moderate']}" style="font-size: 10px;"></i>
+                                        ${data.riskLevel}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 12px 0; line-height: 1.5;">${data.description || 'No description provided.'}</p>
+                        <div style="display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border);">
+                            <button onclick="app.viewLocationDetails('${id}')" style="flex: 1; padding: 8px; background: var(--accent-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s;">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                            <button onclick="app.navigateToLocation(${data.coordinates[0]}, ${data.coordinates[1]})" style="flex: 1; padding: 8px; background: var(--bg-tertiary); color: var(--text-primary); border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s;">
+                                <i class="fas fa-directions"></i> Navigate
+                            </button>
+                        </div>
                         <div style="display: flex; gap: 6px; margin-bottom: 8px;">
                             <span style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: 4px; font-size: 11px;">${data.category}</span>
                             <span style="padding: 2px 8px; background: ${riskColors[data.riskLevel]}; border-radius: 4px; font-size: 11px; color: white;">${data.riskLevel}</span>
@@ -1926,6 +2099,74 @@
                 const banner = document.getElementById('offline-banner');
                 if (!navigator.onLine) {
                     banner.classList.add('active');
+                }
+            }
+
+            // ============================================
+            // ENHANCED MAP INTERACTIONS
+            // ============================================
+
+            viewLocationDetails(locationId) {
+                this.showNotification('Loading location details...', 'info');
+                // TODO: Implement full location details modal
+                setTimeout(() => {
+                    this.showNotification('Location details view coming soon!', 'info');
+                }, 500);
+            }
+
+            navigateToLocation(lat, lng) {
+                if (this.map) {
+                    this.map.setView([lat, lng], 17, {
+                        animate: true,
+                        duration: 1.0
+                    });
+                    this.showNotification('Navigating to location...', 'info');
+                }
+            }
+
+            // Enhanced theme switching with particle effect
+            setTheme(theme) {
+                // Create particle effect
+                this.createThemeParticles();
+
+                document.body.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+
+                // Update active theme option
+                document.querySelectorAll('.theme-option').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.theme === theme);
+                });
+
+                this.showNotification(`Switched to ${theme} theme`, 'success');
+            }
+
+            createThemeParticles() {
+                const container = document.body;
+                const colors = [
+                    'var(--accent-primary)',
+                    'var(--accent-secondary)',
+                    'var(--accent-tertiary)'
+                ];
+
+                for (let i = 0; i < 20; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'theme-particle';
+                    particle.style.cssText = `
+                        position: fixed;
+                        width: 10px;
+                        height: 10px;
+                        background: ${colors[Math.floor(Math.random() * colors.length)]};
+                        border-radius: 50%;
+                        pointer-events: none;
+                        z-index: 10000;
+                        left: ${Math.random() * 100}%;
+                        top: ${Math.random() * 100}%;
+                        animation: particleFade 1s ease-out forwards;
+                        box-shadow: 0 0 10px currentColor;
+                    `;
+                    container.appendChild(particle);
+
+                    setTimeout(() => particle.remove(), 1000);
                 }
             }
         }
