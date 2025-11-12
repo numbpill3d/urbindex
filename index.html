@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urbindex - Urban Exploration Network</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           THEME SYSTEM - Three Modern Themes
+        ============================================ */
+
+        :root {
+            /* Cyberpunk Theme (Default) */
+            --bg-primary: #0a0e27;
+            --bg-secondary: #1a1f3a;
+            --bg-tertiary: #252b47;
+            --bg-elevated: #2d3454;
+            --accent-primary: #00d9ff;
+            --accent-secondary: #7b2cbf;
+            --accent-tertiary: #ff006e;
+            --text-primary: #e0e7ff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: rgba(0, 217, 255, 0.2);
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --danger: #ff006e;
+            --overlay: rgba(10, 14, 39, 0.95);
+
+            /* Effects */
+            --glow: 0 0 20px currentColor;
+            --glow-strong: 0 0 30px currentColor, 0 0 60px currentColor;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.6);
+
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-full: 9999px;
+
+            /* Typography */
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 250ms ease;
+            --transition-slow: 350ms ease;
+        }
+
+        /* Retro Theme */
+        [data-theme="retro"] {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3a3a3a;
+            --bg-elevated: #474747;
+            --accent-primary: #00ff88;
+            --accent-secondary: #ffaa00;
+            --accent-tertiary: #00d9ff;
+            --text-primary: #00ff88;
+            --text-secondary: #c0c0c0;
+            --text-muted: #808080;
+            --border: rgba(0, 255, 136, 0.3);
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --danger: #ff006e;
+            --overlay: rgba(30, 30, 30, 0.95);
+            --glow: 0 0 10px currentColor;
+            --glow-strong: 0 0 20px currentColor;
+        }
+
+        /* Minimal Theme */
+        [data-theme="minimal"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-elevated: #ffffff;
+            --accent-primary: #000000;
+            --accent-secondary: #475569;
+            --accent-tertiary: #64748b;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: rgba(15, 23, 42, 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --overlay: rgba(255, 255, 255, 0.95);
+            --glow: none;
+            --glow-strong: none;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-strong: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        /* ============================================
+           GLOBAL STYLES
+        ============================================ */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background var(--transition-base), color var(--transition-base);
+        }
+
+        /* Cyberpunk theme effects */
+        body:not([data-theme])::before,
+        [data-theme="cyberpunk"]::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 217, 255, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 217, 255, 0.03) 3px
+                );
+            pointer-events: none;
+            z-index: 1;
+            animation: scanlines 8s linear infinite;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100%); }
+        }
+
+        /* Retro theme effects */
+        [data-theme="retro"]::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent 0px,
+                    rgba(0, 255, 136, 0.02) 1px,
+                    transparent 2px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* ============================================
+           APP LAYOUT
+        ============================================ */
+
+        .app-container {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ============================================
+           MODERN NAVIGATION BAR
+        ============================================ */
+
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--spacing-lg);
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-logo {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: var(--glow);
+            letter-spacing: -0.05em;
+        }
+
+        .nav-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 0 var(--spacing-lg);
+        }
+
+        .nav-search {
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
+
+        .nav-search input {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            padding-left: 40px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+
+        .nav-search input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        .nav-search i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+
+        .nav-btn i {
+            font-size: 16px;
+        }
+
+        /* Hamburger menu for mobile */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            padding: var(--spacing-sm);
+        }
+
+        .hamburger span {
+            width: 24px;
+            height: 2px;
+            background: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        /* ============================================
+           COLLAPSIBLE SIDEBAR
+        ============================================ */
+
+        .main-content {
+            display: flex;
+            margin-top: 64px;
+            height: calc(100vh - 64px);
+        }
+
+        .sidebar {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            transition: transform var(--transition-base);
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .sidebar-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .sidebar-section {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .filter-option:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .filter-option input[type="checkbox"],
+        .filter-option input[type="radio"] {
+            accent-color: var(--accent-primary);
+        }
+
+        /* ============================================
+           MAP CONTAINER
+        ============================================ */
+
+        .map-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Map loading skeleton */
+        .map-skeleton {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .map-skeleton.hidden {
+            display: none;
+        }
+
+        /* ============================================
+           FLOATING ACTION BUTTONS
+        ============================================ */
+
+        .fab-container {
+            position: fixed;
+            bottom: var(--spacing-lg);
+            right: var(--spacing-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            z-index: 90;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: var(--shadow-strong);
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fab:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--glow-strong), var(--shadow-strong);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        .fab.secondary {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        /* ============================================
+           QUICK ADD MODAL
+        ============================================ */
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--overlay);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn var(--transition-base);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-strong);
+            animation: slideUp var(--transition-base);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-full);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            background: var(--bg-elevated);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: var(--spacing-lg);
+        }
+
+        .modal-footer {
+            padding: var(--spacing-lg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: flex-end;
+        }
+
+        /* ============================================
+           FORMS
+        ============================================ */
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-secondary);
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: var(--spacing-md);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: var(--font-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: var(--spacing-xs);
+        }
+
+        /* ============================================
+           BUTTONS
+        ============================================ */
+
+        .btn {
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--glow), var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-elevated);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ============================================
+           THEME SELECTOR
+        ============================================ */
+
+        .theme-selector {
+            position: fixed;
+            top: 80px;
+            right: var(--spacing-lg);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow-strong);
+            display: none;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            z-index: 95;
+            animation: slideInRight var(--transition-base);
+        }
+
+        .theme-selector.active {
+            display: flex;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .theme-option {
+            padding: var(--spacing-md);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .theme-option:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(-2px);
+        }
+
+        .theme-option.active {
+            border-color: var(--accent-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .theme-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            overflow: hidden;
+        }
+
+        .theme-preview-color {
+            flex: 1;
+        }
+
+        .theme-info {
+            flex: 1;
+        }
+
+        .theme-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .theme-description {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           NOTIFICATION SYSTEM
+        ============================================ */
+
+        .notification-container {
+            position: fixed;
+            top: 80px;
+            right: var(--spacing-lg);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            max-width: 400px;
+        }
+
+        .notification {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow-strong);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+            animation: slideInRight var(--transition-base);
+        }
+
+        .notification.success {
+            border-left-color: var(--success);
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning);
+        }
+
+        .notification.error {
+            border-left-color: var(--danger);
+        }
+
+        .notification-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notification.success .notification-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .notification.warning .notification-icon {
+            background: var(--warning);
+            color: white;
+        }
+
+        .notification.error .notification-icon {
+            background: var(--danger);
+            color: white;
+        }
+
+        .notification.info .notification-icon {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .notification-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .notification-close {
+            width: 20px;
+            height: 20px;
+            border-radius: var(--radius-full);
+            background: var(--bg-tertiary);
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 12px;
+            transition: all var(--transition-fast);
+        }
+
+        .notification-close:hover {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+        }
+
+        /* ============================================
+           ONBOARDING
+        ============================================ */
+
+        .onboarding-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--overlay);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn var(--transition-base);
+        }
+
+        .onboarding-overlay.active {
+            display: flex;
+        }
+
+        .onboarding-modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            max-width: 600px;
+            width: 90%;
+            box-shadow: var(--glow-strong), var(--shadow-strong);
+            overflow: hidden;
+        }
+
+        .onboarding-slide {
+            display: none;
+            padding: var(--spacing-xl);
+            text-align: center;
+        }
+
+        .onboarding-slide.active {
+            display: block;
+            animation: fadeIn var(--transition-base);
+        }
+
+        .onboarding-icon {
+            font-size: 80px;
+            margin-bottom: var(--spacing-lg);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .onboarding-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .onboarding-description {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xl);
+            line-height: 1.6;
+        }
+
+        .onboarding-dots {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .onboarding-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: var(--radius-full);
+            background: var(--bg-tertiary);
+            transition: all var(--transition-fast);
+        }
+
+        .onboarding-dot.active {
+            background: var(--accent-primary);
+            width: 24px;
+        }
+
+        .onboarding-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+        }
+
+        /* ============================================
+           OFFLINE BANNER
+        ============================================ */
+
+        .offline-banner {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background: var(--warning);
+            color: var(--bg-primary);
+            padding: var(--spacing-md);
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            display: none;
+            z-index: 99;
+            animation: slideDown var(--transition-base);
+        }
+
+        .offline-banner.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================
+           LOADING STATES
+        ============================================ */
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--bg-tertiary);
+            border-top: 3px solid var(--accent-primary);
+            border-radius: var(--radius-full);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                var(--bg-tertiary) 0%,
+                var(--bg-elevated) 50%,
+                var(--bg-tertiary) 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ============================================
+           RESPONSIVE DESIGN
+        ============================================ */
+
+        @media (max-width: 768px) {
+            .nav-center {
+                display: none;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 64px;
+                left: 0;
+                bottom: 0;
+                z-index: 90;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .fab-container {
+                bottom: var(--spacing-md);
+                right: var(--spacing-md);
+            }
+
+            .fab {
+                width: 48px;
+                height: 48px;
+                font-size: 18px;
+            }
+
+            .theme-selector {
+                right: var(--spacing-md);
+            }
+
+            .notification-container {
+                right: var(--spacing-md);
+                left: var(--spacing-md);
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-bar {
+                padding: 0 var(--spacing-md);
+            }
+
+            .nav-logo {
+                font-size: 20px;
+            }
+
+            .nav-actions span {
+                display: none;
+            }
+
+            .modal {
+                width: 100%;
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .onboarding-modal {
+                width: 100%;
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+        }
+
+        /* ============================================
+           UTILITY CLASSES
+        ============================================ */
+
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .gap-sm {
+            gap: var(--spacing-sm);
+        }
+
+        .gap-md {
+            gap: var(--spacing-md);
+        }
+
+        .mt-md {
+            margin-top: var(--spacing-md);
+        }
+
+        .mb-md {
+            margin-bottom: var(--spacing-md);
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification Container -->
+    <div class="notification-container" id="notification-container"></div>
+
+    <!-- Offline Banner -->
+    <div class="offline-banner" id="offline-banner">
+        <i class="fas fa-wifi-slash"></i> You're offline. Changes will sync when you're back online.
+    </div>
+
+    <!-- Onboarding -->
+    <div class="onboarding-overlay" id="onboarding">
+        <div class="onboarding-modal">
+            <div class="onboarding-slide active" data-slide="0">
+                <div class="onboarding-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h2 class="onboarding-title">Welcome to Urbindex</h2>
+                <p class="onboarding-description">
+                    Discover and share urban exploration spots. Map your adventures, connect with explorers, and build your legacy.
+                </p>
+                <div class="onboarding-dots">
+                    <div class="onboarding-dot active"></div>
+                    <div class="onboarding-dot"></div>
+                    <div class="onboarding-dot"></div>
+                </div>
+                <div class="onboarding-actions">
+                    <button class="btn btn-secondary" onclick="app.skipOnboarding()">Skip</button>
+                    <button class="btn btn-primary" onclick="app.nextOnboardingSlide()">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="onboarding-slide" data-slide="1">
+                <div class="onboarding-icon">
+                    <i class="fas fa-location-dot"></i>
+                </div>
+                <h2 class="onboarding-title">Pin Your Discoveries</h2>
+                <p class="onboarding-description">
+                    Add locations with one click. Attach photos, descriptions, and ratings. Share with the community or keep them private.
+                </p>
+                <div class="onboarding-dots">
+                    <div class="onboarding-dot"></div>
+                    <div class="onboarding-dot active"></div>
+                    <div class="onboarding-dot"></div>
+                </div>
+                <div class="onboarding-actions">
+                    <button class="btn btn-secondary" onclick="app.prevOnboardingSlide()">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-primary" onclick="app.nextOnboardingSlide()">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="onboarding-slide" data-slide="2">
+                <div class="onboarding-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h2 class="onboarding-title">Join the Community</h2>
+                <p class="onboarding-description">
+                    Connect with urban explorers worldwide. View rankings, share achievements, and discover new spots from the community.
+                </p>
+                <div class="onboarding-dots">
+                    <div class="onboarding-dot"></div>
+                    <div class="onboarding-dot"></div>
+                    <div class="onboarding-dot active"></div>
+                </div>
+                <div class="onboarding-actions">
+                    <button class="btn btn-secondary" onclick="app.prevOnboardingSlide()">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-primary" onclick="app.completeOnboarding()">
+                        Get Started <i class="fas fa-rocket"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Navigation Bar -->
+        <nav class="nav-bar">
+            <div class="hamburger" id="hamburger" onclick="app.toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="nav-logo">URBINDEX</div>
+
+            <div class="nav-center">
+                <div class="nav-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search locations..." id="search-input">
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" onclick="app.toggleThemeSelector()">
+                    <i class="fas fa-palette"></i>
+                    <span>Theme</span>
+                </button>
+                <button class="nav-btn" id="auth-btn" onclick="app.showAuth()">
+                    <i class="fas fa-user"></i>
+                    <span id="auth-btn-text">Sign In</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Theme Selector -->
+        <div class="theme-selector" id="theme-selector">
+            <div class="theme-option active" data-theme="cyberpunk" onclick="app.setTheme('cyberpunk')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #0a0e27;"></div>
+                    <div class="theme-preview-color" style="background: #00d9ff;"></div>
+                    <div class="theme-preview-color" style="background: #7b2cbf;"></div>
+                </div>
+                <div class="theme-info">
+                    <div class="theme-name">Cyberpunk</div>
+                    <div class="theme-description">Electric & futuristic</div>
+                </div>
+            </div>
+
+            <div class="theme-option" data-theme="retro" onclick="app.setTheme('retro')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #1e1e1e;"></div>
+                    <div class="theme-preview-color" style="background: #00ff88;"></div>
+                    <div class="theme-preview-color" style="background: #ffaa00;"></div>
+                </div>
+                <div class="theme-info">
+                    <div class="theme-name">Retro</div>
+                    <div class="theme-description">Terminal vibes</div>
+                </div>
+            </div>
+
+            <div class="theme-option" data-theme="minimal" onclick="app.setTheme('minimal')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #ffffff;"></div>
+                    <div class="theme-preview-color" style="background: #000000;"></div>
+                    <div class="theme-preview-color" style="background: #475569;"></div>
+                </div>
+                <div class="theme-info">
+                    <div class="theme-name">Minimal</div>
+                    <div class="theme-description">Clean & simple</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">Filters</div>
+                    <div class="sidebar-subtitle">Refine your search</div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="section-title">Quick Filters</div>
+                    <div class="filter-group">
+                        <label class="filter-option">
+                            <input type="checkbox" id="filter-near-me">
+                            <span><i class="fas fa-location-crosshairs"></i> Near Me (5km)</span>
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox" id="filter-recent">
+                            <span><i class="fas fa-clock"></i> Recently Added</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="section-title">Category</div>
+                    <div class="filter-group">
+                        <label class="filter-option">
+                            <input type="radio" name="category" value="all" checked>
+                            <span>All Categories</span>
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="category" value="abandoned">
+                            <span><i class="fas fa-building"></i> Abandoned</span>
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="category" value="rooftop">
+                            <span><i class="fas fa-city"></i> Rooftop</span>
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="category" value="tunnel">
+                            <span><i class="fas fa-subway"></i> Tunnel</span>
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="category" value="industrial">
+                            <span><i class="fas fa-industry"></i> Industrial</span>
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="category" value="other">
+                            <span><i class="fas fa-map-marker"></i> Other</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="section-title">Risk Level</div>
+                    <div class="filter-group">
+                        <label class="filter-option">
+                            <input type="radio" name="risk" value="all" checked>
+                            <span>All Levels</span>
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="risk" value="low">
+                            <span><i class="fas fa-shield" style="color: var(--success);"></i> Low</span>
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="risk" value="moderate">
+                            <span><i class="fas fa-shield" style="color: var(--warning);"></i> Moderate</span>
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="risk" value="high">
+                            <span><i class="fas fa-shield" style="color: var(--danger);"></i> High</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <button class="btn btn-secondary" style="width: 100%;" onclick="app.clearFilters()">
+                        <i class="fas fa-times"></i> Clear All Filters
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Map Wrapper -->
+            <div class="map-wrapper">
+                <div class="map-skeleton" id="map-skeleton">
+                    <div class="loading-spinner"></div>
+                </div>
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- Floating Action Buttons -->
+        <div class="fab-container">
+            <button class="fab secondary" title="Center on my location" onclick="app.centerOnUser()">
+                <i class="fas fa-location-crosshairs"></i>
+            </button>
+            <button class="fab secondary" title="View leaderboard" onclick="app.showLeaderboard()">
+                <i class="fas fa-trophy"></i>
+            </button>
+            <button class="fab" title="Add new location" onclick="app.showQuickAdd()">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+
+        <!-- Quick Add Modal -->
+        <div class="modal-overlay" id="quick-add-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">Quick Add Location</h3>
+                    <button class="modal-close" onclick="app.hideQuickAdd()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="quick-add-form">
+                        <div class="form-group">
+                            <label class="form-label">Location Name *</label>
+                            <input type="text" class="form-input" id="quick-name" placeholder="e.g., Abandoned Factory" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Category *</label>
+                            <select class="form-select" id="quick-category" required>
+                                <option value="">Select category...</option>
+                                <option value="abandoned">Abandoned</option>
+                                <option value="rooftop">Rooftop</option>
+                                <option value="tunnel">Tunnel</option>
+                                <option value="industrial">Industrial</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Coordinates</label>
+                            <input type="text" class="form-input" id="quick-coords" readonly placeholder="Detecting your location...">
+                            <div class="form-hint">
+                                <i class="fas fa-location-dot"></i> Auto-detected from your device
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="app.showFullForm()">
+                                <i class="fas fa-expand"></i> Add More Details
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="app.hideQuickAdd()">Cancel</button>
+                    <button class="btn btn-primary" onclick="app.submitQuickAdd()">
+                        <i class="fas fa-check"></i> Add Location
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auth Modal (placeholder - integrate your existing auth) -->
+        <div class="modal-overlay" id="auth-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">Sign In / Register</h3>
+                    <button class="modal-close" onclick="app.hideAuth()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-center" style="color: var(--text-secondary); margin-bottom: var(--spacing-lg);">
+                        Sign in to save locations, view your profile, and compete on the leaderboard.
+                    </p>
+                    <button class="btn btn-primary" style="width: 100%; margin-bottom: var(--spacing-sm);">
+                        <i class="fab fa-google"></i> Continue with Google
+                    </button>
+                    <button class="btn btn-secondary" style="width: 100%;">
+                        <i class="fas fa-envelope"></i> Continue with Email
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        class UrbindexModern {
+            constructor() {
+                this.map = null;
+                this.currentUser = null;
+                this.userLocation = null;
+                this.markers = new Map();
+                this.currentSlide = 0;
+                this.init();
+            }
+
+            async init() {
+                // Initialize Firebase
+                await this.initFirebase();
+
+                // Check if onboarding needed
+                if (!localStorage.getItem('onboarding-complete')) {
+                    this.showOnboarding();
+                } else {
+                    // Initialize map immediately
+                    this.initMap();
+                }
+
+                // Load theme
+                const savedTheme = localStorage.getItem('theme') || 'cyberpunk';
+                this.setTheme(savedTheme);
+
+                // Setup event listeners
+                this.setupEventListeners();
+
+                // Check online status
+                this.checkOnlineStatus();
+
+                // Request geolocation
+                this.getUserLocation();
+            }
+
+            async initFirebase() {
+                const config = {
+                    apiKey: "AIzaSyCifqLPnCuvRVZ9hvHIJVBmHkzB5nJyqtc",
+                    authDomain: "urbindex-d69e1.firebaseapp.com",
+                    projectId: "urbindex-d69e1",
+                    storageBucket: "urbindex-d69e1.firebasestorage.app",
+                    messagingSenderId: "889914696327",
+                    appId: "1:889914696327:web:351daa656a4d12fa828e22"
+                };
+
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(config);
+                }
+
+                this.db = firebase.firestore();
+                this.auth = firebase.auth();
+
+                // Listen to auth state
+                this.auth.onAuthStateChanged(user => {
+                    this.currentUser = user;
+                    this.updateAuthUI();
+                });
+            }
+
+            initMap() {
+                const mapEl = document.getElementById('map');
+                if (!mapEl) return;
+
+                // Show loading
+                const skeleton = document.getElementById('map-skeleton');
+
+                try {
+                    this.map = L.map('map', {
+                        center: [40.7128, -74.0060],
+                        zoom: 13,
+                        zoomControl: true
+                    });
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 18
+                    }).addTo(this.map);
+
+                    // Hide loading after map loads
+                    this.map.whenReady(() => {
+                        setTimeout(() => {
+                            skeleton.classList.add('hidden');
+                        }, 500);
+                    });
+
+                    // Load locations
+                    this.loadLocations();
+                } catch (error) {
+                    console.error('Map initialization failed:', error);
+                    this.showNotification('Failed to load map', 'error');
+                    skeleton.classList.add('hidden');
+                }
+            }
+
+            setupEventListeners() {
+                // Online/offline detection
+                window.addEventListener('online', () => {
+                    document.getElementById('offline-banner').classList.remove('active');
+                    this.showNotification('Back online', 'success');
+                });
+
+                window.addEventListener('offline', () => {
+                    document.getElementById('offline-banner').classList.add('active');
+                });
+
+                // Search
+                document.getElementById('search-input')?.addEventListener('input', (e) => {
+                    this.handleSearch(e.target.value);
+                });
+
+                // Filter changes
+                document.querySelectorAll('.filter-option input').forEach(input => {
+                    input.addEventListener('change', () => this.applyFilters());
+                });
+
+                // ESC key to close modals
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.hideQuickAdd();
+                        this.hideAuth();
+                        document.getElementById('theme-selector').classList.remove('active');
+                    }
+                });
+            }
+
+            // ============================================
+            // THEME SYSTEM
+            // ============================================
+
+            setTheme(theme) {
+                document.body.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+
+                // Update active theme option
+                document.querySelectorAll('.theme-option').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.theme === theme);
+                });
+            }
+
+            toggleThemeSelector() {
+                const selector = document.getElementById('theme-selector');
+                selector.classList.toggle('active');
+            }
+
+            // ============================================
+            // ONBOARDING
+            // ============================================
+
+            showOnboarding() {
+                document.getElementById('onboarding').classList.add('active');
+            }
+
+            nextOnboardingSlide() {
+                const slides = document.querySelectorAll('.onboarding-slide');
+                const dots = document.querySelectorAll('.onboarding-dot');
+
+                slides[this.currentSlide].classList.remove('active');
+                dots[this.currentSlide].classList.remove('active');
+
+                this.currentSlide++;
+
+                if (this.currentSlide < slides.length) {
+                    slides[this.currentSlide].classList.add('active');
+                    dots[this.currentSlide].classList.add('active');
+                }
+            }
+
+            prevOnboardingSlide() {
+                const slides = document.querySelectorAll('.onboarding-slide');
+                const dots = document.querySelectorAll('.onboarding-dot');
+
+                slides[this.currentSlide].classList.remove('active');
+                dots[this.currentSlide].classList.remove('active');
+
+                this.currentSlide--;
+
+                slides[this.currentSlide].classList.add('active');
+                dots[this.currentSlide].classList.add('active');
+            }
+
+            completeOnboarding() {
+                localStorage.setItem('onboarding-complete', 'true');
+                document.getElementById('onboarding').classList.remove('active');
+                this.showNotification('Welcome to Urbindex!', 'success');
+
+                // Initialize map after onboarding
+                this.initMap();
+            }
+
+            skipOnboarding() {
+                this.completeOnboarding();
+            }
+
+            // ============================================
+            // NOTIFICATIONS
+            // ============================================
+
+            showNotification(message, type = 'info', title = '') {
+                const container = document.getElementById('notification-container');
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-circle',
+                    warning: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+
+                const titles = {
+                    success: title || 'Success',
+                    error: title || 'Error',
+                    warning: title || 'Warning',
+                    info: title || 'Info'
+                };
+
+                notification.innerHTML = `
+                    <div class="notification-icon">
+                        <i class="fas ${icons[type]}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${titles[type]}</div>
+                        <div class="notification-message">${message}</div>
+                    </div>
+                    <button class="notification-close" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+
+                container.appendChild(notification);
+
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
+
+            // ============================================
+            // GEOLOCATION
+            // ============================================
+
+            getUserLocation() {
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            this.userLocation = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            };
+
+                            // Update quick add form
+                            const coordsInput = document.getElementById('quick-coords');
+                            if (coordsInput) {
+                                coordsInput.value = `${this.userLocation.lat.toFixed(6)}, ${this.userLocation.lng.toFixed(6)}`;
+                            }
+
+                            this.showNotification('Location detected', 'success');
+                        },
+                        (error) => {
+                            console.error('Geolocation error:', error);
+                            this.showNotification('Please enable location services for auto-detect', 'warning');
+                        }
+                    );
+                }
+            }
+
+            centerOnUser() {
+                if (this.userLocation && this.map) {
+                    this.map.setView([this.userLocation.lat, this.userLocation.lng], 15);
+
+                    // Add temporary marker
+                    const marker = L.marker([this.userLocation.lat, this.userLocation.lng], {
+                        icon: L.divIcon({
+                            className: 'user-location-marker',
+                            html: '<i class="fas fa-location-dot" style="color: var(--accent-primary); font-size: 24px;"></i>',
+                            iconSize: [24, 24]
+                        })
+                    }).addTo(this.map);
+
+                    setTimeout(() => marker.remove(), 3000);
+                    this.showNotification('Centered on your location', 'info');
+                } else {
+                    this.showNotification('Location not available', 'warning');
+                    this.getUserLocation();
+                }
+            }
+
+            // ============================================
+            // QUICK ADD
+            // ============================================
+
+            showQuickAdd() {
+                // Request location if not already have it
+                if (!this.userLocation) {
+                    this.getUserLocation();
+                }
+
+                document.getElementById('quick-add-modal').classList.add('active');
+            }
+
+            hideQuickAdd() {
+                document.getElementById('quick-add-modal').classList.remove('active');
+                document.getElementById('quick-add-form').reset();
+            }
+
+            async submitQuickAdd() {
+                const name = document.getElementById('quick-name').value.trim();
+                const category = document.getElementById('quick-category').value;
+
+                if (!name || !category) {
+                    this.showNotification('Please fill in all required fields', 'warning');
+                    return;
+                }
+
+                if (!this.userLocation) {
+                    this.showNotification('Please enable location services', 'warning');
+                    return;
+                }
+
+                if (!this.currentUser) {
+                    this.showNotification('Please sign in to add locations', 'warning');
+                    this.showAuth();
+                    return;
+                }
+
+                try {
+                    const locationData = {
+                        name: name,
+                        category: category,
+                        coordinates: [this.userLocation.lat, this.userLocation.lng],
+                        createdBy: this.currentUser.uid,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'active',
+                        riskLevel: 'moderate',
+                        description: ''
+                    };
+
+                    await this.db.collection('locations').add(locationData);
+
+                    this.hideQuickAdd();
+                    this.showNotification('Location added successfully!', 'success');
+                    this.loadLocations();
+                } catch (error) {
+                    console.error('Error adding location:', error);
+                    this.showNotification('Failed to add location. Please try again.', 'error');
+                }
+            }
+
+            showFullForm() {
+                // TODO: Expand to full form
+                this.showNotification('Full form coming soon!', 'info');
+            }
+
+            // ============================================
+            // FIREBASE DATA
+            // ============================================
+
+            async loadLocations() {
+                if (!this.map) return;
+
+                try {
+                    const snapshot = await this.db.collection('locations')
+                        .where('status', '==', 'active')
+                        .orderBy('createdAt', 'desc')
+                        .get();
+
+                    // Clear existing markers
+                    this.markers.forEach(marker => {
+                        if (this.map.hasLayer(marker)) {
+                            this.map.removeLayer(marker);
+                        }
+                    });
+                    this.markers.clear();
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.coordinates && Array.isArray(data.coordinates)) {
+                            const [lat, lng] = data.coordinates;
+
+                            const marker = L.marker([lat, lng])
+                                .bindPopup(this.createPopupContent(data, doc.id))
+                                .addTo(this.map);
+
+                            this.markers.set(doc.id, marker);
+                        }
+                    });
+
+                    this.showNotification(`Loaded ${snapshot.size} locations`, 'info');
+                } catch (error) {
+                    console.error('Error loading locations:', error);
+                    this.showNotification('Failed to load locations', 'error');
+                }
+            }
+
+            createPopupContent(data, id) {
+                const riskColors = {
+                    low: 'var(--success)',
+                    moderate: 'var(--warning)',
+                    high: 'var(--danger)'
+                };
+
+                return `
+                    <div style="min-width: 200px;">
+                        <h4 style="margin-bottom: 8px; color: var(--accent-primary);">${data.name}</h4>
+                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">${data.description || 'No description'}</p>
+                        <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                            <span style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: 4px; font-size: 11px;">${data.category}</span>
+                            <span style="padding: 2px 8px; background: ${riskColors[data.riskLevel]}; border-radius: 4px; font-size: 11px; color: white;">${data.riskLevel}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ============================================
+            // FILTERS & SEARCH
+            // ============================================
+
+            handleSearch(query) {
+                // TODO: Implement search
+                console.log('Search:', query);
+            }
+
+            applyFilters() {
+                // TODO: Implement filters
+                console.log('Applying filters...');
+            }
+
+            clearFilters() {
+                document.querySelectorAll('.filter-option input').forEach(input => {
+                    if (input.type === 'radio' && input.value === 'all') {
+                        input.checked = true;
+                    } else if (input.type === 'checkbox') {
+                        input.checked = false;
+                    }
+                });
+                this.applyFilters();
+            }
+
+            // ============================================
+            // UI CONTROLS
+            // ============================================
+
+            toggleSidebar() {
+                document.getElementById('sidebar').classList.toggle('active');
+            }
+
+            showAuth() {
+                document.getElementById('auth-modal').classList.add('active');
+            }
+
+            hideAuth() {
+                document.getElementById('auth-modal').classList.remove('active');
+            }
+
+            updateAuthUI() {
+                const authBtn = document.getElementById('auth-btn-text');
+                if (authBtn) {
+                    authBtn.textContent = this.currentUser ? 'Profile' : 'Sign In';
+                }
+            }
+
+            showLeaderboard() {
+                this.showNotification('Leaderboard coming soon!', 'info');
+            }
+
+            checkOnlineStatus() {
+                const banner = document.getElementById('offline-banner');
+                if (!navigator.onLine) {
+                    banner.classList.add('active');
+                }
+            }
+        }
+
+        // Initialize app
+        let app;
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new UrbindexModern();
+        });
+    </script>
+</body>
+</html>
