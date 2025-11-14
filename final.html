@@ -1103,6 +1103,218 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
+
+        /* Tags Input Styles */
+        .tags-input-container {
+            background: white;
+            border: 2px solid var(--mac-charcoal);
+            padding: 8px;
+            min-height: 40px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 12px;
+            box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+        }
+
+        .tags-input-container:focus-within {
+            border-color: var(--mac-blue);
+            box-shadow: 0 0 0 2px rgba(0,122,255,0.3), inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+        }
+
+        .selected-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--mac-blue);
+            color: white;
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid var(--mac-charcoal);
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .tag.remove {
+            cursor: pointer;
+            background: var(--danger);
+        }
+
+        .tag.remove:hover {
+            background: #ff6666;
+        }
+
+        .predefined-tags-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .predefined-tag {
+            background: var(--mac-steel);
+            border: 1px solid var(--mac-charcoal);
+            color: var(--text-secondary);
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+        }
+
+        .predefined-tag:hover {
+            background: var(--mac-platinum);
+            color: var(--mac-charcoal);
+            box-shadow: inset -1px -1px 0 #FFFFFF, inset 1px 1px 0 #808080;
+        }
+
+        .predefined-tag.selected {
+            background: var(--mac-blue);
+            color: white;
+        }
+
+        /* Comments and Rating Styles */
+        .comments-section {
+            margin-top: 16px;
+            border-top: 2px solid var(--mac-charcoal);
+            padding-top: 16px;
+        }
+
+        .comment {
+            background: var(--mac-platinum);
+            border: 1px solid var(--mac-charcoal);
+            padding: 8px;
+            margin-bottom: 8px;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            color: var(--mac-blue);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .comment-time {
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        .comment-text {
+            font-size: 11px;
+            line-height: 1.3;
+            color: var(--mac-charcoal);
+        }
+
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .rating-score {
+            font-weight: 700;
+            color: var(--mac-green);
+            font-size: 12px;
+        }
+
+        .rating-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .rating-btn {
+            background: var(--mac-steel);
+            border: 1px solid var(--mac-charcoal);
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+        }
+
+        .rating-btn:hover {
+            background: var(--mac-platinum);
+            color: var(--mac-charcoal);
+        }
+
+        .rating-btn.liked {
+            background: var(--mac-green);
+            color: var(--mac-charcoal);
+        }
+
+        .rating-btn.disliked {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Location Detail Modal */
+        .location-detail-modal .modal-content {
+            max-width: 600px;
+            max-height: 90vh;
+        }
+
+        .location-detail-header {
+            border-bottom: 2px solid var(--mac-charcoal);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .location-detail-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .photos-section {
+            margin: 16px 0;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+        }
+
+        .photo-placeholder {
+            background: var(--mac-steel);
+            border: 2px solid var(--mac-charcoal);
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+        }
     </style>
 </head>
 <body>
@@ -1346,6 +1558,12 @@
                             <option value="rooftop">Rooftop</option>
                             <option value="tunnel">Tunnel</option>
                             <option value="industrial">Industrial</option>
+                            <option value="residential">Residential</option>
+                            <option value="commercial">Commercial</option>
+                            <option value="historic">Historic</option>
+                            <option value="underground">Underground</option>
+                            <option value="park">Park/Green Space</option>
+                            <option value="waterfront">Waterfront</option>
                             <option value="other">Other</option>
                         </select>
                     </div>
@@ -1357,6 +1575,21 @@
                             <option value="moderate">Moderate</option>
                             <option value="high">High</option>
                         </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-tags"></i>
+                        Tags
+                    </label>
+                    <div class="tags-input-container">
+                        <div id="selected-tags" class="selected-tags"></div>
+                        <input class="input" type="text" id="tag-input" placeholder="Add custom tags..." style="margin-top: 8px;">
+                    </div>
+                    <div class="predefined-tags" style="margin-top: 8px;">
+                        <div class="mac-label" style="margin-bottom: 6px; color: var(--text-muted);">Suggested tags:</div>
+                        <div id="predefined-tags-list" class="predefined-tags-list"></div>
                     </div>
                 </div>
 
@@ -1433,6 +1666,7 @@
                 this.markers = new Map();
                 this.selectedLatLng = null;
                 this.init();
+                this.initTagSystem();
             }
 
             async init() {
@@ -1508,44 +1742,89 @@
                 }
 
                 try {
-                    this.map = L.map('map', {
-                        center: [40.7128, -74.0060],
-                        zoom: 13,
-                        zoomControl: true,
-                        attributionControl: false,
-                        maxBounds: [[-90, -180], [90, 180]], // Prevent panning outside world bounds
-                        maxBoundsViscosity: 1.0
+                    // Get user's current location for map centering
+                    this.getUserLocation().then(([lat, lng]) => {
+                        this.initializeMap(lat, lng);
+                        this.showToast('Map centered on your current location', 'success');
+                    }).catch((error) => {
+                        console.warn('Using default location:', error.message);
+                        this.initializeMap(40.7128, -74.0060); // Fallback to New York City
+                        this.showToast('Map centered on default location (New York City)', 'info');
                     });
-
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors',
-                        maxZoom: 18,
-                        errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' // Transparent fallback
-                    }).addTo(this.map);
-
-                    // Add loading/error handling for tiles
-                    this.map.on('tileerror', (e) => {
-                        console.warn('Tile loading error:', e);
-                    });
-
-                    this.map.on('load', () => {
-                        console.log('Map loaded successfully');
-                        this.showToast('Map loaded successfully', 'success');
-                    });
-
-                    this.map.on('click', (e) => this.handleMapClick(e));
-
-                    // Handle map resize
-                    window.addEventListener('resize', () => {
-                        if (this.map) {
-                            setTimeout(() => this.map.invalidateSize(), 100);
-                        }
-                    });
-
                 } catch (error) {
                     console.error('Map initialization failed:', error);
                     this.showError('Failed to initialize map. Please check your internet connection and refresh the page.');
                 }
+            }
+
+            async getUserLocation() {
+                return new Promise((resolve, reject) => {
+                    if (!navigator.geolocation) {
+                        reject(new Error('Geolocation is not supported by this browser'));
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            resolve([position.coords.latitude, position.coords.longitude]);
+                        },
+                        (error) => {
+                            let message = 'Unable to retrieve your location';
+                            switch (error.code) {
+                                case error.PERMISSION_DENIED:
+                                    message = 'Location access denied. Please enable location permissions.';
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    message = 'Location information is unavailable.';
+                                    break;
+                                case error.TIMEOUT:
+                                    message = 'Location request timed out.';
+                                    break;
+                            }
+                            reject(new Error(message));
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 300000 // Cache location for 5 minutes
+                        }
+                    );
+                });
+            }
+
+            initializeMap(centerLat, centerLng) {
+                this.map = L.map('map', {
+                    center: [centerLat, centerLng],
+                    zoom: 13,
+                    zoomControl: true,
+                    attributionControl: false,
+                    maxBounds: [[-90, -180], [90, 180]], // Prevent panning outside world bounds
+                    maxBoundsViscosity: 1.0
+                });
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 18,
+                    errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' // Transparent fallback
+                }).addTo(this.map);
+
+                // Add loading/error handling for tiles
+                this.map.on('tileerror', (e) => {
+                    console.warn('Tile loading error:', e);
+                });
+
+                this.map.on('load', () => {
+                    console.log('Map loaded successfully');
+                });
+
+                this.map.on('click', (e) => this.handleMapClick(e));
+
+                // Handle map resize
+                window.addEventListener('resize', () => {
+                    if (this.map) {
+                        setTimeout(() => this.map.invalidateSize(), 100);
+                    }
+                });
             }
 
             initUI() {
@@ -1570,6 +1849,153 @@
                         this.hidePasswordResetModal();
                     }
                 });
+            }
+
+            initTagSystem() {
+                // Initialize tag-related properties
+                this.selectedTags = new Set();
+                this.predefinedTags = [
+                    'historic', 'architecture', 'nature', 'underground', 'hidden', 'photo-worthy',
+                    'challenging', 'accessible', 'urban', 'industrial', 'abandoned', 'safe',
+                    'dangerous', 'family-friendly', 'night-time', 'day-time', 'rooftop',
+                    'basement', 'warehouse', 'bridge', 'tunnel', 'park', 'waterfront'
+                ];
+
+                // Set up tag input event listeners
+                this.setupTagInput();
+            }
+
+            setupTagInput() {
+                const tagInput = document.getElementById('tag-input');
+                const predefinedTagsList = document.getElementById('predefined-tags-list');
+                
+                if (tagInput) {
+                    tagInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            const tag = tagInput.value.trim();
+                            if (tag) {
+                                this.addTag(tag);
+                                tagInput.value = '';
+                            }
+                        }
+                    });
+
+                    tagInput.addEventListener('blur', () => {
+                        const tag = tagInput.value.trim();
+                        if (tag) {
+                            this.addTag(tag);
+                            tagInput.value = '';
+                        }
+                    });
+                }
+
+                // Render predefined tags
+                if (predefinedTagsList) {
+                    predefinedTagsList.innerHTML = '';
+                    this.predefinedTags.forEach(tag => {
+                        const tagElement = document.createElement('span');
+                        tagElement.className = 'predefined-tag';
+                        tagElement.textContent = tag;
+                        tagElement.addEventListener('click', () => {
+                            this.togglePredefinedTag(tag, tagElement);
+                        });
+                        predefinedTagsList.appendChild(tagElement);
+                    });
+                }
+            }
+
+            addTag(tag) {
+                // Sanitize and validate tag
+                const cleanTag = this.sanitizeInput(tag).toLowerCase();
+                if (cleanTag.length < 2 || cleanTag.length > 20) {
+                    this.showToast('Tags must be 2-20 characters long', 'warning');
+                    return;
+                }
+
+                // Check for duplicates
+                if (this.selectedTags.has(cleanTag)) {
+                    this.showToast('Tag already added', 'info');
+                    return;
+                }
+
+                // Limit number of tags
+                if (this.selectedTags.size >= 10) {
+                    this.showToast('Maximum 10 tags allowed', 'warning');
+                    return;
+                }
+
+                this.selectedTags.add(cleanTag);
+                this.renderSelectedTags();
+            }
+
+            removeTag(tag) {
+                this.selectedTags.delete(tag);
+                this.renderSelectedTags();
+                
+                // Update predefined tag UI if needed
+                const predefinedTags = document.querySelectorAll('.predefined-tag');
+                predefinedTags.forEach(el => {
+                    if (el.textContent === tag) {
+                        el.classList.remove('selected');
+                    }
+                });
+            }
+
+            togglePredefinedTag(tag, element) {
+                if (this.selectedTags.has(tag)) {
+                    this.removeTag(tag);
+                } else {
+                    this.addTag(tag);
+                    element.classList.add('selected');
+                }
+            }
+
+            renderSelectedTags() {
+                const selectedTagsContainer = document.getElementById('selected-tags');
+                if (selectedTagsContainer) {
+                    selectedTagsContainer.innerHTML = '';
+                    this.selectedTags.forEach(tag => {
+                        const tagElement = document.createElement('span');
+                        tagElement.className = 'tag remove';
+                        tagElement.innerHTML = `
+                            ${tag}
+                            <i class="fas fa-times"></i>
+                        `;
+                        tagElement.addEventListener('click', () => {
+                            this.removeTag(tag);
+                        });
+                        selectedTagsContainer.appendChild(tagElement);
+                    });
+                }
+            }
+
+            getSelectedTags() {
+                return Array.from(this.selectedTags);
+            }
+
+            clearTags() {
+                this.selectedTags.clear();
+                this.renderSelectedTags();
+                
+                // Reset predefined tags UI
+                const predefinedTags = document.querySelectorAll('.predefined-tag');
+                predefinedTags.forEach(el => {
+                    el.classList.remove('selected');
+                });
+            }
+
+            loadTagsForLocation(locationData) {
+                // Clear existing tags
+                this.clearTags();
+                
+                // Load tags from location data
+                if (locationData.tags && Array.isArray(locationData.tags)) {
+                    locationData.tags.forEach(tag => {
+                        this.selectedTags.add(tag);
+                    });
+                    this.renderSelectedTags();
+                }
             }
 
             initAuth() {
@@ -1708,6 +2134,19 @@
                 const escapedName = this.escapeHtml(data.name || 'Unnamed Location');
                 const escapedDescription = this.escapeHtml(data.description || 'No description available');
                 const category = this.escapeHtml(data.category || 'other');
+                
+                // Render tags if available
+                let tagsHtml = '';
+                if (data.tags && Array.isArray(data.tags) && data.tags.length > 0) {
+                    tagsHtml = `
+                        <div style="display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0;">
+                            ${data.tags.slice(0, 5).map(tag =>
+                                `<span style="background: var(--mac-blue); color: white; padding: 1px 4px; border-radius: 2px; font-size: 0.7em;">${this.escapeHtml(tag)}</span>`
+                            ).join('')}
+                            ${data.tags.length > 5 ? `<span style="font-size: 0.7em; color: #666;">+${data.tags.length - 5} more</span>` : ''}
+                        </div>
+                    `;
+                }
 
                 return `
                     <div style="min-width: 200px; max-width: 300px;">
@@ -1721,6 +2160,7 @@
                             <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; color: #333;">${category}</span>
                             <span style="background: ${riskColor}; padding: 2px 6px; border-radius: 4px; color: white;">${data.riskLevel || 'unknown'}</span>
                         </div>
+                        ${tagsHtml}
                         ${this.currentUser ? `
                             <div style="display: flex; gap: 4px; margin-top: 8px;">
                                 <button onclick="app.editLocation('${docId}')" style="font-size: 0.8em; padding: 4px 8px;">Edit</button>
@@ -2247,6 +2687,9 @@
                 if (coordsDisplay) {
                     coordsDisplay.textContent = 'Click on map to set location';
                 }
+
+                // Clear tags
+                this.clearTags();
             }
 
             handleMapClick(e) {
@@ -2288,6 +2731,7 @@
                     description: this.sanitizeInput(description),
                     category: document.getElementById('location-category').value,
                     riskLevel: document.getElementById('location-risk').value,
+                    tags: this.getSelectedTags(),
                     coordinates: [this.selectedLatLng.lat, this.selectedLatLng.lng],
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
@@ -2471,6 +2915,9 @@
                         document.getElementById('coordinates-display').textContent =
                             `${data.coordinates[0].toFixed(6)}, ${data.coordinates[1].toFixed(6)}`;
                     }
+
+                    // Load tags if available
+                    this.loadTagsForLocation(data);
 
                     // Change form title and button
                     document.querySelector('#location-modal h3').textContent = 'Edit Location';
