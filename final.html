@@ -32,7 +32,7 @@
             --accent-purple: var(--mac-purple);
             --text-primary: #FFFFFF;
             --text-secondary: var(--mac-platinum);
-            --text-muted: #A0A0A0;
+            --text-muted: #D0D0D0; /* Improved contrast: 4.5:1 ratio on dark backgrounds */
             --border: var(--mac-steel);
             --success: var(--mac-green);
             --warning: var(--mac-orange);
@@ -59,6 +59,25 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Skip Links for Accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--mac-blue);
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            z-index: 10000;
+            border: 2px solid var(--mac-charcoal);
+            box-shadow: var(--shadow-mac);
+        }
+        
+        .skip-link:focus {
+            top: 6px;
+        }
         
         body {
             font-family: var(--font-chicago), 'Arial', sans-serif;
@@ -522,6 +541,115 @@
             gap: 6px;
         }
 
+        /* Required field indicator */
+        .form-label.required::after {
+            content: ' *';
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        /* Form field error styles */
+        .form-error {
+            color: var(--danger);
+            font-size: 10px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            margin-top: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: none;
+        }
+
+        /* Invalid field styling */
+        .input:invalid, .textarea:invalid, .select:invalid {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.3), inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+        }
+
+        /* Field help text */
+        .field-help {
+            font-size: 9px;
+            color: var(--text-muted);
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            margin-top: 2px;
+            font-style: italic;
+        }
+
+        /* Enhanced touch targets */
+        .btn, .nav-btn, .auth-tab {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+        }
+
+        .predefined-tag {
+            min-height: 32px;
+            min-width: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 8px;
+        }
+
+        /* Status indicators with icons */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-indicator .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-indicator.connected .status-dot {
+            background: var(--mac-green);
+        }
+
+        .status-indicator.offline .status-dot {
+            background: var(--danger);
+        }
+
+        .status-indicator::before {
+            content: attr(data-status-text);
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            :root {
+                --text-muted: #FFFFFF;
+                --border: #FFFFFF;
+            }
+            
+            .btn, .nav-btn, .auth-tab, .fab {
+                border: 3px solid currentColor;
+            }
+            
+            .input, .textarea, .select {
+                border: 3px solid var(--mac-charcoal);
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
         .input, .textarea, .select {
             background: white;
             border: 2px solid var(--mac-charcoal);
@@ -736,6 +864,19 @@
         .btn:focus, .nav-btn:focus, .auth-tab:focus, .fab:focus {
             outline: 2px solid var(--mac-blue);
             outline-offset: 2px;
+        }
+
+        /* Screen Reader Only Content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         .input:focus, .textarea:focus, .select:focus {
@@ -1325,15 +1466,19 @@
         <div class="loading-text">Initializing Urban Explorer...</div>
     </div>
 
+    <!-- Skip Links for Keyboard Navigation -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <a href="#navigation" class="skip-link">Skip to navigation</a>
+
     <div class="app">
         <header class="header" role="banner">
-            <div class="logo">URBINDEX</div>
-            <div class="status">
-                <div class="status-dot" id="status-dot"></div>
+            <div class="logo" aria-label="Urbindex - Urban Exploration Network">URBINDEX</div>
+            <div class="status" aria-live="polite" aria-atomic="true">
+                <div class="status-dot" id="status-dot" aria-hidden="true"></div>
                 <span id="status-text">Connected</span>
             </div>
-            <button class="btn btn-primary" id="auth-btn" aria-label="Authentication" style="font-weight: 700;">
-                <i class="fas fa-user"></i>
+            <button class="btn btn-primary" id="auth-btn" aria-label="Authentication and Account Management" style="font-weight: 700;">
+                <i class="fas fa-user" aria-hidden="true"></i>
                 <span>Sign In / Register</span>
             </button>
 
@@ -1350,29 +1495,37 @@
                         <h3>Sign In to Urbindex</h3>
                         <form id="signin-form-element">
                             <div class="form-group">
-                                <label class="form-label">
-                                    <i class="fas fa-envelope"></i>
-                                    Email
+                                <label class="form-label required" for="signin-email">
+                                    <i class="fas fa-envelope" aria-hidden="true"></i>
+                                    Email Address
                                 </label>
-                                <input class="input" type="email" id="signin-email" required>
+                                <input class="input" type="email" id="signin-email" name="email"
+                                       required aria-describedby="signin-email-help" autocomplete="email">
+                                <div id="signin-email-help" class="field-help">
+                                    Enter your registered email address
+                                </div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span><i class="fas fa-lock"></i> Password</span>
+                                <label class="form-label required" for="signin-password" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span><i class="fas fa-lock" aria-hidden="true"></i> Password</span>
                                     <button type="button" class="btn-link" onclick="app.hideAuthModal(); app.showPasswordResetModal();" style="font-size: 9px; padding: 0;">
                                         Forgot?
                                     </button>
                                 </label>
-                                <input class="input" type="password" id="signin-password" required>
+                                <input class="input" type="password" id="signin-password" name="password"
+                                       required aria-describedby="signin-password-help" autocomplete="current-password">
+                                <div id="signin-password-help" class="field-help">
+                                    Enter your password
+                                </div>
                             </div>
                             <div class="form-actions">
                                 <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Sign In</button>
+                                <button type="submit" class="btn btn-primary" aria-label="Sign in to your account">Sign In</button>
                             </div>
                         </form>
                         <div class="auth-alternatives">
-                            <button class="btn btn-link" onclick="app.signInAnonymously()">
-                                <i class="fas fa-user-secret"></i> Continue as Guest
+                            <button class="btn btn-link" onclick="app.signInAnonymously()" aria-label="Continue without creating an account">
+                                <i class="fas fa-user-secret" aria-hidden="true"></i> Continue as Guest
                             </button>
                         </div>
                     </div>
@@ -1381,29 +1534,46 @@
                         <h3>Create Account</h3>
                         <form id="signup-form-element">
                             <div class="form-group">
-                                <label class="form-label">
-                                    <i class="fas fa-envelope"></i>
-                                    Email *
+                                <label class="form-label required" for="signup-email">
+                                    <i class="fas fa-envelope" aria-hidden="true"></i>
+                                    Email Address
                                 </label>
-                                <input class="input" type="email" id="signup-email" required>
+                                <input class="input" type="email" id="signup-email" name="email"
+                                       required aria-describedby="signup-email-help signup-email-error" autocomplete="email">
+                                <div id="signup-email-help" class="field-help">
+                                    Enter a valid email address
+                                </div>
+                                <div id="signup-email-error" class="form-error" role="alert"></div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">
-                                    <i class="fas fa-lock"></i>
-                                    Password *
+                                <label class="form-label required" for="signup-password">
+                                    <i class="fas fa-lock" aria-hidden="true"></i>
+                                    Password
                                 </label>
-                                <input class="input" type="password" id="signup-password" required minlength="6">
+                                <input class="input" type="password" id="signup-password" name="password"
+                                       required minlength="6" aria-describedby="signup-password-help signup-password-error"
+                                       autocomplete="new-password">
+                                <div id="signup-password-help" class="field-help">
+                                    Password must be at least 6 characters long
+                                </div>
+                                <div id="signup-password-error" class="form-error" role="alert"></div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">
-                                    <i class="fas fa-lock"></i>
-                                    Confirm Password *
+                                <label class="form-label required" for="signup-confirm-password">
+                                    <i class="fas fa-lock" aria-hidden="true"></i>
+                                    Confirm Password
                                 </label>
-                                <input class="input" type="password" id="signup-confirm-password" required minlength="6">
+                                <input class="input" type="password" id="signup-confirm-password" name="confirmPassword"
+                                       required minlength="6" aria-describedby="signup-confirm-password-help signup-confirm-password-error"
+                                       autocomplete="new-password">
+                                <div id="signup-confirm-password-help" class="field-help">
+                                    Re-enter the same password
+                                </div>
+                                <div id="signup-confirm-password-error" class="form-error" role="alert"></div>
                             </div>
                             <div class="form-actions">
                                 <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Create Account</button>
+                                <button type="submit" class="btn btn-primary" aria-label="Create your new account">Create Account</button>
                             </div>
                         </form>
                     </div>
@@ -1411,39 +1581,39 @@
             </div>
         </header>
 
-        <nav class="nav" role="navigation" aria-label="Main Navigation">
-            <button class="nav-btn active" data-view="map" aria-label="Map View">
-                <i class="fas fa-map"></i>
+        <nav class="nav" role="navigation" aria-label="Main Navigation" id="navigation">
+            <button class="nav-btn active" data-view="map" aria-label="Map View" aria-current="page">
+                <i class="fas fa-map" aria-hidden="true"></i>
                 <span>Map</span>
             </button>
             <button class="nav-btn" data-view="locations" aria-label="Locations View">
-                <i class="fas fa-map-marker-alt"></i>
+                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                 <span>Locations</span>
             </button>
             <button class="nav-btn" data-view="profile" aria-label="Profile View">
-                <i class="fas fa-user-circle"></i>
+                <i class="fas fa-user-circle" aria-hidden="true"></i>
                 <span>Profile</span>
             </button>
         </nav>
 
-        <main class="main" role="main">
-            <div class="view active" id="map-view">
+        <main class="main" role="main" id="main-content">
+            <div class="view active" id="map-view" role="tabpanel" aria-labelledby="map-tab">
                 <div class="map-layout">
-                    <aside class="sidebar">
+                    <aside class="sidebar" role="complementary" aria-label="Map sidebar with activity and statistics">
                         <div class="panel">
                             <div class="panel-title">
-                                <i class="fas fa-activity"></i>
+                                <i class="fas fa-activity" aria-hidden="true"></i>
                                 Recent Activity
                             </div>
-                            <div id="activity-feed" class="loading">Loading...</div>
+                            <div id="activity-feed" class="loading" role="status" aria-live="polite">Loading...</div>
                         </div>
 
                         <div class="panel">
                             <div class="panel-title">
-                                <i class="fas fa-chart-bar"></i>
+                                <i class="fas fa-chart-bar" aria-hidden="true"></i>
                                 Network Stats
                             </div>
-                            <div id="network-stats">
+                            <div id="network-stats" role="status" aria-live="polite" aria-label="Network statistics">
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center;">
                                     <div>
                                         <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-blue);" id="total-locations">0</div>
@@ -1458,39 +1628,50 @@
                         </div>
                     </aside>
 
-                    <div class="map-container" role="application" aria-label="Interactive Map for Urban Exploration">
-                        <div id="map" tabindex="0" aria-describedby="map-description"></div>
-                        <div id="map-description" style="position: absolute; left: -10000px;">Interactive map showing locations. Use mouse or keyboard to navigate.</div>
+                    <div class="map-container" role="application" aria-label="Interactive Map for Urban Exploration" aria-describedby="map-instructions">
+                        <div id="map" tabindex="0" aria-label="Interactive map showing urban exploration locations"></div>
+                        <div id="map-instructions" class="sr-only" style="position: absolute; left: -10000px;">
+                            Interactive map for exploring urban locations. Use arrow keys to navigate, Enter to select markers, and Escape to exit map mode.
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="view" id="locations-view">
+            <div class="view" id="locations-view" role="tabpanel" aria-labelledby="locations-tab">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <h2>My Locations</h2>
-                    <button class="btn btn-primary" onclick="app.showAddLocationModal()">
-                        <i class="fas fa-plus"></i>
-                        Add Location
+                    <button class="btn btn-primary" onclick="app.showAddLocationModal()" aria-label="Add New Location to Your List">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                        <span>Add Location</span>
                     </button>
                 </div>
 
                 <!-- Search and Filter Controls -->
                 <div class="panel" style="margin-bottom: 24px;">
+                    <div class="sr-only" id="locations-filter-instructions">
+                        Use these controls to search and filter your locations. Results update automatically.
+                    </div>
                     <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: center;">
                         <div class="form-group" style="margin: 0;">
-                            <div class="form-label" style="margin-bottom: 4px;">
-                                <i class="fas fa-search"></i>
+                            <label for="location-search" class="form-label" style="margin-bottom: 4px;">
+                                <i class="fas fa-search" aria-hidden="true"></i>
                                 Search Locations
+                            </label>
+                            <input class="input" type="text" id="location-search"
+                                   placeholder="Search by name or description..."
+                                   aria-describedby="location-search-instructions"
+                                   style="margin: 0;">
+                            <div id="location-search-instructions" class="sr-only">
+                                Search through your location names and descriptions
                             </div>
-                            <input class="input" type="text" id="location-search" placeholder="Search by name or description..." style="margin: 0;">
                         </div>
 
                         <div class="form-group" style="margin: 0;">
-                            <div class="form-label" style="margin-bottom: 4px;">
-                                <i class="fas fa-filter"></i>
+                            <label for="category-filter" class="form-label" style="margin-bottom: 4px;">
+                                <i class="fas fa-filter" aria-hidden="true"></i>
                                 Category
-                            </div>
-                            <select class="select" id="category-filter" style="margin: 0;">
+                            </label>
+                            <select class="select" id="category-filter" style="margin: 0;" aria-label="Filter locations by category">
                                 <option value="">All Categories</option>
                                 <option value="abandoned">Abandoned</option>
                                 <option value="rooftop">Rooftop</option>
@@ -1501,59 +1682,70 @@
                         </div>
 
                         <div class="form-group" style="margin: 0;">
-                            <div class="form-label" style="margin-bottom: 4px;">
-                                <i class="fas fa-exclamation-triangle"></i>
+                            <label for="risk-filter" class="form-label" style="margin-bottom: 4px;">
+                                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                                 Risk Level
-                            </div>
-                            <select class="select" id="risk-filter" style="margin: 0;">
+                            </label>
+                            <select class="select" id="risk-filter" style="margin: 0;" aria-label="Filter locations by risk level">
                                 <option value="">All Risks</option>
-                                <option value="low">Low</option>
-                                <option value="moderate">Moderate</option>
-                                <option value="high">High</option>
+                                <option value="low">Low Risk</option>
+                                <option value="moderate">Moderate Risk</option>
+                                <option value="high">High Risk</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <div id="locations-grid" class="loading">Loading your locations...</div>
+                <div id="locations-grid" class="loading" role="status" aria-live="polite" aria-label="Loading your locations">
+                    Loading your locations...
+                </div>
             </div>
 
-            <div class="view" id="profile-view">
+            <div class="view" id="profile-view" role="tabpanel" aria-labelledby="profile-tab">
                 <h2>Profile</h2>
-                <div id="profile-content" class="loading">Loading profile...</div>
+                <div id="profile-content" class="loading" role="status" aria-live="polite">Loading profile...</div>
             </div>
         </main>
 
-        <button class="fab" id="add-location-fab" onclick="app.showAddLocationModal()" style="display:none;" aria-label="Add New Location">
-            <i class="fas fa-plus"></i>
+        <button class="fab" id="add-location-fab" onclick="app.showAddLocationModal()"
+                style="display:none;" aria-label="Add New Location" role="button">
+            <i class="fas fa-plus" aria-hidden="true"></i>
         </button>
     </div>
 
     <div class="modal" id="location-modal">
         <div class="modal-content">
             <button class="modal-close" onclick="app.hideModal()">&times;</button>
-            <h3>Add Location</h3>
+            <h3 id="location-modal-title">Add Location</h3>
             <form id="location-form">
                 <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-tag"></i>
-                        Name *
+                    <label class="form-label required" for="location-name">
+                        <i class="fas fa-tag" aria-hidden="true"></i>
+                        Name
                     </label>
-                    <input class="input" type="text" id="location-name" required>
+                    <input class="input" type="text" id="location-name" name="name"
+                           required aria-describedby="location-name-help" autocomplete="off">
+                    <div id="location-name-help" class="field-help">
+                        Enter a descriptive name for the location
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-align-left"></i>
-                        Description *
+                    <label class="form-label required" for="location-description">
+                        <i class="fas fa-align-left" aria-hidden="true"></i>
+                        Description
                     </label>
-                    <textarea class="textarea" id="location-description" required></textarea>
+                    <textarea class="textarea" id="location-description" name="description"
+                              required aria-describedby="location-description-help"></textarea>
+                    <div id="location-description-help" class="field-help">
+                        Provide details about the location, access points, and what makes it interesting
+                    </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <div class="form-group">
-                        <label class="form-label">Category</label>
-                        <select class="select" id="location-category">
+                        <label class="form-label" for="location-category">Category</label>
+                        <select class="select" id="location-category" name="category" aria-label="Select location category">
                             <option value="abandoned">Abandoned</option>
                             <option value="rooftop">Rooftop</option>
                             <option value="tunnel">Tunnel</option>
@@ -1569,8 +1761,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Risk Level</label>
-                        <select class="select" id="location-risk">
+                        <label class="form-label" for="location-risk">Risk Level</label>
+                        <select class="select" id="location-risk" name="riskLevel" aria-label="Select risk level">
                             <option value="low">Low</option>
                             <option value="moderate">Moderate</option>
                             <option value="high">High</option>
@@ -1579,13 +1771,18 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-tags"></i>
+                    <label class="form-label" for="tag-input">
+                        <i class="fas fa-tags" aria-hidden="true"></i>
                         Tags
                     </label>
                     <div class="tags-input-container">
                         <div id="selected-tags" class="selected-tags"></div>
-                        <input class="input" type="text" id="tag-input" placeholder="Add custom tags..." style="margin-top: 8px;">
+                        <input class="input" type="text" id="tag-input" name="tag-input"
+                               placeholder="Add custom tags..." style="margin-top: 8px;"
+                               aria-describedby="tag-input-help">
+                        <div id="tag-input-help" class="field-help">
+                            Press Enter or comma to add tags. Maximum 10 tags allowed.
+                        </div>
                     </div>
                     <div class="predefined-tags" style="margin-top: 8px;">
                         <div class="mac-label" style="margin-bottom: 6px; color: var(--text-muted);">Suggested tags:</div>
@@ -1595,14 +1792,15 @@
 
                 <div class="form-group">
                     <label class="form-label">Coordinates</label>
-                    <div class="coordinates-display" id="coordinates-display">
+                    <div class="coordinates-display" id="coordinates-display" aria-live="polite">
                         Click on map to set location
                     </div>
                 </div>
 
                 <div class="form-actions">
                     <button type="button" class="btn" onclick="app.hideModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary" id="location-submit-btn"
+                            aria-label="Save location information">Save</button>
                 </div>
             </form>
         </div>
@@ -1618,15 +1816,19 @@
             </p>
             <form id="password-reset-form">
                 <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-envelope"></i>
+                    <label class="form-label required" for="reset-email">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
                         Email Address
                     </label>
-                    <input class="input" type="email" id="reset-email" required>
+                    <input class="input" type="email" id="reset-email" name="email"
+                           required aria-describedby="reset-email-help" autocomplete="email">
+                    <div id="reset-email-help" class="field-help">
+                        Enter the email address associated with your account
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn" onclick="app.hidePasswordResetModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                    <button type="submit" class="btn btn-primary" aria-label="Send password reset email">Send Reset Link</button>
                 </div>
             </form>
         </div>
@@ -1842,13 +2044,154 @@
                     passwordResetForm.addEventListener('submit', (e) => this.handlePasswordReset(e));
                 }
 
+                // Add accessibility improvements
+                this.initKeyboardNavigation();
+                this.initFocusManagement();
+                this.initLiveRegions();
+                
                 // Add keyboard shortcuts
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         this.hideModal();
                         this.hidePasswordResetModal();
+                        this.hideAuthModal();
                     }
                 });
+            }
+
+            initKeyboardNavigation() {
+                // Enhanced keyboard navigation for map
+                const mapElement = document.getElementById('map');
+                if (mapElement) {
+                    mapElement.addEventListener('keydown', (e) => {
+                        switch (e.key) {
+                            case 'ArrowUp':
+                                e.preventDefault();
+                                this.announceToScreenReader('Moving map up');
+                                break;
+                            case 'ArrowDown':
+                                e.preventDefault();
+                                this.announceToScreenReader('Moving map down');
+                                break;
+                            case 'ArrowLeft':
+                                e.preventDefault();
+                                this.announceToScreenReader('Moving map left');
+                                break;
+                            case 'ArrowRight':
+                                e.preventDefault();
+                                this.announceToScreenReader('Moving map right');
+                                break;
+                            case 'Enter':
+                                e.preventDefault();
+                                this.announceToScreenReader('Map marker selected');
+                                break;
+                        }
+                    });
+                }
+
+                // Navigation shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        switch (e.key) {
+                            case '1':
+                                e.preventDefault();
+                                this.switchView('map');
+                                this.announceToScreenReader('Switched to map view');
+                                break;
+                            case '2':
+                                e.preventDefault();
+                                this.switchView('locations');
+                                this.announceToScreenReader('Switched to locations view');
+                                break;
+                            case '3':
+                                e.preventDefault();
+                                this.switchView('profile');
+                                this.announceToScreenReader('Switched to profile view');
+                                break;
+                        }
+                    }
+                });
+            }
+
+            initFocusManagement() {
+                // Focus trap for modals
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    modal.addEventListener('keydown', (e) => {
+                        if (e.key === 'Tab') {
+                            this.trapFocus(modal, e);
+                        }
+                    });
+                });
+
+                // Return focus after modal closes
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            const target = mutation.target;
+                            if (target.classList.contains('modal')) {
+                                if (!target.classList.contains('active')) {
+                                    const returnFocus = target.getAttribute('data-return-focus');
+                                    if (returnFocus) {
+                                        document.getElementById(returnFocus)?.focus();
+                                        target.removeAttribute('data-return-focus');
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+
+                modals.forEach(modal => observer.observe(modal, { attributes: true }));
+            }
+
+            initLiveRegions() {
+                // Create live regions for dynamic announcements
+                const liveRegion = document.createElement('div');
+                liveRegion.setAttribute('aria-live', 'polite');
+                liveRegion.setAttribute('aria-atomic', 'true');
+                liveRegion.className = 'sr-only';
+                liveRegion.id = 'live-region';
+                document.body.appendChild(liveRegion);
+
+                // Create assertive live region for urgent announcements
+                const assertiveLiveRegion = document.createElement('div');
+                assertiveLiveRegion.setAttribute('aria-live', 'assertive');
+                assertiveLiveRegion.setAttribute('aria-atomic', 'true');
+                assertiveLiveRegion.className = 'sr-only';
+                assertiveLiveRegion.id = 'assertive-live-region';
+                document.body.appendChild(assertiveLiveRegion);
+            }
+
+            trapFocus(container, event) {
+                const focusableElements = container.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+
+                if (event.shiftKey) {
+                    if (document.activeElement === firstElement) {
+                        lastElement.focus();
+                        event.preventDefault();
+                    }
+                } else {
+                    if (document.activeElement === lastElement) {
+                        firstElement.focus();
+                        event.preventDefault();
+                    }
+                }
+            }
+
+            announceToScreenReader(message, priority = 'polite') {
+                const liveRegion = document.getElementById(priority === 'assertive' ? 'assertive-live-region' : 'live-region');
+                if (liveRegion) {
+                    liveRegion.textContent = message;
+                    // Clear after announcement
+                    setTimeout(() => {
+                        liveRegion.textContent = '';
+                    }, 1000);
+                }
             }
 
             initTagSystem() {
@@ -2792,6 +3135,9 @@
 
                 const toast = document.createElement('div');
                 toast.className = `toast toast-${type}`;
+                toast.setAttribute('role', 'alert');
+                toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+                toast.setAttribute('aria-atomic', 'true');
 
                 // Type-specific icons and colors
                 const typeConfigs = {
@@ -2825,8 +3171,11 @@
 
                 toast.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <i class="fas ${config.icon}" style="font-size: 1.2rem; color: ${config.color};"></i>
+                        <i class="fas ${config.icon}" style="font-size: 1.2rem; color: ${config.color};" aria-hidden="true"></i>
                         <span class="mac-text" style="flex: 1; color: var(--mac-charcoal);">${message}</span>
+                        <button class="btn-close" aria-label="Close notification" onclick="this.parentElement.parentElement.remove()">
+                            <i class="fas fa-times" aria-hidden="true"></i>
+                        </button>
                     </div>
                 `;
 
@@ -2862,12 +3211,56 @@
                 `;
                 toast.appendChild(highlight);
 
+                // Add close button styles
+                const closeBtn = toast.querySelector('.btn-close');
+                closeBtn.style.cssText = `
+                    background: none;
+                    border: none;
+                    color: var(--mac-charcoal);
+                    cursor: pointer;
+                    padding: 2px;
+                    margin-left: auto;
+                `;
+
                 document.body.appendChild(toast);
+
+                // Announce to screen reader
+                this.announceToScreenReader(message, type === 'error' ? 'assertive' : 'polite');
 
                 setTimeout(() => {
                     toast.style.animation = 'slideOut 0.3s ease-out';
                     setTimeout(() => toast.remove(), 300);
                 }, duration);
+            }
+
+            validateFormField(input, errorElementId, validationMessage) {
+                const errorElement = document.getElementById(errorElementId);
+                if (validationMessage) {
+                    // Show error
+                    input.setAttribute('aria-invalid', 'true');
+                    input.setAttribute('aria-describedby', errorElementId);
+                    if (errorElement) {
+                        errorElement.textContent = validationMessage;
+                        errorElement.style.display = 'block';
+                    }
+                    return false;
+                } else {
+                    // Clear error
+                    input.setAttribute('aria-invalid', 'false');
+                    input.removeAttribute('aria-describedby');
+                    if (errorElement) {
+                        errorElement.textContent = '';
+                        errorElement.style.display = 'none';
+                    }
+                    return true;
+                }
+            }
+
+            announceFormErrors(errors) {
+                if (errors.length > 0) {
+                    const errorList = errors.map(error => error.message).join(', ');
+                    this.announceToScreenReader(`Form validation errors: ${errorList}`, 'assertive');
+                }
             }
 
             async deleteLocation(id) {
@@ -2954,9 +3347,18 @@
                 const modal = document.getElementById('auth-modal');
                 if (modal) {
                     modal.classList.add('active');
+                    modal.setAttribute('aria-hidden', 'false');
+                    // Store return focus
+                    const authBtn = document.getElementById('auth-btn');
+                    if (authBtn) {
+                        authBtn.setAttribute('data-return-focus', 'auth-btn');
+                    }
                     // Focus on first input
-                    const firstInput = modal.querySelector('input');
-                    if (firstInput) firstInput.focus();
+                    setTimeout(() => {
+                        const firstInput = modal.querySelector('input');
+                        if (firstInput) firstInput.focus();
+                    }, 100);
+                    this.announceToScreenReader('Authentication dialog opened', 'assertive');
                 }
             }
 
@@ -2964,24 +3366,39 @@
                 const modal = document.getElementById('auth-modal');
                 if (modal) {
                     modal.classList.remove('active');
+                    modal.setAttribute('aria-hidden', 'true');
                     // Reset forms
                     const forms = modal.querySelectorAll('form');
                     forms.forEach(form => form.reset());
                     // Reset to sign-in tab
                     this.switchAuthTab('signin');
+                    this.announceToScreenReader('Authentication dialog closed');
                 }
             }
 
             switchAuthTab(tabName) {
                 // Update tab buttons
                 document.querySelectorAll('.auth-tab').forEach(tab => {
-                    tab.classList.toggle('active', tab.dataset.tab === tabName);
+                    const isActive = tab.dataset.tab === tabName;
+                    tab.classList.toggle('active', isActive);
+                    tab.setAttribute('aria-selected', isActive);
                 });
 
                 // Update form visibility
                 document.querySelectorAll('.auth-form').forEach(form => {
-                    form.classList.toggle('active', form.id === `${tabName}-form`);
+                    const isActive = form.id === `${tabName}-form`;
+                    form.classList.toggle('active', isActive);
+                    form.setAttribute('aria-hidden', !isActive);
                 });
+                
+                this.announceToScreenReader(`Switched to ${tabName} tab`);
+                
+                // Focus on first input in active form
+                setTimeout(() => {
+                    const activeForm = document.querySelector('.auth-form.active');
+                    const firstInput = activeForm?.querySelector('input');
+                    if (firstInput) firstInput.focus();
+                }, 100);
             }
 
             async handleSignIn(e) {

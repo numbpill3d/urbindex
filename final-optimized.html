@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urbindex - Urban Exploration Network</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></noscript>
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    
+    <!-- Critical CSS (above-the-fold) -->
+    <style>
+        /* Critical CSS - Above the fold styles only */
+        :root {
+            /* Y2K Mac OS Classic Color Palette */
+            --mac-platinum: #C0C0C0;
+            --mac-steel: #505050;
+            --mac-charcoal: #2A2A2A;
+            --mac-blue: #007AFF;
+            --mac-pink: #FF006E;
+            --mac-purple: #8B5CF6;
+            --mac-green: #00FF88;
+            --mac-orange: #FFA500;
+            
+            /* Typography */
+            --font-chicago: 'Chicago', 'Arial', sans-serif;
+            --font-geneva: 'Geneva', 'Arial', sans-serif;
+            --font-mono: 'Monaco', 'Courier New', monospace;
+            --font-impact: 'Impact', 'Arial Black', sans-serif;
+            
+            /* Theme */
+            --bg-primary: var(--mac-charcoal);
+            --bg-secondary: var(--mac-steel);
+            --bg-tertiary: var(--mac-platinum);
+            --accent-blue: var(--mac-blue);
+            --accent-purple: var(--mac-purple);
+            --text-primary: #FFFFFF;
+            --text-secondary: var(--mac-platinum);
+            --text-muted: #D0D0D0;
+            --border: var(--mac-steel);
+            --success: var(--mac-green);
+            --warning: var(--mac-orange);
+            --danger: #FF4444;
+            
+            /* Classic Mac OS Effects */
+            --shadow-mac: 2px 2px 4px rgba(0,0,0,0.3);
+            --transition: 0.2s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-chicago), 'Arial', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* Loading Screen - Critical */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--mac-charcoal) 0%, var(--mac-steel) 50%, var(--mac-charcoal) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-logo {
+            font-family: var(--font-impact), 'Arial Black', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple), var(--mac-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(0, 122, 255, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+            will-change: transform;
+            margin-bottom: 30px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--mac-steel);
+            border-top: 4px solid var(--mac-blue);
+            border-right: 4px solid var(--mac-purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            will-change: transform;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+        }
+
+        /* App Shell - Critical */
+        .app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .app.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .header {
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+            border-bottom: 2px solid var(--mac-charcoal);
+            padding: 0 20px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-mac);
+            will-change: transform;
+        }
+
+        .logo {
+            font-family: var(--font-impact), 'Arial Black', sans-serif;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .nav {
+            background: linear-gradient(to bottom, var(--mac-steel), var(--mac-charcoal));
+            border-bottom: 2px solid var(--mac-platinum);
+            padding: 6px 20px;
+            display: flex;
+            gap: 4px;
+            position: sticky;
+            top: 50px;
+            z-index: 90;
+            box-shadow: var(--shadow-mac);
+            will-change: transform;
+        }
+
+        .nav-btn {
+            background: var(--mac-steel);
+            border: 2px solid var(--mac-charcoal);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            will-change: background-color, color;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--mac-blue);
+            color: white;
+            border-color: var(--mac-blue);
+        }
+
+        .main {
+            flex: 1;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .view { 
+            display: none; 
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .view.active { 
+            display: block; 
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Skip Links for Accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--mac-blue);
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            z-index: 10000;
+            border: 2px solid var(--mac-charcoal);
+            box-shadow: var(--shadow-mac);
+        }
+
+        .skip-link:focus {
+            top: 6px;
+        }
+
+        /* Status indicators */
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--mac-green);
+            box-shadow: 0 0 5px var(--mac-green);
+        }
+
+        .status-dot.offline {
+            background: var(--danger);
+            box-shadow: 0 0 5px var(--danger);
+        }
+
+        .btn {
+            background: var(--mac-steel);
+            border: 2px solid var(--mac-charcoal);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            will-change: background-color, color;
+        }
+
+        .btn:hover, .btn:focus {
+            background: var(--mac-blue);
+            color: white;
+        }
+
+        .btn-primary {
+            background: var(--mac-blue);
+            color: white;
+            border-color: var(--mac-blue);
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
+            border: 2px solid var(--mac-charcoal);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-mac);
+            transition: var(--transition);
+            z-index: 1000;
+            will-change: transform, box-shadow;
+        }
+
+        .fab:hover, .fab:focus {
+            transform: scale(1.05);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .main { padding: 12px; }
+            .nav { padding: 4px 8px; gap: 2px; }
+            .nav-btn span { display: none; }
+            .header { padding: 0 8px; height: 46px; }
+            .logo { font-size: 16px; }
+            .status { font-size: 10px; }
+            .fab { bottom: 16px; right: 16px; width: 44px; height: 44px; }
+        }
+    </style>
+
+    <!-- Performance monitoring -->
+    <script>
+        // Performance tracking
+        window.performanceMarkers = {
+            domContentLoaded: 0,
+            pageLoad: 0,
+            firstPaint: 0,
+            firstContentfulPaint: 0
+        };
+
+        // Mark performance milestones
+        if ('performance' in window) {
+            performance.mark('navigation-start');
+            window.addEventListener('load', () => {
+                performance.mark('navigation-end');
+                performance.measure('navigation', 'navigation-start', 'navigation-end');
+                
+                const navigation = performance.getEntriesByName('navigation')[0];
+                window.performanceMarkers.pageLoad = navigation.loadEventEnd - navigation.navigationStart;
+            });
+        }
+
+        // Enhanced loading screen optimization
+        document.addEventListener('DOMContentLoaded', () => {
+            window.performanceMarkers.domContentLoaded = performance.now();
+            // Optimize initial paint
+            requestAnimationFrame(() => {
+                document.documentElement.classList.add('loaded');
+            });
+        });
+    </script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-logo">URBINDEX</div>
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Initializing Urban Explorer...</div>
+    </div>
+
+    <!-- Skip Links for Keyboard Navigation -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <a href="#navigation" class="skip-link">Skip to navigation</a>
+
+    <div class="app" id="app">
+        <header class="header" role="banner">
+            <div class="logo" aria-label="Urbindex - Urban Exploration Network">URBINDEX</div>
+            <div class="status" aria-live="polite" aria-atomic="true">
+                <div class="status-dot" id="status-dot" aria-hidden="true"></div>
+                <span id="status-text">Connected</span>
+            </div>
+            <button class="btn btn-primary" id="auth-btn" aria-label="Authentication and Account Management" style="font-weight: 700;">
+                <i class="fas fa-user" aria-hidden="true"></i>
+                <span>Sign In / Register</span>
+            </button>
+        </header>
+
+        <nav class="nav" role="navigation" aria-label="Main Navigation" id="navigation">
+            <button class="nav-btn active" data-view="map" aria-label="Map View" aria-current="page">
+                <i class="fas fa-map" aria-hidden="true"></i>
+                <span>Map</span>
+            </button>
+            <button class="nav-btn" data-view="locations" aria-label="Locations View">
+                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                <span>Locations</span>
+            </button>
+            <button class="nav-btn" data-view="profile" aria-label="Profile View">
+                <i class="fas fa-user-circle" aria-hidden="true"></i>
+                <span>Profile</span>
+            </button>
+        </nav>
+
+        <main class="main" role="main" id="main-content">
+            <!-- Views will be loaded dynamically -->
+        </main>
+
+        <button class="fab" id="add-location-fab" onclick="app.showAddLocationModal()"
+                style="display:none;" aria-label="Add New Location" role="button">
+            <i class="fas fa-plus" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <!-- Global error handling -->
+    <script>
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.error);
+            if ('performance' in window) {
+                performance.mark(`error-${Date.now()}`);
+            }
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            e.preventDefault();
+        });
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+            });
+        }
+    </script>
+
+    <!-- Load dependencies with optimization -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer onerror="console.error('Failed to load Leaflet')"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer onerror="console.error('Failed to load Firebase App')"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" defer onerror="console.error('Failed to load Firebase Auth')"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" defer onerror="console.error('Failed to load Firebase Firestore')"></script>
+    
+    <!-- Load application modules -->
+    <script type="module">
+        // Initialize app when dependencies are loaded
+        const initApp = async () => {
+            // Wait for dependencies with timeout
+            const waitForDeps = () => new Promise((resolve) => {
+                let attempts = 0;
+                const checkDeps = () => {
+                    if (window.leaflet && window.firebase) {
+                        resolve();
+                    } else if (attempts > 200) {
+                        console.warn('Dependencies timeout');
+                        resolve(); // Continue anyway
+                    } else {
+                        attempts++;
+                        setTimeout(checkDeps, 50);
+                    }
+                };
+                checkDeps();
+            });
+
+            await waitForDeps();
+            
+            // Load core app
+            try {
+                const { UrbindexApp } = await import('./js/app-optimized.js');
+                window.app = new UrbindexApp();
+                
+                // Hide loading screen
+                setTimeout(() => {
+                    const loadingScreen = document.getElementById('loading-screen');
+                    if (loadingScreen) {
+                        loadingScreen.style.opacity = '0';
+                        loadingScreen.style.transition = 'opacity 0.5s ease';
+                        setTimeout(() => loadingScreen.style.display = 'none', 500);
+                    }
+                }, 1000);
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                document.getElementById('loading-screen').innerHTML = '<div style="color: white; text-align: center;">Failed to load application</div>';
+            }
+        };
+
+        // Start initialization
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+</body>
+</html>
