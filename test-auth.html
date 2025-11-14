@@ -83,6 +83,7 @@
         </ul>
     </div>
 
+    <script src="firebase-config.js" onerror="console.error('Failed to load Firebase configuration')"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -99,14 +100,13 @@
             try {
                 showStatus('firebase-status', 'Initializing Firebase...', 'info');
                 
-                const config = {
-                    apiKey: "AIzaSyCifqLPnCuvRVZ9hvHIJVBmHkzB5nJyqtc",
-                    authDomain: "urbindex-d69e1.firebaseapp.com",
-                    projectId: "urbindex-d69e1",
-                    storageBucket: "urbindex-d69e1.firebasestorage.app",
-                    messagingSenderId: "889914696327",
-                    appId: "1:889914696327:web:351daa656a4d12fa828e22"
-                };
+                // Use secure Firebase configuration
+                if (typeof window.firebaseConfig === 'undefined') {
+                    showStatus('firebase-status', '❌ Configuration error - Firebase config missing', 'error');
+                    return;
+                }
+                
+                const config = window.firebaseConfig;
                 
                 if (!firebase.apps.length) {
                     app = firebase.initializeApp(config);

@@ -8,14 +8,21 @@
     <div id="status">Testing...</div>
     <button id="signIn">Sign In Anonymously</button>
 
+    <script src="firebase-config.js" onerror="console.error('Failed to load Firebase configuration')"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     
     <script>
-        const config = {
-            apiKey: "AIzaSyCifqLPnCuvRVZ9hvHIJVBmHkzB5nJyqtc",
-            authDomain: "urbindex-d69e1.firebaseapp.com",
-            projectId: "urbindex-d69e1"
+        // Use secure Firebase configuration
+        if (typeof window.firebaseConfig === 'undefined') {
+            console.error('Firebase configuration not found');
+            document.getElementById('status').innerHTML = '❌ Configuration error - Firebase config missing';
+        }
+        
+        const config = window.firebaseConfig || {
+            apiKey: "YOUR_API_KEY", // Replace with actual environment variable
+            authDomain: "your_project.firebaseapp.com",
+            projectId: "your_project_id"
         };
 
         firebase.initializeApp(config);

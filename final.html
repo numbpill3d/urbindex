@@ -806,7 +806,7 @@
 
         .risk {
             padding: 2px 6px;
-            border-radius: 3px;
+            border-radius: 0;
             font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
@@ -886,25 +886,25 @@
         
         /* Fix for mobile layout - Y2K Mac OS Classic */
         @media (max-width: 768px) {
-            .main { padding: 12px; }
+            .main { padding: 8px; }
 
             .map-layout {
                 grid-template-columns: 1fr;
                 grid-template-rows: auto 1fr;
-                gap: 12px;
-                height: calc(100vh - 100px);
+                gap: 8px;
+                height: calc(100vh - 90px);
             }
 
             .sidebar {
                 order: 2;
-                max-height: 200px;
+                max-height: 250px;
                 overflow-y: auto;
-                flex-direction: row;
+                flex-direction: column;
                 gap: 8px;
             }
 
             .panel {
-                min-width: 180px;
+                min-width: 100%;
                 flex-shrink: 0;
                 padding: 8px;
             }
@@ -916,18 +916,68 @@
             }
 
             .modal-content {
-                width: 95%;
-                margin: 16px;
-                max-height: 90vh;
-                padding: 16px;
+                width: 98%;
+                margin: 8px;
+                max-height: 95vh;
+                padding: 12px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
             }
 
             .fab {
-                bottom: 16px;
-                right: 16px;
-                width: 44px;
-                height: 44px;
-                font-size: 1.1rem;
+                bottom: 20px;
+                right: 20px;
+                width: 56px;
+                height: 56px;
+                font-size: 1.3rem;
+            }
+
+            .btn, .nav-btn, .auth-tab {
+                min-height: 48px;
+                min-width: 48px;
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .modal-close {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .input, .textarea, .select {
+                font-size: 16px;
+                padding: 12px 14px;
+                min-height: 48px;
+            }
+
+            .tags-input-container {
+                min-height: 48px;
+                padding: 10px;
+            }
+
+            .predefined-tag {
+                min-height: 40px;
+                min-width: 40px;
+                padding: 6px 12px;
+                font-size: 11px;
+                margin: 2px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
             }
 
             /* Mobile search and filter layout - Y2K Mac OS Classic */
@@ -1853,8 +1903,116 @@
             console.error('Unhandled promise rejection:', e.reason);
             e.preventDefault();
         });
+
+        // PWA Installation Detection and Prompt
+        let deferredPrompt;
+        let installBannerShown = false;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show custom install banner after a delay
+            setTimeout(() => {
+                if (!installBannerShown && !window.matchMedia('(display-mode: standalone)').matches) {
+                    showInstallBanner();
+                    installBannerShown = true;
+                }
+            }, 10000); // Show after 10 seconds
+        });
+
+        function showInstallBanner() {
+            // Create install banner
+            const banner = document.createElement('div');
+            banner.id = 'pwa-install-banner';
+            banner.innerHTML = `
+                <div style="background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+                           border: 2px solid var(--mac-charcoal);
+                           padding: 16px;
+                           margin: 16px;
+                           box-shadow: var(--shadow-mac);
+                           position: fixed;
+                           bottom: 80px;
+                           left: 16px;
+                           right: 16px;
+                           z-index: 2000;
+                           border-radius: 0;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 48px; height: 48px;
+                                    background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
+                                    border: 2px solid var(--mac-charcoal);
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;">
+                            <i class="fas fa-map-marked-alt" style="color: white; font-size: 1.2rem;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-family: var(--font-impact);
+                                       font-size: 14px;
+                                       font-weight: 900;
+                                       text-transform: uppercase;
+                                       letter-spacing: 1px;
+                                       color: var(--mac-blue);">Install Urbindex</div>
+                            <div style="font-family: var(--font-geneva);
+                                       font-size: 11px;
+                                       color: var(--text-secondary);
+                                       margin-top: 2px;">Get the full app experience with offline access</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button id="install-btn" class="btn btn-primary" style="font-size: 11px; padding: 6px 12px;">
+                                <i class="fas fa-download"></i> Install
+                            </button>
+                            <button id="dismiss-btn" class="btn" style="font-size: 11px; padding: 6px 12px;">
+                                <i class="fas fa-times"></i> Dismiss
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(banner);
+            
+            // Install button handler
+            document.getElementById('install-btn').addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    
+                    if (outcome === 'accepted') {
+                        console.log('PWA installation accepted');
+                        banner.remove();
+                    }
+                    deferredPrompt = null;
+                }
+            });
+            
+            // Dismiss button handler
+            document.getElementById('dismiss-btn').addEventListener('click', () => {
+                banner.remove();
+            });
+            
+            // Auto-dismiss after 30 seconds
+            setTimeout(() => {
+                if (banner.parentNode) {
+                    banner.remove();
+                }
+            }, 30000);
+        }
+
+        // Listen for successful installation
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('PWA was installed successfully');
+            const banner = document.getElementById('pwa-install-banner');
+            if (banner) banner.remove();
+            
+            // Show success message
+            if (window.app && window.app.showToast) {
+                window.app.showToast('Urbindex installed successfully!', 'success');
+            }
+        });
     </script>
     
+    <script src="firebase-config.js" onerror="console.error('Failed to load Firebase configuration')"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onerror="console.error('Failed to load Leaflet')"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" onerror="console.error('Failed to load Firebase App')"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" onerror="console.error('Failed to load Firebase Auth')"></script>
@@ -1903,14 +2061,13 @@
                     throw new Error('Firebase SDK failed to load. Please check your internet connection and refresh the page.');
                 }
 
-                const config = {
-                    apiKey: "AIzaSyCifqLPnCuvRVZ9hvHIJVBmHkzB5nJyqtc",
-                    authDomain: "urbindex-d69e1.firebaseapp.com",
-                    projectId: "urbindex-d69e1",
-                    storageBucket: "urbindex-d69e1.firebasestorage.app",
-                    messagingSenderId: "889914696327",
-                    appId: "1:889914696327:web:351daa656a4d12fa828e22"
-                };
+                // Load secure Firebase configuration
+                if (typeof window.firebaseConfig === 'undefined') {
+                    console.error('Firebase configuration not found');
+                    throw new Error('Firebase configuration is missing. Please check your environment variables or firebase-config.js');
+                }
+
+                const config = window.firebaseConfig;
 
                 try {
                     if (!firebase.apps.length) {
@@ -2484,7 +2641,7 @@
                     tagsHtml = `
                         <div style="display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0;">
                             ${data.tags.slice(0, 5).map(tag =>
-                                `<span style="background: var(--mac-blue); color: white; padding: 1px 4px; border-radius: 2px; font-size: 0.7em;">${this.escapeHtml(tag)}</span>`
+                                `<span style="background: var(--mac-blue); color: white; padding: 1px 4px; border-radius: 0; font-size: 0.7em;">${this.escapeHtml(tag)}</span>`
                             ).join('')}
                             ${data.tags.length > 5 ? `<span style="font-size: 0.7em; color: #666;">+${data.tags.length - 5} more</span>` : ''}
                         </div>
@@ -2500,14 +2657,14 @@
                             ${escapedDescription}
                         </div>
                         <div style="display: flex; gap: 6px; font-size: 0.8em; margin-bottom: 8px;">
-                            <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; color: #333;">${category}</span>
-                            <span style="background: ${riskColor}; padding: 2px 6px; border-radius: 4px; color: white;">${data.riskLevel || 'unknown'}</span>
+                            <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 0; color: #333;">${category}</span>
+                            <span style="background: ${riskColor}; padding: 2px 6px; border-radius: 0; color: white;">${data.riskLevel || 'unknown'}</span>
                         </div>
                         ${tagsHtml}
                         ${this.currentUser ? `
                             <div style="display: flex; gap: 4px; margin-top: 8px;">
-                                <button onclick="app.editLocation('${docId}')" style="font-size: 0.8em; padding: 4px 8px;">Edit</button>
-                                <button onclick="app.deleteLocation('${docId}')" style="font-size: 0.8em; padding: 4px 8px; background: #ff3860; color: white;">Delete</button>
+                                <button onclick="app.editLocation('${docId}')" style="font-size: 0.8em; padding: 4px 8px; border-radius: 0;">Edit</button>
+                                <button onclick="app.deleteLocation('${docId}')" style="font-size: 0.8em; padding: 4px 8px; background: #ff3860; color: white; border-radius: 0;">Delete</button>
                             </div>
                         ` : ''}
                     </div>
