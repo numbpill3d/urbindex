@@ -1506,6 +1506,133 @@
             font-size: 12px;
             box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
         }
+
+        /* Geocoded marker styling */
+        .geocoded-marker {
+            animation: pulseMarker 0.8s ease-in-out;
+        }
+
+        @keyframes pulseMarker {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Enhanced address input styling */
+        #location-address:focus {
+            border-color: var(--mac-blue);
+            box-shadow: 0 0 0 2px rgba(0,122,255,0.3), inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+        }
+
+        /* Loading states for buttons */
+        #find-location-btn:disabled, #use-my-location-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background: var(--mac-steel) !important;
+            color: var(--text-muted) !important;
+        }
+
+        /* Location detection indicators */
+        .location-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--mac-platinum);
+            border: 2px solid var(--mac-charcoal);
+            padding: 8px 12px;
+            box-shadow: var(--shadow-mac);
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            color: var(--mac-charcoal);
+        }
+
+        .location-indicator.detecting {
+            display: flex;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .location-indicator.success {
+            background: var(--mac-green);
+            color: var(--mac-charcoal);
+            border-color: var(--mac-green);
+        }
+
+        .location-indicator.error {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        .location-indicator.fallback {
+            background: var(--mac-orange);
+            color: white;
+            border-color: var(--mac-orange);
+        }
+
+        /* Re-center button */
+        .recenter-btn {
+            position: absolute;
+            top: 60px;
+            right: 12px;
+            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
+            border: 2px solid var(--mac-charcoal);
+            color: white;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: var(--bevel-light);
+            z-index: 1000;
+        }
+
+        .recenter-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--bevel-dark);
+        }
+
+        .recenter-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .recenter-btn.loading {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        /* User location marker pulse animation */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .user-location-marker {
+            animation: pulse 2s infinite;
+        }
     </style>
 </head>
 <body>
@@ -1680,6 +1807,14 @@
 
                     <div class="map-container" role="application" aria-label="Interactive Map for Urban Exploration" aria-describedby="map-instructions">
                         <div id="map" tabindex="0" aria-label="Interactive map showing urban exploration locations"></div>
+                        <div id="location-indicator" class="location-indicator">
+                            <i class="fas fa-location-arrow" aria-hidden="true"></i>
+                            <span>Detecting location...</span>
+                        </div>
+                        <button id="recenter-btn" class="recenter-btn" onclick="app.recenterToUserLocation()" aria-label="Re-center map to your current location">
+                            <i class="fas fa-crosshairs" aria-hidden="true"></i>
+                            <span>My Location</span>
+                        </button>
                         <div id="map-instructions" class="sr-only" style="position: absolute; left: -10000px;">
                             Interactive map for exploring urban locations. Use arrow keys to navigate, Enter to select markers, and Escape to exit map mode.
                         </div>
@@ -1841,9 +1976,38 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Coordinates</label>
+                    <label class="form-label" for="location-address">
+                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        Address
+                    </label>
+                    <div style="display: flex; gap: 8px; align-items: stretch;">
+                        <input class="input" type="text" id="location-address" name="address"
+                               placeholder="Enter address (e.g., 123 Main St, City, State)"
+                               aria-describedby="location-address-help" autocomplete="off" style="flex: 1;">
+                        <button type="button" class="btn btn-primary" id="find-location-btn"
+                                aria-label="Find location using address" style="min-width: 44px;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div id="location-address-help" class="field-help">
+                        Enter an address to automatically find its location on the map
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" style="margin: 0;">
+                            <i class="fas fa-crosshairs" aria-hidden="true"></i>
+                            Coordinates
+                        </label>
+                        <button type="button" class="btn btn-primary" id="use-my-location-btn"
+                                aria-label="Use my current location" style="font-size: 10px; padding: 4px 8px;">
+                            <i class="fas fa-location-arrow"></i>
+                            Use My Location
+                        </button>
+                    </div>
                     <div class="coordinates-display" id="coordinates-display" aria-live="polite">
-                        Click on map to set location
+                        Click on map or use address to set location
                     </div>
                 </div>
 
@@ -2025,6 +2189,7 @@
                 this.currentUser = null;
                 this.markers = new Map();
                 this.selectedLatLng = null;
+                this.tempMarker = null;
                 this.init();
                 this.initTagSystem();
             }
@@ -2101,50 +2266,307 @@
                 }
 
                 try {
-                    // Get user's current location for map centering
-                    this.getUserLocation().then(([lat, lng]) => {
-                        this.initializeMap(lat, lng);
-                        this.showToast('Map centered on your current location', 'success');
-                    }).catch((error) => {
-                        console.warn('Using default location:', error.message);
-                        this.initializeMap(40.7128, -74.0060); // Fallback to New York City
-                        this.showToast('Map centered on default location (New York City)', 'info');
-                    });
+                    // Enhanced map initialization with location detection
+                    this.initializeMapWithLocation();
                 } catch (error) {
                     console.error('Map initialization failed:', error);
                     this.showError('Failed to initialize map. Please check your internet connection and refresh the page.');
                 }
             }
 
+            async initializeMapWithLocation() {
+                this.showLocationIndicator('detecting', 'Detecting your location...');
+                
+                try {
+                    const coordinates = await this.getUserLocationWithFallbacks();
+                    const [lat, lng] = coordinates;
+                    
+                    this.initializeMap(lat, lng);
+                    this.showLocationIndicator('success', 'Location detected!');
+                    
+                    // Cache the location for this session
+                    this.cacheUserLocation(lat, lng);
+                    
+                    setTimeout(() => {
+                        this.hideLocationIndicator();
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.warn('Using fallback location:', error.message);
+                    
+                    // Try to get fallback from browser locale
+                    const fallbackCoords = this.getLocaleBasedFallback();
+                    this.initializeMap(fallbackCoords[0], fallbackCoords[1]);
+                    
+                    this.showLocationIndicator('fallback', 'Using default location');
+                    this.showToast('Map centered on default location', 'info');
+                    
+                    setTimeout(() => {
+                        this.hideLocationIndicator();
+                    }, 3000);
+                }
+            }
+
+            async getUserLocationWithFallbacks() {
+                // Check if we have a cached location that's still valid (less than 5 minutes old)
+                const cachedLocation = this.getCachedUserLocation();
+                if (cachedLocation) {
+                    return cachedLocation;
+                }
+
+                // Check if geolocation is available
+                if (!this.isGeolocationAvailable()) {
+                    throw new Error('Geolocation is not supported by this browser');
+                }
+
+                // Try to get user's current location
+                try {
+                    return await this.getUserLocation();
+                } catch (error) {
+                    // If user denies permission or location is unavailable, try to get country-based fallback
+                    console.warn('Geolocation failed:', error.message);
+                    
+                    // Try to get location from browser locale/IP-based services
+                    const localeCoords = await this.getLocaleBasedLocation();
+                    if (localeCoords) {
+                        return localeCoords;
+                    }
+                    
+                    // Re-throw the original error if all fallbacks fail
+                    throw error;
+                }
+            }
+
+            isGeolocationAvailable() {
+                return 'geolocation' in navigator;
+            }
+
+            async getLocaleBasedLocation() {
+                try {
+                    // Try to get location from browser locale
+                    const locale = navigator.language || navigator.userLanguage || 'en-US';
+                    
+                    // Simple locale-based fallbacks for major regions
+                    const localeMap = {
+                        'en-US': [39.8283, -98.5795], // US Center
+                        'en-GB': [54.7023, -3.2766],  // UK Center
+                        'en-CA': [56.1304, -106.3468], // Canada Center
+                        'en-AU': [-25.2744, 133.7751], // Australia Center
+                        'en-NZ': [-40.9006, 174.8860], // New Zealand Center
+                        'en-IN': [20.5937, 78.9629],   // India Center
+                        'en-ZA': [-30.5595, 22.9375],  // South Africa Center
+                        'en': [0, 0] // Global center
+                    };
+                    
+                    // Find the best match for the locale
+                    const localeCode = locale.split('-').slice(0, 2).join('-');
+                    const coords = localeMap[localeCode] || localeMap[locale.split('-')[0]] || localeMap['en'];
+                    
+                    console.log(`Using locale-based fallback for ${locale}: ${coords[0]}, ${coords[1]}`);
+                    return coords;
+                    
+                } catch (error) {
+                    console.warn('Failed to get locale-based location:', error);
+                    return null;
+                }
+            }
+
+            getLocaleBasedFallback() {
+                try {
+                    const coords = this.getLocaleBasedLocation();
+                    return coords || [0, 0]; // Global center as ultimate fallback
+                } catch (error) {
+                    return [0, 0]; // Global center
+                }
+            }
+
+            cacheUserLocation(lat, lng) {
+                try {
+                    const locationData = {
+                        lat,
+                        lng,
+                        timestamp: Date.now()
+                    };
+                    sessionStorage.setItem('urbindex_user_location', JSON.stringify(locationData));
+                } catch (error) {
+                    console.warn('Failed to cache user location:', error);
+                }
+            }
+
+            getCachedUserLocation() {
+                try {
+                    const cached = sessionStorage.getItem('urbindex_user_location');
+                    if (cached) {
+                        const data = JSON.parse(cached);
+                        // Check if cache is less than 5 minutes old
+                        const maxAge = 5 * 60 * 1000; // 5 minutes
+                        if (Date.now() - data.timestamp < maxAge) {
+                            console.log('Using cached location:', data.lat, data.lng);
+                            return [data.lat, data.lng];
+                        } else {
+                            console.log('Cached location expired');
+                            sessionStorage.removeItem('urbindex_user_location');
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Failed to get cached location:', error);
+                    sessionStorage.removeItem('urbindex_user_location');
+                }
+                return null;
+            }
+
+            showLocationIndicator(type, message) {
+                const indicator = document.getElementById('location-indicator');
+                if (!indicator) return;
+                
+                // Remove all classes first
+                indicator.className = 'location-indicator';
+                
+                // Add appropriate class and content
+                indicator.classList.add(type);
+                indicator.querySelector('span').textContent = message;
+                
+                // Show the indicator
+                indicator.style.display = 'flex';
+            }
+
+            hideLocationIndicator() {
+                const indicator = document.getElementById('location-indicator');
+                if (indicator) {
+                    indicator.style.display = 'none';
+                }
+            }
+
+            setRecenterButtonState(state) {
+                const button = document.getElementById('recenter-btn');
+                if (!button) return;
+                
+                const icon = button.querySelector('i');
+                const span = button.querySelector('span');
+                
+                // Remove all state classes
+                button.classList.remove('loading');
+                
+                switch (state) {
+                    case 'loading':
+                        button.disabled = true;
+                        button.classList.add('loading');
+                        if (icon) icon.className = 'fas fa-spinner fa-spin';
+                        if (span) span.textContent = 'Locating...';
+                        break;
+                    case 'success':
+                        if (icon) icon.className = 'fas fa-check';
+                        if (span) span.textContent = 'Found!';
+                        break;
+                    case 'error':
+                        if (icon) icon.className = 'fas fa-exclamation-triangle';
+                        if (span) span.textContent = 'Failed';
+                        button.disabled = false; // Allow retry
+                        break;
+                    default:
+                        button.disabled = false;
+                        if (icon) icon.className = 'fas fa-crosshairs';
+                        if (span) span.textContent = 'My Location';
+                        break;
+                }
+            }
+
+            async recenterToUserLocation() {
+                if (!this.map) {
+                    this.showToast('Map not initialized', 'error');
+                    return;
+                }
+
+                try {
+                    this.showToast('Finding your location...', 'info');
+                    const [lat, lng] = await this.getUserLocation();
+                    
+                    // Center the map on the user's location
+                    this.map.setView([lat, lng], 15);
+                    
+                    // Add a temporary marker to show the user's position
+                    const userMarker = L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            className: 'user-location-marker',
+                            html: '<div style="background: var(--mac-blue); width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); animation: pulse 2s infinite;"></div>',
+                            iconSize: [16, 16],
+                            iconAnchor: [8, 8]
+                        })
+                    }).addTo(this.map);
+                    
+                    // Show popup with location info
+                    userMarker.bindPopup(`
+                        <div style="text-align: center; font-family: var(--font-geneva), Arial, sans-serif; font-size: 12px;">
+                            <strong style="color: var(--mac-blue);">Your Location</strong><br>
+                            <span style="color: #666;">${lat.toFixed(6)}, ${lng.toFixed(6)}</span>
+                        </div>
+                    `).openPopup();
+                    
+                    // Remove marker after 10 seconds
+                    setTimeout(() => {
+                        this.map.removeLayer(userMarker);
+                    }, 10000);
+                    
+                    this.showToast('Map centered on your location!', 'success');
+                    
+                    // Cache the location
+                    this.cacheUserLocation(lat, lng);
+                    
+                } catch (error) {
+                    console.error('Failed to recenter to user location:', error);
+                    this.showToast(error.message, 'error');
+                }
+            }
+
             async getUserLocation() {
                 return new Promise((resolve, reject) => {
-                    if (!navigator.geolocation) {
+                    if (!this.isGeolocationAvailable()) {
                         reject(new Error('Geolocation is not supported by this browser'));
                         return;
                     }
 
+                    // Show loading state in recenter button
+                    this.setRecenterButtonState('loading');
+
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
-                            resolve([position.coords.latitude, position.coords.longitude]);
+                            const [lat, lng] = [position.coords.latitude, position.coords.longitude];
+                            console.log(`Geolocation successful: ${lat}, ${lng}`);
+                            
+                            // Reset button state
+                            this.setRecenterButtonState('success');
+                            setTimeout(() => {
+                                this.setRecenterButtonState('default');
+                            }, 2000);
+                            
+                            resolve([lat, lng]);
                         },
                         (error) => {
+                            console.warn('Geolocation error:', error);
+                            
+                            // Reset button state
+                            this.setRecenterButtonState('error');
+                            setTimeout(() => {
+                                this.setRecenterButtonState('default');
+                            }, 3000);
+                            
                             let message = 'Unable to retrieve your location';
                             switch (error.code) {
                                 case error.PERMISSION_DENIED:
-                                    message = 'Location access denied. Please enable location permissions.';
+                                    message = 'Location access denied. Please enable location permissions and try again.';
                                     break;
                                 case error.POSITION_UNAVAILABLE:
-                                    message = 'Location information is unavailable.';
+                                    message = 'Location information is unavailable. Try again later.';
                                     break;
                                 case error.TIMEOUT:
-                                    message = 'Location request timed out.';
+                                    message = 'Location request timed out. Please try again.';
                                     break;
                             }
                             reject(new Error(message));
                         },
                         {
                             enableHighAccuracy: true,
-                            timeout: 10000,
+                            timeout: 15000, // Increased timeout
                             maximumAge: 300000 // Cache location for 5 minutes
                         }
                     );
@@ -2200,6 +2622,9 @@
                 if (passwordResetForm) {
                     passwordResetForm.addEventListener('submit', (e) => this.handlePasswordReset(e));
                 }
+
+                // Initialize geocoding functionality
+                this.initGeocoding();
 
                 // Add accessibility improvements
                 this.initKeyboardNavigation();
@@ -2349,6 +2774,252 @@
                         liveRegion.textContent = '';
                     }, 1000);
                 }
+            }
+
+            initGeocoding() {
+                // Set up event listeners for geocoding functionality
+                const findLocationBtn = document.getElementById('find-location-btn');
+                const useMyLocationBtn = document.getElementById('use-my-location-btn');
+                const addressInput = document.getElementById('location-address');
+
+                if (findLocationBtn) {
+                    findLocationBtn.addEventListener('click', () => this.handleAddressLookup());
+                }
+
+                if (useMyLocationBtn) {
+                    useMyLocationBtn.addEventListener('click', () => this.handleMyLocation());
+                }
+
+                // Allow Enter key in address field
+                if (addressInput) {
+                    addressInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.handleAddressLookup();
+                        }
+                    });
+
+                    // Add debouncing for address typing
+                    let searchTimeout;
+                    addressInput.addEventListener('input', () => {
+                        clearTimeout(searchTimeout);
+                        searchTimeout = setTimeout(() => {
+                            // Optional: could add auto-suggestions here
+                        }, 500);
+                    });
+                }
+            }
+
+            async handleAddressLookup() {
+                const addressInput = document.getElementById('location-address');
+                const findLocationBtn = document.getElementById('find-location-btn');
+                const coordsDisplay = document.getElementById('coordinates-display');
+
+                if (!addressInput) return;
+
+                const address = addressInput.value.trim();
+                if (!address) {
+                    this.showToast('Please enter an address', 'warning');
+                    addressInput.focus();
+                    return;
+                }
+
+                // Disable button and show loading
+                if (findLocationBtn) {
+                    const originalHTML = findLocationBtn.innerHTML;
+                    findLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    findLocationBtn.disabled = true;
+                }
+
+                // Update display
+                if (coordsDisplay) {
+                    coordsDisplay.textContent = 'Finding location...';
+                    coordsDisplay.style.background = 'linear-gradient(to right, #f0f0f0, #e0e0e0)';
+                }
+
+                try {
+                    const coordinates = await this.geocodeAddress(address);
+                    if (coordinates) {
+                        await this.setLocationFromCoordinates(coordinates.lat, coordinates.lng, address);
+                        this.showToast(`Found location: ${coordinates.displayName}`, 'success');
+                    } else {
+                        throw new Error('Address not found');
+                    }
+                } catch (error) {
+                    console.error('Geocoding error:', error);
+                    let message = 'Failed to find location';
+                    if (error.message.includes('rate limit')) {
+                        message = 'Rate limit exceeded. Please wait a moment and try again.';
+                    } else if (error.message.includes('not found')) {
+                        message = 'Address not found. Please check the spelling and try again.';
+                    }
+                    this.showToast(message, 'error');
+                    
+                    if (coordsDisplay) {
+                        coordsDisplay.textContent = 'Click on map to set location';
+                        coordsDisplay.style.background = 'white';
+                    }
+                } finally {
+                    // Re-enable button
+                    if (findLocationBtn) {
+                        findLocationBtn.innerHTML = '<i class="fas fa-search"></i>';
+                        findLocationBtn.disabled = false;
+                    }
+                }
+            }
+
+            async handleMyLocation() {
+                const useMyLocationBtn = document.getElementById('use-my-location-btn');
+                const coordsDisplay = document.getElementById('coordinates-display');
+
+                // Disable button and show loading
+                if (useMyLocationBtn) {
+                    const originalHTML = useMyLocationBtn.innerHTML;
+                    useMyLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    useMyLocationBtn.disabled = true;
+                }
+
+                if (coordsDisplay) {
+                    coordsDisplay.textContent = 'Getting your location...';
+                    coordsDisplay.style.background = 'linear-gradient(to right, #f0f0f0, #e0e0e0)';
+                }
+
+                try {
+                    const [lat, lng] = await this.getUserLocation();
+                    const address = await this.reverseGeocode(lat, lng);
+                    await this.setLocationFromCoordinates(lat, lng, address);
+                    this.showToast('Location set to your current position', 'success');
+                } catch (error) {
+                    console.error('Geolocation error:', error);
+                    let message = 'Failed to get your location';
+                    if (error.message.includes('denied')) {
+                        message = 'Location access denied. Please enable location permissions.';
+                    } else if (error.message.includes('unavailable')) {
+                        message = 'Location information is unavailable.';
+                    } else if (error.message.includes('timeout')) {
+                        message = 'Location request timed out.';
+                    }
+                    this.showToast(message, 'error');
+                    
+                    if (coordsDisplay) {
+                        coordsDisplay.textContent = 'Click on map to set location';
+                        coordsDisplay.style.background = 'white';
+                    }
+                } finally {
+                    // Re-enable button
+                    if (useMyLocationBtn) {
+                        useMyLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> Use My Location';
+                        useMyLocationBtn.disabled = false;
+                    }
+                }
+            }
+
+            async geocodeAddress(address) {
+                try {
+                    // Nominatim API call with proper headers
+                    const encodedAddress = encodeURIComponent(address);
+                    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1&addressdetails=1`;
+                    
+                    const response = await fetch(url, {
+                        headers: {
+                            'User-Agent': 'Urbindex/1.0 (Urban Exploration Network)'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 429) {
+                            throw new Error('rate limit');
+                        }
+                        throw new Error('Geocoding service unavailable');
+                    }
+
+                    const data = await response.json();
+                    
+                    if (!data || data.length === 0) {
+                        throw new Error('not found');
+                    }
+
+                    const result = data[0];
+                    return {
+                        lat: parseFloat(result.lat),
+                        lng: parseFloat(result.lon),
+                        displayName: result.display_name
+                    };
+                } catch (error) {
+                    console.error('Nominatim geocoding error:', error);
+                    throw error;
+                }
+            }
+
+            async reverseGeocode(lat, lng) {
+                try {
+                    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
+                    
+                    const response = await fetch(url, {
+                        headers: {
+                            'User-Agent': 'Urbindex/1.0 (Urban Exploration Network)'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Reverse geocoding failed');
+                    }
+
+                    const data = await response.json();
+                    return data.display_name || 'Current location';
+                } catch (error) {
+                    console.error('Reverse geocoding error:', error);
+                    return 'Current location';
+                }
+            }
+
+            async setLocationFromCoordinates(lat, lng, address = null) {
+                // Set the coordinates
+                this.selectedLatLng = { lat, lng };
+                
+                // Update the coordinates display
+                const coordsDisplay = document.getElementById('coordinates-display');
+                if (coordsDisplay) {
+                    coordsDisplay.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    coordsDisplay.style.background = 'linear-gradient(to right, #d4edda, #c3e6cb)';
+                    coordsDisplay.style.color = '#155724';
+                }
+
+                // Update address field if provided
+                const addressInput = document.getElementById('location-address');
+                if (addressInput && address) {
+                    addressInput.value = address;
+                }
+
+                // Center map on the location
+                if (this.map && this.map.getContainer().offsetParent !== null) {
+                    this.map.setView([lat, lng], 16);
+                    
+                    // Add a temporary marker to show the found location
+                    if (this.tempMarker) {
+                        this.map.removeLayer(this.tempMarker);
+                    }
+                    
+                    this.tempMarker = L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            className: 'geocoded-marker',
+                            html: '<div style="background: var(--mac-blue); width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                            iconSize: [12, 12],
+                            iconAnchor: [6, 6]
+                        })
+                    }).addTo(this.map);
+
+                    // Remove marker after 3 seconds
+                    setTimeout(() => {
+                        if (this.tempMarker) {
+                            this.map.removeLayer(this.tempMarker);
+                            this.tempMarker = null;
+                        }
+                    }, 3000);
+                }
+
+                // Announce to screen reader
+                this.announceToScreenReader(`Location set to ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
             }
 
             initTagSystem() {
@@ -3185,7 +3856,21 @@
                 this.selectedLatLng = null;
                 const coordsDisplay = document.getElementById('coordinates-display');
                 if (coordsDisplay) {
-                    coordsDisplay.textContent = 'Click on map to set location';
+                    coordsDisplay.textContent = 'Click on map or use address to set location';
+                    coordsDisplay.style.background = 'white';
+                    coordsDisplay.style.color = 'var(--mac-blue)';
+                }
+
+                // Clear address field
+                const addressInput = document.getElementById('location-address');
+                if (addressInput) {
+                    addressInput.value = '';
+                }
+
+                // Remove temp marker
+                if (this.tempMarker) {
+                    this.map.removeLayer(this.tempMarker);
+                    this.tempMarker = null;
                 }
 
                 // Clear tags
@@ -3231,6 +3916,7 @@
                     description: this.sanitizeInput(description),
                     category: document.getElementById('location-category').value,
                     riskLevel: document.getElementById('location-risk').value,
+                    address: this.sanitizeInput(document.getElementById('location-address').value.trim()),
                     tags: this.getSelectedTags(),
                     coordinates: [this.selectedLatLng.lat, this.selectedLatLng.lng],
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -3459,11 +4145,17 @@
                     document.getElementById('location-category').value = data.category || 'other';
                     document.getElementById('location-risk').value = data.riskLevel || 'moderate';
 
+                    // Set address if available
+                    if (data.address) {
+                        document.getElementById('location-address').value = data.address;
+                    }
+
                     // Set coordinates if available
                     if (data.coordinates && Array.isArray(data.coordinates) && data.coordinates.length === 2) {
                         this.selectedLatLng = { lat: data.coordinates[0], lng: data.coordinates[1] };
                         document.getElementById('coordinates-display').textContent =
                             `${data.coordinates[0].toFixed(6)}, ${data.coordinates[1].toFixed(6)}`;
+                        document.getElementById('coordinates-display').style.background = 'white';
                     }
 
                     // Load tags if available
