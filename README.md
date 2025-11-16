@@ -37,6 +37,7 @@ firebase deploy --only hosting
 
 ## 🎯 Features
 
+### Core Features
 - **Interactive Map** - Real-time location markers with Firebase sync
 - **User Authentication** - Anonymous sign-in with presence tracking
 - **Location Management** - Add, view, edit, delete locations
@@ -44,6 +45,16 @@ firebase deploy --only hosting
 - **Responsive Design** - Works on all devices
 - **Offline Support** - PWA with service worker
 - **Real-time Updates** - Live data synchronization
+
+### 🚀 New Location Features
+- **Address Geocoding** - Enter addresses and automatically find locations on the map using OpenStreetMap's Nominatim API
+- **Smart Location Detection** - Automatically detect and center map on user's actual location instead of defaulting to NYC
+- **Enhanced Coordinates System** - Set locations via address lookup, "Use My Location" button, or by clicking on the map
+- **Location Caching** - Session-based caching of user location for improved performance
+- **Cross-browser Compatibility** - Comprehensive error handling for various geolocation scenarios
+- **Fallback Intelligence** - Smart fallbacks when location detection fails (locale-based defaults)
+- **Real-time Location Feedback** - Loading indicators and user feedback during location operations
+- **Integration** - Seamless integration with existing marker and posting system
 
 ## 🛠 Tech Stack
 
