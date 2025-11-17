@@ -8,67 +8,69 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            /* Y2K Mac OS Classic Color Palette */
-            --mac-platinum: #C0C0C0;
-            --mac-steel: #505050;
-            --mac-charcoal: #2A2A2A;
-            --mac-blue: #007AFF;
-            --mac-pink: #FF006E;
-            --mac-purple: #8B5CF6;
-            --mac-green: #00FF88;
-            --mac-orange: #FFA500;
-            --military-steel: #36454F;
-            --steel-blue: #4682B4;
-            --ice-blue: #B3E5FC;
-            --smoked-glass: rgba(255, 255, 255, 0.08);
+            /* Construction Zone Color Palette */
+            --cz-yellow: #FFD000;
+            --cz-yellow-dark: #CC9900;
+            --cz-black: #1A1A1A;
+            --cz-concrete: #6B6B6B;
+            --cz-concrete-light: #8B8B8B;
+            --cz-concrete-dark: #3D3D3D;
+            --cz-blueprint: #1E3A5F;
+            --cz-blueprint-grid: #2A4A6F;
+            --cz-orange: #FF6B00;
+            --cz-red: #CC0000;
+            --cz-green: #00AA44;
+            --cz-rust: #8B4513;
 
             /* Typography */
-            --font-chicago: 'Chicago', 'Arial', sans-serif;
-            --font-geneva: 'Geneva', 'Arial', sans-serif;
+            --font-stencil: 'Courier New', 'Lucida Console', monospace;
+            --font-blueprint: 'Consolas', 'Monaco', monospace;
+            --font-industrial: 'Impact', 'Arial Black', sans-serif;
             --font-mono: 'Monaco', 'Courier New', monospace;
-            --font-impact: 'Impact', 'Arial Black', sans-serif;
-            
-            /* Y2K Mac OS Classic Theme */
-            --bg-primary: var(--mac-charcoal);
-            --bg-secondary: linear-gradient(145deg, var(--military-steel), var(--mac-steel));
-            --bg-tertiary: linear-gradient(145deg, var(--mac-platinum), var(--steel-blue));
-            --bg-panel: linear-gradient(145deg, var(--military-steel), var(--steel-blue));
-            --accent-blue: var(--steel-blue);
-            --accent-ice: var(--ice-blue);
-            --accent-purple: var(--mac-purple);
+
+            /* Construction Zone Theme */
+            --bg-primary: var(--cz-concrete-dark);
+            --bg-secondary: var(--cz-concrete);
+            --bg-tertiary: var(--cz-concrete-light);
+            --accent-yellow: var(--cz-yellow);
+            --accent-orange: var(--cz-orange);
             --text-primary: #FFFFFF;
-            --text-secondary: var(--mac-platinum);
-            --text-muted: #E0E8F0; /* Ice blue muted for better contrast */
-            --border: var(--military-steel);
-            --border-smoked: 1px solid var(--smoked-glass);
-            --success: var(--mac-green);
-            --warning: var(--mac-orange);
-            --danger: #FF4444;
-            
-            /* Classic Mac OS Effects */
-            --bevel-light: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
-            --bevel-dark: inset -1px -1px 0 #FFFFFF, inset 1px 1px 0 #808080;
-            --shadow-mac: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-            --shadow-steel-glow: 0 0 20px rgba(90, 155, 212, 0.4);
-            --shadow-ice-glow: 0 0 15px rgba(179, 229, 252, 0.6);
-            --shadow-neon: 0 0 15px var(--steel-blue);
+            --text-secondary: #D0D0D0;
+            --text-muted: #A0A0A0;
+            --border: var(--cz-black);
+            --success: var(--cz-green);
+            --warning: var(--cz-orange);
+            --danger: var(--cz-red);
 
-            /* Glassmorphism Smoked Effects */
-            --glass-bg: rgba(255, 255, 255, 0.06);
-            --glass-border: 1px solid var(--smoked-glass);
-            --glass-backdrop: blur(12px);
+            /* Construction Zone Effects */
+            --hazard-stripe: repeating-linear-gradient(
+                45deg,
+                var(--cz-yellow) 0px,
+                var(--cz-yellow) 10px,
+                var(--cz-black) 10px,
+                var(--cz-black) 20px
+            );
+            --blueprint-grid:
+                linear-gradient(rgba(30, 58, 95, 0.8) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30, 58, 95, 0.8) 1px, transparent 1px);
+            --concrete-texture: linear-gradient(135deg,
+                rgba(107, 107, 107, 0.1) 0%,
+                rgba(139, 139, 139, 0.05) 50%,
+                rgba(61, 61, 61, 0.1) 100%);
+            --shadow-industrial: 3px 3px 0 var(--cz-black), 6px 6px 12px rgba(0,0,0,0.5);
+            --shadow-plate: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.3);
 
-            /* Retro Y2K Styling */
-            --radius-skeuo: 4px;
-            --scanline: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-            --transition: 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            /* Industrial Styling */
+            --radius: 2px;
+            --shadow: var(--shadow-industrial);
+            --transition: 0.15s ease;
         }
-        
-        /* Nightcore Dark Mode Enhancements */
+
+        /* Dark Mode Enhancements */
         @media (prefers-color-scheme: dark) {
             :root {
-                --neon-glow: 0 0 15px var(--mac-blue);
-                --neon-border: 0 0 5px var(--mac-purple);
+                --hazard-glow: 0 0 20px rgba(255, 208, 0, 0.3);
+                --blueprint-glow: 0 0 15px rgba(30, 58, 95, 0.5);
             }
         }
 
@@ -79,68 +81,84 @@
             position: absolute;
             top: -40px;
             left: 6px;
-            background: var(--mac-blue);
-            color: white;
+            background: var(--cz-yellow);
+            color: var(--cz-black);
             padding: 8px;
             text-decoration: none;
             font-weight: 700;
             z-index: 10000;
-            border: 2px solid var(--mac-charcoal);
-            box-shadow: var(--shadow-mac);
+            border: 3px solid var(--cz-black);
+            box-shadow: var(--shadow-industrial);
         }
-        
+
         .skip-link:focus {
             top: 6px;
         }
-        
+
         body {
-            font-family: var(--font-chicago), 'Arial', sans-serif;
+            font-family: var(--font-stencil);
             background: var(--bg-primary);
+            background-image: var(--concrete-texture);
             color: var(--text-primary);
             line-height: 1.6;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: -webkit-crisp-edges;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
+            position: relative;
         }
-        
-        /* Classic Mac OS Typography */
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(139, 69, 19, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(107, 107, 107, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Industrial Typography */
         h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-impact), 'Arial Black', sans-serif;
+            font-family: var(--font-industrial);
             font-weight: 900;
-            letter-spacing: 1px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0 var(--cz-black);
         }
-        
+
         h1 { font-size: 24px; margin-bottom: 16px; }
-        h2 { font-size: 20px; margin-bottom: 14px; }
+        h2 { font-size: 20px; margin-bottom: 14px; color: var(--cz-yellow); }
         h3 { font-size: 16px; margin-bottom: 12px; }
         h4 { font-size: 14px; margin-bottom: 10px; }
-        
-        .mac-title {
-            font-family: var(--font-chicago), 'Arial', sans-serif;
+
+        .cz-stencil {
+            font-family: var(--font-stencil);
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             font-size: 14px;
         }
-        
-        .mac-label {
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+
+        .cz-label {
+            font-family: var(--font-blueprint);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             font-size: 11px;
             font-weight: 600;
+            color: var(--cz-yellow);
         }
-        
-        .mac-text {
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+
+        .cz-text {
+            font-family: var(--font-blueprint);
             font-size: 12px;
+            letter-spacing: 0.5px;
         }
-        
-        .mac-mono {
-            font-family: var(--font-mono), 'Courier New', monospace;
+
+        .cz-mono {
+            font-family: var(--font-mono);
             font-size: 11px;
+            letter-spacing: 1px;
         }
 
         .app {
@@ -150,17 +168,17 @@
         }
 
         .header {
-            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
-            border-bottom: 2px solid var(--mac-charcoal);
+            background: var(--cz-black);
+            border-bottom: 4px solid var(--cz-yellow);
             padding: 0 20px;
-            height: 50px;
+            height: 56px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: var(--shadow-mac);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
         .header::before {
@@ -169,91 +187,113 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 1px;
-            background: linear-gradient(to right, transparent, #FFFFFF, transparent);
+            height: 4px;
+            background: var(--hazard-stripe);
         }
 
         .logo {
-            font-family: var(--font-impact), 'Arial Black', sans-serif;
-            font-size: 18px;
+            font-family: var(--font-industrial);
+            font-size: 22px;
             font-weight: 900;
-            letter-spacing: 2px;
+            letter-spacing: 4px;
             text-transform: uppercase;
-            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            color: var(--cz-yellow);
+            text-shadow: 2px 2px 0 var(--cz-black), 0 0 20px rgba(255, 208, 0, 0.3);
+            position: relative;
+        }
+
+        .logo::after {
+            content: 'ZONE';
+            position: absolute;
+            bottom: -8px;
+            right: -20px;
+            font-size: 8px;
+            letter-spacing: 2px;
+            color: var(--cz-orange);
+            background: var(--cz-black);
+            padding: 1px 4px;
+            border: 1px solid var(--cz-orange);
         }
 
         .status {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-blueprint);
             font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            color: var(--cz-yellow);
         }
 
         .status-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: var(--mac-green);
-            box-shadow: 0 0 5px var(--mac-green);
+            background: var(--cz-green);
+            box-shadow: 0 0 8px var(--cz-green);
+            animation: pulse-status 2s infinite;
+        }
+
+        @keyframes pulse-status {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
 
         .status-dot.offline {
-            background: var(--danger);
-            box-shadow: 0 0 5px var(--danger);
+            background: var(--cz-red);
+            box-shadow: 0 0 8px var(--cz-red);
         }
 
         .nav {
-            background: linear-gradient(to bottom, var(--mac-steel), var(--mac-charcoal));
-            border-bottom: 2px solid var(--mac-platinum);
-            padding: 6px 20px;
+            background: var(--cz-concrete-dark);
+            border-bottom: 3px solid var(--cz-black);
+            padding: 8px 20px;
             display: flex;
-            gap: 4px;
+            gap: 6px;
             position: sticky;
-            top: 50px;
+            top: 56px;
             z-index: 90;
-            box-shadow: var(--shadow-mac);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.4);
         }
 
         .nav-btn {
-            background: var(--mac-steel);
-            border: 2px solid var(--mac-charcoal);
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
             color: var(--text-secondary);
-            padding: 6px 12px;
+            padding: 8px 14px;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             align-items: center;
             gap: 6px;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-stencil);
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: var(--bevel-light);
+            letter-spacing: 2px;
+            box-shadow: 2px 2px 0 var(--cz-black);
+            position: relative;
         }
 
         .nav-btn:hover {
-            background: var(--mac-platinum);
-            color: var(--mac-charcoal);
-            box-shadow: var(--bevel-dark);
+            background: var(--cz-concrete-light);
+            color: var(--cz-yellow);
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0 var(--cz-black);
         }
-        
+
         .nav-btn.active {
-            background: var(--mac-blue);
-            color: white;
-            border-color: var(--mac-blue);
-            box-shadow: var(--bevel-dark);
+            background: var(--cz-yellow);
+            color: var(--cz-black);
+            border-color: var(--cz-yellow-dark);
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3);
+            transform: translate(1px, 1px);
         }
-        
+
         .nav-btn:active {
-            box-shadow: var(--bevel-light);
+            transform: translate(2px, 2px);
+            box-shadow: none;
         }
 
         .main {
@@ -282,14 +322,11 @@
         }
 
         .panel {
-            background: var(--bg-panel);
-            backdrop-filter: var(--glass-backdrop);
-            border: 2px solid var(--military-steel);
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
             padding: 16px;
-            box-shadow: var(--shadow-mac), var(--shadow-steel-glow);
+            box-shadow: var(--shadow-industrial);
             position: relative;
-            border-radius: var(--radius-skeuo);
-            background-image: var(--scanline);
         }
 
         .panel::before {
@@ -298,176 +335,181 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 1px;
-            background: linear-gradient(to right, transparent, #FFFFFF, transparent);
+            height: 6px;
+            background: var(--hazard-stripe);
+        }
+
+        .panel::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--blueprint-grid);
+            background-size: 20px 20px;
+            opacity: 0.05;
+            pointer-events: none;
         }
 
         .panel-title {
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-stencil);
             font-weight: 700;
             margin-bottom: 12px;
-            color: var(--mac-blue);
+            color: var(--cz-yellow);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 11px;
+            letter-spacing: 3px;
+            font-size: 12px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 2px dashed var(--cz-yellow-dark);
         }
 
         .map-container {
-            background: linear-gradient(145deg, var(--military-steel), var(--steel-blue));
-            backdrop-filter: var(--glass-backdrop);
-            border: 2px solid var(--military-steel);
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
             overflow: hidden;
             position: relative;
-            box-shadow: var(--shadow-mac), var(--shadow-ice-glow);
-            border-radius: var(--radius-skeuo);
+            box-shadow: var(--shadow-industrial);
         }
-        
+
         .map-container::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 1px;
-            background: linear-gradient(to right, transparent, #FFFFFF, transparent);
+            height: 6px;
+            background: var(--hazard-stripe);
+            z-index: 1000;
         }
 
         #map { height: 100%; min-height: 400px; }
 
         .btn {
-            background: linear-gradient(145deg, var(--mac-steel), var(--military-steel));
-            backdrop-filter: var(--glass-backdrop);
-            border: 2px solid var(--military-steel);
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
             color: var(--text-secondary);
-            padding: 8px 16px;
+            padding: 8px 14px;
             cursor: pointer;
             transition: var(--transition);
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
-            font-size: 12px;
+            gap: 6px;
+            font-family: var(--font-stencil);
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1.2px;
-            box-shadow: var(--bevel-light), var(--shadow-steel-glow);
-            min-height: 44px;
-            min-width: 44px;
-            border-radius: var(--radius-skeuo);
+            letter-spacing: 2px;
+            box-shadow: 2px 2px 0 var(--cz-black);
             position: relative;
-            overflow: hidden;
         }
 
         .btn:hover {
-            background: linear-gradient(145deg, var(--steel-blue), var(--ice-blue));
-            color: #FFFFFF;
-            box-shadow: var(--bevel-dark), var(--shadow-ice-glow);
-            transform: translateY(-1px);
-        }
-
-        .btn:hover::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: shine 0.6s ease;
-        }
-
-        @keyframes shine {
-            0% { left: -100%; }
-            100% { left: 100%; }
+            background: var(--cz-concrete-light);
+            color: var(--cz-yellow);
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0 var(--cz-black);
         }
 
         .btn:active {
-            box-shadow: var(--bevel-light);
-            transform: translateY(0px);
+            transform: translate(2px, 2px);
+            box-shadow: none;
         }
 
         .btn-primary {
-            background: linear-gradient(145deg, var(--steel-blue), var(--mac-blue));
-            color: white;
-            border-color: var(--steel-blue);
-            box-shadow: var(--bevel-light), 0 0 20px rgba(90, 155, 212, 0.5);
+            background: var(--cz-yellow);
+            color: var(--cz-black);
+            border-color: var(--cz-yellow-dark);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(145deg, var(--ice-blue), var(--steel-blue));
-            box-shadow: var(--bevel-dark), 0 0 30px rgba(179, 229, 252, 0.7);
-            transform: translateY(-2px);
+            background: var(--cz-yellow-dark);
+            border-color: var(--cz-yellow);
+            color: var(--cz-black);
         }
 
         .fab {
             position: fixed;
             bottom: 24px;
             right: 24px;
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(145deg, var(--steel-blue), var(--ice-blue));
-            backdrop-filter: var(--glass-backdrop);
-            border: 3px solid var(--military-steel);
-            border-radius: 50%;
-            color: white;
-            font-size: 1.5rem;
+            width: 56px;
+            height: 56px;
+            background: var(--cz-yellow);
+            border: 4px solid var(--cz-black);
+            border-radius: 0;
+            color: var(--cz-black);
+            font-size: 1.4rem;
             cursor: pointer;
-            box-shadow: var(--shadow-mac), var(--shadow-steel-glow), 0 0 30px rgba(90, 155, 212, 0.6);
-            transition: all var(--transition);
+            box-shadow: var(--shadow-industrial);
+            transition: var(--transition);
             z-index: 1000;
-            animation: float 3s ease-in-out infinite;
+            transform: rotate(-3deg);
+        }
+
+        .fab::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            background: var(--hazard-stripe);
+            z-index: -1;
+            transform: rotate(3deg);
         }
 
         .fab:hover {
-            transform: scale(1.1);
-            box-shadow: var(--shadow-mac), var(--shadow-steel-glow), 0 0 40px rgba(179, 229, 252, 0.8);
-        }
-        
-        .fab:active {
-            box-shadow: var(--bevel-light);
+            transform: rotate(0deg) scale(1.1);
+            box-shadow: 4px 4px 0 var(--cz-black), 8px 8px 20px rgba(0,0,0,0.4);
         }
 
-        /* Auth Modal Styles - Y2K Mac OS Classic */
+        .fab:active {
+            transform: rotate(-3deg) scale(0.95);
+            box-shadow: 1px 1px 0 var(--cz-black);
+        }
+
+        /* Auth Modal Styles - Construction Zone */
         .auth-tabs {
             display: flex;
-            border-bottom: 2px solid var(--mac-charcoal);
+            border-bottom: 3px solid var(--cz-black);
             margin-bottom: 16px;
-            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
-            padding: 4px;
+            background: var(--cz-concrete-dark);
+            padding: 0;
         }
 
         .auth-tab {
-            background: var(--mac-steel);
-            border: 2px solid var(--mac-charcoal);
-            padding: 8px 16px;
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
+            border-bottom: none;
+            padding: 10px 16px;
             color: var(--text-secondary);
             cursor: pointer;
-            border-bottom: 2px solid transparent;
             transition: var(--transition);
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-stencil);
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: var(--bevel-light);
+            letter-spacing: 2px;
+            box-shadow: 2px -2px 0 var(--cz-black);
             flex: 1;
             text-align: center;
         }
 
         .auth-tab.active {
-            background: var(--mac-blue);
-            color: white;
-            border-color: var(--mac-blue);
-            box-shadow: var(--bevel-dark);
+            background: var(--cz-yellow);
+            color: var(--cz-black);
+            border-color: var(--cz-yellow-dark);
+            box-shadow: none;
+            position: relative;
+            top: 3px;
         }
 
         .auth-tab:hover {
-            background: var(--mac-platinum);
-            color: var(--mac-charcoal);
-            box-shadow: var(--bevel-dark);
+            background: var(--cz-concrete-light);
+            color: var(--cz-yellow);
         }
 
         .auth-form { display: none; }
@@ -475,35 +517,40 @@
 
         .auth-form h3 {
             margin-bottom: 20px;
-            color: var(--mac-blue);
+            color: var(--cz-yellow);
             text-align: center;
-            font-family: var(--font-impact), 'Arial Black', sans-serif;
+            font-family: var(--font-industrial);
             font-size: 16px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 0 var(--cz-black);
         }
 
         .auth-alternatives {
             text-align: center;
             margin-top: 16px;
             padding-top: 12px;
-            border-top: 2px solid var(--mac-charcoal);
+            border-top: 3px solid var(--cz-black);
+            background: var(--hazard-stripe);
+            margin-left: -20px;
+            margin-right: -20px;
+            padding: 12px 20px;
         }
 
         .btn-link {
             background: none;
             border: none;
-            color: var(--mac-blue);
+            color: var(--cz-yellow);
             cursor: pointer;
             text-decoration: underline;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-blueprint);
             font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
 
         .btn-link:hover {
-            color: var(--mac-purple);
+            color: var(--cz-orange);
             text-decoration: none;
         }
 
@@ -513,8 +560,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(42,42,42,0.95);
-            backdrop-filter: blur(2px);
+            background: rgba(26,26,26,0.95);
+            backdrop-filter: blur(4px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -524,15 +571,15 @@
         .modal.active { display: flex; }
 
         .modal-content {
-            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
-            border: 2px solid var(--mac-charcoal);
-            padding: 20px;
+            background: var(--cz-concrete);
+            border: 4px solid var(--cz-black);
+            padding: 24px;
             max-width: 480px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: var(--shadow-mac);
+            box-shadow: var(--shadow-industrial);
         }
 
         .modal-content::before {
@@ -541,34 +588,48 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 1px;
-            background: linear-gradient(to right, transparent, #FFFFFF, transparent);
+            height: 8px;
+            background: var(--hazard-stripe);
+        }
+
+        .modal-content::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--blueprint-grid);
+            background-size: 15px 15px;
+            opacity: 0.03;
+            pointer-events: none;
         }
 
         .modal-close {
             position: absolute;
-            top: 8px;
-            right: 8px;
-            background: var(--mac-steel);
-            border: 2px solid var(--mac-charcoal);
-            color: var(--text-secondary);
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 14px;
+            top: 12px;
+            right: 12px;
+            background: var(--cz-red);
+            border: 3px solid var(--cz-black);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 0;
+            font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: var(--bevel-light);
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            box-shadow: 2px 2px 0 var(--cz-black);
+            font-family: var(--font-stencil);
             font-weight: 700;
+            z-index: 10;
         }
 
         .modal-close:hover {
-            background: var(--mac-platinum);
-            color: var(--mac-charcoal);
-            box-shadow: var(--bevel-dark);
+            background: #FF0000;
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0 var(--cz-black);
         }
 
         .form-group { margin-bottom: 16px; }
@@ -576,12 +637,12 @@
         .form-label {
             display: block;
             margin-bottom: 6px;
-            color: var(--text-secondary);
+            color: var(--cz-yellow);
             font-size: 11px;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
-            font-weight: 600;
+            font-family: var(--font-stencil);
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -598,7 +659,7 @@
         .form-error {
             color: var(--danger);
             font-size: 10px;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-blueprint), 'Arial', sans-serif;
             margin-top: 4px;
             font-weight: 600;
             text-transform: uppercase;
@@ -616,91 +677,21 @@
         .field-help {
             font-size: 9px;
             color: var(--text-muted);
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-blueprint);
             margin-top: 2px;
             font-style: italic;
+            letter-spacing: 0.5px;
         }
 
-        /* Enhanced touch targets and focus indicators */
+        /* Enhanced touch targets */
         .btn, .nav-btn, .auth-tab {
-            min-height: 48px;
-            min-width: 48px;
-            padding: 10px 18px;
-            font-size: 13px;
+            min-height: 44px;
+            min-width: 44px;
         }
 
         .fab {
-            width: 64px;
-            height: 64px;
-            font-size: 1.6rem;
-        }
-
-        /* Improved focus indicators */
-        .btn:focus, .nav-btn:focus, .auth-tab:focus, .fab:focus {
-            outline: 2px solid var(--steel-blue);
-            outline-offset: 3px;
-            box-shadow: 0 0 0 4px rgba(90, 155, 212, 0.3);
-        }
-
-        .input:focus, .textarea:focus, .select:focus {
-            outline: 2px solid var(--steel-blue);
-            outline-offset: 2px;
-            box-shadow: 0 0 0 3px rgba(179, 229, 252, 0.4);
-        }
-
-        /* Loading spinners and progress feedback */
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--military-steel);
-            border-radius: 50%;
-            border-top-color: var(--steel-blue);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: var(--military-steel);
-            border-radius: 2px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--steel-blue), var(--ice-blue));
-            transition: width 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: progressShine 2s ease-in-out infinite;
-        }
-
-        @keyframes progressShine {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        /* Success/error state animations */
-        .success-bounce {
-            animation: successBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        @keyframes successBounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+            width: 56px;
+            height: 56px;
         }
 
         .predefined-tag {
@@ -710,6 +701,11 @@
             align-items: center;
             justify-content: center;
             padding: 4px 8px;
+            background: var(--cz-concrete);
+            border: 2px solid var(--cz-black);
+            color: var(--cz-yellow);
+            font-family: var(--font-stencil);
+            letter-spacing: 1px;
         }
 
         /* Status indicators with icons */
@@ -727,19 +723,19 @@
         }
 
         .status-indicator.connected .status-dot {
-            background: var(--mac-green);
+            background: var(--cz-green);
         }
 
         .status-indicator.offline .status-dot {
-            background: var(--danger);
+            background: var(--cz-red);
         }
 
         .status-indicator::before {
             content: attr(data-status-text);
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
         /* High contrast mode support */
@@ -748,13 +744,13 @@
                 --text-muted: #FFFFFF;
                 --border: #FFFFFF;
             }
-            
+
             .btn, .nav-btn, .auth-tab, .fab {
-                border: 3px solid currentColor;
+                border: 4px solid currentColor;
             }
-            
+
             .input, .textarea, .select {
-                border: 3px solid var(--mac-charcoal);
+                border: 4px solid var(--cz-black);
             }
         }
 
@@ -768,17 +764,18 @@
         }
 
         .input, .textarea, .select {
-            background: white;
-            border: 2px solid var(--mac-charcoal);
-            color: var(--mac-charcoal);
-            padding: 8px 10px;
+            background: #F5F5F5;
+            border: 3px solid var(--cz-black);
+            color: var(--cz-black);
+            padding: 10px 12px;
             width: 100%;
             transition: var(--transition);
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-blueprint);
             font-size: 12px;
-            box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.2);
+            letter-spacing: 0.5px;
         }
-        
+
         .textarea {
             resize: vertical;
             min-height: 80px;
@@ -786,8 +783,9 @@
 
         .input:focus, .textarea:focus, .select:focus {
             outline: none;
-            border-color: var(--mac-blue);
-            box-shadow: 0 0 0 2px rgba(0,122,255,0.3), inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+            border-color: var(--cz-yellow);
+            box-shadow: 0 0 0 3px rgba(255, 208, 0, 0.3), inset 2px 2px 4px rgba(0,0,0,0.2);
+            background: white;
         }
 
         .form-actions {
@@ -796,7 +794,12 @@
             justify-content: flex-end;
             margin-top: 20px;
             padding-top: 12px;
-            border-top: 2px solid var(--mac-charcoal);
+            border-top: 3px solid var(--cz-black);
+            background: var(--hazard-stripe);
+            margin-left: -24px;
+            margin-right: -24px;
+            margin-bottom: -24px;
+            padding: 16px 24px;
         }
 
         .loading {
@@ -804,87 +807,27 @@
             align-items: center;
             justify-content: center;
             padding: 24px;
-            color: var(--text-muted);
+            color: var(--cz-yellow);
             gap: 12px;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-stencil);
             font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .loading::before {
             content: '';
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--mac-charcoal);
-            border-top: 2px solid var(--mac-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--cz-black);
+            border-top: 3px solid var(--cz-yellow);
+            border-radius: 0;
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-        }
-
-        @keyframes entranceSlide {
-            from {
-                opacity: 0;
-                transform: translateY(20px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        @keyframes entranceFade {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .panel, .location-card, .activity-item, .modal-content {
-            animation: entranceSlide 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        .nav-btn, .btn {
-            transition: all var(--transition);
-        }
-
-        .nav-btn:hover::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            animation: shine 0.5s ease;
-        }
-
-        @keyframes shine {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .panel:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-mac), var(--shadow-steel-glow);
-        }
-
-        .location-card:hover {
-            border-color: var(--steel-blue);
-            box-shadow: 0 0 15px rgba(90, 155, 212, 0.4);
-            transform: translateY(-3px);
-        }
-
-        .activity-item:hover {
-            background: rgba(90, 155, 212, 0.1);
-            transform: translateX(5px);
-            border-left: 3px solid var(--steel-blue);
         }
 
         @keyframes slideIn {
@@ -913,135 +856,182 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--mac-charcoal);
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            padding: 10px 0;
+            border-bottom: 2px dashed var(--cz-black);
+            font-family: var(--font-blueprint);
             font-size: 11px;
         }
 
         .activity-item:last-child { border-bottom: none; }
 
         .activity-icon {
-            width: 28px;
-            height: 28px;
-            background: var(--mac-steel);
-            border: 2px solid var(--mac-charcoal);
-            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            background: var(--cz-yellow);
+            border: 3px solid var(--cz-black);
+            border-radius: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--mac-blue);
-            font-size: 10px;
-            box-shadow: var(--bevel-light);
+            color: var(--cz-black);
+            font-size: 12px;
+            box-shadow: 2px 2px 0 var(--cz-black);
         }
 
         .activity-content { flex: 1; }
-        .activity-user { font-weight: 700; color: var(--mac-blue); text-transform: uppercase; letter-spacing: 1px; }
-        .activity-time { font-size: 10px; color: var(--text-muted); }
+        .activity-user { font-weight: 700; color: var(--cz-yellow); text-transform: uppercase; letter-spacing: 2px; font-family: var(--font-stencil); }
+        .activity-time { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; }
 
         .coordinates-display {
-            background: white;
-            border: 2px solid var(--mac-charcoal);
-            padding: 10px;
-            font-family: var(--font-mono), 'Courier New', monospace;
-            color: var(--mac-blue);
+            background: var(--cz-blueprint);
+            border: 3px solid var(--cz-black);
+            padding: 12px;
+            font-family: var(--font-mono);
+            color: var(--cz-yellow);
             text-align: center;
             font-size: 11px;
-            box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.4);
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .coordinates-display::before {
+            content: 'COORDINATES';
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: var(--cz-black);
+            padding: 2px 8px;
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: var(--cz-yellow);
         }
 
         .locations-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 12px;
+            gap: 16px;
             margin-top: 16px;
         }
 
         .location-card {
-            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
-            border: 2px solid var(--mac-charcoal);
-            padding: 12px;
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
+            padding: 16px;
             transition: var(--transition);
-            box-shadow: var(--shadow-mac);
+            box-shadow: var(--shadow-industrial);
+            position: relative;
+        }
+
+        .location-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--hazard-stripe);
         }
 
         .location-card:hover {
-            border-color: var(--mac-blue);
-            box-shadow: 0 0 10px var(--mac-blue);
+            border-color: var(--cz-yellow);
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 var(--cz-black), 10px 10px 20px rgba(0,0,0,0.3);
         }
 
         .location-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .location-actions {
             display: flex;
-            gap: 6px;
-            margin-top: 10px;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px dashed var(--cz-black);
         }
 
         .risk {
-            padding: 2px 6px;
+            padding: 4px 8px;
             border-radius: 0;
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            border: 2px solid var(--cz-black);
+            font-family: var(--font-stencil);
         }
 
-        .risk-low { background: var(--mac-green); color: var(--mac-charcoal); }
-        .risk-moderate { background: var(--mac-orange); color: white; }
-        .risk-high { background: var(--danger); color: white; }
+        .risk-low { background: var(--cz-green); color: white; }
+        .risk-moderate { background: var(--cz-orange); color: white; }
+        .risk-high { background: var(--cz-red); color: white; }
 
         .error {
-            background: rgba(255, 68, 68, 0.1);
-            border: 2px solid var(--danger);
+            background: rgba(204, 0, 0, 0.1);
+            border: 3px solid var(--cz-red);
             padding: 16px;
-            color: var(--danger);
+            color: var(--cz-red);
             text-align: center;
             margin: 16px 0;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-stencil);
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            position: relative;
         }
-        
+
+        .error::before {
+            content: 'ERROR';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--cz-red);
+            color: white;
+            padding: 2px 12px;
+            font-size: 10px;
+        }
+
         .no-data {
             text-align: center;
             color: var(--text-muted);
-            padding: 24px;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            padding: 32px;
+            font-family: var(--font-blueprint);
             font-size: 12px;
             font-style: italic;
+            letter-spacing: 1px;
+            border: 2px dashed var(--cz-concrete-light);
         }
-        
-        /* Fix button states - Y2K Mac OS Classic */
+
+        /* Fix button states - Construction Zone */
         .btn:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
-            background: var(--mac-steel) !important;
+            background: var(--cz-concrete) !important;
             color: var(--text-muted) !important;
             box-shadow: none !important;
+            transform: none !important;
         }
-        
+
         .btn:disabled:hover {
-            background: var(--mac-steel) !important;
+            background: var(--cz-concrete) !important;
             color: var(--text-muted) !important;
             box-shadow: none !important;
+            transform: none !important;
         }
-        
+
         .btn-primary:disabled:hover {
-            background: var(--mac-steel) !important;
+            background: var(--cz-concrete) !important;
             color: var(--text-muted) !important;
             box-shadow: none !important;
         }
-        
+
         .btn:focus, .nav-btn:focus, .auth-tab:focus, .fab:focus {
-            outline: 2px solid var(--mac-blue);
+            outline: 3px solid var(--cz-yellow);
             outline-offset: 2px;
         }
 
@@ -1059,11 +1049,492 @@
         }
 
         .input:focus, .textarea:focus, .select:focus {
-            outline: 2px solid var(--mac-blue);
+            outline: 3px solid var(--cz-yellow);
             outline-offset: 2px;
         }
-        
-        /* Fix for mobile layout - Y2K Mac OS Classic */
+
+        /* ========================================
+           PROFILE INSPECTION REPORT STYLES
+           ======================================== */
+
+        .inspection-report {
+            background: #F5F5DC;
+            border: 4px solid var(--cz-black);
+            padding: 0;
+            box-shadow: var(--shadow-industrial), 8px 8px 0 rgba(0,0,0,0.2);
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .inspection-report::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--blueprint-grid);
+            background-size: 25px 25px;
+            opacity: 0.08;
+            pointer-events: none;
+        }
+
+        .clipboard-header {
+            background: var(--cz-rust);
+            padding: 12px 20px;
+            border-bottom: 4px solid var(--cz-black);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .clipboard-title {
+            color: var(--cz-yellow);
+            font-family: var(--font-industrial);
+            font-size: 18px;
+            letter-spacing: 4px;
+            text-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .clipboard-id {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: #F5F5DC;
+            letter-spacing: 2px;
+            background: var(--cz-black);
+            padding: 4px 10px;
+        }
+
+        .report-body {
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Site Badge / ID Card */
+        .site-badge {
+            background: white;
+            border: 3px solid var(--cz-black);
+            padding: 16px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 3px 3px 0 var(--cz-black);
+        }
+
+        .site-badge::before {
+            content: 'SITE PERSONNEL';
+            position: absolute;
+            top: -12px;
+            left: 16px;
+            background: var(--cz-yellow);
+            color: var(--cz-black);
+            padding: 2px 12px;
+            font-family: var(--font-stencil);
+            font-size: 10px;
+            letter-spacing: 2px;
+            font-weight: 700;
+            border: 2px solid var(--cz-black);
+        }
+
+        .site-badge::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            background: var(--cz-green);
+            border: 2px solid var(--cz-black);
+            border-radius: 50%;
+        }
+
+        .badge-content {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .badge-photo {
+            width: 100px;
+            height: 120px;
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .badge-photo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+        }
+
+        .badge-photo i {
+            font-size: 3rem;
+            color: var(--cz-yellow);
+        }
+
+        .badge-info {
+            flex: 1;
+        }
+
+        .badge-name {
+            font-family: var(--font-industrial);
+            font-size: 20px;
+            color: var(--cz-black);
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .badge-role {
+            font-family: var(--font-stencil);
+            font-size: 12px;
+            color: var(--cz-rust);
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            padding: 4px 0;
+            border-bottom: 2px dashed var(--cz-concrete);
+        }
+
+        .badge-barcode {
+            background: white;
+            padding: 8px;
+            border: 2px solid var(--cz-black);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 4px;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .badge-barcode::before {
+            content: '|||||| || ||| || ||||| ||| ||';
+            display: block;
+            font-size: 20px;
+            line-height: 1;
+            margin-bottom: 4px;
+            letter-spacing: -2px;
+        }
+
+        .badge-timestamp {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--cz-concrete);
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+
+        .clearance-level {
+            display: inline-block;
+            padding: 6px 14px;
+            font-family: var(--font-stencil);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            border: 3px solid var(--cz-black);
+            box-shadow: 2px 2px 0 var(--cz-black);
+            text-transform: uppercase;
+        }
+
+        .verification-stamp {
+            display: inline-block;
+            padding: 4px 10px;
+            font-family: var(--font-stencil);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            transform: rotate(-3deg);
+            border: 3px solid;
+        }
+
+        .stamp-verified {
+            background: rgba(0, 170, 68, 0.2);
+            color: var(--cz-green);
+            border-color: var(--cz-green);
+        }
+
+        .stamp-unverified {
+            background: rgba(255, 107, 0, 0.2);
+            color: var(--cz-orange);
+            border-color: var(--cz-orange);
+        }
+
+        /* Inspection Sections */
+        .inspection-section {
+            background: white;
+            border: 3px solid var(--cz-black);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .inspection-section::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background: var(--cz-yellow);
+            border: 3px solid var(--cz-black);
+            border-radius: 50%;
+        }
+
+        .section-header {
+            background: var(--cz-black);
+            color: var(--cz-yellow);
+            padding: 10px 16px;
+            font-family: var(--font-stencil);
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-content {
+            padding: 16px;
+        }
+
+        /* Stats as Metal Plates */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-plate {
+            background: linear-gradient(135deg, var(--cz-concrete-light) 0%, var(--cz-concrete) 50%, var(--cz-concrete-dark) 100%);
+            border: 3px solid var(--cz-black);
+            padding: 16px 12px;
+            text-align: center;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.3), 2px 2px 0 var(--cz-black);
+        }
+
+        .stat-plate::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            background: var(--cz-black);
+            border-radius: 50%;
+        }
+
+        .stat-plate::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: var(--cz-black);
+            border-radius: 50%;
+        }
+
+        .stat-value {
+            font-family: var(--font-industrial);
+            font-size: 32px;
+            color: var(--cz-yellow);
+            text-shadow: 2px 2px 0 var(--cz-black);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-family: var(--font-stencil);
+            font-size: 10px;
+            color: white;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Progress Bars as Measurement Gauges */
+        .gauge-container {
+            margin-bottom: 12px;
+        }
+
+        .gauge-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-family: var(--font-blueprint);
+            font-size: 11px;
+            color: var(--cz-black);
+            letter-spacing: 1px;
+        }
+
+        .gauge-bar {
+            height: 20px;
+            background: var(--cz-concrete-light);
+            border: 2px solid var(--cz-black);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gauge-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 18px,
+                var(--cz-black) 18px,
+                var(--cz-black) 20px
+            );
+            opacity: 0.3;
+        }
+
+        .gauge-fill {
+            height: 100%;
+            background: var(--hazard-stripe);
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .gauge-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--cz-black);
+        }
+
+        /* Achievement Tags */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+        }
+
+        .achievement-tag {
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
+            padding: 12px 8px;
+            text-align: center;
+            position: relative;
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .achievement-tag.locked {
+            opacity: 0.4;
+            background: var(--cz-concrete-dark);
+        }
+
+        .achievement-tag::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--cz-yellow);
+            border: 2px solid var(--cz-black);
+            border-radius: 50%;
+        }
+
+        .achievement-tag.locked::before {
+            background: var(--cz-concrete);
+        }
+
+        .tag-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 8px;
+            background: var(--cz-black);
+            border: 2px solid var(--cz-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .achievement-tag.locked .tag-icon {
+            border-color: var(--cz-concrete-light);
+        }
+
+        .tag-name {
+            font-family: var(--font-stencil);
+            font-size: 9px;
+            color: var(--cz-yellow);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .tag-desc {
+            font-family: var(--font-blueprint);
+            font-size: 8px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* Report Actions */
+        .report-actions {
+            background: var(--hazard-stripe);
+            padding: 16px 20px;
+            border-top: 4px solid var(--cz-black);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .report-actions .btn {
+            flex: 1;
+            min-width: 150px;
+            justify-content: center;
+        }
+
+        /* Warning Box */
+        .warning-box {
+            background: rgba(255, 107, 0, 0.1);
+            border: 3px solid var(--cz-orange);
+            padding: 12px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .warning-box::before {
+            content: 'ATTENTION';
+            position: absolute;
+            top: -12px;
+            left: 12px;
+            background: var(--cz-orange);
+            color: white;
+            padding: 2px 10px;
+            font-family: var(--font-stencil);
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        .warning-box p {
+            font-family: var(--font-blueprint);
+            font-size: 11px;
+            color: var(--cz-orange);
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        /* Fix for mobile layout - Construction Zone */
         @media (max-width: 768px) {
             .main { padding: 8px; }
 
@@ -1159,7 +1630,7 @@
                 justify-content: center;
             }
 
-            /* Mobile search and filter layout - Y2K Mac OS Classic */
+            /* Mobile search and filter layout - Construction Zone */
             .panel:has(#location-search) {
                 padding: 8px;
             }
@@ -1182,17 +1653,80 @@
                 font-size: 11px;
                 padding: 6px 8px;
             }
+
+            /* Mobile Inspection Report Styles */
+            .inspection-report {
+                margin: 0;
+                box-shadow: var(--shadow-industrial);
+            }
+
+            .clipboard-header {
+                padding: 10px 12px;
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .clipboard-title {
+                font-size: 14px;
+                letter-spacing: 2px;
+            }
+
+            .report-body {
+                padding: 16px;
+            }
+
+            .badge-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .badge-photo {
+                margin: 0 auto;
+                width: 80px;
+                height: 100px;
+            }
+
+            .badge-name {
+                font-size: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+
+            .achievement-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .report-actions {
+                flex-direction: column;
+                padding: 12px;
+            }
+
+            .report-actions .btn {
+                width: 100%;
+            }
         }
 
-        /* Additional mobile improvements - Y2K Mac OS Classic */
+        /* Additional mobile improvements - Construction Zone */
         @media (max-width: 480px) {
             .header {
                 padding: 0 8px;
-                height: 46px;
+                height: 52px;
             }
 
             .logo {
-                font-size: 16px;
+                font-size: 18px;
+                letter-spacing: 2px;
+            }
+
+            .logo::after {
+                display: none;
             }
 
             .status {
@@ -1202,10 +1736,11 @@
             .nav {
                 padding: 4px 8px;
                 gap: 2px;
+                top: 52px;
             }
 
             .main {
-                padding: 12px;
+                padding: 8px;
             }
 
             .btn {
@@ -1233,27 +1768,6 @@
                 font-size: 10px;
             }
 
-            /* Enhanced mobile touch targets */
-            .btn, .nav-btn, .auth-tab, .fab, .location-card {
-                min-height: 48px;
-                min-width: 48px;
-            }
-
-            /* Improved mobile gesture support */
-            .map-container {
-                touch-action: none;
-            }
-
-            /* Thumb-friendly navigation bottom spacing */
-            .nav {
-                padding-bottom: env(safe-area-inset-bottom, 8px);
-            }
-
-            .fab {
-                bottom: calc(env(safe-area-inset-bottom, 20px) + 20px);
-                right: 20px;
-            }
-
             /* Profile page mobile optimizations */
             #profile-view .panel:first-child > div:first-child {
                 flex-direction: column;
@@ -1275,128 +1789,83 @@
             }
         }
         
-        /* Nightcore Dark Mode Enhancements */
+        /* Construction Zone Dark Mode Enhancements */
         @media (prefers-color-scheme: dark) {
-            .neon-glow {
-                box-shadow: 0 0 15px var(--mac-blue), 0 0 25px var(--mac-purple);
+            .hazard-glow {
+                box-shadow: 0 0 15px var(--cz-yellow), 0 0 25px var(--cz-orange);
             }
 
-            .neon-border {
-                border-color: var(--mac-blue);
-                box-shadow: 0 0 10px var(--mac-blue);
+            .hazard-border {
+                border-color: var(--cz-yellow);
+                box-shadow: 0 0 10px var(--cz-yellow);
             }
 
-            .neon-text {
-                color: var(--mac-blue);
-                text-shadow: 0 0 10px var(--mac-blue);
+            .hazard-text {
+                color: var(--cz-yellow);
+                text-shadow: 0 0 10px var(--cz-yellow);
             }
         }
 
-        /* Subtle Retro Y2K Effects */
-        .crt-scanline {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .crt-scanline::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(255,255,255,0.01) 2px,
-                rgba(255,255,255,0.01) 4px
-            );
-            pointer-events: none;
-            animation: scanline 0.1s linear infinite;
-        }
-
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100vh); }
-        }
-
-        .crt-glow {
-            box-shadow:
-                0 0 5px rgba(90, 155, 212, 0.3),
-                inset 0 0 5px rgba(179, 229, 252, 0.1),
-                0 0 20px rgba(90, 155, 212, 0.2);
-        }
-
-        .vaporwave-gradient {
-            background: linear-gradient(
-                135deg,
-                rgba(90, 155, 212, 0.05) 0%,
-                rgba(139, 92, 246, 0.03) 25%,
-                rgba(255, 0, 110, 0.02) 50%,
-                rgba(179, 229, 252, 0.04) 75%,
-                rgba(0, 255, 136, 0.02) 100%
-            );
-        }
-
-        /* Apply retro effects selectively */
-        .panel.crt-scanline {
-            background-image: var(--scanline), var(--bg-panel);
-            background-blend-mode: overlay;
-        }
-
-        .map-container.crt-glow {
-            filter: drop-shadow(0 0 10px rgba(90, 155, 212, 0.4));
-        }
-
-        body.vaporwave-gradient {
-            background: var(--bg-primary);
-            background-image:
-                radial-gradient(circle at 20% 80%, rgba(179, 229, 252, 0.03) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.02) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(255, 0, 110, 0.01) 0%, transparent 50%);
-        }
-        
-        /* Classic Mac OS Scrollbar */
+        /* Industrial Scrollbar */
         ::-webkit-scrollbar {
-            width: 12px;
-            height: 12px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--mac-steel);
-            border: 1px solid var(--mac-charcoal);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--mac-platinum);
-            border: 1px solid var(--mac-charcoal);
-            box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--mac-blue);
-            border-color: var(--mac-blue);
-        }
-        
-        ::-webkit-scrollbar-corner {
-            background: var(--mac-charcoal);
+            width: 14px;
+            height: 14px;
         }
 
-        /* Loading Screen */
+        ::-webkit-scrollbar-track {
+            background: var(--cz-concrete-dark);
+            border: 2px solid var(--cz-black);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--cz-concrete);
+            border: 2px solid var(--cz-black);
+            box-shadow: inset 1px 1px 0 rgba(255,255,255,0.2);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cz-yellow);
+            border-color: var(--cz-yellow-dark);
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: var(--cz-black);
+        }
+
+        /* Construction Zone Loading Screen */
         #loading-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, var(--mac-charcoal) 0%, var(--mac-steel) 50%, var(--mac-charcoal) 100%);
+            background: var(--cz-black);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 9999;
             animation: fadeOut 0.5s ease-out 2s forwards;
+        }
+
+        #loading-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: var(--hazard-stripe);
+        }
+
+        #loading-screen::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: var(--hazard-stripe);
         }
 
         #loading-screen.hidden {
@@ -1411,17 +1880,14 @@
         }
 
         .loading-logo {
-            font-family: var(--font-impact), 'Arial Black', sans-serif;
-            font-size: 4rem;
+            font-family: var(--font-industrial);
+            font-size: 3.5rem;
             font-weight: 900;
-            letter-spacing: 4px;
+            letter-spacing: 6px;
             text-transform: uppercase;
-            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple), var(--mac-pink));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 30px rgba(0, 122, 255, 0.5);
-            animation: pulse 2s ease-in-out infinite, glow 2s ease-in-out infinite;
+            color: var(--cz-yellow);
+            text-shadow: 3px 3px 0 var(--cz-black), 0 0 30px rgba(255, 208, 0, 0.5);
+            animation: pulse 2s ease-in-out infinite;
             margin-bottom: 30px;
         }
 
@@ -1430,29 +1896,24 @@
             50% { transform: scale(1.05); }
         }
 
-        @keyframes glow {
-            0%, 100% { filter: brightness(1); }
-            50% { filter: brightness(1.3); }
-        }
-
         .loading-spinner {
             width: 60px;
             height: 60px;
-            border: 4px solid var(--mac-steel);
-            border-top: 4px solid var(--mac-blue);
-            border-right: 4px solid var(--mac-purple);
-            border-radius: 50%;
+            border: 4px solid var(--cz-concrete);
+            border-top: 4px solid var(--cz-yellow);
+            border-right: 4px solid var(--cz-orange);
+            border-radius: 0;
             animation: spin 1s linear infinite;
-            box-shadow: 0 0 30px rgba(0, 122, 255, 0.3);
+            box-shadow: 0 0 30px rgba(255, 208, 0, 0.3);
         }
 
         .loading-text {
             margin-top: 20px;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-stencil);
             font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-secondary);
+            letter-spacing: 3px;
+            color: var(--cz-yellow);
             animation: fadeInOut 1.5s ease-in-out infinite;
         }
 
@@ -1461,25 +1922,14 @@
             50% { opacity: 1; }
         }
 
-        /* Enhanced Header with Gradient Glow */
-        .header {
-            background: linear-gradient(to bottom, #E0E0E0, var(--mac-platinum), var(--mac-steel));
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-        }
-
+        /* Logo Glow Animation */
         .logo {
             animation: logoGlow 3s ease-in-out infinite;
         }
 
         @keyframes logoGlow {
-            0%, 100% { text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-            50% { text-shadow: 2px 2px 8px rgba(0,122,255,0.5), 0 0 20px rgba(139,92,246,0.3); }
-        }
-
-        /* Enhanced Map Container with Glow Effect */
-        .map-container {
-            box-shadow: 0 0 30px rgba(0, 122, 255, 0.2), var(--shadow-mac);
-            border: 3px solid var(--mac-charcoal);
+            0%, 100% { text-shadow: 2px 2px 0 var(--cz-black), 0 0 20px rgba(255, 208, 0, 0.3); }
+            50% { text-shadow: 2px 2px 0 var(--cz-black), 0 0 30px rgba(255, 208, 0, 0.6), 0 0 40px rgba(255, 107, 0, 0.3); }
         }
 
         /* Pulsing Activity Items */
@@ -1489,9 +1939,9 @@
         }
 
         .activity-item:hover {
-            background: rgba(0, 122, 255, 0.1);
+            background: rgba(255, 208, 0, 0.1);
             transform: translateX(5px);
-            border-left: 3px solid var(--mac-blue);
+            border-left: 3px solid var(--cz-yellow);
         }
 
         @keyframes slideInLeft {
@@ -1518,14 +1968,13 @@
             text-shadow: 0 0 15px currentColor;
         }
 
-        /* Floating Animation for FAB */
+        /* FAB Animation - Override float for industrial feel */
         .fab {
-            animation: float 3s ease-in-out infinite;
+            animation: none;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+        .fab:hover {
+            animation: none;
         }
 
         /* Nav Buttons with Better Hover Effects */
@@ -1562,18 +2011,18 @@
 
         /* Tags Input Styles */
         .tags-input-container {
-            background: white;
-            border: 2px solid var(--mac-charcoal);
+            background: #F5F5F5;
+            border: 3px solid var(--cz-black);
             padding: 8px;
             min-height: 40px;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-blueprint);
             font-size: 12px;
-            box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .tags-input-container:focus-within {
-            border-color: var(--mac-blue);
-            box-shadow: 0 0 0 2px rgba(0,122,255,0.3), inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+            border-color: var(--cz-yellow);
+            box-shadow: 0 0 0 3px rgba(255, 208, 0, 0.3), inset 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .selected-tags {
@@ -1587,24 +2036,25 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: var(--mac-blue);
-            color: white;
+            background: var(--cz-yellow);
+            color: var(--cz-black);
             padding: 3px 8px;
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            border: 1px solid var(--mac-charcoal);
-            box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            border: 2px solid var(--cz-black);
+            box-shadow: 1px 1px 0 var(--cz-black);
         }
 
         .tag.remove {
             cursor: pointer;
-            background: var(--danger);
+            background: var(--cz-red);
+            color: white;
         }
 
         .tag.remove:hover {
-            background: #ff6666;
+            background: #FF0000;
         }
 
         .predefined-tags-list {
@@ -1614,43 +2064,44 @@
         }
 
         .predefined-tag {
-            background: var(--mac-steel);
-            border: 1px solid var(--mac-charcoal);
+            background: var(--cz-concrete);
+            border: 2px solid var(--cz-black);
             color: var(--text-secondary);
             padding: 3px 8px;
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
             cursor: pointer;
             transition: var(--transition);
-            box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+            box-shadow: 1px 1px 0 var(--cz-black);
         }
 
         .predefined-tag:hover {
-            background: var(--mac-platinum);
-            color: var(--mac-charcoal);
-            box-shadow: inset -1px -1px 0 #FFFFFF, inset 1px 1px 0 #808080;
+            background: var(--cz-concrete-light);
+            color: var(--cz-yellow);
+            transform: translate(-1px, -1px);
+            box-shadow: 2px 2px 0 var(--cz-black);
         }
 
         .predefined-tag.selected {
-            background: var(--mac-blue);
-            color: white;
+            background: var(--cz-yellow);
+            color: var(--cz-black);
         }
 
         /* Comments and Rating Styles */
         .comments-section {
             margin-top: 16px;
-            border-top: 2px solid var(--mac-charcoal);
+            border-top: 3px solid var(--cz-black);
             padding-top: 16px;
         }
 
         .comment {
-            background: var(--mac-platinum);
-            border: 1px solid var(--mac-charcoal);
+            background: var(--cz-concrete-light);
+            border: 2px solid var(--cz-black);
             padding: 8px;
             margin-bottom: 8px;
-            box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 2px 2px 0 var(--cz-black);
         }
 
         .comment-header {
@@ -1662,21 +2113,24 @@
 
         .comment-author {
             font-weight: 700;
-            color: var(--mac-blue);
+            color: var(--cz-yellow);
             font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            font-family: var(--font-stencil);
         }
 
         .comment-time {
             font-size: 9px;
             color: var(--text-muted);
+            letter-spacing: 1px;
         }
 
         .comment-text {
             font-size: 11px;
             line-height: 1.3;
-            color: var(--mac-charcoal);
+            color: var(--cz-black);
+            font-family: var(--font-blueprint);
         }
 
         .rating-display {
@@ -1688,8 +2142,9 @@
 
         .rating-score {
             font-weight: 700;
-            color: var(--mac-green);
+            color: var(--cz-green);
             font-size: 12px;
+            font-family: var(--font-stencil);
         }
 
         .rating-buttons {
@@ -1698,28 +2153,28 @@
         }
 
         .rating-btn {
-            background: var(--mac-steel);
-            border: 1px solid var(--mac-charcoal);
+            background: var(--cz-concrete);
+            border: 2px solid var(--cz-black);
             color: var(--text-secondary);
             padding: 4px 8px;
             font-size: 10px;
             cursor: pointer;
             transition: var(--transition);
-            box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+            box-shadow: 1px 1px 0 var(--cz-black);
         }
 
         .rating-btn:hover {
-            background: var(--mac-platinum);
-            color: var(--mac-charcoal);
+            background: var(--cz-concrete-light);
+            color: var(--cz-yellow);
         }
 
         .rating-btn.liked {
-            background: var(--mac-green);
-            color: var(--mac-charcoal);
+            background: var(--cz-green);
+            color: white;
         }
 
         .rating-btn.disliked {
-            background: var(--danger);
+            background: var(--cz-red);
             color: white;
         }
 
@@ -1730,7 +2185,7 @@
         }
 
         .location-detail-header {
-            border-bottom: 2px solid var(--mac-charcoal);
+            border-bottom: 3px solid var(--cz-black);
             padding-bottom: 12px;
             margin-bottom: 16px;
         }
@@ -1748,6 +2203,7 @@
             gap: 4px;
             font-size: 10px;
             color: var(--text-muted);
+            font-family: var(--font-blueprint);
         }
 
         .photos-section {
@@ -1761,15 +2217,15 @@
         }
 
         .photo-placeholder {
-            background: var(--mac-steel);
-            border: 2px solid var(--mac-charcoal);
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
             height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text-muted);
             font-size: 12px;
-            box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3);
         }
 
         /* Geocoded marker styling */
@@ -1785,15 +2241,15 @@
 
         /* Enhanced address input styling */
         #location-address:focus {
-            border-color: var(--mac-blue);
-            box-shadow: 0 0 0 2px rgba(0,122,255,0.3), inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+            border-color: var(--cz-yellow);
+            box-shadow: 0 0 0 3px rgba(255, 208, 0, 0.3), inset 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         /* Loading states for buttons */
         #find-location-btn:disabled, #use-my-location-btn:disabled {
             opacity: 0.7;
             cursor: not-allowed;
-            background: var(--mac-steel) !important;
+            background: var(--cz-concrete) !important;
             color: var(--text-muted) !important;
         }
 
@@ -1802,20 +2258,20 @@
             position: absolute;
             top: 12px;
             right: 12px;
-            background: var(--mac-platinum);
-            border: 2px solid var(--mac-charcoal);
+            background: var(--cz-concrete-light);
+            border: 3px solid var(--cz-black);
             padding: 8px 12px;
-            box-shadow: var(--shadow-mac);
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            box-shadow: var(--shadow-industrial);
+            font-family: var(--font-stencil);
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             z-index: 1000;
             display: none;
             align-items: center;
             gap: 6px;
-            color: var(--mac-charcoal);
+            color: var(--cz-black);
         }
 
         .location-indicator.detecting {
@@ -1824,21 +2280,21 @@
         }
 
         .location-indicator.success {
-            background: var(--mac-green);
-            color: var(--mac-charcoal);
-            border-color: var(--mac-green);
+            background: var(--cz-green);
+            color: white;
+            border-color: var(--cz-green);
         }
 
         .location-indicator.error {
-            background: var(--danger);
+            background: var(--cz-red);
             color: white;
-            border-color: var(--danger);
+            border-color: var(--cz-red);
         }
 
         .location-indicator.fallback {
-            background: var(--mac-orange);
+            background: var(--cz-orange);
             color: white;
-            border-color: var(--mac-orange);
+            border-color: var(--cz-orange);
         }
 
         /* Re-center button */
@@ -1846,18 +2302,18 @@
             position: absolute;
             top: 60px;
             right: 12px;
-            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
-            border: 2px solid var(--mac-charcoal);
-            color: white;
+            background: var(--cz-yellow);
+            border: 3px solid var(--cz-black);
+            color: var(--cz-black);
             padding: 8px 12px;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             align-items: center;
             gap: 6px;
-            font-family: var(--font-geneva), 'Arial', sans-serif;
+            font-family: var(--font-stencil);
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
             box-shadow: var(--bevel-light);
@@ -1898,305 +2354,6 @@
         .user-location-marker {
             animation: pulse 2s infinite;
         }
-
-        /* Profile Page Enhancements - Y2K Mac OS Classic */
-        #profile-view .profile-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 2px solid var(--mac-charcoal);
-            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
-            box-shadow: var(--shadow-mac);
-            border-radius: 0;
-            transition: var(--transition);
-        }
-
-        #profile-view .profile-header:hover {
-            box-shadow: 0 0 15px var(--mac-blue);
-        }
-
-        #profile-view .profile-avatar-section {
-            flex-shrink: 0;
-        }
-
-        #profile-view .profile-avatar-canvas {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid var(--mac-charcoal);
-            box-shadow: var(--shadow-mac);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        #profile-view .profile-avatar-canvas:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px var(--mac-blue);
-        }
-
-        #profile-view .avatar-edit-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 122, 255, 0.8);
-            border-radius: 50%;
-            width: 120px;
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        #profile-view .profile-avatar:hover .avatar-edit-overlay {
-            opacity: 1;
-        }
-
-        #profile-view .profile-info-section {
-            flex: 1;
-        }
-
-        #profile-view .profile-display-name {
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            display: block;
-        }
-
-        #profile-view .profile-display-name:hover {
-            color: var(--mac-blue);
-            text-shadow: 0 0 10px var(--mac-blue);
-        }
-
-        #profile-view .profile-display-bio,
-        #profile-view .profile-display-contact {
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: var(--transition);
-            padding: 4px 0;
-            border-bottom: 1px solid transparent;
-        }
-
-        #profile-view .profile-display-bio:hover,
-        #profile-view .profile-display-contact:hover {
-            background: rgba(0, 122, 255, 0.1);
-            border-radius: 2px;
-            color: var(--mac-blue);
-        }
-
-        #profile-view .profile-controls {
-            display: flex;
-            gap: 8px;
-            align-self: flex-start;
-        }
-
-        #profile-view .profile-edit-form {
-            animation: slideIn 0.3s ease-out;
-        }
-
-        /* Visibility Toggle */
-        .toggle-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .toggle-input {
-            display: none;
-        }
-
-        .toggle-label {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 30px;
-            background: var(--mac-steel);
-            border: 2px solid var(--mac-charcoal);
-            border-radius: 15px;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: var(--bevel-light);
-        }
-
-        .toggle-input:checked + .toggle-label {
-            background: var(--mac-blue);
-            border-color: var(--mac-blue);
-            box-shadow: var(--bevel-dark);
-        }
-
-        .toggle-slider {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            right: 2px;
-            bottom: 2px;
-            background: white;
-            border-radius: 13px;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--mac-charcoal);
-        }
-
-        .toggle-input:checked + .toggle-label .toggle-slider {
-            transform: translateX(30px);
-            color: white;
-        }
-
-        .toggle-icon-on,
-        .toggle-icon-off {
-            position: absolute;
-            transition: opacity 0.2s ease;
-        }
-
-        .toggle-icon-off {
-            opacity: 1;
-        }
-
-        .toggle-icon-on {
-            opacity: 0;
-        }
-
-        .toggle-input:checked + .toggle-label .toggle-icon-off {
-            opacity: 0;
-        }
-
-        .toggle-input:checked + .toggle-label .toggle-icon-on {
-            opacity: 1;
-        }
-
-        .visibility-status {
-            font-size: 11px;
-            color: var(--text-secondary);
-            font-family: var(--font-geneva);
-            min-height: 1em;
-        }
-
-        /* Activity Dashboard */
-        .activity-history-feed {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .activity-card {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 12px;
-            margin-bottom: 8px;
-            border: 1px solid var(--mac-charcoal);
-            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
-            box-shadow: var(--shadow-mac);
-            transition: var(--transition);
-            border-left: 4px solid var(--mac-blue);
-        }
-
-        .activity-card:hover {
-            transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(0,122,255,0.3);
-        }
-
-        .activity-icon-large {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
-            border: 2px solid var(--mac-charcoal);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-            box-shadow: var(--shadow-mac);
-        }
-
-        .activity-content-large {
-            flex: 1;
-        }
-
-        .activity-title {
-            font-weight: 700;
-            color: var(--mac-blue);
-            margin-bottom: 4px;
-            font-size: 13px;
-        }
-
-        .activity-description {
-            color: var(--text-secondary);
-            font-size: 11px;
-            margin-bottom: 6px;
-            line-height: 1.4;
-        }
-
-        .activity-meta {
-            display: flex;
-            gap: 12px;
-            font-size: 10px;
-            color: var(--text-muted);
-        }
-
-        /* Stats Summary */
-        .stats-summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 16px;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: var(--mac-blue);
-            margin-bottom: 4px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        /* Responsive Profile */
-        @media (max-width: 768px) {
-            #profile-view .profile-header {
-                flex-direction: column;
-                text-align: center;
-                gap: 16px;
-            }
-
-            #profile-view .profile-controls {
-                width: 100%;
-            }
-
-            #profile-view .profile-controls .btn {
-                flex: 1;
-            }
-
-            .stats-summary-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
     </style>
 </head>
 <body>
@@ -2211,7 +2368,7 @@
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <a href="#navigation" class="skip-link">Skip to navigation</a>
 
-    <div class="app vaporwave-gradient">
+    <div class="app">
         <header class="header" role="banner">
             <div class="logo" aria-label="Urbindex - Urban Exploration Network">URBINDEX</div>
             <div class="status" aria-live="polite" aria-atomic="true">
@@ -2451,103 +2608,8 @@
             </div>
 
             <div class="view" id="profile-view" role="tabpanel" aria-labelledby="profile-tab">
-                <!-- Inline Editable Profile Header -->
-                <div id="profile-header" class="profile-header panel" tabindex="0" role="button" aria-label="Click to edit profile">
-                    <div class="profile-avatar-section">
-                        <div id="profile-avatar" class="profile-avatar" style="position: relative;">
-                            <canvas id="profile-avatar-canvas" class="profile-avatar-canvas" width="120" height="120" style="border-radius: 50%; border: 3px solid var(--mac-charcoal); box-shadow: var(--shadow-mac); cursor: pointer;"></canvas>
-                            <div id="avatar-edit-overlay" class="avatar-edit-overlay" style="display: none;">
-                                <i class="fas fa-camera" style="font-size: 1.5rem; color: white;"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="profile-info-section">
-                        <div id="profile-display-name" class="profile-display-name mac-title" tabindex="0" style="cursor: pointer; display: inline-block; max-width: 300px; word-break: break-word;" aria-label="Click to edit username">Explorer</div>
-                        <div id="profile-display-bio" class="profile-display-bio mac-text" style="margin-top: 8px; color: var(--text-secondary); max-width: 400px; word-break: break-word;" aria-label="Click to edit bio">Click fields to edit your profile</div>
-                        <div id="profile-display-contact" class="profile-display-contact mac-text" style="margin-top: 4px; font-size: 10px; color: var(--text-muted);" aria-label="Click to edit contact"></div>
-                    </div>
-                    <div class="profile-controls">
-                        <button id="save-profile-btn" class="btn btn-primary" style="display: none;" onclick="app.saveProfileChanges()">Save</button>
-                        <button id="cancel-profile-btn" class="btn" style="display: none;" onclick="app.cancelProfileEdit()">Cancel</button>
-                        <div id="profile-saving-indicator" class="loading" style="display: none; font-size: 0.9em;">Saving...</div>
-                    </div>
-                </div>
-
-                <!-- Inline Edit Inputs (hidden by default) -->
-                <div id="profile-edit-inputs" style="display: none;">
-                    <div class="form-group">
-                        <label for="edit-username-input" class="form-label required">Username</label>
-                        <input id="edit-username-input" type="text" class="input" maxlength="20" minlength="3" aria-describedby="username-error" autocomplete="nickname">
-                        <div id="username-error" class="form-error" role="alert"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-bio-input" class="form-label">Bio</label>
-                        <textarea id="edit-bio-input" class="input" rows="3" maxlength="200" aria-describedby="bio-error" autocomplete="note"></textarea>
-                        <div id="bio-error" class="form-error" role="alert"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-contact-input" class="form-label">Contact</label>
-                        <input id="edit-contact-input" type="url" class="input" maxlength="100" aria-describedby="contact-error" autocomplete="url">
-                        <div id="contact-error" class="form-error" role="alert"></div>
-                    </div>
-                </div>
-
-                <!-- Visibility Toggle -->
-                <div class="panel" style="margin-top: 20px;">
-                    <div class="panel-title">
-                        <i class="fas fa-eye"></i>
-                        Profile Visibility
-                    </div>
-                    <div id="visibility-toggle-container">
-                        <div class="toggle-group">
-                            <input type="checkbox" id="profile-visibility-toggle" class="toggle-input" aria-labelledby="visibility-label">
-                            <label for="profile-visibility-toggle" id="visibility-label" class="toggle-label">
-                                <span class="toggle-slider">
-                                    <span class="toggle-icon-on">
-                                        <i class="fas fa-globe"></i> Public
-                                    </span>
-                                    <span class="toggle-icon-off">
-                                        <i class="fas fa-lock"></i> Private
-                                    </span>
-                                </span>
-                            </label>
-                            <div id="visibility-status" class="visibility-status" aria-live="polite"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Activity History Dashboard -->
-                <div class="panel" style="margin-top: 20px;">
-                    <div class="panel-title">
-                        <i class="fas fa-history"></i>
-                        Activity History
-                    </div>
-                    <div id="user-activity-feed" class="activity-history-feed loading" role="status" aria-live="polite">
-                        Loading activity...
-                    </div>
-                </div>
-
-                <!-- Stats Summary -->
-                <div class="stats-summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px;">
-                    <div class="panel">
-                        <div class="stat-item">
-                            <div id="stat-total-locations" class="stat-number">0</div>
-                            <div class="stat-label">Total Locations</div>
-                        </div>
-                    </div>
-                    <div class="panel">
-                        <div class="stat-item">
-                            <div id="stat-join-date" class="stat-number">N/A</div>
-                            <div class="stat-label">Member Since</div>
-                        </div>
-                    </div>
-                    <div class="panel">
-                        <div class="stat-item">
-                            <div id="stat-last-activity" class="stat-number">Never</div>
-                            <div class="stat-label">Last Activity</div>
-                        </div>
-                    </div>
-                </div>
+                <h2>Profile</h2>
+                <div id="profile-content" class="loading" role="status" aria-live="polite">Loading profile...</div>
             </div>
         </main>
 
@@ -2629,7 +2691,7 @@
                         </div>
                     </div>
                     <div class="predefined-tags" style="margin-top: 8px;">
-                        <div class="mac-label" style="margin-bottom: 6px; color: var(--text-muted);">Suggested tags:</div>
+                        <div class="cz-label" style="margin-bottom: 6px; color: var(--text-muted);">Suggested tags:</div>
                         <div id="predefined-tags-list" class="predefined-tags-list"></div>
                     </div>
                 </div>
@@ -2684,7 +2746,7 @@
         <div class="modal-content">
             <button class="modal-close" onclick="app.hidePasswordResetModal()">&times;</button>
             <h3>Reset Password</h3>
-            <p class="mac-text" style="color: var(--text-secondary); margin-bottom: 20px;">
+            <p class="cz-text" style="color: var(--text-secondary); margin-bottom: 20px;">
                 Enter your email address and we'll send you a link to reset your password.
             </p>
             <form id="password-reset-form">
@@ -2749,37 +2811,38 @@
             const banner = document.createElement('div');
             banner.id = 'pwa-install-banner';
             banner.innerHTML = `
-                <div style="background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
-                           border: 2px solid var(--mac-charcoal);
+                <div style="background: var(--cz-concrete);
+                           border: 4px solid var(--cz-black);
                            padding: 16px;
                            margin: 16px;
-                           box-shadow: var(--shadow-mac);
+                           box-shadow: var(--shadow-industrial);
                            position: fixed;
                            bottom: 80px;
                            left: 16px;
                            right: 16px;
                            z-index: 2000;
                            border-radius: 0;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--hazard-stripe);"></div>
+                    <div style="display: flex; align-items: center; gap: 12px; padding-top: 8px;">
                         <div style="width: 48px; height: 48px;
-                                    background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
-                                    border: 2px solid var(--mac-charcoal);
+                                    background: var(--cz-yellow);
+                                    border: 3px solid var(--cz-black);
                                     display: flex;
                                     align-items: center;
                                     justify-content: center;">
-                            <i class="fas fa-map-marked-alt" style="color: white; font-size: 1.2rem;"></i>
+                            <i class="fas fa-hard-hat" style="color: var(--cz-black); font-size: 1.2rem;"></i>
                         </div>
                         <div style="flex: 1;">
-                            <div style="font-family: var(--font-impact);
+                            <div style="font-family: var(--font-industrial);
                                        font-size: 14px;
                                        font-weight: 900;
                                        text-transform: uppercase;
-                                       letter-spacing: 1px;
-                                       color: var(--mac-blue);">Install Urbindex</div>
-                            <div style="font-family: var(--font-geneva);
+                                       letter-spacing: 2px;
+                                       color: var(--cz-yellow);">Install Urbindex</div>
+                            <div style="font-family: var(--font-blueprint);
                                        font-size: 11px;
                                        color: var(--text-secondary);
-                                       margin-top: 2px;">Get the full app experience with offline access</div>
+                                       margin-top: 2px;">Get the full site access with offline capabilities</div>
                         </div>
                         <div style="display: flex; gap: 8px;">
                             <button id="install-btn" class="btn btn-primary" style="font-size: 11px; padding: 6px 12px;">
@@ -3147,7 +3210,7 @@
                     const userMarker = L.marker([lat, lng], {
                         icon: L.divIcon({
                             className: 'user-location-marker',
-                            html: '<div style="background: var(--mac-blue); width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); animation: pulse 2s infinite;"></div>',
+                            html: '<div style="background: var(--cz-yellow); width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); animation: pulse 2s infinite;"></div>',
                             iconSize: [16, 16],
                             iconAnchor: [8, 8]
                         })
@@ -3155,8 +3218,8 @@
                     
                     // Show popup with location info
                     userMarker.bindPopup(`
-                        <div style="text-align: center; font-family: var(--font-geneva), Arial, sans-serif; font-size: 12px;">
-                            <strong style="color: var(--mac-blue);">Your Location</strong><br>
+                        <div style="text-align: center; font-family: var(--font-blueprint), Arial, sans-serif; font-size: 12px;">
+                            <strong style="color: var(--cz-yellow);">Your Location</strong><br>
                             <span style="color: #666;">${lat.toFixed(6)}, ${lng.toFixed(6)}</span>
                         </div>
                     `).openPopup();
@@ -3662,7 +3725,7 @@
                     this.tempMarker = L.marker([lat, lng], {
                         icon: L.divIcon({
                             className: 'geocoded-marker',
-                            html: '<div style="background: var(--mac-blue); width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                            html: '<div style="background: var(--cz-yellow); width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
                             iconSize: [12, 12],
                             iconAnchor: [6, 6]
                         })
@@ -3971,7 +4034,7 @@
                     tagsHtml = `
                         <div style="display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0;">
                             ${data.tags.slice(0, 5).map(tag =>
-                                `<span style="background: var(--mac-blue); color: white; padding: 1px 4px; border-radius: 0; font-size: 0.7em;">${this.escapeHtml(tag)}</span>`
+                                `<span style="background: var(--cz-yellow); color: white; padding: 1px 4px; border-radius: 0; font-size: 0.7em;">${this.escapeHtml(tag)}</span>`
                             ).join('')}
                             ${data.tags.length > 5 ? `<span style="font-size: 0.7em; color: #666;">+${data.tags.length - 5} more</span>` : ''}
                         </div>
@@ -4223,13 +4286,19 @@
 
                 if (!this.currentUser) {
                     content.innerHTML = `
-                        <div style="text-align: center; padding: 48px;">
-                            <i class="fas fa-user-circle" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 16px; display: block;"></i>
-                            <h3 style="color: var(--text-secondary); margin-bottom: 12px;">Create Your Profile</h3>
-                            <p style="color: var(--text-muted); margin-bottom: 20px;">Join the Urbindex community to track your discoveries and connect with fellow explorers</p>
-                            <button class="btn btn-primary" onclick="app.handleAuth()">
-                                <i class="fas fa-user-plus"></i> Get Started
-                            </button>
+                        <div class="inspection-report">
+                            <div class="clipboard-header">
+                                <div class="clipboard-title">ACCESS DENIED</div>
+                                <div class="clipboard-id">NO-AUTH</div>
+                            </div>
+                            <div class="report-body" style="text-align: center; padding: 48px;">
+                                <i class="fas fa-hard-hat" style="font-size: 4rem; color: var(--cz-yellow); margin-bottom: 16px; display: block;"></i>
+                                <h3 style="color: var(--cz-black); margin-bottom: 12px; font-family: var(--font-industrial); letter-spacing: 3px;">SITE ACCESS REQUIRED</h3>
+                                <p style="color: var(--cz-concrete); margin-bottom: 20px; font-family: var(--font-blueprint);">Register as site personnel to access construction zone features and track your urban explorations.</p>
+                                <button class="btn btn-primary" onclick="app.handleAuth()">
+                                    <i class="fas fa-id-badge"></i> REGISTER ACCESS
+                                </button>
+                            </div>
                         </div>
                     `;
                     return;
@@ -4255,231 +4324,261 @@
                     const emailVerified = this.currentUser.emailVerified;
                     const userEmail = this.currentUser.email || 'Guest User';
 
-                    // Calculate achievement levels
-                    const explorerLevel = totalLocations < 5 ? 'Novice' : totalLocations < 15 ? 'Explorer' : totalLocations < 30 ? 'Veteran' : totalLocations < 50 ? 'Expert' : 'Legend';
-                    const levelColor = totalLocations < 5 ? '#A0A0A0' : totalLocations < 15 ? '#00FF88' : totalLocations < 30 ? '#007AFF' : totalLocations < 50 ? '#8B5CF6' : '#FF006E';
+                    // Calculate clearance levels (like security clearance)
+                    const clearanceLevel = totalLocations < 5 ? 'TRAINEE' : totalLocations < 15 ? 'OPERATIVE' : totalLocations < 30 ? 'SPECIALIST' : totalLocations < 50 ? 'SUPERVISOR' : 'FOREMAN';
+                    const clearanceColor = totalLocations < 5 ? '#A0A0A0' : totalLocations < 15 ? '#00AA44' : totalLocations < 30 ? '#007AFF' : totalLocations < 50 ? '#FF6B00' : '#FFD000';
+
+                    // Generate report ID
+                    const reportId = `RPT-${this.currentUser.uid.substring(0, 8).toUpperCase()}`;
+                    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
                     content.innerHTML = `
-                        <!-- User Info Card -->
-                        <div class="panel" style="margin-bottom: 20px;">
-                            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-                                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple)); border: 3px solid var(--mac-charcoal); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-mac);">
-                                    <i class="fas fa-user" style="font-size: 2.5rem; color: white;"></i>
-                                </div>
-                                <div style="flex: 1;">
-                                    <h3 class="mac-title" style="color: var(--text-primary); margin-bottom: 8px;">
-                                        ${isAnonymous ? 'GUEST EXPLORER' : 'URBAN EXPLORER'}
-                                    </h3>
-                                    <div class="mac-text" style="color: var(--text-secondary); margin-bottom: 8px; word-break: break-all;">
-                                        ${isAnonymous ? 'Anonymous Session' : this.escapeHtml(userEmail)}
-                                    </div>
-                                    ${!isAnonymous ? `
-                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                            ${emailVerified ?
-                                                '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: var(--mac-green); color: var(--mac-charcoal); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;"><i class="fas fa-check-circle"></i> Verified</span>' :
-                                                '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: var(--mac-orange); color: white; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;"><i class="fas fa-exclamation-triangle"></i> Unverified</span>'
-                                            }
+                        <div class="inspection-report">
+                            <!-- Clipboard Header -->
+                            <div class="clipboard-header">
+                                <div class="clipboard-title">SITE INSPECTION REPORT</div>
+                                <div class="clipboard-id">${reportId}</div>
+                            </div>
+
+                            <div class="report-body">
+                                <!-- Site Badge / ID Card -->
+                                <div class="site-badge">
+                                    <div class="badge-content">
+                                        <div class="badge-photo">
+                                            <i class="fas fa-hard-hat"></i>
                                         </div>
-                                    ` : ''}
-                                    <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: ${levelColor}; color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; box-shadow: var(--shadow-mac);">
-                                        <i class="fas fa-star"></i> ${explorerLevel} EXPLORER
+                                        <div class="badge-info">
+                                            <div class="badge-name">${isAnonymous ? 'TEMPORARY WORKER' : 'SITE OPERATIVE'}</div>
+                                            <div class="badge-role">${isAnonymous ? 'GUEST ACCESS' : this.escapeHtml(userEmail)}</div>
+
+                                            ${!isAnonymous ? `
+                                                <div style="margin-bottom: 12px;">
+                                                    ${emailVerified ?
+                                                        '<span class="verification-stamp stamp-verified"><i class="fas fa-check"></i> VERIFIED</span>' :
+                                                        '<span class="verification-stamp stamp-unverified"><i class="fas fa-exclamation"></i> PENDING</span>'
+                                                    }
+                                                </div>
+                                            ` : ''}
+
+                                            <div class="clearance-level" style="background: ${clearanceColor}; color: ${clearanceColor === '#FFD000' ? 'var(--cz-black)' : 'white'};">
+                                                <i class="fas fa-shield-alt"></i> ${clearanceLevel}
+                                            </div>
+
+                                            <div class="badge-barcode">
+                                                ${this.currentUser.uid.substring(0, 16).toUpperCase()}
+                                            </div>
+                                            <div class="badge-timestamp">LAST SCAN: ${timestamp}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                ${!isAnonymous && !emailVerified ? `
+                                    <div class="warning-box">
+                                        <p><strong>EMAIL VERIFICATION REQUIRED</strong><br>Complete verification to unlock full site access and secure your credentials.</p>
+                                        <button class="btn btn-primary" onclick="app.resendVerificationEmail()" style="margin-top: 10px;">
+                                            <i class="fas fa-envelope"></i> RESEND VERIFICATION
+                                        </button>
+                                    </div>
+                                ` : ''}
+
+                                <!-- Site Statistics -->
+                                <div class="inspection-section">
+                                    <div class="section-header">
+                                        <i class="fas fa-chart-bar"></i>
+                                        SITE METRICS
+                                    </div>
+                                    <div class="section-content">
+                                        <div class="stats-grid">
+                                            <div class="stat-plate">
+                                                <div class="stat-value">${totalLocations}</div>
+                                                <div class="stat-label">LOCATIONS</div>
+                                            </div>
+                                            <div class="stat-plate">
+                                                <div class="stat-value">${totalLocations * 10}</div>
+                                                <div class="stat-label">POINTS</div>
+                                            </div>
+                                            <div class="stat-plate">
+                                                <div class="stat-value">${Object.keys(categoryStats).length}</div>
+                                                <div class="stat-label">SECTORS</div>
+                                            </div>
+                                            <div class="stat-plate">
+                                                <div class="stat-value">${Math.floor(totalLocations * 1.5)}</div>
+                                                <div class="stat-label">SURVEYS</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                ${totalLocations > 0 ? `
+                                    <!-- Category Analysis -->
+                                    <div class="inspection-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-clipboard-list"></i>
+                                            SECTOR ANALYSIS
+                                        </div>
+                                        <div class="section-content">
+                                            ${Object.entries(categoryStats).map(([category, count]) => {
+                                                const percentage = Math.round((count / totalLocations) * 100);
+                                                const categoryIcons = {
+                                                    abandoned: 'building',
+                                                    rooftop: 'city',
+                                                    tunnel: 'subway',
+                                                    industrial: 'industry',
+                                                    other: 'map-marker'
+                                                };
+                                                return `
+                                                    <div class="gauge-container">
+                                                        <div class="gauge-label">
+                                                            <span><i class="fas fa-${categoryIcons[category] || 'map-marker'}"></i> ${category.toUpperCase()}</span>
+                                                            <span>${count} SITES (${percentage}%)</span>
+                                                        </div>
+                                                        <div class="gauge-bar">
+                                                            <div class="gauge-fill" style="width: ${percentage}%;"></div>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    </div>
+
+                                    <!-- Risk Assessment -->
+                                    <div class="inspection-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            HAZARD ASSESSMENT
+                                        </div>
+                                        <div class="section-content">
+                                            ${Object.entries(riskStats).map(([risk, count]) => {
+                                                const percentage = Math.round((count / totalLocations) * 100);
+                                                const riskColors = {
+                                                    low: '#00AA44',
+                                                    moderate: '#FF6B00',
+                                                    high: '#CC0000'
+                                                };
+                                                return `
+                                                    <div class="gauge-container">
+                                                        <div class="gauge-label">
+                                                            <span><i class="fas fa-radiation" style="color: ${riskColors[risk]};"></i> ${risk.toUpperCase()} RISK</span>
+                                                            <span>${count} ZONES (${percentage}%)</span>
+                                                        </div>
+                                                        <div class="gauge-bar">
+                                                            <div class="gauge-fill" style="width: ${percentage}%; background: ${riskColors[risk]};"></div>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
+
+                                <!-- Certifications / Achievements -->
+                                <div class="inspection-section">
+                                    <div class="section-header">
+                                        <i class="fas fa-certificate"></i>
+                                        CERTIFICATIONS
+                                    </div>
+                                    <div class="section-content">
+                                        <div class="achievement-grid">
+                                            ${this.generateAchievementBadges(totalLocations, categoryStats, riskStats)}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            ${!isAnonymous && !emailVerified ? `
-                                <div style="background: rgba(255, 165, 0, 0.1); border: 2px solid var(--mac-orange); padding: 12px; margin-bottom: 12px;">
-                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                        <i class="fas fa-envelope" style="color: var(--mac-orange);"></i>
-                                        <span class="mac-label" style="color: var(--mac-orange);">Email Not Verified</span>
-                                    </div>
-                                    <p class="mac-text" style="color: var(--text-secondary); margin-bottom: 8px;">Verify your email to unlock all features and secure your account.</p>
-                                    <button class="btn btn-primary" onclick="app.resendVerificationEmail()" style="font-size: 11px; padding: 6px 12px;">
-                                        <i class="fas fa-paper-plane"></i> Resend Verification Email
-                                    </button>
-                                </div>
-                            ` : ''}
-                            <div style="display: flex; gap: 8px; padding-top: 12px; border-top: 2px solid var(--mac-charcoal);">
+
+                            <!-- Report Actions -->
+                            <div class="report-actions">
                                 ${!isAnonymous ? `
-                                    <button class="btn" onclick="app.showPasswordResetModal()" style="flex: 1;">
-                                        <i class="fas fa-key"></i> Change Password
+                                    <button class="btn" onclick="app.showPasswordResetModal()">
+                                        <i class="fas fa-key"></i> CHANGE CREDENTIALS
                                     </button>
                                 ` : ''}
-                                <button class="btn" onclick="app.handleAuth()" style="flex: 1; background: var(--danger); border-color: var(--danger); color: white;">
-                                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                                <button class="btn" onclick="app.handleAuth()" style="background: var(--cz-red); border-color: var(--cz-red); color: white;">
+                                    <i class="fas fa-sign-out-alt"></i> CLOCK OUT
                                 </button>
-                            </div>
-                        </div>
-
-                        <!-- Stats Grid -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px;">
-                            <div class="panel" style="text-align: center; padding: 16px;">
-                                <div style="font-size: 2.5rem; font-weight: 900; color: var(--mac-blue); text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">${totalLocations}</div>
-                                <div class="mac-label" style="color: var(--text-muted); margin-top: 4px;">Locations</div>
-                                <i class="fas fa-map-marker-alt" style="color: var(--text-muted); font-size: 1rem; margin-top: 8px;"></i>
-                            </div>
-                            <div class="panel" style="text-align: center; padding: 16px;">
-                                <div style="font-size: 2.5rem; font-weight: 900; color: var(--mac-purple); text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">${totalLocations * 10}</div>
-                                <div class="mac-label" style="color: var(--text-muted); margin-top: 4px;">Points</div>
-                                <i class="fas fa-trophy" style="color: var(--text-muted); font-size: 1rem; margin-top: 8px;"></i>
-                            </div>
-                            <div class="panel" style="text-align: center; padding: 16px;">
-                                <div style="font-size: 2.5rem; font-weight: 900; color: var(--mac-green); text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">${Object.keys(categoryStats).length}</div>
-                                <div class="mac-label" style="color: var(--text-muted); margin-top: 4px;">Categories</div>
-                                <i class="fas fa-layer-group" style="color: var(--text-muted); font-size: 1rem; margin-top: 8px;"></i>
-                            </div>
-                            <div class="panel" style="text-align: center; padding: 16px;">
-                                <div style="font-size: 2.5rem; font-weight: 900; color: var(--mac-orange); text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">${Math.floor(totalLocations * 1.5)}</div>
-                                <div class="mac-label" style="color: var(--text-muted); margin-top: 4px;">Explorations</div>
-                                <i class="fas fa-compass" style="color: var(--text-muted); font-size: 1rem; margin-top: 8px;"></i>
-                            </div>
-                        </div>
-
-                        ${totalLocations > 0 ? `
-                            <!-- Category Breakdown -->
-                            <div class="panel" style="margin-bottom: 20px;">
-                                <div class="panel-title">
-                                    <i class="fas fa-chart-pie"></i>
-                                    Category Breakdown
-                                </div>
-                                <div style="display: grid; gap: 8px;">
-                                    ${Object.entries(categoryStats).map(([category, count]) => {
-                                        const percentage = Math.round((count / totalLocations) * 100);
-                                        const categoryIcons = {
-                                            abandoned: 'building',
-                                            rooftop: 'city',
-                                            tunnel: 'subway',
-                                            industrial: 'industry',
-                                            other: 'map-marker'
-                                        };
-                                        return `
-                                            <div>
-                                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                                    <span class="mac-text" style="text-transform: uppercase; letter-spacing: 1px;">
-                                                        <i class="fas fa-${categoryIcons[category] || 'map-marker'}"></i> ${category}
-                                                    </span>
-                                                    <span class="mac-text" style="font-weight: 700;">${count} (${percentage}%)</span>
-                                                </div>
-                                                <div style="width: 100%; height: 12px; background: var(--mac-steel); border: 2px solid var(--mac-charcoal); position: relative; overflow: hidden;">
-                                                    <div style="width: ${percentage}%; height: 100%; background: linear-gradient(to right, var(--mac-blue), var(--mac-purple)); transition: width 0.5s ease;"></div>
-                                                </div>
-                                            </div>
-                                        `;
-                                    }).join('')}
-                                </div>
-                            </div>
-
-                            <!-- Risk Level Breakdown -->
-                            <div class="panel" style="margin-bottom: 20px;">
-                                <div class="panel-title">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    Risk Level Distribution
-                                </div>
-                                <div style="display: grid; gap: 8px;">
-                                    ${Object.entries(riskStats).map(([risk, count]) => {
-                                        const percentage = Math.round((count / totalLocations) * 100);
-                                        const riskColors = {
-                                            low: '#00FF88',
-                                            moderate: '#FFA500',
-                                            high: '#FF4444'
-                                        };
-                                        return `
-                                            <div>
-                                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                                    <span class="mac-text" style="text-transform: uppercase; letter-spacing: 1px;">
-                                                        <i class="fas fa-shield-alt" style="color: ${riskColors[risk]};"></i> ${risk}
-                                                    </span>
-                                                    <span class="mac-text" style="font-weight: 700;">${count} (${percentage}%)</span>
-                                                </div>
-                                                <div style="width: 100%; height: 12px; background: var(--mac-steel); border: 2px solid var(--mac-charcoal); position: relative; overflow: hidden;">
-                                                    <div style="width: ${percentage}%; height: 100%; background: ${riskColors[risk]}; transition: width 0.5s ease;"></div>
-                                                </div>
-                                            </div>
-                                        `;
-                                    }).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        <!-- Achievements -->
-                        <div class="panel">
-                            <div class="panel-title">
-                                <i class="fas fa-medal"></i>
-                                Achievements
-                            </div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px;">
-                                ${this.generateAchievementBadges(totalLocations, categoryStats, riskStats)}
                             </div>
                         </div>
                     `;
                 } catch (error) {
                     console.error('Error loading profile:', error);
-                    content.innerHTML = '<div class="error">Failed to load profile</div>';
+                    content.innerHTML = '<div class="error">FAILED TO LOAD INSPECTION REPORT</div>';
                 }
             }
 
             generateAchievementBadges(totalLocations, categoryStats, riskStats) {
                 const achievements = [];
 
-                // Location milestones
+                // Location milestones - Construction Zone certifications
                 const locationMilestones = [
-                    { count: 1, icon: 'seedling', name: 'First Steps', color: '#A0A0A0', unlocked: totalLocations >= 1 },
-                    { count: 5, icon: 'walking', name: 'Explorer', color: '#00FF88', unlocked: totalLocations >= 5 },
-                    { count: 10, icon: 'hiking', name: 'Adventurer', color: '#007AFF', unlocked: totalLocations >= 10 },
-                    { count: 25, icon: 'mountain', name: 'Pathfinder', color: '#8B5CF6', unlocked: totalLocations >= 25 },
-                    { count: 50, icon: 'crown', name: 'Legend', color: '#FF006E', unlocked: totalLocations >= 50 }
+                    { count: 1, icon: 'hard-hat', name: 'SITE INITIATION', desc: '1 SITE', unlocked: totalLocations >= 1 },
+                    { count: 5, icon: 'tools', name: 'FIELD OPERATOR', desc: '5 SITES', unlocked: totalLocations >= 5 },
+                    { count: 10, icon: 'cogs', name: 'SITE INSPECTOR', desc: '10 SITES', unlocked: totalLocations >= 10 },
+                    { count: 25, icon: 'drafting-compass', name: 'PROJECT LEAD', desc: '25 SITES', unlocked: totalLocations >= 25 },
+                    { count: 50, icon: 'building', name: 'SITE FOREMAN', desc: '50 SITES', unlocked: totalLocations >= 50 }
                 ];
 
                 locationMilestones.forEach(achievement => {
                     achievements.push(`
-                        <div style="text-align: center; padding: 12px; background: ${achievement.unlocked ? 'var(--mac-steel)' : 'var(--mac-charcoal)'}; border: 2px solid var(--mac-charcoal); ${achievement.unlocked ? 'box-shadow: var(--shadow-mac);' : 'opacity: 0.5;'}">
-                            <div style="width: 48px; height: 48px; margin: 0 auto 8px; background: ${achievement.unlocked ? achievement.color : '#505050'}; border: 2px solid var(--mac-charcoal); border-radius: 50%; display: flex; align-items: center; justify-content: center; ${achievement.unlocked ? 'box-shadow: 0 0 15px ' + achievement.color + ';' : ''}">
-                                <i class="fas fa-${achievement.icon}" style="font-size: 1.5rem; color: white;"></i>
+                        <div class="achievement-tag ${achievement.unlocked ? '' : 'locked'}">
+                            <div class="tag-icon">
+                                <i class="fas fa-${achievement.icon}" style="color: ${achievement.unlocked ? 'var(--cz-yellow)' : 'var(--cz-concrete-light)'};"></i>
                             </div>
-                            <div class="mac-label" style="font-size: 9px; color: ${achievement.unlocked ? 'var(--text-secondary)' : 'var(--text-muted)'}; margin-bottom: 2px;">${achievement.name}</div>
-                            <div style="font-size: 10px; color: var(--text-muted);">${achievement.count} locations</div>
+                            <div class="tag-name">${achievement.name}</div>
+                            <div class="tag-desc">${achievement.desc}</div>
                         </div>
                     `);
                 });
 
-                // Category achievements
+                // Category achievements - Specialist Certifications
                 if (categoryStats.abandoned >= 5) {
                     achievements.push(`
-                        <div style="text-align: center; padding: 12px; background: var(--mac-steel); border: 2px solid var(--mac-charcoal); box-shadow: var(--shadow-mac);">
-                            <div style="width: 48px; height: 48px; margin: 0 auto 8px; background: #FF006E; border: 2px solid var(--mac-charcoal); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px #FF006E;">
-                                <i class="fas fa-building" style="font-size: 1.5rem; color: white;"></i>
+                        <div class="achievement-tag">
+                            <div class="tag-icon">
+                                <i class="fas fa-building" style="color: var(--cz-orange);"></i>
                             </div>
-                            <div class="mac-label" style="font-size: 9px; color: var(--text-secondary); margin-bottom: 2px;">Ruins Master</div>
-                            <div style="font-size: 10px; color: var(--text-muted);">5+ abandoned</div>
+                            <div class="tag-name">DEMOLITION EXPERT</div>
+                            <div class="tag-desc">5+ ABANDONED</div>
                         </div>
                     `);
                 }
 
                 if (categoryStats.rooftop >= 5) {
                     achievements.push(`
-                        <div style="text-align: center; padding: 12px; background: var(--mac-steel); border: 2px solid var(--mac-charcoal); box-shadow: var(--shadow-mac);">
-                            <div style="width: 48px; height: 48px; margin: 0 auto 8px; background: #007AFF; border: 2px solid var(--mac-charcoal); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px #007AFF;">
-                                <i class="fas fa-city" style="font-size: 1.5rem; color: white;"></i>
+                        <div class="achievement-tag">
+                            <div class="tag-icon">
+                                <i class="fas fa-city" style="color: #007AFF;"></i>
                             </div>
-                            <div class="mac-label" style="font-size: 9px; color: var(--text-secondary); margin-bottom: 2px;">Sky Walker</div>
-                            <div style="font-size: 10px; color: var(--text-muted);">5+ rooftops</div>
+                            <div class="tag-name">HIGH RISE CERT</div>
+                            <div class="tag-desc">5+ ROOFTOPS</div>
                         </div>
                     `);
                 }
 
-                // Risk taker achievement
+                if (categoryStats.tunnel >= 3) {
+                    achievements.push(`
+                        <div class="achievement-tag">
+                            <div class="tag-icon">
+                                <i class="fas fa-subway" style="color: var(--cz-concrete-light);"></i>
+                            </div>
+                            <div class="tag-name">UNDERGROUND OPS</div>
+                            <div class="tag-desc">3+ TUNNELS</div>
+                        </div>
+                    `);
+                }
+
+                // Risk taker achievement - Hazmat Certification
                 if (riskStats.high >= 5) {
                     achievements.push(`
-                        <div style="text-align: center; padding: 12px; background: var(--mac-steel); border: 2px solid var(--mac-charcoal); box-shadow: var(--shadow-mac);">
-                            <div style="width: 48px; height: 48px; margin: 0 auto 8px; background: #FF4444; border: 2px solid var(--mac-charcoal); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px #FF4444;">
-                                <i class="fas fa-fire" style="font-size: 1.5rem; color: white;"></i>
+                        <div class="achievement-tag">
+                            <div class="tag-icon">
+                                <i class="fas fa-radiation" style="color: var(--cz-red);"></i>
                             </div>
-                            <div class="mac-label" style="font-size: 9px; color: var(--text-secondary); margin-bottom: 2px;">Daredevil</div>
-                            <div style="font-size: 10px; color: var(--text-muted);">5+ high risk</div>
+                            <div class="tag-name">HAZMAT CERTIFIED</div>
+                            <div class="tag-desc">5+ HIGH RISK</div>
                         </div>
                     `);
                 }
 
-                return achievements.length > 0 ? achievements.join('') : '<div class="no-data">Unlock achievements by exploring more locations!</div>';
+                return achievements.length > 0 ? achievements.join('') : '<div class="no-data">Complete site inspections to earn certifications!</div>';
             }
 
             showAddLocationModal() {
@@ -4517,7 +4616,7 @@
                 if (coordsDisplay) {
                     coordsDisplay.textContent = 'Click on map or use address to set location';
                     coordsDisplay.style.background = 'white';
-                    coordsDisplay.style.color = 'var(--mac-blue)';
+                    coordsDisplay.style.color = 'var(--cz-yellow)';
                 }
 
                 // Clear address field
@@ -4647,25 +4746,25 @@
                         icon: 'fa-exclamation-circle',
                         borderColor: 'var(--danger)',
                         color: 'var(--danger)',
-                        background: 'linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel))'
+                        background: 'linear-gradient(to bottom, var(--cz-concrete-light), var(--cz-concrete))'
                     },
                     success: {
                         icon: 'fa-check-circle',
                         borderColor: 'var(--success)',
                         color: 'var(--success)',
-                        background: 'linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel))'
+                        background: 'linear-gradient(to bottom, var(--cz-concrete-light), var(--cz-concrete))'
                     },
                     warning: {
                         icon: 'fa-exclamation-triangle',
                         borderColor: 'var(--warning)',
                         color: 'var(--warning)',
-                        background: 'linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel))'
+                        background: 'linear-gradient(to bottom, var(--cz-concrete-light), var(--cz-concrete))'
                     },
                     info: {
                         icon: 'fa-info-circle',
                         borderColor: 'var(--accent-blue)',
                         color: 'var(--accent-blue)',
-                        background: 'linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel))'
+                        background: 'linear-gradient(to bottom, var(--cz-concrete-light), var(--cz-concrete))'
                     }
                 };
 
@@ -4674,7 +4773,7 @@
                 toast.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <i class="fas ${config.icon}" style="font-size: 1.2rem; color: ${config.color};" aria-hidden="true"></i>
-                        <span class="mac-text" style="flex: 1; color: var(--mac-charcoal);">${message}</span>
+                        <span class="cz-text" style="flex: 1; color: var(--cz-black);">${message}</span>
                         <button class="btn-close" aria-label="Close notification" onclick="this.parentElement.parentElement.remove()">
                             <i class="fas fa-times" aria-hidden="true"></i>
                         </button>
@@ -4690,11 +4789,11 @@
                     border: `3px solid ${config.borderColor}`,
                     borderRadius: '0',
                     zIndex: '3000',
-                    boxShadow: 'var(--shadow-mac), 0 0 20px ' + config.color,
+                    boxShadow: 'var(--shadow-industrial), 0 0 20px ' + config.color,
                     maxWidth: '400px',
                     minWidth: '250px',
                     animation: 'slideIn 0.3s ease-out',
-                    fontFamily: 'var(--font-geneva), Arial, sans-serif',
+                    fontFamily: 'var(--font-blueprint), Arial, sans-serif',
                     fontSize: '12px',
                     fontWeight: '600'
                 };
@@ -4718,7 +4817,7 @@
                 closeBtn.style.cssText = `
                     background: none;
                     border: none;
-                    color: var(--mac-charcoal);
+                    color: var(--cz-black);
                     cursor: pointer;
                     padding: 2px;
                     margin-left: auto;
