@@ -403,13 +403,313 @@
         </nav>
 
         <main class="main" role="main" id="main-content">
-            <!-- Views will be loaded dynamically -->
+            <!-- Map View -->
+            <div class="view active" id="map-view" role="tabpanel" aria-labelledby="map-tab">
+                <div style="display: grid; grid-template-columns: 300px 1fr; gap: 16px; height: calc(100vh - 120px); min-height: 500px;">
+                    <aside style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="background: var(--bg-secondary); border: 2px solid var(--mac-charcoal); padding: 16px; box-shadow: var(--shadow-mac);">
+                            <h3 style="color: var(--mac-blue); margin-bottom: 12px; font-size: 14px;">Recent Activity</h3>
+                            <div id="activity-feed" style="color: var(--text-muted);">Loading...</div>
+                        </div>
+                        <div style="background: var(--bg-secondary); border: 2px solid var(--mac-charcoal); padding: 16px; box-shadow: var(--shadow-mac);">
+                            <h3 style="color: var(--mac-blue); margin-bottom: 12px; font-size: 14px;">Network Stats</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center;">
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-blue);" id="total-locations">0</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Locations</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-blue);" id="active-users">0</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Explorers</div>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                    <div style="background: var(--bg-secondary); border: 2px solid var(--mac-charcoal); overflow: hidden; position: relative; box-shadow: var(--shadow-mac);">
+                        <div id="map" style="height: 100%; min-height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Locations View -->
+            <div class="view" id="locations-view" role="tabpanel" aria-labelledby="locations-tab">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2>My Locations</h2>
+                    <button class="btn btn-primary" onclick="app.showAddLocationModal()" aria-label="Add New Location to Your List">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                        <span>Add Location</span>
+                    </button>
+                </div>
+
+                <!-- Search and Filter Controls -->
+                <div style="background: var(--bg-secondary); border: 2px solid var(--mac-charcoal); padding: 16px; margin-bottom: 24px; box-shadow: var(--shadow-mac);">
+                    <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: center;">
+                        <div style="margin: 0;">
+                            <label for="location-search" style="display: block; margin-bottom: 4px; color: var(--text-secondary); font-size: 11px; font-family: var(--font-geneva), 'Arial', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                <i class="fas fa-search" aria-hidden="true"></i>
+                                Search Locations
+                            </label>
+                            <input class="input" type="text" id="location-search"
+                                   placeholder="Search by name or description..."
+                                   aria-describedby="location-search-instructions"
+                                   style="margin: 0;">
+                            <div id="location-search-instructions" style="position: absolute; left: -10000px;">Search through your location names and descriptions</div>
+                        </div>
+
+                        <div style="margin: 0;">
+                            <label for="category-filter" style="display: block; margin-bottom: 4px; color: var(--text-secondary); font-size: 11px; font-family: var(--font-geneva), 'Arial', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                <i class="fas fa-filter" aria-hidden="true"></i>
+                                Category
+                            </label>
+                            <select class="select" id="category-filter" style="margin: 0;" aria-label="Filter locations by category">
+                                <option value="">All Categories</option>
+                                <option value="abandoned">Abandoned</option>
+                                <option value="rooftop">Rooftop</option>
+                                <option value="tunnel">Tunnel</option>
+                                <option value="industrial">Industrial</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div style="margin: 0;">
+                            <label for="risk-filter" style="display: block; margin-bottom: 4px; color: var(--text-secondary); font-size: 11px; font-family: var(--font-geneva), 'Arial', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                                Risk Level
+                            </label>
+                            <select class="select" id="risk-filter" style="margin: 0;" aria-label="Filter locations by risk level">
+                                <option value="">All Risks</option>
+                                <option value="low">Low Risk</option>
+                                <option value="moderate">Moderate Risk</option>
+                                <option value="high">High Risk</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="locations-grid" style="color: var(--text-muted);">Loading your locations...</div>
+            </div>
+
+            <!-- Profile View -->
+            <div class="view" id="profile-view" role="tabpanel" aria-labelledby="profile-tab">
+                <h2>Profile</h2>
+                <div id="profile-content" style="color: var(--text-muted);">Loading profile...</div>
+            </div>
         </main>
 
         <button class="fab" id="add-location-fab" onclick="app.showAddLocationModal()"
                 style="display:none;" aria-label="Add New Location" role="button">
             <i class="fas fa-plus" aria-hidden="true"></i>
         </button>
+    <!-- Location Modal -->
+    <div class="modal" id="location-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="app.hideModal()">&times;</button>
+            <h3 id="location-modal-title" style="margin-bottom: 20px; color: var(--mac-blue);">Add Location</h3>
+            <form id="location-form">
+                <div class="form-group">
+                    <label class="form-label" for="location-name">
+                        <i class="fas fa-tag" aria-hidden="true"></i>
+                        Name
+                    </label>
+                    <input class="input" type="text" id="location-name" name="name"
+                           required aria-describedby="location-name-help" autocomplete="off">
+                    <div id="location-name-help" style="color: var(--text-muted); font-size: 10px; margin-top: 2px;">Enter a descriptive name for the location</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="location-description">
+                        <i class="fas fa-align-left" aria-hidden="true"></i>
+                        Description
+                    </label>
+                    <textarea class="textarea" id="location-description" name="description"
+                              required aria-describedby="location-description-help"></textarea>
+                    <div id="location-description-help" style="color: var(--text-muted); font-size: 10px; margin-top: 2px;">Provide details about the location, access points, and what makes it interesting</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label" for="location-category">Category</label>
+                        <select class="select" id="location-category" name="category" aria-label="Select location category">
+                            <option value="abandoned">Abandoned</option>
+                            <option value="rooftop">Rooftop</option>
+                            <option value="tunnel">Tunnel</option>
+                            <option value="industrial">Industrial</option>
+                            <option value="residential">Residential</option>
+                            <option value="commercial">Commercial</option>
+                            <option value="historic">Historic</option>
+                            <option value="underground">Underground</option>
+                            <option value="park">Park/Green Space</option>
+                            <option value="waterfront">Waterfront</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="location-risk">Risk Level</label>
+                        <select class="select" id="location-risk" name="riskLevel" aria-label="Select risk level">
+                            <option value="low">Low</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="tag-input">
+                        <i class="fas fa-tags" aria-hidden="true"></i>
+                        Tags
+                    </label>
+                    <div style="background: #F5F5F5; border: 2px solid var(--mac-charcoal); padding: 8px; min-height: 40px; font-family: var(--font-geneva), 'Arial', sans-serif; font-size: 12px; box-shadow: inset 2px 2px 4px rgba(0,0,0,0.2);">
+                        <div id="selected-tags" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;"></div>
+                        <input class="input" type="text" id="tag-input" name="tag-input"
+                               placeholder="Add custom tags..." style="margin-top: 8px; border: none; box-shadow: none; padding: 0;">
+                        <div style="color: var(--text-muted); font-size: 10px; margin-top: 2px;">Press Enter or comma to add tags. Maximum 10 tags allowed.</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" style="margin: 0;">
+                            <i class="fas fa-crosshairs" aria-hidden="true"></i>
+                            Coordinates
+                        </label>
+                    </div>
+                    <div class="coordinates-display" id="coordinates-display" aria-live="polite">
+                        Click on the map to select coordinates
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="app.hideModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="location-submit-btn"
+                            aria-label="Save location information">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal" id="auth-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="app.hideAuthModal()">&times;</button>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="signin">Sign In</button>
+                <button class="auth-tab" data-tab="signup">Sign Up</button>
+            </div>
+
+            <div class="auth-form active" id="signin-form">
+                <h3>Sign In to Urbindex</h3>
+                <form id="signin-form-element">
+                    <div class="form-group">
+                        <label class="form-label" for="signin-email">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            Email Address
+                        </label>
+                        <input class="input" type="email" id="signin-email" name="email"
+                               required aria-describedby="signin-email-help" autocomplete="email">
+                        <div id="signin-email-help" class="field-help">
+                            Enter your registered email address
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signin-password">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                            Password
+                        </label>
+                        <input class="input" type="password" id="signin-password" name="password"
+                               required aria-describedby="signin-password-help" autocomplete="current-password">
+                        <div id="signin-password-help" class="field-help">
+                            Enter your password
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" aria-label="Sign in to your account">Sign In</button>
+                    </div>
+                </form>
+                <div class="auth-alternatives">
+                    <button class="btn btn-link" onclick="app.signInAnonymously()" aria-label="Continue without creating an account">
+                        <i class="fas fa-user-secret" aria-hidden="true"></i> Continue as Guest
+                    </button>
+                </div>
+            </div>
+
+            <div class="auth-form" id="signup-form">
+                <h3>Create Account</h3>
+                <form id="signup-form-element">
+                    <div class="form-group">
+                        <label class="form-label" for="signup-email">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            Email Address
+                        </label>
+                        <input class="input" type="email" id="signup-email" name="email"
+                               required aria-describedby="signup-email-help" autocomplete="email">
+                        <div id="signup-email-help" class="field-help">
+                            Enter a valid email address
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-password">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                            Password
+                        </label>
+                        <input class="input" type="password" id="signup-password" name="password"
+                               required minlength="6" aria-describedby="signup-password-help"
+                               autocomplete="new-password">
+                        <div id="signup-password-help" class="field-help">
+                            Password must be at least 6 characters long
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-confirm-password">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                            Confirm Password
+                        </label>
+                        <input class="input" type="password" id="signup-confirm-password" name="confirmPassword"
+                               required minlength="6" aria-describedby="signup-confirm-password-help"
+                               autocomplete="new-password">
+                        <div id="signup-confirm-password-help" class="field-help">
+                            Re-enter the same password
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" aria-label="Create your new account">Create Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Reset Modal -->
+    <div class="modal" id="password-reset-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="app.hidePasswordResetModal()">&times;</button>
+            <h3>Reset Password</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                Enter your email address and we'll send you a link to reset your password.
+            </p>
+            <form id="password-reset-form">
+                <div class="form-group">
+                    <label class="form-label" for="reset-email">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                        Email Address
+                    </label>
+                    <input class="input" type="email" id="reset-email" name="email"
+                           required aria-describedby="reset-email-help" autocomplete="email">
+                    <div id="reset-email-help" class="field-help">
+                        Enter the email address associated with your account
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="app.hidePasswordResetModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" aria-label="Send password reset email">Send Reset Link</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Global error handling -->
     </div>
 
     <!-- Global error handling -->
