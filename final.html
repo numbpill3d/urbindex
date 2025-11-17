@@ -17,7 +17,11 @@
             --mac-purple: #8B5CF6;
             --mac-green: #00FF88;
             --mac-orange: #FFA500;
-            
+            --military-steel: #36454F;
+            --steel-blue: #4682B4;
+            --ice-blue: #B3E5FC;
+            --smoked-glass: rgba(255, 255, 255, 0.08);
+
             /* Typography */
             --font-chicago: 'Chicago', 'Arial', sans-serif;
             --font-geneva: 'Geneva', 'Arial', sans-serif;
@@ -26,14 +30,17 @@
             
             /* Y2K Mac OS Classic Theme */
             --bg-primary: var(--mac-charcoal);
-            --bg-secondary: var(--mac-steel);
-            --bg-tertiary: var(--mac-platinum);
-            --accent-blue: var(--mac-blue);
+            --bg-secondary: linear-gradient(145deg, var(--military-steel), var(--mac-steel));
+            --bg-tertiary: linear-gradient(145deg, var(--mac-platinum), var(--steel-blue));
+            --bg-panel: linear-gradient(145deg, var(--military-steel), var(--steel-blue));
+            --accent-blue: var(--steel-blue);
+            --accent-ice: var(--ice-blue);
             --accent-purple: var(--mac-purple);
             --text-primary: #FFFFFF;
             --text-secondary: var(--mac-platinum);
-            --text-muted: #D0D0D0; /* Improved contrast: 4.5:1 ratio on dark backgrounds */
-            --border: var(--mac-steel);
+            --text-muted: #E0E8F0; /* Ice blue muted for better contrast */
+            --border: var(--military-steel);
+            --border-smoked: 1px solid var(--smoked-glass);
             --success: var(--mac-green);
             --warning: var(--mac-orange);
             --danger: #FF4444;
@@ -41,13 +48,20 @@
             /* Classic Mac OS Effects */
             --bevel-light: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
             --bevel-dark: inset -1px -1px 0 #FFFFFF, inset 1px 1px 0 #808080;
-            --shadow-mac: 2px 2px 4px rgba(0,0,0,0.3);
-            --shadow-neon: 0 0 10px currentColor;
-            
-            /* Classic Mac OS Styling */
-            --radius: 0;
-            --shadow: var(--shadow-mac);
-            --transition: 0.2s ease;
+            --shadow-mac: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            --shadow-steel-glow: 0 0 20px rgba(90, 155, 212, 0.4);
+            --shadow-ice-glow: 0 0 15px rgba(179, 229, 252, 0.6);
+            --shadow-neon: 0 0 15px var(--steel-blue);
+
+            /* Glassmorphism Smoked Effects */
+            --glass-bg: rgba(255, 255, 255, 0.06);
+            --glass-border: 1px solid var(--smoked-glass);
+            --glass-backdrop: blur(12px);
+
+            /* Retro Y2K Styling */
+            --radius-skeuo: 4px;
+            --scanline: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+            --transition: 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         
         /* Nightcore Dark Mode Enhancements */
@@ -268,11 +282,14 @@
         }
 
         .panel {
-            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
-            border: 2px solid var(--mac-charcoal);
-            padding: 12px;
-            box-shadow: var(--shadow-mac);
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass-backdrop);
+            border: 2px solid var(--military-steel);
+            padding: 16px;
+            box-shadow: var(--shadow-mac), var(--shadow-steel-glow);
             position: relative;
+            border-radius: var(--radius-skeuo);
+            background-image: var(--scanline);
         }
 
         .panel::before {
@@ -299,11 +316,13 @@
         }
 
         .map-container {
-            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
-            border: 2px solid var(--mac-charcoal);
+            background: linear-gradient(145deg, var(--military-steel), var(--steel-blue));
+            backdrop-filter: var(--glass-backdrop);
+            border: 2px solid var(--military-steel);
             overflow: hidden;
             position: relative;
-            box-shadow: var(--shadow-mac);
+            box-shadow: var(--shadow-mac), var(--shadow-ice-glow);
+            border-radius: var(--radius-skeuo);
         }
         
         .map-container::before {
@@ -319,65 +338,92 @@
         #map { height: 100%; min-height: 400px; }
 
         .btn {
-            background: var(--mac-steel);
-            border: 2px solid var(--mac-charcoal);
+            background: linear-gradient(145deg, var(--mac-steel), var(--military-steel));
+            backdrop-filter: var(--glass-backdrop);
+            border: 2px solid var(--military-steel);
             color: var(--text-secondary);
-            padding: 6px 12px;
+            padding: 8px 16px;
             cursor: pointer;
             transition: var(--transition);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             font-family: var(--font-geneva), 'Arial', sans-serif;
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: var(--bevel-light);
+            letter-spacing: 1.2px;
+            box-shadow: var(--bevel-light), var(--shadow-steel-glow);
+            min-height: 44px;
+            min-width: 44px;
+            border-radius: var(--radius-skeuo);
+            position: relative;
+            overflow: hidden;
         }
 
         .btn:hover {
-            background: var(--mac-platinum);
-            color: var(--mac-charcoal);
-            box-shadow: var(--bevel-dark);
+            background: linear-gradient(145deg, var(--steel-blue), var(--ice-blue));
+            color: #FFFFFF;
+            box-shadow: var(--bevel-dark), var(--shadow-ice-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn:hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shine 0.6s ease;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         .btn:active {
             box-shadow: var(--bevel-light);
+            transform: translateY(0px);
         }
 
         .btn-primary {
-            background: var(--mac-blue);
+            background: linear-gradient(145deg, var(--steel-blue), var(--mac-blue));
             color: white;
-            border-color: var(--mac-blue);
+            border-color: var(--steel-blue);
+            box-shadow: var(--bevel-light), 0 0 20px rgba(90, 155, 212, 0.5);
         }
 
         .btn-primary:hover {
-            background: #0088FF;
-            border-color: #0088FF;
+            background: linear-gradient(145deg, var(--ice-blue), var(--steel-blue));
+            box-shadow: var(--bevel-dark), 0 0 30px rgba(179, 229, 252, 0.7);
+            transform: translateY(-2px);
         }
 
         .fab {
             position: fixed;
             bottom: 24px;
             right: 24px;
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
-            border: 2px solid var(--mac-charcoal);
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(145deg, var(--steel-blue), var(--ice-blue));
+            backdrop-filter: var(--glass-backdrop);
+            border: 3px solid var(--military-steel);
             border-radius: 50%;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             cursor: pointer;
-            box-shadow: var(--shadow-mac);
-            transition: var(--transition);
+            box-shadow: var(--shadow-mac), var(--shadow-steel-glow), 0 0 30px rgba(90, 155, 212, 0.6);
+            transition: all var(--transition);
             z-index: 1000;
-            box-shadow: var(--bevel-light);
+            animation: float 3s ease-in-out infinite;
         }
 
         .fab:hover {
-            transform: scale(1.05);
-            box-shadow: var(--bevel-dark);
+            transform: scale(1.1);
+            box-shadow: var(--shadow-mac), var(--shadow-steel-glow), 0 0 40px rgba(179, 229, 252, 0.8);
         }
         
         .fab:active {
@@ -575,15 +621,86 @@
             font-style: italic;
         }
 
-        /* Enhanced touch targets */
+        /* Enhanced touch targets and focus indicators */
         .btn, .nav-btn, .auth-tab {
-            min-height: 44px;
-            min-width: 44px;
+            min-height: 48px;
+            min-width: 48px;
+            padding: 10px 18px;
+            font-size: 13px;
         }
 
         .fab {
-            width: 56px;
-            height: 56px;
+            width: 64px;
+            height: 64px;
+            font-size: 1.6rem;
+        }
+
+        /* Improved focus indicators */
+        .btn:focus, .nav-btn:focus, .auth-tab:focus, .fab:focus {
+            outline: 2px solid var(--steel-blue);
+            outline-offset: 3px;
+            box-shadow: 0 0 0 4px rgba(90, 155, 212, 0.3);
+        }
+
+        .input:focus, .textarea:focus, .select:focus {
+            outline: 2px solid var(--steel-blue);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 3px rgba(179, 229, 252, 0.4);
+        }
+
+        /* Loading spinners and progress feedback */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--military-steel);
+            border-radius: 50%;
+            border-top-color: var(--steel-blue);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--military-steel);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--steel-blue), var(--ice-blue));
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: progressShine 2s ease-in-out infinite;
+        }
+
+        @keyframes progressShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Success/error state animations */
+        .success-bounce {
+            animation: successBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes successBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
 
         .predefined-tag {
@@ -706,6 +823,68 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes entranceSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes entranceFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .panel, .location-card, .activity-item, .modal-content {
+            animation: entranceSlide 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .nav-btn, .btn {
+            transition: all var(--transition);
+        }
+
+        .nav-btn:hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 0.5s ease;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .panel:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-mac), var(--shadow-steel-glow);
+        }
+
+        .location-card:hover {
+            border-color: var(--steel-blue);
+            box-shadow: 0 0 15px rgba(90, 155, 212, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .activity-item:hover {
+            background: rgba(90, 155, 212, 0.1);
+            transform: translateX(5px);
+            border-left: 3px solid var(--steel-blue);
         }
 
         @keyframes slideIn {
@@ -1026,7 +1205,7 @@
             }
 
             .main {
-                padding: 8px;
+                padding: 12px;
             }
 
             .btn {
@@ -1052,6 +1231,27 @@
                 justify-content: center;
                 padding: 3px 6px;
                 font-size: 10px;
+            }
+
+            /* Enhanced mobile touch targets */
+            .btn, .nav-btn, .auth-tab, .fab, .location-card {
+                min-height: 48px;
+                min-width: 48px;
+            }
+
+            /* Improved mobile gesture support */
+            .map-container {
+                touch-action: none;
+            }
+
+            /* Thumb-friendly navigation bottom spacing */
+            .nav {
+                padding-bottom: env(safe-area-inset-bottom, 8px);
+            }
+
+            .fab {
+                bottom: calc(env(safe-area-inset-bottom, 20px) + 20px);
+                right: 20px;
             }
 
             /* Profile page mobile optimizations */
@@ -1080,16 +1280,81 @@
             .neon-glow {
                 box-shadow: 0 0 15px var(--mac-blue), 0 0 25px var(--mac-purple);
             }
-            
+
             .neon-border {
                 border-color: var(--mac-blue);
                 box-shadow: 0 0 10px var(--mac-blue);
             }
-            
+
             .neon-text {
                 color: var(--mac-blue);
                 text-shadow: 0 0 10px var(--mac-blue);
             }
+        }
+
+        /* Subtle Retro Y2K Effects */
+        .crt-scanline {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .crt-scanline::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255,255,255,0.01) 2px,
+                rgba(255,255,255,0.01) 4px
+            );
+            pointer-events: none;
+            animation: scanline 0.1s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+
+        .crt-glow {
+            box-shadow:
+                0 0 5px rgba(90, 155, 212, 0.3),
+                inset 0 0 5px rgba(179, 229, 252, 0.1),
+                0 0 20px rgba(90, 155, 212, 0.2);
+        }
+
+        .vaporwave-gradient {
+            background: linear-gradient(
+                135deg,
+                rgba(90, 155, 212, 0.05) 0%,
+                rgba(139, 92, 246, 0.03) 25%,
+                rgba(255, 0, 110, 0.02) 50%,
+                rgba(179, 229, 252, 0.04) 75%,
+                rgba(0, 255, 136, 0.02) 100%
+            );
+        }
+
+        /* Apply retro effects selectively */
+        .panel.crt-scanline {
+            background-image: var(--scanline), var(--bg-panel);
+            background-blend-mode: overlay;
+        }
+
+        .map-container.crt-glow {
+            filter: drop-shadow(0 0 10px rgba(90, 155, 212, 0.4));
+        }
+
+        body.vaporwave-gradient {
+            background: var(--bg-primary);
+            background-image:
+                radial-gradient(circle at 20% 80%, rgba(179, 229, 252, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 0, 110, 0.01) 0%, transparent 50%);
         }
         
         /* Classic Mac OS Scrollbar */
@@ -1633,6 +1898,305 @@
         .user-location-marker {
             animation: pulse 2s infinite;
         }
+
+        /* Profile Page Enhancements - Y2K Mac OS Classic */
+        #profile-view .profile-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid var(--mac-charcoal);
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+            box-shadow: var(--shadow-mac);
+            border-radius: 0;
+            transition: var(--transition);
+        }
+
+        #profile-view .profile-header:hover {
+            box-shadow: 0 0 15px var(--mac-blue);
+        }
+
+        #profile-view .profile-avatar-section {
+            flex-shrink: 0;
+        }
+
+        #profile-view .profile-avatar-canvas {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--mac-charcoal);
+            box-shadow: var(--shadow-mac);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        #profile-view .profile-avatar-canvas:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--mac-blue);
+        }
+
+        #profile-view .avatar-edit-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 122, 255, 0.8);
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        #profile-view .profile-avatar:hover .avatar-edit-overlay {
+            opacity: 1;
+        }
+
+        #profile-view .profile-info-section {
+            flex: 1;
+        }
+
+        #profile-view .profile-display-name {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: block;
+        }
+
+        #profile-view .profile-display-name:hover {
+            color: var(--mac-blue);
+            text-shadow: 0 0 10px var(--mac-blue);
+        }
+
+        #profile-view .profile-display-bio,
+        #profile-view .profile-display-contact {
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 4px 0;
+            border-bottom: 1px solid transparent;
+        }
+
+        #profile-view .profile-display-bio:hover,
+        #profile-view .profile-display-contact:hover {
+            background: rgba(0, 122, 255, 0.1);
+            border-radius: 2px;
+            color: var(--mac-blue);
+        }
+
+        #profile-view .profile-controls {
+            display: flex;
+            gap: 8px;
+            align-self: flex-start;
+        }
+
+        #profile-view .profile-edit-form {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        /* Visibility Toggle */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-input {
+            display: none;
+        }
+
+        .toggle-label {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+            background: var(--mac-steel);
+            border: 2px solid var(--mac-charcoal);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--bevel-light);
+        }
+
+        .toggle-input:checked + .toggle-label {
+            background: var(--mac-blue);
+            border-color: var(--mac-blue);
+            box-shadow: var(--bevel-dark);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: white;
+            border-radius: 13px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--mac-charcoal);
+        }
+
+        .toggle-input:checked + .toggle-label .toggle-slider {
+            transform: translateX(30px);
+            color: white;
+        }
+
+        .toggle-icon-on,
+        .toggle-icon-off {
+            position: absolute;
+            transition: opacity 0.2s ease;
+        }
+
+        .toggle-icon-off {
+            opacity: 1;
+        }
+
+        .toggle-icon-on {
+            opacity: 0;
+        }
+
+        .toggle-input:checked + .toggle-label .toggle-icon-off {
+            opacity: 0;
+        }
+
+        .toggle-input:checked + .toggle-label .toggle-icon-on {
+            opacity: 1;
+        }
+
+        .visibility-status {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-family: var(--font-geneva);
+            min-height: 1em;
+        }
+
+        /* Activity Dashboard */
+        .activity-history-feed {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 1px solid var(--mac-charcoal);
+            background: linear-gradient(to bottom, var(--mac-platinum), var(--mac-steel));
+            box-shadow: var(--shadow-mac);
+            transition: var(--transition);
+            border-left: 4px solid var(--mac-blue);
+        }
+
+        .activity-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+        }
+
+        .activity-icon-large {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--mac-blue), var(--mac-purple));
+            border: 2px solid var(--mac-charcoal);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-mac);
+        }
+
+        .activity-content-large {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 700;
+            color: var(--mac-blue);
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .activity-description {
+            color: var(--text-secondary);
+            font-size: 11px;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .activity-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Stats Summary */
+        .stats-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--mac-blue);
+            margin-bottom: 4px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* Responsive Profile */
+        @media (max-width: 768px) {
+            #profile-view .profile-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 16px;
+            }
+
+            #profile-view .profile-controls {
+                width: 100%;
+            }
+
+            #profile-view .profile-controls .btn {
+                flex: 1;
+            }
+
+            .stats-summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
@@ -1647,7 +2211,7 @@
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <a href="#navigation" class="skip-link">Skip to navigation</a>
 
-    <div class="app">
+    <div class="app vaporwave-gradient">
         <header class="header" role="banner">
             <div class="logo" aria-label="Urbindex - Urban Exploration Network">URBINDEX</div>
             <div class="status" aria-live="polite" aria-atomic="true">
@@ -1887,8 +2451,103 @@
             </div>
 
             <div class="view" id="profile-view" role="tabpanel" aria-labelledby="profile-tab">
-                <h2>Profile</h2>
-                <div id="profile-content" class="loading" role="status" aria-live="polite">Loading profile...</div>
+                <!-- Inline Editable Profile Header -->
+                <div id="profile-header" class="profile-header panel" tabindex="0" role="button" aria-label="Click to edit profile">
+                    <div class="profile-avatar-section">
+                        <div id="profile-avatar" class="profile-avatar" style="position: relative;">
+                            <canvas id="profile-avatar-canvas" class="profile-avatar-canvas" width="120" height="120" style="border-radius: 50%; border: 3px solid var(--mac-charcoal); box-shadow: var(--shadow-mac); cursor: pointer;"></canvas>
+                            <div id="avatar-edit-overlay" class="avatar-edit-overlay" style="display: none;">
+                                <i class="fas fa-camera" style="font-size: 1.5rem; color: white;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-info-section">
+                        <div id="profile-display-name" class="profile-display-name mac-title" tabindex="0" style="cursor: pointer; display: inline-block; max-width: 300px; word-break: break-word;" aria-label="Click to edit username">Explorer</div>
+                        <div id="profile-display-bio" class="profile-display-bio mac-text" style="margin-top: 8px; color: var(--text-secondary); max-width: 400px; word-break: break-word;" aria-label="Click to edit bio">Click fields to edit your profile</div>
+                        <div id="profile-display-contact" class="profile-display-contact mac-text" style="margin-top: 4px; font-size: 10px; color: var(--text-muted);" aria-label="Click to edit contact"></div>
+                    </div>
+                    <div class="profile-controls">
+                        <button id="save-profile-btn" class="btn btn-primary" style="display: none;" onclick="app.saveProfileChanges()">Save</button>
+                        <button id="cancel-profile-btn" class="btn" style="display: none;" onclick="app.cancelProfileEdit()">Cancel</button>
+                        <div id="profile-saving-indicator" class="loading" style="display: none; font-size: 0.9em;">Saving...</div>
+                    </div>
+                </div>
+
+                <!-- Inline Edit Inputs (hidden by default) -->
+                <div id="profile-edit-inputs" style="display: none;">
+                    <div class="form-group">
+                        <label for="edit-username-input" class="form-label required">Username</label>
+                        <input id="edit-username-input" type="text" class="input" maxlength="20" minlength="3" aria-describedby="username-error" autocomplete="nickname">
+                        <div id="username-error" class="form-error" role="alert"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-bio-input" class="form-label">Bio</label>
+                        <textarea id="edit-bio-input" class="input" rows="3" maxlength="200" aria-describedby="bio-error" autocomplete="note"></textarea>
+                        <div id="bio-error" class="form-error" role="alert"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-contact-input" class="form-label">Contact</label>
+                        <input id="edit-contact-input" type="url" class="input" maxlength="100" aria-describedby="contact-error" autocomplete="url">
+                        <div id="contact-error" class="form-error" role="alert"></div>
+                    </div>
+                </div>
+
+                <!-- Visibility Toggle -->
+                <div class="panel" style="margin-top: 20px;">
+                    <div class="panel-title">
+                        <i class="fas fa-eye"></i>
+                        Profile Visibility
+                    </div>
+                    <div id="visibility-toggle-container">
+                        <div class="toggle-group">
+                            <input type="checkbox" id="profile-visibility-toggle" class="toggle-input" aria-labelledby="visibility-label">
+                            <label for="profile-visibility-toggle" id="visibility-label" class="toggle-label">
+                                <span class="toggle-slider">
+                                    <span class="toggle-icon-on">
+                                        <i class="fas fa-globe"></i> Public
+                                    </span>
+                                    <span class="toggle-icon-off">
+                                        <i class="fas fa-lock"></i> Private
+                                    </span>
+                                </span>
+                            </label>
+                            <div id="visibility-status" class="visibility-status" aria-live="polite"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity History Dashboard -->
+                <div class="panel" style="margin-top: 20px;">
+                    <div class="panel-title">
+                        <i class="fas fa-history"></i>
+                        Activity History
+                    </div>
+                    <div id="user-activity-feed" class="activity-history-feed loading" role="status" aria-live="polite">
+                        Loading activity...
+                    </div>
+                </div>
+
+                <!-- Stats Summary -->
+                <div class="stats-summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px;">
+                    <div class="panel">
+                        <div class="stat-item">
+                            <div id="stat-total-locations" class="stat-number">0</div>
+                            <div class="stat-label">Total Locations</div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="stat-item">
+                            <div id="stat-join-date" class="stat-number">N/A</div>
+                            <div class="stat-label">Member Since</div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="stat-item">
+                            <div id="stat-last-activity" class="stat-number">Never</div>
+                            <div class="stat-label">Last Activity</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
 
