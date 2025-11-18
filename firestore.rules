@@ -104,7 +104,7 @@ service cloud.firestore {
       allow update: if request.auth != null && resource.data.createdBy == request.auth.uid;
       allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
     }
-  }
+
     // Followers - authenticated users can read all follower relationships
     // Users can only manage their own following/follower relationships
     match /user_followers/{followId} {
@@ -215,5 +215,4 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.uploadedBy == request.auth.uid;
     }
   }
-}
 }
