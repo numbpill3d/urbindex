@@ -2352,6 +2352,164 @@
         }
 
         .user-location-marker {
+        .user-location-marker {
+            animation: pulse 2s infinite;
+        }
+
+        /* Navigation badges for notifications */
+        .nav-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--cz-red);
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 1px solid var(--cz-black);
+            min-width: 16px;
+        }
+
+        /* Social features styles */
+        .social-feed-item {
+            background: var(--cz-concrete);
+            border: 2px solid var(--cz-black);
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .social-action-buttons {
+            display: flex;
+            gap: 6px;
+            margin: 8px 0;
+        }
+
+        .social-btn {
+            background: var(--cz-concrete-light);
+            border: 2px solid var(--cz-black);
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 1px 1px 0 var(--cz-black);
+        }
+
+        .social-btn:hover {
+            background: var(--cz-yellow);
+            color: var(--cz-black);
+            transform: translate(-1px, -1px);
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .social-btn.liked {
+            background: var(--cz-red);
+            color: white;
+        }
+
+        .social-btn.checked-in {
+            background: var(--cz-green);
+            color: white;
+        }
+
+        /* Mission and achievement styles */
+        .mission-card {
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-industrial);
+            position: relative;
+        }
+
+        .mission-progress {
+            width: 100%;
+            height: 8px;
+            background: var(--cz-concrete-dark);
+            border: 2px solid var(--cz-black);
+            margin: 8px 0;
+            position: relative;
+        }
+
+        .mission-progress-fill {
+            height: 100%;
+            background: var(--hazard-stripe);
+            transition: width 0.3s ease;
+        }
+
+        /* Group and route styles */
+        .group-card {
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-industrial);
+        }
+
+        .route-card {
+            background: var(--cz-concrete);
+            border: 3px solid var(--cz-black);
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-industrial);
+        }
+
+        .route-map-preview {
+            background: var(--cz-concrete-dark);
+            border: 2px solid var(--cz-black);
+            height: 120px;
+            margin: 8px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Notification center styles */
+        .notification-item {
+            background: var(--cz-concrete-light);
+            border: 2px solid var(--cz-black);
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 2px 2px 0 var(--cz-black);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-item:hover {
+            background: var(--cz-yellow);
+            color: var(--cz-black);
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0 var(--cz-black);
+        }
+
+        .notification-item.unread {
+            border-left: 4px solid var(--cz-yellow);
+            background: var(--cz-concrete);
+        }
+
+        .notification-type {
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+    </style>
             animation: pulse 2s infinite;
         }
     </style>
@@ -2493,6 +2651,38 @@
             <button class="nav-btn" data-view="locations" aria-label="Locations View">
                 <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                 <span>Locations</span>
+        <nav class="nav" role="navigation" aria-label="Main Navigation" id="navigation">
+            <button class="nav-btn active" data-view="map" aria-label="Map View" aria-current="page">
+                <i class="fas fa-map" aria-hidden="true"></i>
+                <span>Map</span>
+            </button>
+            <button class="nav-btn" data-view="locations" aria-label="Locations View">
+                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                <span>Locations</span>
+            </button>
+            <button class="nav-btn" data-view="social" aria-label="Social Feed" onclick="app.showSocialFeed()">
+                <i class="fas fa-users" aria-hidden="true"></i>
+                <span>Social</span>
+                <span class="nav-badge" id="social-notification-badge" style="display: none;"></span>
+            </button>
+            <button class="nav-btn" data-view="missions" aria-label="Missions and Challenges" onclick="app.showMissions()">
+                <i class="fas fa-trophy" aria-hidden="true"></i>
+                <span>Missions</span>
+            </button>
+            <button class="nav-btn" data-view="routes" aria-label="Route Planning" onclick="app.showRoutes()">
+                <i class="fas fa-route" aria-hidden="true"></i>
+                <span>Routes</span>
+            </button>
+            <button class="nav-btn" data-view="groups" aria-label="Groups and Teams" onclick="app.showGroups()">
+                <i class="fas fa-user-friends" aria-hidden="true"></i>
+                <span>Groups</span>
+            </button>
+            <button class="nav-btn" data-view="notifications" aria-label="Notifications Center" onclick="app.showNotifications()">
+                <i class="fas fa-bell" aria-hidden="true"></i>
+                <span>Alerts</span>
+                <span class="nav-badge" id="notification-badge" style="display: none;"></span>
+            </button>
+        </nav>
             </button>
         </nav>
 
@@ -2837,6 +3027,564 @@
                 navigator.serviceWorker.register('/service-worker.js')
                     .then(registration => console.log('SW registered'))
                     .catch(error => console.log('SW registration failed'));
+            getRiskColor(riskLevel) {
+                const colors = {
+                    low: '#23d160',
+                    moderate: '#ffdd57', 
+                    high: '#ff3860'
+                };
+                return colors[riskLevel] || '#7a7a9a';
+            }
+
+            // ========================
+            // SOCIAL FEATURES
+            // ========================
+
+            // Follow/Unfollow system
+            async followUser(userId) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to follow users', 'warning');
+                    return;
+                }
+
+                try {
+                    await this.db.collection('user_followers').add({
+                        followerId: this.currentUser.uid,
+                        followingId: userId,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    // Create notification for the followed user
+                    await this.createNotification(userId, 'follow', {
+                        message: 'Someone started following you',
+                        fromUserId: this.currentUser.uid
+                    });
+                    
+                    this.showToast('User followed successfully', 'success');
+                } catch (error) {
+                    console.error('Error following user:', error);
+                    this.showToast('Failed to follow user', 'error');
+                }
+            }
+
+            async unfollowUser(userId) {
+                if (!this.currentUser) return;
+
+                try {
+                    const query = await this.db.collection('user_followers')
+                        .where('followerId', '==', this.currentUser.uid)
+                        .where('followingId', '==', userId)
+                        .get();
+                    
+                    query.forEach(doc => doc.delete());
+                    this.showToast('User unfollowed', 'success');
+                } catch (error) {
+                    console.error('Error unfollowing user:', error);
+                    this.showToast('Failed to unfollow user', 'error');
+                }
+            }
+
+            // Location like/favorite system
+            async likeLocation(locationId) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to like locations', 'warning');
+                    return;
+                }
+
+                try {
+                    await this.db.collection('location_likes').add({
+                        userId: this.currentUser.uid,
+                        locationId: locationId,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    // Get location owner for notification
+                    const locationDoc = await this.db.collection('locations').doc(locationId).get();
+                    if (locationDoc.exists && locationDoc.data().createdBy !== this.currentUser.uid) {
+                        await this.createNotification(locationDoc.data().createdBy, 'like', {
+                            message: 'Someone liked your location',
+                            locationId: locationId,
+                            fromUserId: this.currentUser.uid
+                        });
+                    }
+                    
+                    this.showToast('Location liked!', 'success');
+                } catch (error) {
+                    console.error('Error liking location:', error);
+                    this.showToast('Failed to like location', 'error');
+                }
+            }
+
+            async unlikeLocation(locationId) {
+                if (!this.currentUser) return;
+
+                try {
+                    const query = await this.db.collection('location_likes')
+                        .where('userId', '==', this.currentUser.uid)
+                        .where('locationId', '==', locationId)
+                        .get();
+                    
+                    query.forEach(doc => doc.delete());
+                    this.showToast('Location unliked', 'success');
+                } catch (error) {
+                    console.error('Error unliking location:', error);
+                    this.showToast('Failed to unlike location', 'error');
+                }
+            }
+
+            // Comment system
+            async addComment(locationId, commentText) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to add comments', 'warning');
+                    return;
+                }
+
+                if (!commentText.trim()) {
+                    this.showToast('Please enter a comment', 'warning');
+                    return;
+                }
+
+                try {
+                    await this.db.collection('location_comments').add({
+                        userId: this.currentUser.uid,
+                        locationId: locationId,
+                        text: this.sanitizeInput(commentText.trim()),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        flagged: false
+                    });
+                    
+                    // Get location owner for notification
+                    const locationDoc = await this.db.collection('locations').doc(locationId).get();
+                    if (locationDoc.exists && locationDoc.data().createdBy !== this.currentUser.uid) {
+                        await this.createNotification(locationDoc.data().createdBy, 'comment', {
+                            message: 'Someone commented on your location',
+                            locationId: locationId,
+                            fromUserId: this.currentUser.uid
+                        });
+                    }
+                    
+                    this.showToast('Comment added!', 'success');
+                    this.loadLocationComments(locationId); // Refresh comments
+                } catch (error) {
+                    console.error('Error adding comment:', error);
+                    this.showToast('Failed to add comment', 'error');
+                }
+            }
+
+            async loadLocationComments(locationId) {
+                try {
+                    const snapshot = await this.db.collection('location_comments')
+                        .where('locationId', '==', locationId)
+                        .where('flagged', '==', false)
+                        .orderBy('createdAt', 'desc')
+                        .get();
+
+                    const comments = [];
+                    snapshot.forEach(doc => {
+                        comments.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    return comments;
+                } catch (error) {
+                    console.error('Error loading comments:', error);
+                    return [];
+                }
+            }
+
+            // Visit/Check-in system
+            async checkInLocation(locationId, photoUrl = null) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to check in', 'warning');
+                    return;
+                }
+
+                try {
+                    await this.db.collection('location_visits').add({
+                        userId: this.currentUser.uid,
+                        locationId: locationId,
+                        checkInAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        photoUrl: photoUrl
+                    });
+                    
+                    // Update user's visit count and award badges
+                    await this.updateUserBadges(this.currentUser.uid, 'visit');
+                    
+                    this.showToast('Successfully checked in!', 'success');
+                } catch (error) {
+                    console.error('Error checking in:', error);
+                    this.showToast('Failed to check in', 'error');
+                }
+            }
+
+            // Notification system
+            async createNotification(userId, type, data) {
+                try {
+                    await this.db.collection('user_notifications').add({
+                        userId: userId,
+                        type: type,
+                        data: data,
+                        read: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Error creating notification:', error);
+                }
+            }
+
+            async loadNotifications() {
+                if (!this.currentUser) return;
+
+                try {
+                    const snapshot = await this.db.collection('user_notifications')
+                        .where('userId', '==', this.currentUser.uid)
+                        .orderBy('createdAt', 'desc')
+                        .limit(20)
+                        .get();
+
+                    this.notifications = [];
+                    this.unreadNotifications = 0;
+                    
+                    snapshot.forEach(doc => {
+                        const notification = { id: doc.id, ...doc.data() };
+                        this.notifications.push(notification);
+                        if (!notification.read) this.unreadNotifications++;
+                    });
+                    
+                    this.updateNotificationBadge();
+                } catch (error) {
+                    console.error('Error loading notifications:', error);
+                }
+            }
+
+            async markNotificationAsRead(notificationId) {
+                try {
+                    await this.db.collection('user_notifications').doc(notificationId).update({
+                        read: true
+                    });
+                    this.unreadNotifications = Math.max(0, this.unreadNotifications - 1);
+                    this.updateNotificationBadge();
+                } catch (error) {
+                    console.error('Error marking notification as read:', error);
+                }
+            }
+
+            updateNotificationBadge() {
+                const profileBtn = document.getElementById('profile-btn');
+                if (profileBtn) {
+                    const existingBadge = profileBtn.querySelector('.notification-badge');
+                    if (this.unreadNotifications > 0) {
+                        if (!existingBadge) {
+                            const badge = document.createElement('span');
+                            badge.className = 'notification-badge';
+                            badge.textContent = this.unreadNotifications;
+                            badge.style.cssText = `
+                                position: absolute;
+                                top: -5px;
+                                right: -5px;
+                                background: var(--cz-red);
+                                color: white;
+                                border-radius: 50%;
+                                width: 18px;
+                                height: 18px;
+                                font-size: 10px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-weight: bold;
+                                border: 2px solid var(--cz-black);
+                            `;
+                            profileBtn.style.position = 'relative';
+                            profileBtn.appendChild(badge);
+                        } else {
+                            existingBadge.textContent = this.unreadNotifications;
+                        }
+                    } else if (existingBadge) {
+                        existingBadge.remove();
+                    }
+                }
+            }
+
+            // Badge/Achievement system
+            async updateUserBadges(userId, action) {
+                // This would be expanded with actual badge logic
+                try {
+                    // Example badges based on actions
+                    const badgeActions = {
+                        'visit': ['first_visit', 'explorer_10', 'explorer_50'],
+                        'location_add': ['first_location', 'mapper_10', 'mapper_50'],
+                        'comment': ['social_butterfly', 'commentator_10'],
+                        'like': ['appreciator', 'liker_25']
+                    };
+
+                    const potentialBadges = badgeActions[action] || [];
+                    
+                    for (const badge of potentialBadges) {
+                        // Check if user qualifies for this badge and doesn't already have it
+                        // This is simplified - real implementation would check specific criteria
+                        await this.awardBadge(userId, badge);
+                    }
+                } catch (error) {
+                    console.error('Error updating user badges:', error);
+                }
+            }
+
+            async awardBadge(userId, badgeId) {
+                try {
+                    await this.db.collection('user_badges').add({
+                        userId: userId,
+                        badgeId: badgeId,
+                        earnedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Error awarding badge:', error);
+                }
+            }
+
+            // Route planning
+            async createRoute(name, locationIds, isPublic = true) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to create routes', 'warning');
+                    return;
+                }
+
+                try {
+                    const routeData = {
+                        name: name,
+                        locationIds: locationIds,
+                        createdBy: this.currentUser.uid,
+                        isPublic: isPublic,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    await this.db.collection('routes').add(routeData);
+                    this.showToast('Route created successfully!', 'success');
+                } catch (error) {
+                    console.error('Error creating route:', error);
+                    this.showToast('Failed to create route', 'error');
+                }
+            }
+
+            // Group management
+            async createGroup(name, description, isPrivate = false) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to create groups', 'warning');
+                    return;
+                }
+
+                try {
+                    const groupData = {
+                        name: name,
+                        description: description,
+                        createdBy: this.currentUser.uid,
+                        members: [this.currentUser.uid],
+                        isPrivate: isPrivate,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    await this.db.collection('groups').add(groupData);
+                    this.showToast('Group created successfully!', 'success');
+                } catch (error) {
+                    console.error('Error creating group:', error);
+                    this.showToast('Failed to create group', 'error');
+                }
+            }
+
+            // Enhanced location detail modal with social features
+            showLocationDetailModal(locationId, locationData) {
+                const modal = document.createElement('div');
+                modal.className = 'modal location-detail-modal active';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                        
+                        <div class="location-detail-header">
+                            <h3>${this.escapeHtml(locationData.name)}</h3>
+                            <div class="location-detail-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-tag"></i> ${this.escapeHtml(locationData.category)}
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-exclamation-triangle"></i> ${this.escapeHtml(locationData.riskLevel)}
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-clock"></i> ${this.timeAgo(locationData.createdAt?.toDate())}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="location-description">
+                            <p>${this.escapeHtml(locationData.description)}</p>
+                        </div>
+
+                        ${locationData.address ? `
+                            <div class="location-address">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${this.escapeHtml(locationData.address)}</span>
+                            </div>
+                        ` : ''}
+
+                        <div class="location-actions" style="margin: 16px 0; padding: 12px; background: var(--cz-concrete-light); border: 2px solid var(--cz-black);">
+                            ${this.currentUser ? `
+                                <button class="btn" onclick="app.likeLocation('${locationId}')" id="like-btn-${locationId}">
+                                    <i class="fas fa-heart"></i> Like
+                                </button>
+                                <button class="btn" onclick="app.checkInLocation('${locationId}')">
+                                    <i class="fas fa-check-circle"></i> Check In
+                                </button>
+                                <button class="btn" onclick="app.showRoutePlanningModal(['${locationId}'])">
+                                    <i class="fas fa-route"></i> Add to Route
+                                </button>
+                            ` : `
+                                <p style="color: var(--text-muted); font-size: 12px;">Sign in to like, check in, and plan routes</p>
+                            `}
+                        </div>
+
+                        <div class="comments-section">
+                            <h4>Comments</h4>
+                            ${this.currentUser ? `
+                                <div style="margin-bottom: 16px;">
+                                    <textarea class="textarea" id="comment-input-${locationId}" placeholder="Add a comment..." rows="3"></textarea>
+                                    <button class="btn btn-primary" onclick="app.submitComment('${locationId}')" style="margin-top: 8px;">
+                                        <i class="fas fa-comment"></i> Add Comment
+                                    </button>
+                                </div>
+                            ` : ''}
+                            <div id="comments-list-${locationId}" class="loading">Loading comments...</div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn" onclick="this.parentElement.parentElement.parentElement.remove()">Close</button>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+                this.loadLocationComments(locationId).then(comments => {
+                    this.renderComments(locationId, comments);
+                });
+            }
+
+            async submitComment(locationId) {
+                const input = document.getElementById(`comment-input-${locationId}`);
+                if (input) {
+                    await this.addComment(locationId, input.value);
+                    input.value = '';
+                }
+            }
+
+            renderComments(locationId, comments) {
+                const container = document.getElementById(`comments-list-${locationId}`);
+                if (!container) return;
+
+                if (comments.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No comments yet. Be the first to comment!</p>';
+                    return;
+                }
+
+                container.innerHTML = comments.map(comment => `
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span class="comment-author">Explorer</span>
+                            <span class="comment-time">${this.timeAgo(comment.createdAt?.toDate())}</span>
+                        </div>
+                        <div class="comment-text">${this.escapeHtml(comment.text)}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Enhanced activity feed with social features
+            loadSocialActivity() {
+                if (!this.currentUser) return;
+
+                try {
+                    // This would load activities from followed users, liked locations, comments, etc.
+                    const activities = [];
+                    
+                    // Add location additions from followed users
+                    // Add comments on user's locations  
+                    // Add likes on user's locations
+                    // Add new followers
+                    
+                    this.renderActivityFeed(activities);
+                } catch (error) {
+                    console.error('Error loading social activity:', error);
+                }
+            }
+
+            renderActivityFeed(activities) {
+                const feed = document.getElementById('activity-feed');
+                if (!feed) return;
+
+                if (activities.length === 0) {
+                    feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">No recent social activity</div>';
+                    return;
+                }
+
+                feed.innerHTML = activities.map(activity => `
+                    <div class="activity-item">
+                        <div class="activity-icon">${activity.icon}</div>
+                        <div class="activity-content">
+                            <div>${activity.message}</div>
+                            <div class="activity-time">${this.timeAgo(activity.timestamp)}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Search and filtering enhancements
+            setupAdvancedFilters() {
+                const searchContainer = document.querySelector('.panel:has(#location-search)');
+                if (!searchContainer) return;
+
+                // Add distance filter
+                const distanceFilter = document.createElement('div');
+                distanceFilter.className = 'form-group';
+                distanceFilter.innerHTML = `
+                    <label for="distance-filter" class="form-label">
+                        <i class="fas fa-ruler"></i>
+                        Distance (km)
+                    </label>
+                    <select class="select" id="distance-filter" style="margin: 0;">
+                        <option value="">Any distance</option>
+                        <option value="1">Within 1 km</option>
+                        <option value="5">Within 5 km</option>
+                        <option value="10">Within 10 km</option>
+                        <option value="25">Within 25 km</option>
+                    </select>
+                `;
+
+                // Add tag filter
+                const tagFilter = document.createElement('div');
+                tagFilter.className = 'form-group';
+                tagFilter.innerHTML = `
+                    <label for="tag-filter" class="form-label">
+                        <i class="fas fa-tags"></i>
+                        Tags
+                    </label>
+                    <select class="select" id="tag-filter" style="margin: 0;">
+                        <option value="">All tags</option>
+                        <option value="historic">Historic</option>
+                        <option value="underground">Underground</option>
+                        <option value="rooftop">Rooftop</option>
+                        <option value="industrial">Industrial</option>
+                        <option value="abandoned">Abandoned</option>
+                        <option value="photo-worthy">Photo-worthy</option>
+                    </select>
+                `;
+
+                searchContainer.appendChild(distanceFilter);
+                searchContainer.appendChild(tagFilter);
+
+                // Add event listeners
+                document.getElementById('distance-filter')?.addEventListener('change', () => this.applyAdvancedFilters());
+                document.getElementById('tag-filter')?.addEventListener('change', () => this.applyAdvancedFilters());
+            }
+
+            applyAdvancedFilters() {
+                // Enhanced filtering logic with distance, tags, etc.
+                // This would integrate with the existing renderFilteredLocations method
+                console.log('Applying advanced filters...');
+            }
             });
         }
         
@@ -3580,6 +4328,612 @@
                 }
 
                 // Allow Enter key in address field
+            createLocationPopup(data, docId) {
+                const riskColor = this.getRiskColor(data.riskLevel);
+                const escapedName = this.escapeHtml(data.name || 'Unnamed Location');
+                const escapedDescription = this.escapeHtml(data.description || 'No description available');
+                const category = this.escapeHtml(data.category || 'other');
+                
+                // Render tags if available
+                let tagsHtml = '';
+                if (data.tags && Array.isArray(data.tags) && data.tags.length > 0) {
+                    tagsHtml = `
+                        <div style="display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0;">
+                            ${data.tags.slice(0, 5).map(tag =>
+                                `<span style="background: var(--cz-yellow); color: white; padding: 1px 4px; border-radius: 0; font-size: 0.7em;">${this.escapeHtml(tag)}</span>`
+                            ).join('')}
+                            ${data.tags.length > 5 ? `<span style="font-size: 0.7em; color: #666;">+${data.tags.length - 5} more</span>` : ''}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div style="min-width: 200px; max-width: 300px;">
+                        <div style="margin-bottom: 8px;">
+                            <strong style="font-size: 1.1em; color: var(--accent-blue);">${escapedName}</strong>
+                        </div>
+                        <div style="margin-bottom: 8px; color: #666; font-size: 0.9em; line-height: 1.4;">
+                            ${escapedDescription}
+                        </div>
+            showView(viewName) {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === viewName);
+                });
+
+                document.querySelectorAll('.view').forEach(view => {
+                    view.classList.toggle('active', view.id === `${viewName}-view`);
+                });
+
+                if (viewName === 'map' && this.map) {
+                    setTimeout(() => this.map.invalidateSize(), 100);
+                } else if (viewName === 'locations') {
+                    this.loadUserLocations();
+                } else if (viewName === 'profile') {
+                    this.loadProfile();
+                } else if (viewName === 'social') {
+                    this.showSocialFeed();
+                } else if (viewName === 'missions') {
+                    this.showMissions();
+                } else if (viewName === 'routes') {
+                    this.showRoutes();
+                } else if (viewName === 'groups') {
+                    this.showGroups();
+                } else if (viewName === 'notifications') {
+                    this.showNotifications();
+                }
+            }
+
+            // ========================
+            // SOCIAL FEATURES UI
+            // ========================
+
+            showSocialFeed() {
+                const main = document.querySelector('.main');
+                if (!main) return;
+
+                main.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2>Social Feed</h2>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn" onclick="app.showView('map')" aria-label="Return to map view">
+                                <i class="fas fa-map" aria-hidden="true"></i>
+                                <span>Back to Map</span>
+                            </button>
+                            <button class="btn btn-primary" onclick="app.createNewPost()" aria-label="Create new post">
+                                <i class="fas fa-plus" aria-hidden="true"></i>
+                                <span>New Post</span>
+                            </button>
+                try {
+                    // Load user profile data
+                    const userDoc = await this.db.collection('users').doc(targetUserId).get();
+                    const userData = userDoc.exists ? userDoc.data() : {};
+
+                    // Load user's locations
+                    const snapshot = await this.db.collection('locations')
+                        .where('createdBy', '==', targetUserId)
+                        .where('status', '==', 'active')
+                        .get();
+
+                    const locations = [];
+                    snapshot.forEach(doc => {
+                        locations.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    const totalLocations = locations.length;
+                    const username = userData.displayName || userData.email || 'Urban Explorer';
+                    const userAvatar = userData.photoURL || null;
+                    const userBio = userData.bio || '';
+                    const joinedDate = userData.createdAt ? new Date(userData.createdAt.toDate()).toLocaleDateString() : 'Recently';
+                        </div>
+                    </div>
+
+                    <!-- Social Feed Filters -->
+                    <div class="panel" style="margin-bottom: 24px;">
+                        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                            <div class="form-group" style="margin: 0;">
+                                <label for="social-filter" class="form-label">Filter Feed</label>
+                                <select class="select" id="social-filter" style="margin: 0;" onchange="app.filterSocialFeed()">
+                                    <option value="all">All Activity</option>
+                                    <option value="following">Following</option>
+                                    <option value="location-updates">Location Updates</option>
+                                    <option value="social">Social Actions</option>
+                                    <option value="achievements">Achievements</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label for="sort-feed" class="form-label">Sort By</label>
+                                <select class="select" id="sort-feed" style="margin: 0;" onchange="app.sortSocialFeed()">
+                                    <option value="recent">Most Recent</option>
+                                    <option value="popular">Most Popular</option>
+                                    <option value="engagement">Most Engaged</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social Feed Content -->
+                    <div id="social-feed-content" class="loading">
+                        Loading social feed...
+                    </div>
+                `;
+
+                this.loadSocialFeed();
+            }
+
+            async loadSocialFeed() {
+                if (!this.currentUser) {
+                    document.getElementById('social-feed-content').innerHTML = `
+                        <div style="text-align: center; padding: 48px;">
+                            <i class="fas fa-user-lock" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px; display: block;"></i>
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                    content.innerHTML = '<div class="error">FAILED TO LOAD INSPECTION REPORT</div>';
+                }
+
+                // Load social stats after content is rendered
+                this.loadUserSocialStats(targetUserId);
+            }
+                    `;
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                    content.innerHTML = '<div class="error">FAILED TO LOAD INSPECTION REPORT</div>';
+                }
+
+                // Load social stats after content is rendered
+                this.loadUserSocialStats(targetUserId);
+                            <h3 style="color: var(--text-secondary); margin-bottom: 12px;">Sign In Required</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 20px;">Sign in to see your social feed and connect with other explorers</p>
+                            <button class="btn btn-primary" onclick="app.handleAuth()">
+        <!-- Stats Overview -->
+        <div class="panel" style="margin-bottom: 24px;">
+            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);"><i class="fas fa-chart-line"></i> Stats</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-blue); margin-bottom: 8px;" id="profile-locations-count">${totalLocations}</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Locations</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary); margin-bottom: 8px;" id="profile-followers-count">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Followers</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--success); margin-bottom: 8px;" id="profile-following-count">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Following</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--warning); margin-bottom: 8px;" id="profile-likes-count">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Likes Received</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--danger); margin-bottom: 8px;" id="profile-visits-count">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Visits</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-yellow); margin-bottom: 8px;" id="profile-badges-count">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Badges</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Actions (for other users' profiles) -->
+        ${!isOwnProfile ? `
+            <div class="panel" style="margin-bottom: 24px;">
+                <h3 style="margin: 0 0 16px 0;">Social Actions</h3>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" id="follow-btn-${targetUserId}" onclick="app.toggleFollow('${targetUserId}')">
+                        <i class="fas fa-user-plus"></i> Follow
+                    </button>
+                    <button class="btn" onclick="app.messageUser('${targetUserId}')">
+                        <i class="fas fa-envelope"></i> Message
+                    </button>
+                    <button class="btn" onclick="app.viewUserLocations('${targetUserId}')">
+                        <i class="fas fa-map"></i> View Locations
+                    </button>
+                </div>
+            </div>
+        ` : ''}
+
+        <!-- Badges & Achievements -->
+        <div class="panel" style="margin-bottom: 24px;">
+            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);">
+                <i class="fas fa-trophy"></i> Achievements (0)
+            </h3>
+            <div class="achievement-grid" id="user-badges">
+                <!-- Badges will be loaded dynamically -->
+                <div style="text-align: center; padding: 24px; color: var(--text-muted); grid-column: 1 / -1;">
+                    <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 8px; display: block; opacity: 0.5;"></i>
+                    <p>No badges earned yet. Start exploring to unlock achievements!</p>
+                </div>
+            </div>
+        </div>
+                                <i class="fas fa-sign-in-alt"></i> Sign In Now
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                try {
+                    // Load activities from followed users, comments, likes, etc.
+                    const activities = await this.getSocialActivities();
+                    this.renderSocialFeed(activities);
+                } catch (error) {
+                    console.error('Error loading social feed:', error);
+                    document.getElementById('social-feed-content').innerHTML = 
+                        '<div class="error">Failed to load social feed</div>';
+                }
+            }
+
+            async getSocialActivities() {
+                const activities = [];
+                
+                // Get followed users' locations
+                const followedSnapshot = await this.db.collection('user_followers')
+                    .where('followerId', '==', this.currentUser.uid)
+                    .get();
+                
+                const followingIds = followedSnapshot.docs.map(doc => doc.data().followingId);
+                
+                if (followingIds.length > 0) {
+                    const locationSnapshot = await this.db.collection('locations')
+                        .where('createdBy', 'in', followingIds.slice(0, 10)) // Firestore 'in' limit
+                        .orderBy('createdAt', 'desc')
+                        .limit(20)
+                        .get();
+                    
+                    locationSnapshot.forEach(doc => {
+                        activities.push({
+                            type: 'location-added',
+                            userId: doc.data().createdBy,
+                            data: doc.data(),
+                            timestamp: doc.data().createdAt,
+                            icon: 'fas fa-map-marker-alt',
+                            message: `added a new location: ${doc.data().name}`
+                        });
+                    });
+                }
+
+                // Get comments on user's locations
+                const commentsSnapshot = await this.db.collection('location_comments')
+                    .where('flagged', '==', false)
+                    .orderBy('createdAt', 'desc')
+                    .limit(15)
+                    .get();
+                
+                commentsSnapshot.forEach(doc => {
+                    const comment = doc.data();
+                    if (comment.userId !== this.currentUser.uid) {
+                        activities.push({
+                            type: 'comment',
+                            userId: comment.userId,
+                            data: comment,
+                            timestamp: comment.createdAt,
+                            icon: 'fas fa-comment',
+                            message: 'commented on a location'
+                        });
+                    }
+                });
+
+                // Sort by timestamp
+                return activities.sort((a, b) => b.timestamp - a.timestamp);
+            }
+
+            renderSocialFeed(activities) {
+                const container = document.getElementById('social-feed-content');
+                if (!container) return;
+
+                if (activities.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 48px; color: var(--text-muted);">
+                            <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.5;"></i>
+                            <p>No social activity yet. Follow other explorers to see their updates!</p>
+                            <button class="btn btn-primary" onclick="app.showView('map')">Start Exploring</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = activities.map(activity => `
+                    <div class="social-feed-item">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                            <div class="activity-icon" style="width: 32px; height: 32px;">
+                                <i class="${activity.icon}"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; color: var(--cz-yellow);">
+                                    Explorer ${activity.userId.substring(0, 8)}
+                                </div>
+                                <div class="activity-time">
+                                    ${this.timeAgo(activity.timestamp?.toDate())}
+                                </div>
+                            </div>
+                            <div class="social-action-buttons">
+                                ${activity.type === 'location-added' ? `
+                                    <button class="social-btn" onclick="app.showLocationDetailModal('${activity.data.id}', ${JSON.stringify(activity.data).replace(/"/g, '&quot;')})">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                ` : ''}
+                                <button class="social-btn" onclick="app.followUser('${activity.userId}')">
+                                    <i class="fas fa-user-plus"></i> Follow
+                                </button>
+                            </div>
+                        </div>
+                        <div style="margin-left: 44px;">
+                            <p style="margin: 0; color: var(--text-secondary);">${activity.message}</p>
+                            ${activity.data.name ? `
+                                <div style="margin-top: 8px; padding: 8px; background: var(--cz-concrete-dark); border: 1px solid var(--cz-black);">
+                                    <strong>${this.escapeHtml(activity.data.name)}</strong>
+                                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px;">
+                                        ${this.escapeHtml(activity.data.description).substring(0, 100)}${activity.data.description.length > 100 ? '...' : ''}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            showMissions() {
+                const main = document.querySelector('.main');
+                if (!main) return;
+
+                main.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2>Missions & Challenges</h2>
+                        <button class="btn" onclick="app.showView('map')">
+                            <i class="fas fa-map"></i> Back to Map
+                        </button>
+                    </div>
+
+                    <div class="panel" style="margin-bottom: 24px;">
+                        <h3>Available Missions</h3>
+                        <div id="missions-grid">
+                            <div class="loading">Loading missions...</div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Your Progress</h3>
+                        <div id="mission-progress">
+                            <div class="loading">Loading progress...</div>
+                        </div>
+                    </div>
+                `;
+
+                this.loadMissions();
+            }
+
+            async loadMissions() {
+                try {
+                    const snapshot = await this.db.collection('missions').get();
+                    const missions = [];
+                    
+                    snapshot.forEach(doc => {
+                        missions.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    this.renderMissions(missions);
+                } catch (error) {
+                    console.error('Error loading missions:', error);
+                    document.getElementById('missions-grid').innerHTML = 
+                        '<div class="error">Failed to load missions</div>';
+                }
+            }
+
+            renderMissions(missions) {
+                const container = document.getElementById('missions-grid');
+                if (!container) return;
+
+                container.innerHTML = missions.map(mission => `
+                    <div class="mission-card">
+                        <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 12px;">
+                            <div>
+                                <h4 style="margin: 0 0 8px 0; color: var(--cz-yellow);">${this.escapeHtml(mission.title)}</h4>
+                                <p style="margin: 0; color: var(--text-secondary);">${this.escapeHtml(mission.description)}</p>
+                            </div>
+                            <div class="badge difficulty-badge" style="background: var(--cz-${mission.difficulty === 'easy' ? 'green' : mission.difficulty === 'medium' ? 'orange' : 'red'}); color: white;">
+                                ${mission.difficulty}
+                            </div>
+                        </div>
+                        
+                        <div class="mission-progress">
+                            <div class="mission-progress-fill" style="width: ${mission.progress || 0}%"></div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: between; align-items: center; margin-top: 8px;">
+                            <span style="font-size: 0.9rem; color: var(--text-muted);">
+                                ${mission.progress || 0}% complete
+                            </span>
+                            <button class="btn btn-primary" onclick="app.startMission('${mission.id}')">
+                                ${mission.progress > 0 ? 'Continue' : 'Start'} Mission
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            showRoutes() {
+                const main = document.querySelector('.main');
+                if (!main) return;
+
+                main.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2>Route Planning</h2>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn" onclick="app.showView('map')">
+                                <i class="fas fa-map"></i> Back to Map
+                            </button>
+                            <button class="btn btn-primary" onclick="app.createNewRoute()">
+                                <i class="fas fa-route"></i> New Route
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="routes-content" class="loading">
+                        Loading routes...
+                    </div>
+                `;
+
+                this.loadRoutes();
+            }
+
+            showGroups() {
+                const main = document.querySelector('.main');
+                if (!main) return;
+
+                main.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2>Groups & Teams</h2>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn" onclick="app.showView('map')">
+                                <i class="fas fa-map"></i> Back to Map
+                            </button>
+                            <button class="btn btn-primary" onclick="app.createNewGroup()">
+                                <i class="fas fa-users"></i> New Group
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="groups-content" class="loading">
+                        Loading groups...
+                    </div>
+                `;
+
+                this.loadGroups();
+            }
+
+            showNotifications() {
+                const main = document.querySelector('.main');
+                if (!main) return;
+
+                main.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2>Notifications</h2>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn" onclick="app.showView('map')">
+                                <i class="fas fa-map"></i> Back to Map
+                            </button>
+                            <button class="btn" onclick="app.markAllNotificationsAsRead()">
+                                <i class="fas fa-check-double"></i> Mark All Read
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="notifications-content" class="loading">
+                        Loading notifications...
+                    </div>
+                `;
+
+                this.loadNotifications();
+            }
+
+            async markAllNotificationsAsRead() {
+                if (!this.currentUser) return;
+
+                try {
+                    const snapshot = await this.db.collection('user_notifications')
+                        .where('userId', '==', this.currentUser.uid)
+                        .where('read', '==', false)
+                        .get();
+
+                    const batch = this.db.batch();
+                    snapshot.forEach(doc => {
+                        batch.update(doc.ref, { read: true });
+                    });
+
+                    await batch.commit();
+                    this.unreadNotifications = 0;
+                    this.updateNotificationBadge();
+                    this.showNotifications(); // Refresh
+                    this.showToast('All notifications marked as read', 'success');
+                } catch (error) {
+                    console.error('Error marking notifications as read:', error);
+                    this.showToast('Failed to mark notifications as read', 'error');
+                }
+            }
+
+            // Utility methods for social features
+            async createNewPost() {
+                // Placeholder for creating new social posts
+                this.showToast('Post creation coming soon!', 'info');
+            }
+
+            async startMission(missionId) {
+                this.showToast('Mission started!', 'success');
+            }
+
+            async createNewRoute() {
+                this.showToast('Route planning coming soon!', 'info');
+            }
+
+            async createNewGroup() {
+                this.showToast('Group creation coming soon!', 'info');
+            }
+
+            filterSocialFeed() {
+                // Implement feed filtering
+                console.log('Filtering social feed...');
+            }
+
+            sortSocialFeed() {
+                // Implement feed sorting
+                console.log('Sorting social feed...');
+            }
+                        <div style="display: flex; gap: 6px; font-size: 0.8em; margin-bottom: 8px;">
+                            <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 0; color: #333;">${category}</span>
+                            <span style="background: ${riskColor}; padding: 2px 6px; border-radius: 0; color: white;">${data.riskLevel || 'unknown'}</span>
+                        </div>
+                        ${tagsHtml}
+                        
+                        <!-- Social Actions -->
+                        <div style="display: flex; gap: 4px; margin: 8px 0; padding: 8px; background: var(--cz-concrete-light); border: 1px solid var(--cz-black);">
+                            ${this.currentUser ? `
+                                <button onclick="app.showLocationDetailModal('${docId}', ${JSON.stringify(data).replace(/"/g, '&quot;')})" 
+                                        style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-yellow); color: var(--cz-black); border: 1px solid var(--cz-black);">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </button>
+                                <button onclick="app.likeLocation('${docId}')" 
+                                        style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-concrete); border: 1px solid var(--cz-black);">
+                                    <i class="fas fa-heart"></i> Like
+                                </button>
+                                <button onclick="app.checkInLocation('${docId}')" 
+                                        style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-green); color: white; border: 1px solid var(--cz-black);">
+                                    <i class="fas fa-check"></i> Check In
+                                </button>
+                            ` : `
+                                <button onclick="app.handleAuth()" 
+                                        style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-yellow); color: var(--cz-black); border: 1px solid var(--cz-black);">
+                                    <i class="fas fa-sign-in-alt"></i> Sign In
+                                </button>
+                            `}
+                        </div>
+                        
+                        ${this.currentUser ? `
+                            <div style="display: flex; gap: 4px; margin-top: 8px;">
+                                <button onclick="app.editLocation('${docId}')" 
+                                        style="font-size: 0.7em; padding: 3px 6px; background: var(--cz-concrete); border: 1px solid var(--cz-black);">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button onclick="app.deleteLocation('${docId}')" 
+                                        style="font-size: 0.7em; padding: 3px 6px; background: #ff3860; color: white; border: 1px solid var(--cz-black);">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                                <button onclick="app.showView('locations'); setTimeout(() => app.loadUserLocations(), 100);" 
+                                        style="font-size: 0.7em; padding: 3px 6px; background: var(--cz-orange); color: white; border: 1px solid var(--cz-black);">
+                                    <i class="fas fa-list"></i> List
+                                </button>
+                            </div>
+                        ` : `
+                            <div style="margin-top: 8px;">
+                                <button onclick="app.showView('locations')" 
+                                        style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-yellow); color: var(--cz-black); border: 1px solid var(--cz-black);">
+                                    <i class="fas fa-map-marker-alt"></i> View All Locations
+                                </button>
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
                 if (addressInput) {
                     addressInput.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter') {
@@ -3823,6 +5177,18 @@
 
                 // Set up tag input event listeners
                 this.setupTagInput();
+                // Initialize social features
+                this.followers = new Map();
+                this.following = new Map();
+                this.likes = new Map();
+                this.comments = new Map();
+                this.notifications = [];
+                this.visits = new Map();
+                this.badges = new Map();
+                this.routes = new Map();
+                this.groups = new Map();
+                this.missions = new Map();
+                this.unreadNotifications = 0;
             }
 
             setupTagInput() {
@@ -4008,6 +5374,175 @@
                 // Load public data (locations, stats) regardless of auth state
                 // Activity feed will handle auth requirements internally
                 this.loadLocations();
+            getRiskColor(riskLevel) {
+                const colors = {
+                    low: '#23d160',
+                    moderate: '#ffdd57', 
+                    high: '#ff3860'
+                };
+                return colors[riskLevel] || '#7a7a9a';
+            }
+
+            // ========================
+            // PROFILE SOCIAL METHODS
+            // ========================
+
+            async toggleFollow(userId) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to follow users', 'warning');
+                    return;
+                }
+
+                try {
+                    const followBtn = document.getElementById(`follow-btn-${userId}`);
+                    const isFollowing = followBtn && followBtn.textContent.includes('Unfollow');
+
+                    if (isFollowing) {
+                        await this.unfollowUser(userId);
+                        if (followBtn) {
+                            followBtn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
+                            followBtn.className = 'btn btn-primary';
+                        }
+                    } else {
+                        await this.followUser(userId);
+                        if (followBtn) {
+                            followBtn.innerHTML = '<i class="fas fa-user-check"></i> Following';
+                            followBtn.className = 'btn';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error toggling follow:', error);
+                    this.showToast('Failed to update follow status', 'error');
+                }
+            }
+
+            messageUser(userId) {
+                this.showToast('Direct messaging coming soon!', 'info');
+            }
+
+            async viewUserLocations(userId) {
+                this.showToast('Loading user locations...', 'info');
+                // This would show a filtered view of the user's locations
+            }
+
+            async loadUserSocialStats(userId) {
+                try {
+                    // Load follower count
+                    const followersSnapshot = await this.db.collection('user_followers')
+                        .where('followingId', '==', userId)
+                        .get();
+                    
+                    // Load following count  
+                    const followingSnapshot = await this.db.collection('user_followers')
+                        .where('followerId', '==', userId)
+                        .get();
+
+                    // Load likes received on user's locations
+                    const userLocationsSnapshot = await this.db.collection('locations')
+                        .where('createdBy', '==', userId)
+                        .get();
+                    
+                    const locationIds = userLocationsSnapshot.docs.map(doc => doc.id);
+                    let likesCount = 0;
+                    
+                    if (locationIds.length > 0) {
+                        const likesSnapshot = await this.db.collection('location_likes')
+                            .where('locationId', 'in', locationIds.slice(0, 10)) // Firestore limit
+                            .get();
+                        likesCount = likesSnapshot.size;
+                    }
+
+                    // Load visits to user's locations
+                    let visitsCount = 0;
+                    if (locationIds.length > 0) {
+                        const visitsSnapshot = await this.db.collection('location_visits')
+                            .where('locationId', 'in', locationIds.slice(0, 10))
+                            .get();
+                        visitsCount = visitsSnapshot.size;
+                    }
+
+                    // Load user badges
+                    const badgesSnapshot = await this.db.collection('user_badges')
+                        .where('userId', '==', userId)
+                        .get();
+
+                    // Update the stats in the profile
+                    const followersElement = document.getElementById('profile-followers-count');
+                    const followingElement = document.getElementById('profile-following-count');
+                    const likesElement = document.getElementById('profile-likes-count');
+                    const visitsElement = document.getElementById('profile-visits-count');
+                    const badgesElement = document.getElementById('profile-badges-count');
+
+                    if (followersElement) followersElement.textContent = followersSnapshot.size;
+                    if (followingElement) followingElement.textContent = followingSnapshot.size;
+                    if (likesElement) likesElement.textContent = likesCount;
+                    if (visitsElement) visitsElement.textContent = visitsCount;
+                    if (badgesElement) badgesElement.textContent = badgesSnapshot.size;
+
+                    this.renderUserBadges(badgesSnapshot.docs.map(doc => doc.data()));
+
+                } catch (error) {
+                    console.error('Error loading user social stats:', error);
+                }
+            }
+
+            renderUserBadges(badges) {
+                const container = document.getElementById('user-badges');
+                if (!container) return;
+
+                if (badges.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 24px; color: var(--text-muted); grid-column: 1 / -1;">
+                            <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 8px; display: block; opacity: 0.5;"></i>
+                            <p>No badges earned yet. Start exploring to unlock achievements!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = badges.map(badge => `
+                    <div class="achievement-tag">
+                        <div class="tag-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="tag-name">${this.getBadgeName(badge.badgeId)}</div>
+                        <div class="tag-desc">${this.getBadgeDescription(badge.badgeId)}</div>
+                    </div>
+                `).join('');
+            }
+
+            getBadgeName(badgeId) {
+                const badgeNames = {
+                    'first_location': 'First Explorer',
+                    'mapper_10': 'Mapper',
+                    'mapper_50': 'Master Mapper',
+                    'first_visit': 'First Check-in',
+                    'explorer_10': 'Explorer',
+                    'explorer_50': 'Master Explorer',
+                    'social_butterfly': 'Social Butterfly',
+                    'commentator_10': 'Commentator',
+                    'appreciator': 'Appreciator',
+                    'liker_25': 'Liked'
+                };
+                return badgeNames[badgeId] || 'Achievement';
+            }
+
+            getBadgeDescription(badgeId) {
+                const badgeDescriptions = {
+                    'first_location': 'Added your first location',
+                    'mapper_10': 'Added 10 locations',
+                    'mapper_50': 'Added 50 locations',
+                    'first_visit': 'First location visit',
+                    'explorer_10': 'Visited 10 locations',
+                    'explorer_50': 'Visited 50 locations',
+                    'social_butterfly': 'Made your first comment',
+                    'commentator_10': 'Posted 10 comments',
+                    'appreciator': 'First location like',
+                    'liker_25': 'Received 25 likes'
+                };
+                return badgeDescriptions[badgeId] || 'Special achievement';
+            }
+        }
                 this.loadStats();
                 this.loadActivity();
             }

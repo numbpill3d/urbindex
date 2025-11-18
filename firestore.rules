@@ -105,4 +105,115 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
     }
   }
+    // Followers - authenticated users can read all follower relationships
+    // Users can only manage their own following/follower relationships
+    match /user_followers/{followId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.followerId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.followerId == request.auth.uid;
+    }
+
+    // Location comments - authenticated users can read all comments
+    // Users can only create, update, or delete their own comments
+    match /location_comments/{commentId} {
+      allow read: if true; // Allow public read for location detail pages
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Location likes/favorites - authenticated users can read all likes
+    // Users can only manage their own likes
+    match /location_likes/{likeId} {
+      allow read: if true; // Allow public read for like counts
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // User notifications - users can only read/write their own notifications
+    match /user_notifications/{notificationId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Location visits/check-ins - authenticated users can read all visits
+    // Users can only create their own visits
+    match /location_visits/{visitId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // User badges/achievements - users can read all badges, authenticated create/manage their own
+    match /user_badges/{badgeId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+
+    // Missions/challenges - authenticated users can read all missions
+    // Admin/create permission for creating missions
+    match /missions/{missionId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+
+    // User mission progress - users can only manage their own progress
+    match /user_missions/{progressId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Routes/journeys - authenticated users can read all public routes
+    // Users can manage their own routes
+    match /routes/{routeId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.createdBy == request.auth.uid;
+      allow update: if request.auth != null && resource.data.createdBy == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+    }
+
+    // Groups/teams - authenticated users can read all groups
+    // Group members can manage groups they belong to
+    match /groups/{groupId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.createdBy == request.auth.uid;
+      allow update: if request.auth != null && (resource.data.createdBy == request.auth.uid || resource.data.members.hasAny([request.auth.uid]));
+      allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+    }
+
+    // Group members - authenticated users can read all memberships
+    // Users can manage their own memberships
+    match /group_members/{memberId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Direct messages - users can only read/write messages they're part of
+    match /direct_messages/{messageId} {
+      allow read: if request.auth != null &&
+        (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.senderId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.senderId == request.auth.uid;
+      allow delete: if request.auth != null &&
+        (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
+    }
+
+    // Location images/photos - allow public read, authenticated write
+    match /location_images/{imageId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && resource.data.uploadedBy == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.uploadedBy == request.auth.uid;
+    }
+  }
+}
 }
