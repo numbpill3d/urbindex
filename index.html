@@ -2376,7 +2376,7 @@
                 <span id="status-text">Connected</span>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
-                <button class="btn btn-secondary" id="profile-btn" aria-label="View Profile" style="display: none;" onclick="app.showView('profile')">
+                <button class="btn btn-secondary" id="profile-btn" aria-label="View Profile" onclick="app.handleProfileButtonClick()">
                     <i class="fas fa-user-circle" aria-hidden="true"></i>
                     <span>Profile</span>
                 </button>
@@ -2548,10 +2548,16 @@
             <div class="view" id="locations-view" role="tabpanel" aria-labelledby="locations-tab">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <h2>My Locations</h2>
-                    <button class="btn btn-primary" onclick="app.showAddLocationModal()" aria-label="Add New Location to Your List">
-                        <i class="fas fa-plus" aria-hidden="true"></i>
-                        <span>Add Location</span>
-                    </button>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn" onclick="app.showView('map')" aria-label="Return to map view">
+                            <i class="fas fa-map" aria-hidden="true"></i>
+                            <span>Back to Map</span>
+                        </button>
+                        <button class="btn btn-primary" onclick="app.showAddLocationModal()" aria-label="Add New Location to Your List">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                            <span>Add Location</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Search and Filter Controls -->
@@ -4040,6 +4046,11 @@
                                             locationCount++;
 
                                             const marker = L.marker([lat, lng])
+                                                .bindTooltip(data.name || 'Unnamed Location', {
+                                                    direction: 'top',
+                                                    permanent: false,
+                                                    offset: [0, -10]
+                                                })
                                                 .bindPopup(this.createLocationPopup(data, doc.id))
                                                 .addTo(this.map);
 
@@ -4119,8 +4130,13 @@
                             <div style="display: flex; gap: 4px; margin-top: 8px;">
                                 <button onclick="app.editLocation('${docId}')" style="font-size: 0.8em; padding: 4px 8px; border-radius: 0;">Edit</button>
                                 <button onclick="app.deleteLocation('${docId}')" style="font-size: 0.8em; padding: 4px 8px; background: #ff3860; color: white; border-radius: 0;">Delete</button>
+                                <button onclick="app.showView('locations'); setTimeout(() => app.loadUserLocations(), 100);" style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-yellow); color: var(--cz-black); border-radius: 0;">View in List</button>
                             </div>
-                        ` : ''}
+                        ` : `
+                            <div style="margin-top: 8px;">
+                                <button onclick="app.showView('locations')" style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-yellow); color: var(--cz-black); border-radius: 0;">View All Locations</button>
+                            </div>
+                        `}
                     </div>
                 `;
             }
@@ -5254,7 +5270,7 @@
                     if (span) span.textContent = 'Sign In / Register';
                     if (icon) icon.className = 'fas fa-user';
                     btn?.setAttribute('title', 'Sign in or create an account');
-                    if (profileBtn) profileBtn.style.display = 'none';
+                    if (profileBtn) profileBtn.style.display = ''; // Always show profile button
                 }
 
                 const dot = document.getElementById('status-dot');
@@ -5276,7 +5292,7 @@
 
             async loadUserData() {
                 if (!this.currentUser) return;
-                
+
                 try {
                     await this.db.collection('users').doc(this.currentUser.uid).set({
                         lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
@@ -5284,6 +5300,14 @@
                     }, { merge: true });
                 } catch (error) {
                     console.error('Error updating user data:', error);
+                }
+            }
+
+            handleProfileButtonClick() {
+                if (!this.currentUser) {
+                    this.handleAuth(); // Show auth modal if not authenticated
+                } else {
+                    this.showView('profile'); // Show profile view if authenticated
                 }
             }
 
