@@ -2375,10 +2375,16 @@
                 <div class="status-dot" id="status-dot" aria-hidden="true"></div>
                 <span id="status-text">Connected</span>
             </div>
-            <button class="btn btn-primary" id="auth-btn" aria-label="Authentication and Account Management" style="font-weight: 700;">
-                <i class="fas fa-user" aria-hidden="true"></i>
-                <span>Sign In / Register</span>
-            </button>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <button class="btn btn-secondary" id="profile-btn" aria-label="View Profile" style="display: none;" onclick="app.showView('profile')">
+                    <i class="fas fa-user-circle" aria-hidden="true"></i>
+                    <span>Profile</span>
+                </button>
+                <button class="btn btn-primary" id="auth-btn" aria-label="Authentication and Account Management" style="font-weight: 700;">
+                    <i class="fas fa-user" aria-hidden="true"></i>
+                    <span>Sign In / Register</span>
+                </button>
+            </div>
 
             <!-- Auth Modal -->
             <div class="modal" id="auth-modal">
@@ -2487,10 +2493,6 @@
             <button class="nav-btn" data-view="locations" aria-label="Locations View">
                 <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                 <span>Locations</span>
-            </button>
-            <button class="nav-btn" data-view="profile" aria-label="Profile View">
-                <i class="fas fa-user-circle" aria-hidden="true"></i>
-                <span>Profile</span>
             </button>
         </nav>
 
@@ -2764,6 +2766,59 @@
                 <div class="form-actions">
                     <button type="button" class="btn" onclick="app.hidePasswordResetModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary" aria-label="Send password reset email">Send Reset Link</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="edit-profile-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="app.hideEditProfileModal()">&times;</button>
+            <h3>Edit Profile</h3>
+            <form id="edit-profile-form">
+                <div class="form-group">
+                    <label class="form-label" for="profile-display-name">
+                        <i class="fas fa-user" aria-hidden="true"></i>
+                        Display Name
+                    </label>
+                    <input class="input" type="text" id="profile-display-name" name="displayName"
+                           placeholder="Your display name" aria-describedby="display-name-help" autocomplete="name">
+                    <div id="display-name-help" class="field-help">
+                        This is how your name will appear to others
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="profile-bio">
+                        <i class="fas fa-align-left" aria-hidden="true"></i>
+                        Bio
+                    </label>
+                    <textarea class="textarea" id="profile-bio" name="bio" rows="4"
+                              placeholder="Tell others about yourself and your urban exploration journey..."
+                              aria-describedby="bio-help" maxlength="500"></textarea>
+                    <div id="bio-help" class="field-help">
+                        Maximum 500 characters
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="profile-photo-url">
+                        <i class="fas fa-image" aria-hidden="true"></i>
+                        Profile Photo URL
+                    </label>
+                    <input class="input" type="url" id="profile-photo-url" name="photoURL"
+                           placeholder="https://example.com/photo.jpg" aria-describedby="photo-help">
+                    <div id="photo-help" class="field-help">
+                        Enter a URL to your profile photo (leave blank to use default)
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="app.hideEditProfileModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="profile-submit-btn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
                 </div>
             </form>
         </div>
@@ -3345,6 +3400,11 @@
                     passwordResetForm.addEventListener('submit', (e) => this.handlePasswordReset(e));
                 }
 
+                const editProfileForm = document.getElementById('edit-profile-form');
+                if (editProfileForm) {
+                    editProfileForm.addEventListener('submit', (e) => this.handleEditProfile(e));
+                }
+
                 // Initialize geocoding functionality
                 this.initGeocoding();
 
@@ -3359,6 +3419,7 @@
                         this.hideModal();
                         this.hidePasswordResetModal();
                         this.hideAuthModal();
+                        this.hideEditProfileModal();
                     }
                 });
             }
@@ -4280,305 +4341,178 @@
                 });
             }
 
-            async loadProfile() {
+            async loadProfile(userId = null) {
                 const content = document.getElementById('profile-content');
                 if (!content) return;
 
-                if (!this.currentUser) {
+                // If no userId provided, show current user's profile
+                const targetUserId = userId || this.currentUser?.uid;
+                const isOwnProfile = targetUserId === this.currentUser?.uid;
+
+                if (!targetUserId) {
                     content.innerHTML = `
-                        <div class="inspection-report">
-                            <div class="clipboard-header">
-                                <div class="clipboard-title">ACCESS DENIED</div>
-                                <div class="clipboard-id">NO-AUTH</div>
-                            </div>
-                            <div class="report-body" style="text-align: center; padding: 48px;">
-                                <i class="fas fa-hard-hat" style="font-size: 4rem; color: var(--cz-yellow); margin-bottom: 16px; display: block;"></i>
-                                <h3 style="color: var(--cz-black); margin-bottom: 12px; font-family: var(--font-industrial); letter-spacing: 3px;">SITE ACCESS REQUIRED</h3>
-                                <p style="color: var(--cz-concrete); margin-bottom: 20px; font-family: var(--font-blueprint);">Register as site personnel to access construction zone features and track your urban explorations.</p>
-                                <button class="btn btn-primary" onclick="app.handleAuth()">
-                                    <i class="fas fa-id-badge"></i> REGISTER ACCESS
-                                </button>
-                            </div>
+                        <div style="text-align: center; padding: 80px 20px;">
+                            <i class="fas fa-user-lock" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 24px; display: block;"></i>
+                            <h3 style="color: var(--text-secondary); margin-bottom: 16px;">Sign In Required</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                                Create an account to build your urban exploration profile, track your locations, and connect with the community.
+                            </p>
+                            <button class="btn btn-primary" onclick="app.handleAuth()">
+                                <i class="fas fa-sign-in-alt"></i> Sign In / Register
+                            </button>
                         </div>
                     `;
                     return;
                 }
 
                 try {
+                    // Load user profile data
+                    const userDoc = await this.db.collection('users').doc(targetUserId).get();
+                    const userData = userDoc.exists ? userDoc.data() : {};
+
+                    // Load user's locations
                     const snapshot = await this.db.collection('locations')
-                        .where('createdBy', '==', this.currentUser.uid)
+                        .where('createdBy', '==', targetUserId)
                         .where('status', '==', 'active')
                         .get();
 
-                    // Calculate category breakdown
-                    const categoryStats = {};
-                    const riskStats = {};
+                    const locations = [];
                     snapshot.forEach(doc => {
-                        const data = doc.data();
-                        categoryStats[data.category] = (categoryStats[data.category] || 0) + 1;
-                        riskStats[data.riskLevel] = (riskStats[data.riskLevel] || 0) + 1;
+                        locations.push({ id: doc.id, ...doc.data() });
                     });
 
-                    const totalLocations = snapshot.size;
-                    const isAnonymous = this.currentUser.isAnonymous;
-                    const emailVerified = this.currentUser.emailVerified;
-                    const userEmail = this.currentUser.email || 'Guest User';
-
-                    // Calculate clearance levels (like security clearance)
-                    const clearanceLevel = totalLocations < 5 ? 'TRAINEE' : totalLocations < 15 ? 'OPERATIVE' : totalLocations < 30 ? 'SPECIALIST' : totalLocations < 50 ? 'SUPERVISOR' : 'FOREMAN';
-                    const clearanceColor = totalLocations < 5 ? '#A0A0A0' : totalLocations < 15 ? '#00AA44' : totalLocations < 30 ? '#007AFF' : totalLocations < 50 ? '#FF6B00' : '#FFD000';
-
-                    // Generate report ID
-                    const reportId = `RPT-${this.currentUser.uid.substring(0, 8).toUpperCase()}`;
-                    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+                    const totalLocations = locations.length;
+                    const username = userData.displayName || userData.email || 'Urban Explorer';
+                    const userAvatar = userData.photoURL || null;
+                    const userBio = userData.bio || '';
+                    const joinedDate = userData.createdAt ? new Date(userData.createdAt.toDate()).toLocaleDateString() : 'Recently';
 
                     content.innerHTML = `
-                        <div class="inspection-report">
-                            <!-- Clipboard Header -->
-                            <div class="clipboard-header">
-                                <div class="clipboard-title">SITE INSPECTION REPORT</div>
-                                <div class="clipboard-id">${reportId}</div>
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <!-- Profile Header -->
+        <div class="panel" style="margin-bottom: 24px;">
+            <div style="display: flex; gap: 24px; align-items: start;">
+                <div style="flex-shrink: 0;">
+                    ${userAvatar ?
+                        `<img src="${this.escapeHtml(userAvatar)}" alt="${this.escapeHtml(username)}"
+                            style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-blue);">` :
+                        `<div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-blue), var(--primary));
+                            display: flex; align-items: center; justify-content: center; font-size: 3rem; color: white; font-weight: bold;">
+                            ${username.charAt(0).toUpperCase()}
+                        </div>`
+                    }
+                </div>
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                        <div>
+                            <h2 style="margin: 0 0 8px 0; font-size: 2rem;">${this.escapeHtml(username)}</h2>
+                            <p style="color: var(--text-muted); margin: 0;">
+                                <i class="fas fa-calendar-alt"></i> Joined ${joinedDate}
+                            </p>
+                        </div>
+                        ${isOwnProfile ? `
+                            <button class="btn btn-primary" onclick="app.showEditProfile()">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </button>
+                        ` : ''}
+                    </div>
+                    ${userBio ? `
+                        <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; border-left: 3px solid var(--accent-blue);">
+                            <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">${this.escapeHtml(userBio)}</p>
+                        </div>
+                    ` : (isOwnProfile ? `
+                        <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; border-left: 3px solid var(--text-muted); opacity: 0.7;">
+                            <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; font-style: italic;">
+                                <i class="fas fa-info-circle"></i> Add a bio to tell others about yourself
+                            </p>
+                        </div>
+                    ` : '')}
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="panel" style="margin-bottom: 24px;">
+            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);"><i class="fas fa-chart-line"></i> Stats</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-blue); margin-bottom: 8px;">${totalLocations}</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Locations</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary); margin-bottom: 8px;">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Images</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--success); margin-bottom: 8px;">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Comments</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Locations Gallery -->
+        <div class="panel" style="margin-bottom: 24px;">
+            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);">
+                <i class="fas fa-map-marked-alt"></i> Locations (${totalLocations})
+            </h3>
+            ${totalLocations > 0 ? `
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;">
+                    ${locations.slice(0, 6).map(loc => `
+                        <div class="location-card" style="cursor: pointer;" onclick="app.showView('map'); app.map.setView([${loc.coordinates[0]}, ${loc.coordinates[1]}], 16);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <h4 style="margin: 0; font-size: 1.1rem;">${this.escapeHtml(loc.name)}</h4>
+                                <span class="risk risk-${loc.riskLevel}" style="font-size: 0.75rem;">${loc.riskLevel}</span>
                             </div>
-
-                            <div class="report-body">
-                                <!-- Site Badge / ID Card -->
-                                <div class="site-badge">
-                                    <div class="badge-content">
-                                        <div class="badge-photo">
-                                            <i class="fas fa-hard-hat"></i>
-                                        </div>
-                                        <div class="badge-info">
-                                            <div class="badge-name">${isAnonymous ? 'TEMPORARY WORKER' : 'SITE OPERATIVE'}</div>
-                                            <div class="badge-role">${isAnonymous ? 'GUEST ACCESS' : this.escapeHtml(userEmail)}</div>
-
-                                            ${!isAnonymous ? `
-                                                <div style="margin-bottom: 12px;">
-                                                    ${emailVerified ?
-                                                        '<span class="verification-stamp stamp-verified"><i class="fas fa-check"></i> VERIFIED</span>' :
-                                                        '<span class="verification-stamp stamp-unverified"><i class="fas fa-exclamation"></i> PENDING</span>'
-                                                    }
-                                                </div>
-                                            ` : ''}
-
-                                            <div class="clearance-level" style="background: ${clearanceColor}; color: ${clearanceColor === '#FFD000' ? 'var(--cz-black)' : 'white'};">
-                                                <i class="fas fa-shield-alt"></i> ${clearanceLevel}
-                                            </div>
-
-                                            <div class="badge-barcode">
-                                                ${this.currentUser.uid.substring(0, 16).toUpperCase()}
-                                            </div>
-                                            <div class="badge-timestamp">LAST SCAN: ${timestamp}</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                ${!isAnonymous && !emailVerified ? `
-                                    <div class="warning-box">
-                                        <p><strong>EMAIL VERIFICATION REQUIRED</strong><br>Complete verification to unlock full site access and secure your credentials.</p>
-                                        <button class="btn btn-primary" onclick="app.resendVerificationEmail()" style="margin-top: 10px;">
-                                            <i class="fas fa-envelope"></i> RESEND VERIFICATION
-                                        </button>
-                                    </div>
-                                ` : ''}
-
-                                <!-- Site Statistics -->
-                                <div class="inspection-section">
-                                    <div class="section-header">
-                                        <i class="fas fa-chart-bar"></i>
-                                        SITE METRICS
-                                    </div>
-                                    <div class="section-content">
-                                        <div class="stats-grid">
-                                            <div class="stat-plate">
-                                                <div class="stat-value">${totalLocations}</div>
-                                                <div class="stat-label">LOCATIONS</div>
-                                            </div>
-                                            <div class="stat-plate">
-                                                <div class="stat-value">${totalLocations * 10}</div>
-                                                <div class="stat-label">POINTS</div>
-                                            </div>
-                                            <div class="stat-plate">
-                                                <div class="stat-value">${Object.keys(categoryStats).length}</div>
-                                                <div class="stat-label">SECTORS</div>
-                                            </div>
-                                            <div class="stat-plate">
-                                                <div class="stat-value">${Math.floor(totalLocations * 1.5)}</div>
-                                                <div class="stat-label">SURVEYS</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                ${totalLocations > 0 ? `
-                                    <!-- Category Analysis -->
-                                    <div class="inspection-section">
-                                        <div class="section-header">
-                                            <i class="fas fa-clipboard-list"></i>
-                                            SECTOR ANALYSIS
-                                        </div>
-                                        <div class="section-content">
-                                            ${Object.entries(categoryStats).map(([category, count]) => {
-                                                const percentage = Math.round((count / totalLocations) * 100);
-                                                const categoryIcons = {
-                                                    abandoned: 'building',
-                                                    rooftop: 'city',
-                                                    tunnel: 'subway',
-                                                    industrial: 'industry',
-                                                    other: 'map-marker'
-                                                };
-                                                return `
-                                                    <div class="gauge-container">
-                                                        <div class="gauge-label">
-                                                            <span><i class="fas fa-${categoryIcons[category] || 'map-marker'}"></i> ${category.toUpperCase()}</span>
-                                                            <span>${count} SITES (${percentage}%)</span>
-                                                        </div>
-                                                        <div class="gauge-bar">
-                                                            <div class="gauge-fill" style="width: ${percentage}%;"></div>
-                                                        </div>
-                                                    </div>
-                                                `;
-                                            }).join('')}
-                                        </div>
-                                    </div>
-
-                                    <!-- Risk Assessment -->
-                                    <div class="inspection-section">
-                                        <div class="section-header">
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            HAZARD ASSESSMENT
-                                        </div>
-                                        <div class="section-content">
-                                            ${Object.entries(riskStats).map(([risk, count]) => {
-                                                const percentage = Math.round((count / totalLocations) * 100);
-                                                const riskColors = {
-                                                    low: '#00AA44',
-                                                    moderate: '#FF6B00',
-                                                    high: '#CC0000'
-                                                };
-                                                return `
-                                                    <div class="gauge-container">
-                                                        <div class="gauge-label">
-                                                            <span><i class="fas fa-radiation" style="color: ${riskColors[risk]};"></i> ${risk.toUpperCase()} RISK</span>
-                                                            <span>${count} ZONES (${percentage}%)</span>
-                                                        </div>
-                                                        <div class="gauge-bar">
-                                                            <div class="gauge-fill" style="width: ${percentage}%; background: ${riskColors[risk]};"></div>
-                                                        </div>
-                                                    </div>
-                                                `;
-                                            }).join('')}
-                                        </div>
-                                    </div>
-                                ` : ''}
-
-                                <!-- Certifications / Achievements -->
-                                <div class="inspection-section">
-                                    <div class="section-header">
-                                        <i class="fas fa-certificate"></i>
-                                        CERTIFICATIONS
-                                    </div>
-                                    <div class="section-content">
-                                        <div class="achievement-grid">
-                                            ${this.generateAchievementBadges(totalLocations, categoryStats, riskStats)}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Report Actions -->
-                            <div class="report-actions">
-                                ${!isAnonymous ? `
-                                    <button class="btn" onclick="app.showPasswordResetModal()">
-                                        <i class="fas fa-key"></i> CHANGE CREDENTIALS
-                                    </button>
-                                ` : ''}
-                                <button class="btn" onclick="app.handleAuth()" style="background: var(--cz-red); border-color: var(--cz-red); color: white;">
-                                    <i class="fas fa-sign-out-alt"></i> CLOCK OUT
-                                </button>
+                            <p style="color: var(--text-secondary); margin-bottom: 8px; font-size: 0.9rem;">${this.escapeHtml(loc.description).substring(0, 80)}${loc.description.length > 80 ? '...' : ''}</p>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                <i class="fas fa-tag"></i> ${this.escapeHtml(loc.category)}
+                                ${loc.coordinates ? ` • <i class="fas fa-map-marker-alt"></i> ${loc.coordinates[0].toFixed(4)}, ${loc.coordinates[1].toFixed(4)}` : ''}
                             </div>
                         </div>
-                    `;
+                    `).join('')}
+                </div>
+                ${totalLocations > 6 ? `
+                    <div style="text-align: center; margin-top: 16px;">
+                        <button class="btn" onclick="app.showView('locations')">
+                            <i class="fas fa-th"></i> View All ${totalLocations} Locations
+                        </button>
+                    </div>
+                ` : ''}
+            ` : `
+                <div style="text-align: center; padding: 48px; color: var(--text-muted);">
+                    <i class="fas fa-map" style="font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.5;"></i>
+                    <p>${isOwnProfile ? 'No locations yet. Start exploring!' : 'No locations to display.'}</p>
+                </div>
+            `}
+        </div>
+
+        <!-- Images Gallery -->
+        <div class="panel" style="margin-bottom: 24px;">
+            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);">
+                <i class="fas fa-images"></i> Images (0)
+            </h3>
+            <div style="text-align: center; padding: 48px; color: var(--text-muted);">
+                <i class="fas fa-camera" style="font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.5;"></i>
+                <p>No images uploaded yet.</p>
+            </div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="panel">
+            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);">
+                <i class="fas fa-stream"></i> Activity
+            </h3>
+            <div style="text-align: center; padding: 48px; color: var(--text-muted);">
+                <i class="fas fa-rss" style="font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.5;"></i>
+                <p>No recent activity to display.</p>
+            </div>
+        </div>
+    </div>
+`;
                 } catch (error) {
                     console.error('Error loading profile:', error);
                     content.innerHTML = '<div class="error">FAILED TO LOAD INSPECTION REPORT</div>';
                 }
-            }
-
-            generateAchievementBadges(totalLocations, categoryStats, riskStats) {
-                const achievements = [];
-
-                // Location milestones - Construction Zone certifications
-                const locationMilestones = [
-                    { count: 1, icon: 'hard-hat', name: 'SITE INITIATION', desc: '1 SITE', unlocked: totalLocations >= 1 },
-                    { count: 5, icon: 'tools', name: 'FIELD OPERATOR', desc: '5 SITES', unlocked: totalLocations >= 5 },
-                    { count: 10, icon: 'cogs', name: 'SITE INSPECTOR', desc: '10 SITES', unlocked: totalLocations >= 10 },
-                    { count: 25, icon: 'drafting-compass', name: 'PROJECT LEAD', desc: '25 SITES', unlocked: totalLocations >= 25 },
-                    { count: 50, icon: 'building', name: 'SITE FOREMAN', desc: '50 SITES', unlocked: totalLocations >= 50 }
-                ];
-
-                locationMilestones.forEach(achievement => {
-                    achievements.push(`
-                        <div class="achievement-tag ${achievement.unlocked ? '' : 'locked'}">
-                            <div class="tag-icon">
-                                <i class="fas fa-${achievement.icon}" style="color: ${achievement.unlocked ? 'var(--cz-yellow)' : 'var(--cz-concrete-light)'};"></i>
-                            </div>
-                            <div class="tag-name">${achievement.name}</div>
-                            <div class="tag-desc">${achievement.desc}</div>
-                        </div>
-                    `);
-                });
-
-                // Category achievements - Specialist Certifications
-                if (categoryStats.abandoned >= 5) {
-                    achievements.push(`
-                        <div class="achievement-tag">
-                            <div class="tag-icon">
-                                <i class="fas fa-building" style="color: var(--cz-orange);"></i>
-                            </div>
-                            <div class="tag-name">DEMOLITION EXPERT</div>
-                            <div class="tag-desc">5+ ABANDONED</div>
-                        </div>
-                    `);
-                }
-
-                if (categoryStats.rooftop >= 5) {
-                    achievements.push(`
-                        <div class="achievement-tag">
-                            <div class="tag-icon">
-                                <i class="fas fa-city" style="color: #007AFF;"></i>
-                            </div>
-                            <div class="tag-name">HIGH RISE CERT</div>
-                            <div class="tag-desc">5+ ROOFTOPS</div>
-                        </div>
-                    `);
-                }
-
-                if (categoryStats.tunnel >= 3) {
-                    achievements.push(`
-                        <div class="achievement-tag">
-                            <div class="tag-icon">
-                                <i class="fas fa-subway" style="color: var(--cz-concrete-light);"></i>
-                            </div>
-                            <div class="tag-name">UNDERGROUND OPS</div>
-                            <div class="tag-desc">3+ TUNNELS</div>
-                        </div>
-                    `);
-                }
-
-                // Risk taker achievement - Hazmat Certification
-                if (riskStats.high >= 5) {
-                    achievements.push(`
-                        <div class="achievement-tag">
-                            <div class="tag-icon">
-                                <i class="fas fa-radiation" style="color: var(--cz-red);"></i>
-                            </div>
-                            <div class="tag-name">HAZMAT CERTIFIED</div>
-                            <div class="tag-desc">5+ HIGH RISK</div>
-                        </div>
-                    `);
-                }
-
-                return achievements.length > 0 ? achievements.join('') : '<div class="no-data">Complete site inspections to earn certifications!</div>';
             }
 
             showAddLocationModal() {
@@ -5189,6 +5123,94 @@
                 }
             }
 
+            showEditProfile() {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in first', 'warning');
+                    return;
+                }
+
+                const modal = document.getElementById('edit-profile-modal');
+                if (modal) {
+                    // Load current user data
+                    this.db.collection('users').doc(this.currentUser.uid).get()
+                        .then(doc => {
+                            const userData = doc.exists ? doc.data() : {};
+
+                            document.getElementById('profile-display-name').value = userData.displayName || '';
+                            document.getElementById('profile-bio').value = userData.bio || '';
+                            document.getElementById('profile-photo-url').value = userData.photoURL || '';
+                        })
+                        .catch(error => {
+                            console.error('Error loading profile data:', error);
+                        });
+
+                    modal.classList.add('active');
+                    modal.setAttribute('aria-hidden', 'false');
+                    setTimeout(() => {
+                        document.getElementById('profile-display-name')?.focus();
+                    }, 100);
+                }
+            }
+
+            hideEditProfileModal() {
+                const modal = document.getElementById('edit-profile-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    modal.setAttribute('aria-hidden', 'true');
+                    const form = document.getElementById('edit-profile-form');
+                    if (form) form.reset();
+                }
+            }
+
+            async handleEditProfile(e) {
+                e.preventDefault();
+
+                if (!this.currentUser) {
+                    this.showToast('Please sign in first', 'warning');
+                    return;
+                }
+
+                const displayName = document.getElementById('profile-display-name').value.trim();
+                const bio = document.getElementById('profile-bio').value.trim();
+                const photoURL = document.getElementById('profile-photo-url').value.trim();
+
+                const submitBtn = document.getElementById('profile-submit-btn');
+                const originalText = submitBtn.textContent;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                submitBtn.disabled = true;
+
+                try {
+                    // Update user profile in Firestore
+                    await this.db.collection('users').doc(this.currentUser.uid).set({
+                        displayName: displayName || null,
+                        bio: bio || null,
+                        photoURL: photoURL || null,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    // Update Firebase auth profile if display name or photo changed
+                    if (displayName || photoURL) {
+                        await this.currentUser.updateProfile({
+                            displayName: displayName || null,
+                            photoURL: photoURL || null
+                        });
+                    }
+
+                    this.hideEditProfileModal();
+                    this.showToast('Profile updated successfully!', 'success');
+
+                    // Reload profile to show changes
+                    this.loadProfile();
+
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    this.showToast('Failed to update profile. Please try again.', 'error');
+                } finally {
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                    submitBtn.disabled = false;
+                }
+            }
+
             async resendVerificationEmail() {
                 if (!this.currentUser) {
                     this.showToast('Please sign in first', 'warning');
@@ -5221,17 +5243,20 @@
                 const btn = document.getElementById('auth-btn');
                 const span = btn?.querySelector('span');
                 const icon = btn?.querySelector('i');
+                const profileBtn = document.getElementById('profile-btn');
 
                 if (this.currentUser) {
                     if (span) span.textContent = 'Sign Out';
                     if (icon) icon.className = 'fas fa-sign-out-alt';
                     btn?.setAttribute('title', 'Sign out of your account');
+                    if (profileBtn) profileBtn.style.display = '';
                 } else {
                     if (span) span.textContent = 'Sign In / Register';
                     if (icon) icon.className = 'fas fa-user';
                     btn?.setAttribute('title', 'Sign in or create an account');
+                    if (profileBtn) profileBtn.style.display = 'none';
                 }
-                
+
                 const dot = document.getElementById('status-dot');
                 const text = document.getElementById('status-text');
                 if (this.currentUser) {
@@ -5241,7 +5266,7 @@
                     dot?.classList.add('offline');
                     if (text) text.textContent = 'Guest Mode';
                 }
-                
+
                 // Update FAB visibility
                 const fab = document.getElementById('add-location-fab');
                 if (fab) {
