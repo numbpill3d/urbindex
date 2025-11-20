@@ -2352,7 +2352,6 @@
         }
 
         .user-location-marker {
-        .user-location-marker {
             animation: pulse 2s infinite;
         }
 
@@ -2510,9 +2509,6 @@
             color: var(--text-muted);
         }
     </style>
-            animation: pulse 2s infinite;
-        }
-    </style>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -2651,14 +2647,6 @@
             <button class="nav-btn" data-view="locations" aria-label="Locations View">
                 <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                 <span>Locations</span>
-        <nav class="nav" role="navigation" aria-label="Main Navigation" id="navigation">
-            <button class="nav-btn active" data-view="map" aria-label="Map View" aria-current="page">
-                <i class="fas fa-map" aria-hidden="true"></i>
-                <span>Map</span>
-            </button>
-            <button class="nav-btn" data-view="locations" aria-label="Locations View">
-                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-                <span>Locations</span>
             </button>
             <button class="nav-btn" data-view="social" aria-label="Social Feed" onclick="app.showSocialFeed()">
                 <i class="fas fa-users" aria-hidden="true"></i>
@@ -2681,8 +2669,6 @@
                 <i class="fas fa-bell" aria-hidden="true"></i>
                 <span>Alerts</span>
                 <span class="nav-badge" id="notification-badge" style="display: none;"></span>
-            </button>
-        </nav>
             </button>
         </nav>
 
@@ -3027,564 +3013,6 @@
                 navigator.serviceWorker.register('/service-worker.js')
                     .then(registration => console.log('SW registered'))
                     .catch(error => console.log('SW registration failed'));
-            getRiskColor(riskLevel) {
-                const colors = {
-                    low: '#23d160',
-                    moderate: '#ffdd57', 
-                    high: '#ff3860'
-                };
-                return colors[riskLevel] || '#7a7a9a';
-            }
-
-            // ========================
-            // SOCIAL FEATURES
-            // ========================
-
-            // Follow/Unfollow system
-            async followUser(userId) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to follow users', 'warning');
-                    return;
-                }
-
-                try {
-                    await this.db.collection('user_followers').add({
-                        followerId: this.currentUser.uid,
-                        followingId: userId,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    // Create notification for the followed user
-                    await this.createNotification(userId, 'follow', {
-                        message: 'Someone started following you',
-                        fromUserId: this.currentUser.uid
-                    });
-                    
-                    this.showToast('User followed successfully', 'success');
-                } catch (error) {
-                    console.error('Error following user:', error);
-                    this.showToast('Failed to follow user', 'error');
-                }
-            }
-
-            async unfollowUser(userId) {
-                if (!this.currentUser) return;
-
-                try {
-                    const query = await this.db.collection('user_followers')
-                        .where('followerId', '==', this.currentUser.uid)
-                        .where('followingId', '==', userId)
-                        .get();
-                    
-                    query.forEach(doc => doc.delete());
-                    this.showToast('User unfollowed', 'success');
-                } catch (error) {
-                    console.error('Error unfollowing user:', error);
-                    this.showToast('Failed to unfollow user', 'error');
-                }
-            }
-
-            // Location like/favorite system
-            async likeLocation(locationId) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to like locations', 'warning');
-                    return;
-                }
-
-                try {
-                    await this.db.collection('location_likes').add({
-                        userId: this.currentUser.uid,
-                        locationId: locationId,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    // Get location owner for notification
-                    const locationDoc = await this.db.collection('locations').doc(locationId).get();
-                    if (locationDoc.exists && locationDoc.data().createdBy !== this.currentUser.uid) {
-                        await this.createNotification(locationDoc.data().createdBy, 'like', {
-                            message: 'Someone liked your location',
-                            locationId: locationId,
-                            fromUserId: this.currentUser.uid
-                        });
-                    }
-                    
-                    this.showToast('Location liked!', 'success');
-                } catch (error) {
-                    console.error('Error liking location:', error);
-                    this.showToast('Failed to like location', 'error');
-                }
-            }
-
-            async unlikeLocation(locationId) {
-                if (!this.currentUser) return;
-
-                try {
-                    const query = await this.db.collection('location_likes')
-                        .where('userId', '==', this.currentUser.uid)
-                        .where('locationId', '==', locationId)
-                        .get();
-                    
-                    query.forEach(doc => doc.delete());
-                    this.showToast('Location unliked', 'success');
-                } catch (error) {
-                    console.error('Error unliking location:', error);
-                    this.showToast('Failed to unlike location', 'error');
-                }
-            }
-
-            // Comment system
-            async addComment(locationId, commentText) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to add comments', 'warning');
-                    return;
-                }
-
-                if (!commentText.trim()) {
-                    this.showToast('Please enter a comment', 'warning');
-                    return;
-                }
-
-                try {
-                    await this.db.collection('location_comments').add({
-                        userId: this.currentUser.uid,
-                        locationId: locationId,
-                        text: this.sanitizeInput(commentText.trim()),
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        flagged: false
-                    });
-                    
-                    // Get location owner for notification
-                    const locationDoc = await this.db.collection('locations').doc(locationId).get();
-                    if (locationDoc.exists && locationDoc.data().createdBy !== this.currentUser.uid) {
-                        await this.createNotification(locationDoc.data().createdBy, 'comment', {
-                            message: 'Someone commented on your location',
-                            locationId: locationId,
-                            fromUserId: this.currentUser.uid
-                        });
-                    }
-                    
-                    this.showToast('Comment added!', 'success');
-                    this.loadLocationComments(locationId); // Refresh comments
-                } catch (error) {
-                    console.error('Error adding comment:', error);
-                    this.showToast('Failed to add comment', 'error');
-                }
-            }
-
-            async loadLocationComments(locationId) {
-                try {
-                    const snapshot = await this.db.collection('location_comments')
-                        .where('locationId', '==', locationId)
-                        .where('flagged', '==', false)
-                        .orderBy('createdAt', 'desc')
-                        .get();
-
-                    const comments = [];
-                    snapshot.forEach(doc => {
-                        comments.push({ id: doc.id, ...doc.data() });
-                    });
-                    
-                    return comments;
-                } catch (error) {
-                    console.error('Error loading comments:', error);
-                    return [];
-                }
-            }
-
-            // Visit/Check-in system
-            async checkInLocation(locationId, photoUrl = null) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to check in', 'warning');
-                    return;
-                }
-
-                try {
-                    await this.db.collection('location_visits').add({
-                        userId: this.currentUser.uid,
-                        locationId: locationId,
-                        checkInAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        photoUrl: photoUrl
-                    });
-                    
-                    // Update user's visit count and award badges
-                    await this.updateUserBadges(this.currentUser.uid, 'visit');
-                    
-                    this.showToast('Successfully checked in!', 'success');
-                } catch (error) {
-                    console.error('Error checking in:', error);
-                    this.showToast('Failed to check in', 'error');
-                }
-            }
-
-            // Notification system
-            async createNotification(userId, type, data) {
-                try {
-                    await this.db.collection('user_notifications').add({
-                        userId: userId,
-                        type: type,
-                        data: data,
-                        read: false,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } catch (error) {
-                    console.error('Error creating notification:', error);
-                }
-            }
-
-            async loadNotifications() {
-                if (!this.currentUser) return;
-
-                try {
-                    const snapshot = await this.db.collection('user_notifications')
-                        .where('userId', '==', this.currentUser.uid)
-                        .orderBy('createdAt', 'desc')
-                        .limit(20)
-                        .get();
-
-                    this.notifications = [];
-                    this.unreadNotifications = 0;
-                    
-                    snapshot.forEach(doc => {
-                        const notification = { id: doc.id, ...doc.data() };
-                        this.notifications.push(notification);
-                        if (!notification.read) this.unreadNotifications++;
-                    });
-                    
-                    this.updateNotificationBadge();
-                } catch (error) {
-                    console.error('Error loading notifications:', error);
-                }
-            }
-
-            async markNotificationAsRead(notificationId) {
-                try {
-                    await this.db.collection('user_notifications').doc(notificationId).update({
-                        read: true
-                    });
-                    this.unreadNotifications = Math.max(0, this.unreadNotifications - 1);
-                    this.updateNotificationBadge();
-                } catch (error) {
-                    console.error('Error marking notification as read:', error);
-                }
-            }
-
-            updateNotificationBadge() {
-                const profileBtn = document.getElementById('profile-btn');
-                if (profileBtn) {
-                    const existingBadge = profileBtn.querySelector('.notification-badge');
-                    if (this.unreadNotifications > 0) {
-                        if (!existingBadge) {
-                            const badge = document.createElement('span');
-                            badge.className = 'notification-badge';
-                            badge.textContent = this.unreadNotifications;
-                            badge.style.cssText = `
-                                position: absolute;
-                                top: -5px;
-                                right: -5px;
-                                background: var(--cz-red);
-                                color: white;
-                                border-radius: 50%;
-                                width: 18px;
-                                height: 18px;
-                                font-size: 10px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                font-weight: bold;
-                                border: 2px solid var(--cz-black);
-                            `;
-                            profileBtn.style.position = 'relative';
-                            profileBtn.appendChild(badge);
-                        } else {
-                            existingBadge.textContent = this.unreadNotifications;
-                        }
-                    } else if (existingBadge) {
-                        existingBadge.remove();
-                    }
-                }
-            }
-
-            // Badge/Achievement system
-            async updateUserBadges(userId, action) {
-                // This would be expanded with actual badge logic
-                try {
-                    // Example badges based on actions
-                    const badgeActions = {
-                        'visit': ['first_visit', 'explorer_10', 'explorer_50'],
-                        'location_add': ['first_location', 'mapper_10', 'mapper_50'],
-                        'comment': ['social_butterfly', 'commentator_10'],
-                        'like': ['appreciator', 'liker_25']
-                    };
-
-                    const potentialBadges = badgeActions[action] || [];
-                    
-                    for (const badge of potentialBadges) {
-                        // Check if user qualifies for this badge and doesn't already have it
-                        // This is simplified - real implementation would check specific criteria
-                        await this.awardBadge(userId, badge);
-                    }
-                } catch (error) {
-                    console.error('Error updating user badges:', error);
-                }
-            }
-
-            async awardBadge(userId, badgeId) {
-                try {
-                    await this.db.collection('user_badges').add({
-                        userId: userId,
-                        badgeId: badgeId,
-                        earnedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } catch (error) {
-                    console.error('Error awarding badge:', error);
-                }
-            }
-
-            // Route planning
-            async createRoute(name, locationIds, isPublic = true) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to create routes', 'warning');
-                    return;
-                }
-
-                try {
-                    const routeData = {
-                        name: name,
-                        locationIds: locationIds,
-                        createdBy: this.currentUser.uid,
-                        isPublic: isPublic,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-
-                    await this.db.collection('routes').add(routeData);
-                    this.showToast('Route created successfully!', 'success');
-                } catch (error) {
-                    console.error('Error creating route:', error);
-                    this.showToast('Failed to create route', 'error');
-                }
-            }
-
-            // Group management
-            async createGroup(name, description, isPrivate = false) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to create groups', 'warning');
-                    return;
-                }
-
-                try {
-                    const groupData = {
-                        name: name,
-                        description: description,
-                        createdBy: this.currentUser.uid,
-                        members: [this.currentUser.uid],
-                        isPrivate: isPrivate,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-
-                    await this.db.collection('groups').add(groupData);
-                    this.showToast('Group created successfully!', 'success');
-                } catch (error) {
-                    console.error('Error creating group:', error);
-                    this.showToast('Failed to create group', 'error');
-                }
-            }
-
-            // Enhanced location detail modal with social features
-            showLocationDetailModal(locationId, locationData) {
-                const modal = document.createElement('div');
-                modal.className = 'modal location-detail-modal active';
-                modal.innerHTML = `
-                    <div class="modal-content">
-                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
-                        
-                        <div class="location-detail-header">
-                            <h3>${this.escapeHtml(locationData.name)}</h3>
-                            <div class="location-detail-meta">
-                                <span class="meta-item">
-                                    <i class="fas fa-tag"></i> ${this.escapeHtml(locationData.category)}
-                                </span>
-                                <span class="meta-item">
-                                    <i class="fas fa-exclamation-triangle"></i> ${this.escapeHtml(locationData.riskLevel)}
-                                </span>
-                                <span class="meta-item">
-                                    <i class="fas fa-clock"></i> ${this.timeAgo(locationData.createdAt?.toDate())}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="location-description">
-                            <p>${this.escapeHtml(locationData.description)}</p>
-                        </div>
-
-                        ${locationData.address ? `
-                            <div class="location-address">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>${this.escapeHtml(locationData.address)}</span>
-                            </div>
-                        ` : ''}
-
-                        <div class="location-actions" style="margin: 16px 0; padding: 12px; background: var(--cz-concrete-light); border: 2px solid var(--cz-black);">
-                            ${this.currentUser ? `
-                                <button class="btn" onclick="app.likeLocation('${locationId}')" id="like-btn-${locationId}">
-                                    <i class="fas fa-heart"></i> Like
-                                </button>
-                                <button class="btn" onclick="app.checkInLocation('${locationId}')">
-                                    <i class="fas fa-check-circle"></i> Check In
-                                </button>
-                                <button class="btn" onclick="app.showRoutePlanningModal(['${locationId}'])">
-                                    <i class="fas fa-route"></i> Add to Route
-                                </button>
-                            ` : `
-                                <p style="color: var(--text-muted); font-size: 12px;">Sign in to like, check in, and plan routes</p>
-                            `}
-                        </div>
-
-                        <div class="comments-section">
-                            <h4>Comments</h4>
-                            ${this.currentUser ? `
-                                <div style="margin-bottom: 16px;">
-                                    <textarea class="textarea" id="comment-input-${locationId}" placeholder="Add a comment..." rows="3"></textarea>
-                                    <button class="btn btn-primary" onclick="app.submitComment('${locationId}')" style="margin-top: 8px;">
-                                        <i class="fas fa-comment"></i> Add Comment
-                                    </button>
-                                </div>
-                            ` : ''}
-                            <div id="comments-list-${locationId}" class="loading">Loading comments...</div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn" onclick="this.parentElement.parentElement.parentElement.remove()">Close</button>
-                        </div>
-                    </div>
-                `;
-
-                document.body.appendChild(modal);
-                this.loadLocationComments(locationId).then(comments => {
-                    this.renderComments(locationId, comments);
-                });
-            }
-
-            async submitComment(locationId) {
-                const input = document.getElementById(`comment-input-${locationId}`);
-                if (input) {
-                    await this.addComment(locationId, input.value);
-                    input.value = '';
-                }
-            }
-
-            renderComments(locationId, comments) {
-                const container = document.getElementById(`comments-list-${locationId}`);
-                if (!container) return;
-
-                if (comments.length === 0) {
-                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No comments yet. Be the first to comment!</p>';
-                    return;
-                }
-
-                container.innerHTML = comments.map(comment => `
-                    <div class="comment">
-                        <div class="comment-header">
-                            <span class="comment-author">Explorer</span>
-                            <span class="comment-time">${this.timeAgo(comment.createdAt?.toDate())}</span>
-                        </div>
-                        <div class="comment-text">${this.escapeHtml(comment.text)}</div>
-                    </div>
-                `).join('');
-            }
-
-            // Enhanced activity feed with social features
-            loadSocialActivity() {
-                if (!this.currentUser) return;
-
-                try {
-                    // This would load activities from followed users, liked locations, comments, etc.
-                    const activities = [];
-                    
-                    // Add location additions from followed users
-                    // Add comments on user's locations  
-                    // Add likes on user's locations
-                    // Add new followers
-                    
-                    this.renderActivityFeed(activities);
-                } catch (error) {
-                    console.error('Error loading social activity:', error);
-                }
-            }
-
-            renderActivityFeed(activities) {
-                const feed = document.getElementById('activity-feed');
-                if (!feed) return;
-
-                if (activities.length === 0) {
-                    feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">No recent social activity</div>';
-                    return;
-                }
-
-                feed.innerHTML = activities.map(activity => `
-                    <div class="activity-item">
-                        <div class="activity-icon">${activity.icon}</div>
-                        <div class="activity-content">
-                            <div>${activity.message}</div>
-                            <div class="activity-time">${this.timeAgo(activity.timestamp)}</div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // Search and filtering enhancements
-            setupAdvancedFilters() {
-                const searchContainer = document.querySelector('.panel:has(#location-search)');
-                if (!searchContainer) return;
-
-                // Add distance filter
-                const distanceFilter = document.createElement('div');
-                distanceFilter.className = 'form-group';
-                distanceFilter.innerHTML = `
-                    <label for="distance-filter" class="form-label">
-                        <i class="fas fa-ruler"></i>
-                        Distance (km)
-                    </label>
-                    <select class="select" id="distance-filter" style="margin: 0;">
-                        <option value="">Any distance</option>
-                        <option value="1">Within 1 km</option>
-                        <option value="5">Within 5 km</option>
-                        <option value="10">Within 10 km</option>
-                        <option value="25">Within 25 km</option>
-                    </select>
-                `;
-
-                // Add tag filter
-                const tagFilter = document.createElement('div');
-                tagFilter.className = 'form-group';
-                tagFilter.innerHTML = `
-                    <label for="tag-filter" class="form-label">
-                        <i class="fas fa-tags"></i>
-                        Tags
-                    </label>
-                    <select class="select" id="tag-filter" style="margin: 0;">
-                        <option value="">All tags</option>
-                        <option value="historic">Historic</option>
-                        <option value="underground">Underground</option>
-                        <option value="rooftop">Rooftop</option>
-                        <option value="industrial">Industrial</option>
-                        <option value="abandoned">Abandoned</option>
-                        <option value="photo-worthy">Photo-worthy</option>
-                    </select>
-                `;
-
-                searchContainer.appendChild(distanceFilter);
-                searchContainer.appendChild(tagFilter);
-
-                // Add event listeners
-                document.getElementById('distance-filter')?.addEventListener('change', () => this.applyAdvancedFilters());
-                document.getElementById('tag-filter')?.addEventListener('change', () => this.applyAdvancedFilters());
-            }
-
-            applyAdvancedFilters() {
-                // Enhanced filtering logic with distance, tags, etc.
-                // This would integrate with the existing renderFilteredLocations method
-                console.log('Applying advanced filters...');
-            }
             });
         }
         
@@ -3716,25 +3144,36 @@
     <script>
         class UrbindexApp {
             constructor() {
+                console.log('UrbindexApp constructor called');
                 this.map = null;
                 this.currentUser = null;
                 this.markers = new Map();
                 this.selectedLatLng = null;
                 this.tempMarker = null;
+                console.log('Calling this.init()...');
                 this.init();
+                console.log('Calling this.initTagSystem()...');
                 this.initTagSystem();
+                console.log('UrbindexApp constructor completed');
             }
 
             async init() {
+                console.log('UrbindexApp.init() called');
                 try {
+                    console.log('Step 1: Initializing Firebase...');
                     await this.initFirebase();
+                    console.log('Step 2: Initializing map...');
                     this.initMap();
+                    console.log('Step 3: Initializing UI...');
                     this.initUI();
+                    console.log('Step 4: Initializing auth...');
                     this.initAuth();
+                    console.log('Step 5: Loading data...');
                     this.loadData();
 
                     // Hide loading screen after successful initialization
                     setTimeout(() => {
+                        console.log('Hiding loading screen...');
                         const loadingScreen = document.getElementById('loading-screen');
                         if (loadingScreen) {
                             loadingScreen.classList.add('hidden');
@@ -4328,6 +3767,16 @@
                 }
 
                 // Allow Enter key in address field
+                if (addressInput) {
+                    addressInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.handleAddressLookup();
+                        }
+                    });
+                }
+            }
+
             createLocationPopup(data, docId) {
                 const riskColor = this.getRiskColor(data.riskLevel);
                 const escapedName = this.escapeHtml(data.name || 'Unnamed Location');
@@ -4350,11 +3799,19 @@
                 return `
                     <div style="min-width: 200px; max-width: 300px;">
                         <div style="margin-bottom: 8px;">
-                            <strong style="font-size: 1.1em; color: var(--accent-blue);">${escapedName}</strong>
+                            <strong style="font-size: 1.1em; color: var(--cz-yellow);">${escapedName}</strong>
                         </div>
-                        <div style="margin-bottom: 8px; color: #666; font-size: 0.9em; line-height: 1.4;">
+                        <div style="margin-bottom: 8px; color: #ccc; font-size: 0.9em; line-height: 1.4;">
                             ${escapedDescription}
                         </div>
+                        ${tagsHtml}
+                        <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.8em; color: var(--cz-yellow); background: rgba(255, 208, 0, 0.2); padding: 2px 6px; border-radius: 2px; text-transform: uppercase;">${category}</span>
+                            <span style="font-size: 0.8em; color: white; background: ${riskColor}; padding: 2px 6px; border-radius: 2px; text-transform: uppercase;">${data.riskLevel || 'unknown'}</span>
+                        </div>
+                    </div>
+                `;
+            }
             showView(viewName) {
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.view === viewName);
@@ -5371,18 +4828,18 @@
             }
 
             async loadData() {
-                // Load public data (locations, stats) regardless of auth state
-                // Activity feed will handle auth requirements internally
-                this.loadLocations();
-            getRiskColor(riskLevel) {
-                const colors = {
-                    low: '#23d160',
-                    moderate: '#ffdd57', 
-                    high: '#ff3860'
-                };
-                return colors[riskLevel] || '#7a7a9a';
+                try {
+                    // Load public data (locations, stats, recent activity)
+                    // Activity feed will handle auth requirements internally
+                    this.loadLocations();
+                    this.loadStats();
+                    this.loadActivity();
+                } catch (error) {
+                    console.error('loadData failed:', error);
+                    this.showToast('Failed to load initial data', 'error');
+                }
             }
-
+ 
             // ========================
             // PROFILE SOCIAL METHODS
             // ========================
@@ -5543,9 +5000,6 @@
                 return badgeDescriptions[badgeId] || 'Special achievement';
             }
         }
-                this.loadStats();
-                this.loadActivity();
-            }
 
             loadLocations() {
                 if (!this.map) {
@@ -6878,7 +6332,22 @@
 
         let app;
         document.addEventListener('DOMContentLoaded', () => {
-            app = new UrbindexApp();
+            console.log('DOMContentLoaded fired - attempting to create UrbindexApp');
+            try {
+                app = new UrbindexApp();
+                console.log('UrbindexApp created successfully');
+            } catch (error) {
+                console.error('Failed to create UrbindexApp:', error);
+            }
+        });
+        
+        // Add global error handling
+        window.addEventListener('error', (e) => {
+            console.error('Global JavaScript error:', e.error, 'at', e.filename, ':', e.lineno);
+        });
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
         });
     </script>
 </body>
