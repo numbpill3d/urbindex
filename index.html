@@ -3163,7 +3163,7 @@
                     console.log('Step 1: Initializing Firebase...');
                     await this.initFirebase();
                     console.log('Step 2: Initializing map...');
-                    this.initMap();
+                    await this.initMap();
                     console.log('Step 3: Initializing UI...');
                     this.initUI();
                     console.log('Step 4: Initializing auth...');
@@ -3227,7 +3227,7 @@
                 }
             }
 
-            initMap() {
+            async initMap() {
                 const mapElement = document.getElementById('map');
                 if (!mapElement) {
                     console.error('Map element not found');
@@ -3237,7 +3237,7 @@
 
                 try {
                     // Enhanced map initialization with location detection
-                    this.initializeMapWithLocation();
+                    await this.initializeMapWithLocation();
                 } catch (error) {
                     console.error('Map initialization failed:', error);
                     this.showError('Failed to initialize map. Please check your internet connection and refresh the page.');
@@ -6334,7 +6334,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOMContentLoaded fired - attempting to create UrbindexApp');
             try {
-                app = new UrbindexApp();
+                window.app = app = new UrbindexApp();
                 console.log('UrbindexApp created successfully');
             } catch (error) {
                 console.error('Failed to create UrbindexApp:', error);
