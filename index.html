@@ -3010,603 +3010,20 @@
         </div>
     </div>
 
-    <!-- Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => console.log('SW registered'))
-                    .catch(error => console.log('SW registration failed'));
-            getRiskColor(riskLevel) {
-                const colors = {
-                    low: '#23d160',
-                    moderate: '#ffdd57', 
-                    high: '#ff3860'
-                };
-                return colors[riskLevel] || '#7a7a9a';
-            }
-
-            // ========================
-            // SOCIAL FEATURES
-            // ========================
-
-            // Follow/Unfollow system
-            async followUser(userId) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to follow users', 'warning');
-                    return;
-                }
-
-                try {
-                    await this.db.collection('user_followers').add({
-                        followerId: this.currentUser.uid,
-                        followingId: userId,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    // Create notification for the followed user
-                    await this.createNotification(userId, 'follow', {
-                        message: 'Someone started following you',
-                        fromUserId: this.currentUser.uid
-                    });
-                    
-                    this.showToast('User followed successfully', 'success');
-                } catch (error) {
-                    console.error('Error following user:', error);
-                    this.showToast('Failed to follow user', 'error');
-                }
-            }
-
-            async unfollowUser(userId) {
-                if (!this.currentUser) return;
-
-                try {
-                    const query = await this.db.collection('user_followers')
-                        .where('followerId', '==', this.currentUser.uid)
-                        .where('followingId', '==', userId)
-                        .get();
-                    
-                    query.forEach(doc => doc.delete());
-                    this.showToast('User unfollowed', 'success');
-                } catch (error) {
-                    console.error('Error unfollowing user:', error);
-                    this.showToast('Failed to unfollow user', 'error');
-                }
-            }
-
-            // Location like/favorite system
-            async likeLocation(locationId) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to like locations', 'warning');
-                    return;
-                }
-
-                const opKey = `like-${locationId}`;
-                if (this.activeOperations.has(opKey)) return;
-                this.activeOperations.add(opKey);
-
-                try {
-                    await this.db.collection('location_likes').add({
-                        userId: this.currentUser.uid,
-                        locationId: locationId,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    // Get location owner for notification
-                    const locationDoc = await this.db.collection('locations').doc(locationId).get();
-                    if (locationDoc.exists && locationDoc.data().createdBy !== this.currentUser.uid) {
-                        await this.createNotification(locationDoc.data().createdBy, 'like', {
-                            message: 'Someone liked your location',
-                            locationId: locationId,
-                            fromUserId: this.currentUser.uid
-                        });
-                    }
-
-                    this.showToast('Location liked!', 'success');
-                } catch (error) {
-                    console.error('Error liking location:', error);
-                    this.showToast('Failed to like location', 'error');
-                } finally {
-                    this.activeOperations.delete(opKey);
-                }
-            }
-
-            async unlikeLocation(locationId) {
-                if (!this.currentUser) return;
-
-                const opKey = `unlike-${locationId}`;
-                if (this.activeOperations.has(opKey)) return;
-                this.activeOperations.add(opKey);
-
-                try {
-                    const query = await this.db.collection('location_likes')
-                        .where('userId', '==', this.currentUser.uid)
-                        .where('locationId', '==', locationId)
-                        .get();
-
-                    query.forEach(doc => doc.delete());
-                    this.showToast('Location unliked', 'success');
-                } catch (error) {
-                    console.error('Error unliking location:', error);
-                    this.showToast('Failed to unlike location', 'error');
-                } finally {
-                    this.activeOperations.delete(opKey);
-                }
-            }
-
-            // Comment system
-            async addComment(locationId, commentText) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to add comments', 'warning');
-                    return;
-                }
-
-                if (!commentText.trim()) {
-                    this.showToast('Please enter a comment', 'warning');
-                    return;
-                }
-
-                const opKey = `comment-${locationId}`;
-                if (this.activeOperations.has(opKey)) return;
-                this.activeOperations.add(opKey);
-
-                try {
-                    await this.db.collection('location_comments').add({
-                        userId: this.currentUser.uid,
-                        locationId: locationId,
-                        text: this.sanitizeInput(commentText.trim()),
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        flagged: false
-                    });
-
-                    // Get location owner for notification
-                    const locationDoc = await this.db.collection('locations').doc(locationId).get();
-                    if (locationDoc.exists && locationDoc.data().createdBy !== this.currentUser.uid) {
-                        await this.createNotification(locationDoc.data().createdBy, 'comment', {
-                            message: 'Someone commented on your location',
-                            locationId: locationId,
-                            fromUserId: this.currentUser.uid
-                        });
-                    }
-
-                    this.showToast('Comment added!', 'success');
-                    this.loadLocationComments(locationId); // Refresh comments
-                } catch (error) {
-                    console.error('Error adding comment:', error);
-                    this.showToast('Failed to add comment', 'error');
-                } finally {
-                    this.activeOperations.delete(opKey);
-                }
-            }
-
-            async loadLocationComments(locationId) {
-                try {
-                    const snapshot = await this.db.collection('location_comments')
-                        .where('locationId', '==', locationId)
-                        .where('flagged', '==', false)
-                        .orderBy('createdAt', 'desc')
-                        .get();
-
-                    const comments = [];
-                    snapshot.forEach(doc => {
-                        comments.push({ id: doc.id, ...doc.data() });
-                    });
-                    
-                    return comments;
-                } catch (error) {
-                    console.error('Error loading comments:', error);
-                    return [];
-                }
-            }
-
-            // Visit/Check-in system
-            async checkInLocation(locationId, photoUrl = null) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to check in', 'warning');
-                    return;
-                }
-
-                const opKey = `checkin-${locationId}`;
-                if (this.activeOperations.has(opKey)) return;
-                this.activeOperations.add(opKey);
-
-                try {
-                    await this.db.collection('location_visits').add({
-                        userId: this.currentUser.uid,
-                        locationId: locationId,
-                        checkInAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        photoUrl: photoUrl
-                    });
-
-                    // Update user's visit count and award badges
-                    await this.updateUserBadges(this.currentUser.uid, 'visit');
-
-                    this.showToast('Successfully checked in!', 'success');
-                } catch (error) {
-                    console.error('Error checking in:', error);
-                    this.showToast('Failed to check in', 'error');
-                } finally {
-                    this.activeOperations.delete(opKey);
-                }
-            }
-
-            // Notification system
-            async createNotification(userId, type, data) {
-                try {
-                    await this.db.collection('user_notifications').add({
-                        userId: userId,
-                        type: type,
-                        data: data,
-                        read: false,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } catch (error) {
-                    console.error('Error creating notification:', error);
-                }
-            }
-
-            async loadNotifications() {
-                if (!this.currentUser) return;
-
-                try {
-                    const snapshot = await this.db.collection('user_notifications')
-                        .where('userId', '==', this.currentUser.uid)
-                        .orderBy('createdAt', 'desc')
-                        .limit(20)
-                        .get();
-
-                    this.notifications = [];
-                    this.unreadNotifications = 0;
-                    
-                    snapshot.forEach(doc => {
-                        const notification = { id: doc.id, ...doc.data() };
-                        this.notifications.push(notification);
-                        if (!notification.read) this.unreadNotifications++;
-                    });
-                    
-                    this.updateNotificationBadge();
-                } catch (error) {
-                    console.error('Error loading notifications:', error);
-                }
-            }
-
-            async markNotificationAsRead(notificationId) {
-                try {
-                    await this.db.collection('user_notifications').doc(notificationId).update({
-                        read: true
-                    });
-                    this.unreadNotifications = Math.max(0, this.unreadNotifications - 1);
-                    this.updateNotificationBadge();
-                } catch (error) {
-                    console.error('Error marking notification as read:', error);
-                }
-            }
-
-            updateNotificationBadge() {
-                const profileBtn = document.getElementById('profile-btn');
-                if (profileBtn) {
-                    const existingBadge = profileBtn.querySelector('.notification-badge');
-                    if (this.unreadNotifications > 0) {
-                        if (!existingBadge) {
-                            const badge = document.createElement('span');
-                            badge.className = 'notification-badge';
-                            badge.textContent = this.unreadNotifications;
-                            badge.style.cssText = `
-                                position: absolute;
-                                top: -5px;
-                                right: -5px;
-                                background: var(--cz-red);
-                                color: white;
-                                border-radius: 50%;
-                                width: 18px;
-                                height: 18px;
-                                font-size: 10px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                font-weight: bold;
-                                border: 2px solid var(--cz-black);
-                            `;
-                            profileBtn.style.position = 'relative';
-                            profileBtn.appendChild(badge);
-                        } else {
-                            existingBadge.textContent = this.unreadNotifications;
-                        }
-                    } else if (existingBadge) {
-                        existingBadge.remove();
-                    }
-                }
-            }
-
-            // Badge/Achievement system
-            async updateUserBadges(userId, action) {
-                // This would be expanded with actual badge logic
-                try {
-                    // Example badges based on actions
-                    const badgeActions = {
-                        'visit': ['first_visit', 'explorer_10', 'explorer_50'],
-                        'location_add': ['first_location', 'mapper_10', 'mapper_50'],
-                        'comment': ['social_butterfly', 'commentator_10'],
-                        'like': ['appreciator', 'liker_25']
-                    };
-
-                    const potentialBadges = badgeActions[action] || [];
-                    
-                    for (const badge of potentialBadges) {
-                        // Check if user qualifies for this badge and doesn't already have it
-                        // This is simplified - real implementation would check specific criteria
-                        await this.awardBadge(userId, badge);
-                    }
-                } catch (error) {
-                    console.error('Error updating user badges:', error);
-                }
-            }
-
-            async awardBadge(userId, badgeId) {
-                try {
-                    await this.db.collection('user_badges').add({
-                        userId: userId,
-                        badgeId: badgeId,
-                        earnedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } catch (error) {
-                    console.error('Error awarding badge:', error);
-                }
-            }
-
-            // Route planning
-            async createRoute(name, locationIds, isPublic = true) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to create routes', 'warning');
-                    return;
-                }
-
-                try {
-                    const routeData = {
-                        name: name,
-                        locationIds: locationIds,
-                        createdBy: this.currentUser.uid,
-                        isPublic: isPublic,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-
-                    await this.db.collection('routes').add(routeData);
-                    this.showToast('Route created successfully!', 'success');
-                } catch (error) {
-                    console.error('Error creating route:', error);
-                    this.showToast('Failed to create route', 'error');
-                }
-            }
-
-            // Group management
-            async createGroup(name, description, isPrivate = false) {
-                if (!this.currentUser) {
-                    this.showToast('Please sign in to create groups', 'warning');
-                    return;
-                }
-
-                try {
-                    const groupData = {
-                        name: name,
-                        description: description,
-                        createdBy: this.currentUser.uid,
-                        members: [this.currentUser.uid],
-                        isPrivate: isPrivate,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-
-                    await this.db.collection('groups').add(groupData);
-                    this.showToast('Group created successfully!', 'success');
-                } catch (error) {
-                    console.error('Error creating group:', error);
-                    this.showToast('Failed to create group', 'error');
-                }
-            }
-
-            // Enhanced location detail modal with social features
-            showLocationDetailModal(locationId, locationData) {
-                const modal = document.createElement('div');
-                modal.className = 'modal location-detail-modal active';
-                modal.innerHTML = `
-                    <div class="modal-content">
-                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
-                        
-                        <div class="location-detail-header">
-                            <h3>${this.escapeHtml(locationData.name)}</h3>
-                            <div class="location-detail-meta">
-                                <span class="meta-item">
-                                    <i class="fas fa-tag"></i> ${this.escapeHtml(locationData.category)}
-                                </span>
-                                <span class="meta-item">
-                                    <i class="fas fa-exclamation-triangle"></i> ${this.escapeHtml(locationData.riskLevel)}
-                                </span>
-                                <span class="meta-item">
-                                    <i class="fas fa-clock"></i> ${this.timeAgo(locationData.createdAt?.toDate())}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="location-description">
-                            <p>${this.escapeHtml(locationData.description)}</p>
-                        </div>
-
-                        ${locationData.address ? `
-                            <div class="location-address">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>${this.escapeHtml(locationData.address)}</span>
-                            </div>
-                        ` : ''}
-
-                        <div class="location-actions" style="margin: 16px 0; padding: 12px; background: var(--cz-concrete-light); border: 2px solid var(--cz-black);">
-                            ${this.currentUser ? `
-                                <button class="btn" onclick="app.likeLocation('${locationId}')" id="like-btn-${locationId}">
-                                    <i class="fas fa-heart"></i> Like
-                                </button>
-                                <button class="btn" onclick="app.checkInLocation('${locationId}')">
-                                    <i class="fas fa-check-circle"></i> Check In
-                                </button>
-                                <button class="btn" onclick="app.showRoutePlanningModal(['${locationId}'])">
-                                    <i class="fas fa-route"></i> Add to Route
-                                </button>
-                            ` : `
-                                <p style="color: var(--text-muted); font-size: 12px;">Sign in to like, check in, and plan routes</p>
-                            `}
-                        </div>
-
-                        <div class="comments-section">
-                            <h4>Comments</h4>
-                            ${this.currentUser ? `
-                                <div style="margin-bottom: 16px;">
-                                    <textarea class="textarea" id="comment-input-${locationId}" placeholder="Add a comment..." rows="3"></textarea>
-                                    <button class="btn btn-primary" onclick="app.submitComment('${locationId}')" style="margin-top: 8px;">
-                                        <i class="fas fa-comment"></i> Add Comment
-                                    </button>
-                                </div>
-                            ` : ''}
-                            <div id="comments-list-${locationId}" class="loading">Loading comments...</div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn" onclick="this.parentElement.parentElement.parentElement.remove()">Close</button>
-                        </div>
-                    </div>
-                `;
-
-                document.body.appendChild(modal);
-                this.loadLocationComments(locationId).then(comments => {
-                    this.renderComments(locationId, comments);
-                });
-            }
-
-            async submitComment(locationId) {
-                const input = document.getElementById(`comment-input-${locationId}`);
-                if (input) {
-                    await this.addComment(locationId, input.value);
-                    input.value = '';
-                }
-            }
-
-            renderComments(locationId, comments) {
-                const container = document.getElementById(`comments-list-${locationId}`);
-                if (!container) return;
-
-                if (comments.length === 0) {
-                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No comments yet. Be the first to comment!</p>';
-                    return;
-                }
-
-                container.innerHTML = comments.map(comment => `
-                    <div class="comment">
-                        <div class="comment-header">
-                            <span class="comment-author">Explorer</span>
-                            <span class="comment-time">${this.timeAgo(comment.createdAt?.toDate())}</span>
-                        </div>
-                        <div class="comment-text">${this.escapeHtml(comment.text)}</div>
-                    </div>
-                `).join('');
-            }
-
-            // Enhanced activity feed with social features
-            loadSocialActivity() {
-                if (!this.currentUser) return;
-
-                try {
-                    // This would load activities from followed users, liked locations, comments, etc.
-                    const activities = [];
-                    
-                    // Add location additions from followed users
-                    // Add comments on user's locations  
-                    // Add likes on user's locations
-                    // Add new followers
-                    
-                    this.renderActivityFeed(activities);
-                } catch (error) {
-                    console.error('Error loading social activity:', error);
-                }
-            }
-
-            renderActivityFeed(activities) {
-                const feed = document.getElementById('activity-feed');
-                if (!feed) return;
-
-                if (activities.length === 0) {
-                    feed.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">No recent social activity</div>';
-                    return;
-                }
-
-                feed.innerHTML = activities.map(activity => `
-                    <div class="activity-item">
-                        <div class="activity-icon">${activity.icon}</div>
-                        <div class="activity-content">
-                            <div>${activity.message}</div>
-                            <div class="activity-time">${this.timeAgo(activity.timestamp)}</div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // Search and filtering enhancements
-            setupAdvancedFilters() {
-                const searchContainer = document.querySelector('.panel:has(#location-search)');
-                if (!searchContainer) return;
-
-                // Add distance filter
-                const distanceFilter = document.createElement('div');
-                distanceFilter.className = 'form-group';
-                distanceFilter.innerHTML = `
-                    <label for="distance-filter" class="form-label">
-                        <i class="fas fa-ruler"></i>
-                        Distance (km)
-                    </label>
-                    <select class="select" id="distance-filter" style="margin: 0;">
-                        <option value="">Any distance</option>
-                        <option value="1">Within 1 km</option>
-                        <option value="5">Within 5 km</option>
-                        <option value="10">Within 10 km</option>
-                        <option value="25">Within 25 km</option>
-                    </select>
-                `;
-
-                // Add tag filter
-                const tagFilter = document.createElement('div');
-                tagFilter.className = 'form-group';
-                tagFilter.innerHTML = `
-                    <label for="tag-filter" class="form-label">
-                        <i class="fas fa-tags"></i>
-                        Tags
-                    </label>
-                    <select class="select" id="tag-filter" style="margin: 0;">
-                        <option value="">All tags</option>
-                        <option value="historic">Historic</option>
-                        <option value="underground">Underground</option>
-                        <option value="rooftop">Rooftop</option>
-                        <option value="industrial">Industrial</option>
-                        <option value="abandoned">Abandoned</option>
-                        <option value="photo-worthy">Photo-worthy</option>
-                    </select>
-                `;
-
-                searchContainer.appendChild(distanceFilter);
-                searchContainer.appendChild(tagFilter);
-
-                // Add event listeners
-                document.getElementById('distance-filter')?.addEventListener('change', () => this.applyAdvancedFilters());
-                document.getElementById('tag-filter')?.addEventListener('change', () => this.applyAdvancedFilters());
-            }
-
-            applyAdvancedFilters() {
-                // Enhanced filtering logic with distance, tags, etc.
-                // This would integrate with the existing renderFilteredLocations method
-                console.log('Applying advanced filters...');
-            }
+                    .then(() => console.log('SW registered'))
+                    .catch((error) => console.log('SW registration failed', error));
             });
         }
-        
+
         // Global error handling
         window.addEventListener('error', (e) => {
             console.error('Global error:', e.error);
         });
-        
+
         window.addEventListener('unhandledrejection', (e) => {
             console.error('Unhandled promise rejection:', e.reason);
             e.preventDefault();
@@ -3619,7 +3036,7 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            
+
             // Show custom install banner after a delay
             setTimeout(() => {
                 if (!installBannerShown && !window.matchMedia('(display-mode: standalone)').matches) {
@@ -3678,15 +3095,15 @@
                     </div>
                 </div>
             `;
-            
+
             document.body.appendChild(banner);
-            
+
             // Install button handler
             document.getElementById('install-btn').addEventListener('click', async () => {
                 if (deferredPrompt) {
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
-                    
+
                     if (outcome === 'accepted') {
                         console.log('PWA installation accepted');
                         banner.remove();
@@ -3694,12 +3111,12 @@
                     deferredPrompt = null;
                 }
             });
-            
+
             // Dismiss button handler
             document.getElementById('dismiss-btn').addEventListener('click', () => {
                 banner.remove();
             });
-            
+
             // Auto-dismiss after 30 seconds
             setTimeout(() => {
                 if (banner.parentNode) {
@@ -3709,11 +3126,11 @@
         }
 
         // Listen for successful installation
-        window.addEventListener('appinstalled', (evt) => {
+        window.addEventListener('appinstalled', () => {
             console.log('PWA was installed successfully');
             const banner = document.getElementById('pwa-install-banner');
             if (banner) banner.remove();
-            
+
             // Show success message
             if (window.app && window.app.showToast) {
                 window.app.showToast('Urbindex installed successfully!', 'success');
@@ -3736,6 +3153,8 @@
                 this.selectedLatLng = null;
                 this.tempMarker = null;
                 this.activeOperations = new Set(); // Track active async operations to prevent duplicate clicks
+                this.notifications = [];
+                this.unreadNotifications = 0;
                 this.init();
                 this.initTagSystem();
             }
@@ -4342,34 +3761,25 @@
                     useMyLocationBtn.addEventListener('click', () => this.handleMyLocation());
                 }
 
-                // Allow Enter key in address field
-            createLocationPopup(data, docId) {
-                const riskColor = this.getRiskColor(data.riskLevel);
-                const escapedName = this.escapeHtml(data.name || 'Unnamed Location');
-                const escapedDescription = this.escapeHtml(data.description || 'No description available');
-                const category = this.escapeHtml(data.category || 'other');
-                
-                // Render tags if available
-                let tagsHtml = '';
-                if (data.tags && Array.isArray(data.tags) && data.tags.length > 0) {
-                    tagsHtml = `
-                        <div style="display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0;">
-                            ${data.tags.slice(0, 5).map(tag =>
-                                `<span style="background: var(--cz-yellow); color: white; padding: 1px 4px; border-radius: 0; font-size: 0.7em;">${this.escapeHtml(tag)}</span>`
-                            ).join('')}
-                            ${data.tags.length > 5 ? `<span style="font-size: 0.7em; color: #666;">+${data.tags.length - 5} more</span>` : ''}
-                        </div>
-                    `;
-                }
+                if (addressInput) {
+                    addressInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.handleAddressLookup();
+                        }
+                    });
 
-                return `
-                    <div style="min-width: 200px; max-width: 300px;">
-                        <div style="margin-bottom: 8px;">
-                            <strong style="font-size: 1.1em; color: var(--accent-blue);">${escapedName}</strong>
-                        </div>
-                        <div style="margin-bottom: 8px; color: #666; font-size: 0.9em; line-height: 1.4;">
-                            ${escapedDescription}
-                        </div>
+                    // Add debouncing for address typing
+                    let searchTimeout;
+                    addressInput.addEventListener('input', () => {
+                        clearTimeout(searchTimeout);
+                        searchTimeout = setTimeout(() => {
+                            // Placeholder for future auto-suggestions
+                        }, 500);
+                    });
+                }
+            }
+
             showView(viewName) {
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.view === viewName);
@@ -4418,31 +3828,9 @@
                                 <i class="fas fa-plus" aria-hidden="true"></i>
                                 <span>New Post</span>
                             </button>
-                try {
-                    // Load user profile data
-                    const userDoc = await this.db.collection('users').doc(targetUserId).get();
-                    const userData = userDoc.exists ? userDoc.data() : {};
-
-                    // Load user's locations
-                    const snapshot = await this.db.collection('locations')
-                        .where('createdBy', '==', targetUserId)
-                        .where('status', '==', 'active')
-                        .get();
-
-                    const locations = [];
-                    snapshot.forEach(doc => {
-                        locations.push({ id: doc.id, ...doc.data() });
-                    });
-
-                    const totalLocations = locations.length;
-                    const username = userData.displayName || userData.email || 'Urban Explorer';
-                    const userAvatar = userData.photoURL || null;
-                    const userBio = userData.bio || '';
-                    const joinedDate = userData.createdAt ? new Date(userData.createdAt.toDate()).toLocaleDateString() : 'Recently';
                         </div>
                     </div>
 
-                    <!-- Social Feed Filters -->
                     <div class="panel" style="margin-bottom: 24px;">
                         <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
                             <div class="form-group" style="margin: 0;">
@@ -4466,7 +3854,6 @@
                         </div>
                     </div>
 
-                    <!-- Social Feed Content -->
                     <div id="social-feed-content" class="loading">
                         Loading social feed...
                     </div>
@@ -4476,91 +3863,16 @@
             }
 
             async loadSocialFeed() {
+                const container = document.getElementById('social-feed-content');
+                if (!container) return;
+
                 if (!this.currentUser) {
-                    document.getElementById('social-feed-content').innerHTML = `
+                    container.innerHTML = `
                         <div style="text-align: center; padding: 48px;">
                             <i class="fas fa-user-lock" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px; display: block;"></i>
-                } catch (error) {
-                    console.error('Error loading profile:', error);
-                    content.innerHTML = '<div class="error">FAILED TO LOAD INSPECTION REPORT</div>';
-                }
-
-                // Load social stats after content is rendered
-                this.loadUserSocialStats(targetUserId);
-            }
-                    `;
-                } catch (error) {
-                    console.error('Error loading profile:', error);
-                    content.innerHTML = '<div class="error">FAILED TO LOAD INSPECTION REPORT</div>';
-                }
-
-                // Load social stats after content is rendered
-                this.loadUserSocialStats(targetUserId);
                             <h3 style="color: var(--text-secondary); margin-bottom: 12px;">Sign In Required</h3>
                             <p style="color: var(--text-muted); margin-bottom: 20px;">Sign in to see your social feed and connect with other explorers</p>
                             <button class="btn btn-primary" onclick="app.handleAuth()">
-        <!-- Stats Overview -->
-        <div class="panel" style="margin-bottom: 24px;">
-            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);"><i class="fas fa-chart-line"></i> Stats</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-blue); margin-bottom: 8px;" id="profile-locations-count">${totalLocations}</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Locations</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary); margin-bottom: 8px;" id="profile-followers-count">0</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Followers</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--success); margin-bottom: 8px;" id="profile-following-count">0</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Following</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--warning); margin-bottom: 8px;" id="profile-likes-count">0</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Likes Received</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--danger); margin-bottom: 8px;" id="profile-visits-count">0</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Visits</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-yellow); margin-bottom: 8px;" id="profile-badges-count">0</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Badges</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Social Actions (for other users' profiles) -->
-        ${!isOwnProfile ? `
-            <div class="panel" style="margin-bottom: 24px;">
-                <h3 style="margin: 0 0 16px 0;">Social Actions</h3>
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button class="btn btn-primary" id="follow-btn-${targetUserId}" onclick="app.toggleFollow('${targetUserId}')">
-                        <i class="fas fa-user-plus"></i> Follow
-                    </button>
-                    <button class="btn" onclick="app.messageUser('${targetUserId}')">
-                        <i class="fas fa-envelope"></i> Message
-                    </button>
-                    <button class="btn" onclick="app.viewUserLocations('${targetUserId}')">
-                        <i class="fas fa-map"></i> View Locations
-                    </button>
-                </div>
-            </div>
-        ` : ''}
-
-        <!-- Badges & Achievements -->
-        <div class="panel" style="margin-bottom: 24px;">
-            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);">
-                <i class="fas fa-trophy"></i> Achievements (0)
-            </h3>
-            <div class="achievement-grid" id="user-badges">
-                <!-- Badges will be loaded dynamically -->
-                <div style="text-align: center; padding: 24px; color: var(--text-muted); grid-column: 1 / -1;">
-                    <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 8px; display: block; opacity: 0.5;"></i>
-                    <p>No badges earned yet. Start exploring to unlock achievements!</p>
-                </div>
-            </div>
-        </div>
                                 <i class="fas fa-sign-in-alt"></i> Sign In Now
                             </button>
                         </div>
@@ -4569,13 +3881,11 @@
                 }
 
                 try {
-                    // Load activities from followed users, comments, likes, etc.
                     const activities = await this.getSocialActivities();
                     this.renderSocialFeed(activities);
                 } catch (error) {
                     console.error('Error loading social feed:', error);
-                    document.getElementById('social-feed-content').innerHTML = 
-                        '<div class="error">Failed to load social feed</div>';
+                    container.innerHTML = '<div class="error">Failed to load social feed</div>';
                 }
             }
 
@@ -4684,6 +3994,430 @@
                                 </div>
                             ` : ''}
                         </div>
+                    </div>
+                `).join('');
+            }
+
+            // Social interactions and feedback
+            async followUser(userId) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to follow users', 'warning');
+                    return;
+                }
+
+                const opKey = `follow-${userId}`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    await this.db.collection('user_followers').add({
+                        followerId: this.currentUser.uid,
+                        followingId: userId,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    await this.createNotification(userId, 'follow', {
+                        message: 'Someone started following you',
+                        fromUserId: this.currentUser.uid
+                    });
+
+                    this.showToast('User followed successfully', 'success');
+                } catch (error) {
+                    console.error('Error following user:', error);
+                    this.showToast('Failed to follow user', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async unfollowUser(userId) {
+                if (!this.currentUser) return;
+
+                const opKey = `unfollow-${userId}`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    const query = await this.db.collection('user_followers')
+                        .where('followerId', '==', this.currentUser.uid)
+                        .where('followingId', '==', userId)
+                        .get();
+
+                    query.forEach(doc => doc.ref.delete());
+                    this.showToast('User unfollowed', 'success');
+                } catch (error) {
+                    console.error('Error unfollowing user:', error);
+                    this.showToast('Failed to unfollow user', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async likeLocation(locationId) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to like locations', 'warning');
+                    return;
+                }
+
+                const opKey = `like-${locationId}`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    await this.db.collection('location_likes').add({
+                        userId: this.currentUser.uid,
+                        locationId: locationId,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    const locationDoc = await this.db.collection('locations').doc(locationId).get();
+                    if (locationDoc.exists && locationDoc.data().createdBy !== this.currentUser.uid) {
+                        await this.createNotification(locationDoc.data().createdBy, 'like', {
+                            message: 'Someone liked your location',
+                            locationId: locationId,
+                            fromUserId: this.currentUser.uid
+                        });
+                    }
+
+                    this.showToast('Location liked!', 'success');
+                } catch (error) {
+                    console.error('Error liking location:', error);
+                    this.showToast('Failed to like location', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async unlikeLocation(locationId) {
+                if (!this.currentUser) return;
+
+                const opKey = `unlike-${locationId}`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    const query = await this.db.collection('location_likes')
+                        .where('userId', '==', this.currentUser.uid)
+                        .where('locationId', '==', locationId)
+                        .get();
+
+                    query.forEach(doc => doc.ref.delete());
+                    this.showToast('Location unliked', 'success');
+                } catch (error) {
+                    console.error('Error unliking location:', error);
+                    this.showToast('Failed to unlike location', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async addComment(locationId, commentText) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to add comments', 'warning');
+                    return;
+                }
+
+                if (!commentText || !commentText.trim()) {
+                    this.showToast('Please enter a comment', 'warning');
+                    return;
+                }
+
+                const opKey = `comment-${locationId}`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    await this.db.collection('location_comments').add({
+                        userId: this.currentUser.uid,
+                        locationId: locationId,
+                        text: this.sanitizeInput(commentText.trim()),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        flagged: false
+                    });
+
+                    const locationDoc = await this.db.collection('locations').doc(locationId).get();
+                    if (locationDoc.exists && locationDoc.data().createdBy !== this.currentUser.uid) {
+                        await this.createNotification(locationDoc.data().createdBy, 'comment', {
+                            message: 'Someone commented on your location',
+                            locationId: locationId,
+                            fromUserId: this.currentUser.uid
+                        });
+                    }
+
+                    this.showToast('Comment added!', 'success');
+                    this.loadLocationComments(locationId);
+                } catch (error) {
+                    console.error('Error adding comment:', error);
+                    this.showToast('Failed to add comment', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async loadLocationComments(locationId) {
+                try {
+                    const snapshot = await this.db.collection('location_comments')
+                        .where('locationId', '==', locationId)
+                        .where('flagged', '==', false)
+                        .orderBy('createdAt', 'desc')
+                        .get();
+
+                    const comments = [];
+                    snapshot.forEach(doc => {
+                        comments.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    return comments;
+                } catch (error) {
+                    console.error('Error loading comments:', error);
+                    return [];
+                }
+            }
+
+            async checkInLocation(locationId, photoUrl = null) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to check in', 'warning');
+                    return;
+                }
+
+                const opKey = `checkin-${locationId}`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    await this.db.collection('location_visits').add({
+                        userId: this.currentUser.uid,
+                        locationId: locationId,
+                        checkInAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        photoUrl: photoUrl
+                    });
+
+                    await this.updateUserBadges(this.currentUser.uid, 'visit');
+                    this.showToast('Successfully checked in!', 'success');
+                } catch (error) {
+                    console.error('Error checking in:', error);
+                    this.showToast('Failed to check in', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async createNotification(userId, type, data) {
+                try {
+                    await this.db.collection('user_notifications').add({
+                        userId: userId,
+                        type: type,
+                        data: data,
+                        read: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Error creating notification:', error);
+                }
+            }
+
+            async loadNotifications() {
+                if (!this.currentUser) return;
+
+                try {
+                    const snapshot = await this.db.collection('user_notifications')
+                        .where('userId', '==', this.currentUser.uid)
+                        .orderBy('createdAt', 'desc')
+                        .limit(20)
+                        .get();
+
+                    this.notifications = [];
+                    this.unreadNotifications = 0;
+
+                    snapshot.forEach(doc => {
+                        const notification = { id: doc.id, ...doc.data() };
+                        this.notifications.push(notification);
+                        if (!notification.read) this.unreadNotifications++;
+                    });
+
+                    this.updateNotificationBadge();
+                } catch (error) {
+                    console.error('Error loading notifications:', error);
+                }
+            }
+
+            async markNotificationAsRead(notificationId) {
+                try {
+                    await this.db.collection('user_notifications').doc(notificationId).update({
+                        read: true
+                    });
+                    this.unreadNotifications = Math.max(0, this.unreadNotifications - 1);
+                    this.updateNotificationBadge();
+                } catch (error) {
+                    console.error('Error marking notification as read:', error);
+                }
+            }
+
+            updateNotificationBadge() {
+                const profileBtn = document.getElementById('profile-btn');
+                if (!profileBtn) return;
+
+                const existingBadge = profileBtn.querySelector('.notification-badge');
+                if (this.unreadNotifications > 0) {
+                    if (!existingBadge) {
+                        const badge = document.createElement('span');
+                        badge.className = 'notification-badge';
+                        badge.textContent = this.unreadNotifications;
+                        badge.style.cssText = `
+                            position: absolute;
+                            top: -5px;
+                            right: -5px;
+                            background: var(--cz-red);
+                            color: white;
+                            border-radius: 50%;
+                            width: 18px;
+                            height: 18px;
+                            font-size: 10px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-weight: bold;
+                            border: 2px solid var(--cz-black);
+                        `;
+                        profileBtn.style.position = 'relative';
+                        profileBtn.appendChild(badge);
+                    } else {
+                        existingBadge.textContent = this.unreadNotifications;
+                    }
+                } else if (existingBadge) {
+                    existingBadge.remove();
+                }
+            }
+
+            async updateUserBadges(userId, action) {
+                try {
+                    const badgeActions = {
+                        'visit': ['first_visit', 'explorer_10', 'explorer_50'],
+                        'location_add': ['first_location', 'mapper_10', 'mapper_50'],
+                        'comment': ['social_butterfly', 'commentator_10'],
+                        'like': ['appreciator', 'liker_25']
+                    };
+
+                    const potentialBadges = badgeActions[action] || [];
+
+                    for (const badge of potentialBadges) {
+                        await this.awardBadge(userId, badge);
+                    }
+                } catch (error) {
+                    console.error('Error updating user badges:', error);
+                }
+            }
+
+            async awardBadge(userId, badgeId) {
+                try {
+                    await this.db.collection('user_badges').add({
+                        userId: userId,
+                        badgeId: badgeId,
+                        earnedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Error awarding badge:', error);
+                }
+            }
+
+            showLocationDetailModal(locationId, locationData) {
+                const modal = document.createElement('div');
+                modal.className = 'modal location-detail-modal active';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                        
+                        <div class="location-detail-header">
+                            <h3>${this.escapeHtml(locationData.name)}</h3>
+                            <div class="location-detail-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-tag"></i> ${this.escapeHtml(locationData.category)}
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-exclamation-triangle"></i> ${this.escapeHtml(locationData.riskLevel)}
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-clock"></i> ${this.timeAgo(locationData.createdAt?.toDate())}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="location-description">
+                            <p>${this.escapeHtml(locationData.description)}</p>
+                        </div>
+
+                        ${locationData.address ? `
+                            <div class="location-address">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${this.escapeHtml(locationData.address)}</span>
+                            </div>
+                        ` : ''}
+
+                        <div class="location-actions" style="margin: 16px 0; padding: 12px; background: var(--cz-concrete-light); border: 2px solid var(--cz-black);">
+                            ${this.currentUser ? `
+                                <button class="btn" onclick="app.likeLocation('${locationId}')" id="like-btn-${locationId}">
+                                    <i class="fas fa-heart"></i> Like
+                                </button>
+                                <button class="btn" onclick="app.checkInLocation('${locationId}')">
+                                    <i class="fas fa-check-circle"></i> Check In
+                                </button>
+                                <button class="btn" onclick="app.showRoutePlanningModal(['${locationId}'])">
+                                    <i class="fas fa-route"></i> Add to Route
+                                </button>
+                            ` : `
+                                <p style="color: var(--text-muted); font-size: 12px;">Sign in to like, check in, and plan routes</p>
+                            `}
+                        </div>
+
+                        <div class="comments-section">
+                            <h4>Comments</h4>
+                            ${this.currentUser ? `
+                                <div style="margin-bottom: 16px;">
+                                    <textarea class="textarea" id="comment-input-${locationId}" placeholder="Add a comment..." rows="3"></textarea>
+                                    <button class="btn btn-primary" onclick="app.submitComment('${locationId}')" style="margin-top: 8px;">
+                                        <i class="fas fa-comment"></i> Add Comment
+                                    </button>
+                                </div>
+                            ` : ''}
+                            <div id="comments-list-${locationId}" class="loading">Loading comments...</div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn" onclick="this.parentElement.parentElement.parentElement.remove()">Close</button>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+                this.loadLocationComments(locationId).then(comments => {
+                    this.renderComments(locationId, comments);
+                });
+            }
+
+            async submitComment(locationId) {
+                const input = document.getElementById(`comment-input-${locationId}`);
+                if (input) {
+                    await this.addComment(locationId, input.value);
+                    input.value = '';
+                }
+            }
+
+            renderComments(locationId, comments) {
+                const container = document.getElementById(`comments-list-${locationId}`);
+                if (!container) return;
+
+                if (!comments || comments.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No comments yet. Be the first to comment!</p>';
+                    return;
+                }
+
+                container.innerHTML = comments.map(comment => `
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span class="comment-author">Explorer</span>
+                            <span class="comment-time">${this.timeAgo(comment.createdAt?.toDate())}</span>
+                        </div>
+                        <div class="comment-text">${this.escapeHtml(comment.text)}</div>
                     </div>
                 `).join('');
             }
@@ -4894,80 +4628,6 @@
                 // Implement feed sorting
                 console.log('Sorting social feed...');
             }
-                        <div style="display: flex; gap: 6px; font-size: 0.8em; margin-bottom: 8px;">
-                            <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 0; color: #333;">${category}</span>
-                            <span style="background: ${riskColor}; padding: 2px 6px; border-radius: 0; color: white;">${data.riskLevel || 'unknown'}</span>
-                        </div>
-                        ${tagsHtml}
-                        
-                        <!-- Social Actions -->
-                        <div style="display: flex; gap: 4px; margin: 8px 0; padding: 8px; background: var(--cz-concrete-light); border: 1px solid var(--cz-black);">
-                            ${this.currentUser ? `
-                                <button onclick="app.showLocationDetailModal('${docId}', ${JSON.stringify(data).replace(/"/g, '&quot;')})" 
-                                        style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-yellow); color: var(--cz-black); border: 1px solid var(--cz-black);">
-                                    <i class="fas fa-info-circle"></i> Details
-                                </button>
-                                <button onclick="app.likeLocation('${docId}')" 
-                                        style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-concrete); border: 1px solid var(--cz-black);">
-                                    <i class="fas fa-heart"></i> Like
-                                </button>
-                                <button onclick="app.checkInLocation('${docId}')" 
-                                        style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-green); color: white; border: 1px solid var(--cz-black);">
-                                    <i class="fas fa-check"></i> Check In
-                                </button>
-                            ` : `
-                                <button onclick="app.handleAuth()" 
-                                        style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-yellow); color: var(--cz-black); border: 1px solid var(--cz-black);">
-                                    <i class="fas fa-sign-in-alt"></i> Sign In
-                                </button>
-                            `}
-                        </div>
-                        
-                        ${this.currentUser ? `
-                            <div style="display: flex; gap: 4px; margin-top: 8px;">
-                                <button onclick="app.editLocation('${docId}')" 
-                                        style="font-size: 0.7em; padding: 3px 6px; background: var(--cz-concrete); border: 1px solid var(--cz-black);">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <button onclick="app.deleteLocation('${docId}')" 
-                                        style="font-size: 0.7em; padding: 3px 6px; background: #ff3860; color: white; border: 1px solid var(--cz-black);">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                                <button onclick="app.showView('locations'); setTimeout(() => app.loadUserLocations(), 100);" 
-                                        style="font-size: 0.7em; padding: 3px 6px; background: var(--cz-orange); color: white; border: 1px solid var(--cz-black);">
-                                    <i class="fas fa-list"></i> List
-                                </button>
-                            </div>
-                        ` : `
-                            <div style="margin-top: 8px;">
-                                <button onclick="app.showView('locations')" 
-                                        style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-yellow); color: var(--cz-black); border: 1px solid var(--cz-black);">
-                                    <i class="fas fa-map-marker-alt"></i> View All Locations
-                                </button>
-                            </div>
-                        `}
-                    </div>
-                `;
-            }
-                if (addressInput) {
-                    addressInput.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            this.handleAddressLookup();
-                        }
-                    });
-
-                    // Add debouncing for address typing
-                    let searchTimeout;
-                    addressInput.addEventListener('input', () => {
-                        clearTimeout(searchTimeout);
-                        searchTimeout = setTimeout(() => {
-                            // Optional: could add auto-suggestions here
-                        }, 500);
-                    });
-                }
-            }
-
             async handleAddressLookup() {
                 const addressInput = document.getElementById('location-address');
                 const findLocationBtn = document.getElementById('find-location-btn');
@@ -5389,13 +5049,8 @@
                 // Load public data (locations, stats) regardless of auth state
                 // Activity feed will handle auth requirements internally
                 this.loadLocations();
-            getRiskColor(riskLevel) {
-                const colors = {
-                    low: '#23d160',
-                    moderate: '#ffdd57', 
-                    high: '#ff3860'
-                };
-                return colors[riskLevel] || '#7a7a9a';
+                this.loadStats();
+                this.loadActivity();
             }
 
             // ========================
@@ -5562,10 +5217,6 @@
                     'liker_25': 'Received 25 likes'
                 };
                 return badgeDescriptions[badgeId] || 'Special achievement';
-            }
-        }
-                this.loadStats();
-                this.loadActivity();
             }
 
             loadLocations() {
