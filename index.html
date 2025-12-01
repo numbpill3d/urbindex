@@ -2538,14 +2538,14 @@
                     <i class="fas fa-user-circle" aria-hidden="true"></i>
                     <span>Profile</span>
                 </button>
-                <button class="btn btn-primary" id="auth-btn" aria-label="Authentication and Account Management" style="font-weight: 700;">
+                <button class="btn btn-primary" id="auth-btn" type="button" onclick="app.handleAuth()" aria-label="Authentication and Account Management" style="font-weight: 700;">
                     <i class="fas fa-user" aria-hidden="true"></i>
                     <span>Sign In / Register</span>
                 </button>
             </div>
 
             <!-- Auth Modal -->
-            <div class="modal" id="auth-modal">
+            <div class="modal" id="auth-modal" role="dialog" aria-modal="true" aria-hidden="true">
                 <div class="modal-content">
                     <button class="modal-close" onclick="app.hideAuthModal()">&times;</button>
                     <div class="auth-tabs">
@@ -2644,32 +2644,32 @@
         </header>
 
         <nav class="nav" role="navigation" aria-label="Main Navigation" id="navigation">
-            <button class="nav-btn active" data-view="map" aria-label="Map View" aria-current="page">
+            <button class="nav-btn active" type="button" data-view="map" aria-label="Map View" aria-current="page">
                 <i class="fas fa-map" aria-hidden="true"></i>
                 <span>Map</span>
             </button>
-            <button class="nav-btn" data-view="locations" aria-label="Locations View">
+            <button class="nav-btn" type="button" data-view="locations" aria-label="Locations View">
                 <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                 <span>Locations</span>
             </button>
-            <button class="nav-btn" data-view="social" aria-label="Social Feed">
+            <button class="nav-btn" type="button" data-view="social" aria-label="Social Feed">
                 <i class="fas fa-users" aria-hidden="true"></i>
                 <span>Social</span>
                 <span class="nav-badge" id="social-notification-badge" style="display: none;"></span>
             </button>
-            <button class="nav-btn" data-view="missions" aria-label="Missions and Challenges">
+            <button class="nav-btn" type="button" data-view="missions" aria-label="Missions and Challenges">
                 <i class="fas fa-trophy" aria-hidden="true"></i>
                 <span>Missions</span>
             </button>
-            <button class="nav-btn" data-view="routes" aria-label="Route Planning">
+            <button class="nav-btn" type="button" data-view="routes" aria-label="Route Planning">
                 <i class="fas fa-route" aria-hidden="true"></i>
                 <span>Routes</span>
             </button>
-            <button class="nav-btn" data-view="groups" aria-label="Groups and Teams">
+            <button class="nav-btn" type="button" data-view="groups" aria-label="Groups and Teams">
                 <i class="fas fa-user-friends" aria-hidden="true"></i>
                 <span>Groups</span>
             </button>
-            <button class="nav-btn" data-view="notifications" aria-label="Notifications Center">
+            <button class="nav-btn" type="button" data-view="notifications" aria-label="Notifications Center">
                 <i class="fas fa-bell" aria-hidden="true"></i>
                 <span>Alerts</span>
                 <span class="nav-badge" id="notification-badge" style="display: none;"></span>
@@ -2798,6 +2798,36 @@
             <div class="view" id="profile-view" role="tabpanel" aria-labelledby="profile-tab">
                 <h2>Profile</h2>
                 <div id="profile-content" class="loading" role="status" aria-live="polite">Loading profile...</div>
+            </div>
+
+            <div class="view" id="social-view" role="tabpanel" aria-labelledby="social-tab">
+                <div id="social-view-content" class="panel">
+                    <div class="loading">Loading social feed...</div>
+                </div>
+            </div>
+
+            <div class="view" id="missions-view" role="tabpanel" aria-labelledby="missions-tab">
+                <div id="missions-view-content" class="panel">
+                    <div class="loading">Loading missions...</div>
+                </div>
+            </div>
+
+            <div class="view" id="routes-view" role="tabpanel" aria-labelledby="routes-tab">
+                <div id="routes-view-content" class="panel">
+                    <div class="loading">Loading routes...</div>
+                </div>
+            </div>
+
+            <div class="view" id="groups-view" role="tabpanel" aria-labelledby="groups-tab">
+                <div id="groups-view-content" class="panel">
+                    <div class="loading">Loading groups...</div>
+                </div>
+            </div>
+
+            <div class="view" id="notifications-view" role="tabpanel" aria-labelledby="notifications-tab">
+                <div id="notifications-view-content" class="panel">
+                    <div class="loading">Loading notifications...</div>
+                </div>
             </div>
         </main>
 
@@ -3813,53 +3843,52 @@
             // ========================
 
             showSocialFeed() {
-                const main = document.querySelector('.main');
-                if (!main) return;
-
-                main.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                        <h2>Social Feed</h2>
-                        <div style="display: flex; gap: 12px;">
-                            <button class="btn" onclick="app.showView('map')" aria-label="Return to map view">
-                                <i class="fas fa-map" aria-hidden="true"></i>
-                                <span>Back to Map</span>
-                            </button>
-                            <button class="btn btn-primary" onclick="app.createNewPost()" aria-label="Create new post">
-                                <i class="fas fa-plus" aria-hidden="true"></i>
-                                <span>New Post</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="panel" style="margin-bottom: 24px;">
-                        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-                            <div class="form-group" style="margin: 0;">
-                                <label for="social-filter" class="form-label">Filter Feed</label>
-                                <select class="select" id="social-filter" style="margin: 0;" onchange="app.filterSocialFeed()">
-                                    <option value="all">All Activity</option>
-                                    <option value="following">Following</option>
-                                    <option value="location-updates">Location Updates</option>
-                                    <option value="social">Social Actions</option>
-                                    <option value="achievements">Achievements</option>
-                                </select>
-                            </div>
-                            <div class="form-group" style="margin: 0;">
-                                <label for="sort-feed" class="form-label">Sort By</label>
-                                <select class="select" id="sort-feed" style="margin: 0;" onchange="app.sortSocialFeed()">
-                                    <option value="recent">Most Recent</option>
-                                    <option value="popular">Most Popular</option>
-                                    <option value="engagement">Most Engaged</option>
-                                </select>
+                const view = document.getElementById('social-view-content');
+                if (view) {
+                    view.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h2>Social Feed</h2>
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn" onclick="app.showView('map')" aria-label="Return to map view">
+                                    <i class="fas fa-map" aria-hidden="true"></i>
+                                    <span>Back to Map</span>
+                                </button>
+                                <button class="btn btn-primary" onclick="app.createNewPost()" aria-label="Create new post">
+                                    <i class="fas fa-plus" aria-hidden="true"></i>
+                                    <span>New Post</span>
+                                </button>
                             </div>
                         </div>
-                    </div>
 
-                    <div id="social-feed-content" class="loading">
-                        Loading social feed...
-                    </div>
-                `;
+                        <div class="panel" style="margin-bottom: 24px;">
+                            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label for="social-filter" class="form-label">Filter Feed</label>
+                                    <select class="select" id="social-filter" style="margin: 0;" onchange="app.filterSocialFeed()">
+                                        <option value="all">All Activity</option>
+                                        <option value="following">Following</option>
+                                        <option value="location-updates">Location Updates</option>
+                                        <option value="social">Social Actions</option>
+                                        <option value="achievements">Achievements</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label for="sort-feed" class="form-label">Sort By</label>
+                                    <select class="select" id="sort-feed" style="margin: 0;" onchange="app.sortSocialFeed()">
+                                        <option value="recent">Most Recent</option>
+                                        <option value="popular">Most Popular</option>
+                                        <option value="engagement">Most Engaged</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
-                this.loadSocialFeed();
+                        <div id="social-feed-content" class="loading">
+                            Loading social feed...
+                        </div>
+                    `;
+                    this.loadSocialFeed();
+                }
             }
 
             async loadSocialFeed() {
@@ -4423,33 +4452,33 @@
             }
 
             showMissions() {
-                const main = document.querySelector('.main');
-                if (!main) return;
-
-                main.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                        <h2>Missions & Challenges</h2>
-                        <button class="btn" onclick="app.showView('map')">
-                            <i class="fas fa-map"></i> Back to Map
-                        </button>
-                    </div>
-
-                    <div class="panel" style="margin-bottom: 24px;">
-                        <h3>Available Missions</h3>
-                        <div id="missions-grid">
-                            <div class="loading">Loading missions...</div>
+                const view = document.getElementById('missions-view-content');
+                if (view) {
+                    view.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h2>Missions & Challenges</h2>
+                            <button class="btn" onclick="app.showView('map')">
+                                <i class="fas fa-map"></i> Back to Map
+                            </button>
                         </div>
-                    </div>
 
-                    <div class="panel">
-                        <h3>Your Progress</h3>
-                        <div id="mission-progress">
-                            <div class="loading">Loading progress...</div>
+                        <div class="panel" style="margin-bottom: 24px;">
+                            <h3>Available Missions</h3>
+                            <div id="missions-grid">
+                                <div class="loading">Loading missions...</div>
+                            </div>
                         </div>
-                    </div>
-                `;
 
-                this.loadMissions();
+                        <div class="panel">
+                            <h3>Your Progress</h3>
+                            <div id="mission-progress">
+                                <div class="loading">Loading progress...</div>
+                            </div>
+                        </div>
+                    `;
+
+                    this.loadMissions();
+                }
             }
 
             async loadMissions() {
@@ -4502,78 +4531,78 @@
             }
 
             showRoutes() {
-                const main = document.querySelector('.main');
-                if (!main) return;
-
-                main.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                        <h2>Route Planning</h2>
-                        <div style="display: flex; gap: 12px;">
-                            <button class="btn" onclick="app.showView('map')">
-                                <i class="fas fa-map"></i> Back to Map
-                            </button>
-                            <button class="btn btn-primary" onclick="app.createNewRoute()">
-                                <i class="fas fa-route"></i> New Route
-                            </button>
+                const view = document.getElementById('routes-view-content');
+                if (view) {
+                    view.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h2>Route Planning</h2>
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn" onclick="app.showView('map')">
+                                    <i class="fas fa-map"></i> Back to Map
+                                </button>
+                                <button class="btn btn-primary" onclick="app.createNewRoute()">
+                                    <i class="fas fa-route"></i> New Route
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div id="routes-content" class="loading">
-                        Loading routes...
-                    </div>
-                `;
+                        <div id="routes-content" class="loading">
+                            Loading routes...
+                        </div>
+                    `;
 
-                this.loadRoutes();
+                    this.loadRoutes();
+                }
             }
 
             showGroups() {
-                const main = document.querySelector('.main');
-                if (!main) return;
-
-                main.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                        <h2>Groups & Teams</h2>
-                        <div style="display: flex; gap: 12px;">
-                            <button class="btn" onclick="app.showView('map')">
-                                <i class="fas fa-map"></i> Back to Map
-                            </button>
-                            <button class="btn btn-primary" onclick="app.createNewGroup()">
-                                <i class="fas fa-users"></i> New Group
-                            </button>
+                const view = document.getElementById('groups-view-content');
+                if (view) {
+                    view.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h2>Groups & Teams</h2>
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn" onclick="app.showView('map')">
+                                    <i class="fas fa-map"></i> Back to Map
+                                </button>
+                                <button class="btn btn-primary" onclick="app.createNewGroup()">
+                                    <i class="fas fa-users"></i> New Group
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div id="groups-content" class="loading">
-                        Loading groups...
-                    </div>
-                `;
+                        <div id="groups-content" class="loading">
+                            Loading groups...
+                        </div>
+                    `;
 
-                this.loadGroups();
+                    this.loadGroups();
+                }
             }
 
             showNotifications() {
-                const main = document.querySelector('.main');
-                if (!main) return;
-
-                main.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                        <h2>Notifications</h2>
-                        <div style="display: flex; gap: 12px;">
-                            <button class="btn" onclick="app.showView('map')">
-                                <i class="fas fa-map"></i> Back to Map
-                            </button>
-                            <button class="btn" onclick="app.markAllNotificationsAsRead()">
-                                <i class="fas fa-check-double"></i> Mark All Read
-                            </button>
+                const view = document.getElementById('notifications-view-content');
+                if (view) {
+                    view.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h2>Notifications</h2>
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn" onclick="app.showView('map')">
+                                    <i class="fas fa-map"></i> Back to Map
+                                </button>
+                                <button class="btn" onclick="app.markAllNotificationsAsRead()">
+                                    <i class="fas fa-check-double"></i> Mark All Read
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div id="notifications-content" class="loading">
-                        Loading notifications...
-                    </div>
-                `;
+                        <div id="notifications-content" class="loading">
+                            Loading notifications...
+                        </div>
+                    `;
 
-                this.loadNotifications();
+                    this.loadNotifications();
+                }
             }
 
             async markAllNotificationsAsRead() {
@@ -5589,15 +5618,18 @@
                 }
 
                 try {
-                    // Load user profile data
-                    const userDoc = await this.db.collection('users').doc(targetUserId).get();
-                    const userData = userDoc.exists ? userDoc.data() : {};
+                    content.innerHTML = '<div class="loading">Loading profile...</div>';
 
-                    // Load user's locations
-                    const snapshot = await this.db.collection('locations')
-                        .where('createdBy', '==', targetUserId)
-                        .where('status', '==', 'active')
-                        .get();
+                    // Load user profile data and locations in parallel
+                    const [userDoc, snapshot] = await Promise.all([
+                        this.db.collection('users').doc(targetUserId).get(),
+                        this.db.collection('locations')
+                            .where('createdBy', '==', targetUserId)
+                            .where('status', '==', 'active')
+                            .get()
+                    ]);
+
+                    const userData = userDoc.exists ? userDoc.data() : {};
 
                     const locations = [];
                     snapshot.forEach(doc => {
@@ -5663,12 +5695,24 @@
                     <div style="color: var(--text-muted); font-size: 0.9rem;">Locations</div>
                 </div>
                 <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary); margin-bottom: 8px;">0</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Images</div>
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary); margin-bottom: 8px;" id="profile-followers-count">--</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Followers</div>
                 </div>
                 <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--success); margin-bottom: 8px;">0</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Comments</div>
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--success); margin-bottom: 8px;" id="profile-following-count">--</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Following</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--warning); margin-bottom: 8px;" id="profile-likes-count">--</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Likes Received</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--danger); margin-bottom: 8px;" id="profile-visits-count">--</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Visits</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-yellow); margin-bottom: 8px;" id="profile-badges-count">--</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Badges</div>
                 </div>
             </div>
         </div>
@@ -5681,7 +5725,7 @@
             ${totalLocations > 0 ? `
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;">
                     ${locations.slice(0, 6).map(loc => `
-                        <div class="location-card" style="cursor: pointer;" onclick="app.showView('map'); app.map.setView([${loc.coordinates[0]}, ${loc.coordinates[1]}], 16);">
+                        <div class="location-card" style="cursor: pointer;" onclick="app.showView('map'); ${loc.coordinates && Array.isArray(loc.coordinates) ? `app.map?.setView([${loc.coordinates[0]}, ${loc.coordinates[1]}], 16);` : ''}">
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                                 <h4 style="margin: 0; font-size: 1.1rem;">${this.escapeHtml(loc.name)}</h4>
                                 <span class="risk risk-${loc.riskLevel}" style="font-size: 0.75rem;">${loc.riskLevel}</span>
@@ -5689,7 +5733,7 @@
                             <p style="color: var(--text-secondary); margin-bottom: 8px; font-size: 0.9rem;">${this.escapeHtml(loc.description).substring(0, 80)}${loc.description.length > 80 ? '...' : ''}</p>
                             <div style="font-size: 0.8rem; color: var(--text-muted);">
                                 <i class="fas fa-tag"></i> ${this.escapeHtml(loc.category)}
-                                ${loc.coordinates ? ` • <i class="fas fa-map-marker-alt"></i> ${loc.coordinates[0].toFixed(4)}, ${loc.coordinates[1].toFixed(4)}` : ''}
+                                ${loc.coordinates && Array.isArray(loc.coordinates) ? ` • <i class="fas fa-map-marker-alt"></i> ${loc.coordinates[0].toFixed(4)}, ${loc.coordinates[1].toFixed(4)}` : ''}
                             </div>
                         </div>
                     `).join('')}
@@ -5732,6 +5776,9 @@
         </div>
     </div>
 `;
+
+                    // Load and hydrate social stats/badges after rendering
+                    this.loadUserSocialStats(targetUserId);
                 } catch (error) {
                     console.error('Error loading profile:', error);
                     content.innerHTML = '<div class="error">FAILED TO LOAD INSPECTION REPORT</div>';
