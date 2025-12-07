@@ -2352,7 +2352,6 @@
         }
 
         .user-location-marker {
-        .user-location-marker {
             animation: pulse 2s infinite;
         }
 
@@ -2510,9 +2509,6 @@
             color: var(--text-muted);
         }
     </style>
-            animation: pulse 2s infinite;
-        }
-    </style>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -2538,7 +2534,7 @@
                     <i class="fas fa-user-circle" aria-hidden="true"></i>
                     <span>Profile</span>
                 </button>
-                <button class="btn btn-primary" id="auth-btn" type="button" onclick="app.handleAuth()" aria-label="Authentication and Account Management" style="font-weight: 700;">
+                <button class="btn btn-primary" id="auth-btn" type="button" aria-label="Authentication and Account Management" style="font-weight: 700;">
                     <i class="fas fa-user" aria-hidden="true"></i>
                     <span>Sign In / Register</span>
                 </button>
@@ -3611,6 +3607,14 @@
                 const form = document.getElementById('location-form');
                 if (form) {
                     form.addEventListener('submit', (e) => this.handleLocationSubmit(e));
+                }
+
+                const authBtn = document.getElementById('auth-btn');
+                if (authBtn) {
+                    authBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.handleAuth();
+                    });
                 }
 
                 const passwordResetForm = document.getElementById('password-reset-form');
@@ -5056,8 +5060,6 @@
                     }
                 });
 
-                document.getElementById('auth-btn').addEventListener('click', () => this.handleAuth());
-
                 // Auth modal event listeners
                 document.querySelectorAll('.auth-tab').forEach(tab => {
                     tab.addEventListener('click', () => this.switchAuthTab(tab.dataset.tab));
@@ -6145,7 +6147,7 @@
             }
 
             async handleAuth() {
-                if (this.currentUser) {
+                if (this.currentUser && !this.currentUser.isAnonymous) {
                     // Sign out
                     const opKey = 'auth-signout';
                     if (this.activeOperations.has(opKey)) return;
@@ -6160,10 +6162,11 @@
                     } finally {
                         this.activeOperations.delete(opKey);
                     }
-                } else {
-                    // Show auth modal
-                    this.showAuthModal();
+                    return;
                 }
+
+                // Show auth modal for guests/anonymous users
+                this.showAuthModal();
             }
 
             showAuthModal() {
