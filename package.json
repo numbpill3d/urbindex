@@ -21,6 +21,7 @@
   "author": "Urbindex Team",
   "license": "MIT",
   "dependencies": {
+    "@playwright/test": "^1.57.0",
     "firebase": "^9.23.0",
     "leaflet": "^1.9.4"
   },
