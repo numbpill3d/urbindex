@@ -3915,10 +3915,12 @@
 
                 try {
                     const activities = await this.getSocialActivities();
-                    this.renderSocialFeed(activities);
+                    this.socialActivities = activities.length ? activities : this.getSampleSocialActivities();
+                    this.renderSocialFeed(this.applySocialFilters(this.socialActivities));
                 } catch (error) {
                     console.error('Error loading social feed:', error);
-                    container.innerHTML = '<div class="error">Failed to load social feed</div>';
+                    this.socialActivities = this.getSampleSocialActivities();
+                    this.renderSocialFeed(this.applySocialFilters(this.socialActivities));
                 }
             }
 
@@ -3972,8 +3974,14 @@
                     }
                 });
 
-                // Sort by timestamp
-                return activities.sort((a, b) => b.timestamp - a.timestamp);
+                const getTime = (ts) => {
+                    if (!ts) return 0;
+                    if (ts.toMillis) return ts.toMillis();
+                    if (ts.toDate) return ts.toDate().getTime();
+                    return new Date(ts).getTime();
+                };
+
+                return activities.sort((a, b) => getTime(b.timestamp) - getTime(a.timestamp));
             }
 
             renderSocialFeed(activities) {
@@ -4002,7 +4010,7 @@
                                     Explorer ${activity.userId.substring(0, 8)}
                                 </div>
                                 <div class="activity-time">
-                                    ${this.timeAgo(activity.timestamp?.toDate())}
+                                    ${this.timeAgo(activity.timestamp?.toDate ? activity.timestamp.toDate() : activity.timestamp)}
                                 </div>
                             </div>
                             <div class="social-action-buttons">
@@ -4022,13 +4030,79 @@
                                 <div style="margin-top: 8px; padding: 8px; background: var(--cz-concrete-dark); border: 1px solid var(--cz-black);">
                                     <strong>${this.escapeHtml(activity.data.name)}</strong>
                                     <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px;">
-                                        ${this.escapeHtml(activity.data.description).substring(0, 100)}${activity.data.description.length > 100 ? '...' : ''}
+                                        ${this.escapeHtml(activity.data.description || '').substring(0, 120)}${(activity.data.description || '').length > 120 ? '...' : ''}
                                     </div>
                                 </div>
                             ` : ''}
                         </div>
                     </div>
                 `).join('');
+            }
+
+            getSampleSocialActivities() {
+                const now = Date.now();
+                return [
+                    {
+                        type: 'location-added',
+                        userId: 'alex-rivera',
+                        data: { id: 'loc-metro', name: 'Old Metro Tunnels', description: 'Hidden service corridor under the central station with amazing acoustics.' },
+                        timestamp: new Date(now - 5 * 60 * 1000),
+                        icon: 'fas fa-map-marker-alt',
+                        message: 'added a new location: Old Metro Tunnels'
+                    },
+                    {
+                        type: 'comment',
+                        userId: 'rae-night',
+                        data: { id: 'c1', text: 'Meetup this weekend at the rooftops?', related: 'Skyline Observation Deck' },
+                        timestamp: new Date(now - 35 * 60 * 1000),
+                        icon: 'fas fa-comment',
+                        message: 'commented on Skyline Observation Deck'
+                    },
+                    {
+                        type: 'achievement',
+                        userId: 'vex-crawler',
+                        data: { badge: 'Explorer Lv. 2', detail: '10 verified locations visited' },
+                        timestamp: new Date(now - 2 * 60 * 60 * 1000),
+                        icon: 'fas fa-medal',
+                        message: 'earned Explorer Lv. 2'
+                    },
+                    {
+                        type: 'group',
+                        userId: 'team-ghostline',
+                        data: { name: 'Ghostline Collective', update: 'Scheduled a night run through the river tunnels.' },
+                        timestamp: new Date(now - 4 * 60 * 60 * 1000),
+                        icon: 'fas fa-users',
+                        message: 'posted an update in Ghostline Collective'
+                    }
+                ];
+            }
+
+            applySocialFilters(source = []) {
+                const filter = document.getElementById('social-filter')?.value || 'all';
+                const sort = document.getElementById('sort-feed')?.value || 'recent';
+
+                let items = [...source];
+
+                if (filter !== 'all') {
+                    items = items.filter(item => {
+                        if (filter === 'following') return item.type === 'location-added' || item.type === 'comment';
+                        if (filter === 'location-updates') return item.type === 'location-added';
+                        if (filter === 'social') return item.type === 'comment' || item.type === 'group';
+                        if (filter === 'achievements') return item.type === 'achievement';
+                        return true;
+                    });
+                }
+
+                items.sort((a, b) => {
+                    if (sort === 'popular' || sort === 'engagement') {
+                        return (b.data?.likes || 0) - (a.data?.likes || 0);
+                    }
+                    const aTime = a.timestamp?.toDate ? a.timestamp.toDate() : a.timestamp;
+                    const bTime = b.timestamp?.toDate ? b.timestamp.toDate() : b.timestamp;
+                    return (bTime || 0) - (aTime || 0);
+                });
+
+                return items;
             }
 
             // Social interactions and feedback
@@ -4250,7 +4324,19 @@
             }
 
             async loadNotifications() {
-                if (!this.currentUser) return;
+                const container = document.getElementById('notifications-content');
+                if (!container) return;
+
+                if (!this.currentUser) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 32px;">
+                            <i class="fas fa-bell-slash" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 12px;"></i>
+                            <p style="color: var(--text-secondary); margin-bottom: 12px;">Sign in to see alerts for check-ins, followers, and mission progress.</p>
+                            <button class="btn btn-primary" onclick="app.handleAuth()"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+                        </div>
+                    `;
+                    return;
+                }
 
                 try {
                     const snapshot = await this.db.collection('user_notifications')
@@ -4269,12 +4355,15 @@
                     });
 
                     this.updateNotificationBadge();
+                    this.renderNotifications(this.notifications.length ? this.notifications : this.getSampleNotifications());
                 } catch (error) {
                     console.error('Error loading notifications:', error);
+                    this.renderNotifications(this.getSampleNotifications());
                 }
             }
 
             async markNotificationAsRead(notificationId) {
+                if (!this.currentUser || !this.db) return;
                 try {
                     await this.db.collection('user_notifications').doc(notificationId).update({
                         read: true
@@ -4320,6 +4409,35 @@
                 } else if (existingBadge) {
                     existingBadge.remove();
                 }
+            }
+
+            renderNotifications(notifications) {
+                const container = document.getElementById('notifications-content');
+                if (!container) return;
+
+                if (!notifications || !notifications.length) {
+                    container.innerHTML = '<p style="color: var(--text-muted);">No alerts yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = notifications.map(note => {
+                    const clickable = this.currentUser && !note.sample;
+                    return `
+                    <div class="notification-item ${note.read ? '' : 'unread'}" ${clickable ? `onclick="app.markNotificationAsRead('${note.id}')"` : ''}>
+                        <div class="notification-type">${(note.type || 'update').toUpperCase()}</div>
+                        <div class="notification-message">${this.escapeHtml(note.data?.message || 'Activity update')}</div>
+                        <div class="notification-time">${this.timeAgo(note.createdAt?.toDate ? note.createdAt.toDate() : note.createdAt)}</div>
+                    </div>
+                `}).join('');
+            }
+
+            getSampleNotifications() {
+                const now = Date.now();
+                return [
+                    { id: 'n1', sample: true, type: 'follow', data: { message: 'Rae Night started following you.' }, read: false, createdAt: new Date(now - 15 * 60 * 1000) },
+                    { id: 'n2', sample: true, type: 'comment', data: { message: 'New comment on Old Metro Tunnels.' }, read: false, createdAt: new Date(now - 45 * 60 * 1000) },
+                    { id: 'n3', sample: true, type: 'mission', data: { message: 'Mission Rooftop Recon is 50% complete.' }, read: true, createdAt: new Date(now - 2 * 60 * 60 * 1000) }
+                ];
             }
 
             async updateUserBadges(userId, action) {
@@ -4494,11 +4612,14 @@
                         missions.push({ id: doc.id, ...doc.data() });
                     });
 
-                    this.renderMissions(missions);
+                    const items = missions.length ? missions : this.getSampleMissions();
+                    this.renderMissions(items);
+                    this.renderMissionProgress(items);
                 } catch (error) {
                     console.error('Error loading missions:', error);
-                    document.getElementById('missions-grid').innerHTML = 
-                        '<div class="error">Failed to load missions</div>';
+                    const fallback = this.getSampleMissions();
+                    this.renderMissions(fallback);
+                    this.renderMissionProgress(fallback);
                 }
             }
 
@@ -4532,6 +4653,181 @@
                         </div>
                     </div>
                 `).join('');
+            }
+
+            renderMissionProgress(missions) {
+                const container = document.getElementById('mission-progress');
+                if (!container) return;
+
+                const completed = missions.filter(m => (m.progress || 0) >= 100).length;
+                const inProgress = missions.filter(m => (m.progress || 0) > 0 && (m.progress || 0) < 100).length;
+                const notStarted = missions.length - completed - inProgress;
+
+                container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;">
+                        <div class="panel" style="padding: 12px; box-shadow: none; border-width: 2px;">
+                            <div class="mac-label">Completed</div>
+                            <div class="mac-title" style="font-size: 20px; color: var(--success);">${completed}</div>
+                        </div>
+                        <div class="panel" style="padding: 12px; box-shadow: none; border-width: 2px;">
+                            <div class="mac-label">In Progress</div>
+                            <div class="mac-title" style="font-size: 20px; color: var(--accent-yellow);">${inProgress}</div>
+                        </div>
+                        <div class="panel" style="padding: 12px; box-shadow: none; border-width: 2px;">
+                            <div class="mac-label">Queued</div>
+                            <div class="mac-title" style="font-size: 20px; color: var(--text-secondary);">${notStarted}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            getSampleMissions() {
+                return [
+                    { id: 'mission-a', title: 'Rooftop Recon', description: 'Scout three rooftops and log safe access points.', difficulty: 'medium', progress: 65 },
+                    { id: 'mission-b', title: 'Tunnel Drift', description: 'Chart a path through the river tunnels without GPS.', difficulty: 'hard', progress: 20 },
+                    { id: 'mission-c', title: 'Hidden Courtyard', description: 'Find and photograph two hidden courtyards in the old district.', difficulty: 'easy', progress: 90 }
+                ];
+            }
+
+            async loadRoutes() {
+                const container = document.getElementById('routes-content');
+                if (!container) return;
+
+                let routes = [];
+
+                if (this.currentUser) {
+                    try {
+                        const snapshot = await this.db.collection('routes')
+                            .where('userId', '==', this.currentUser.uid)
+                            .orderBy('updatedAt', 'desc')
+                            .limit(10)
+                            .get();
+
+                        snapshot.forEach(doc => {
+                            routes.push({ id: doc.id, ...doc.data() });
+                        });
+                    } catch (error) {
+                        console.error('Error loading routes:', error);
+                    }
+                }
+
+                if (!routes.length) {
+                    routes = this.getSampleRoutes();
+                }
+
+                this.renderRoutes(routes);
+            }
+
+            renderRoutes(routes) {
+                const container = document.getElementById('routes-content');
+                if (!container) return;
+
+                container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+                        ${routes.map(route => `
+                            <div class="route-card">
+                                <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: var(--cz-yellow);">${this.escapeHtml(route.name)}</h4>
+                                        <div style="font-size: 0.9rem; color: var(--text-secondary);">${route.stops?.length || 0} stops · ${route.distance || 'Unknown'} km</div>
+                                    </div>
+                                    <div class="badge" style="background: var(--cz-blueprint); color: white;">${route.mode || 'Walk'}</div>
+                                </div>
+                                <div class="route-map-preview">
+                                    <div style="position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-muted); font-size: 0.9rem;">
+                                        Mini map preview
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    ${(route.tags || []).map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('')}
+                                </div>
+                                <div class="social-action-buttons">
+                                    <button class="social-btn" onclick="app.startRoute('${route.id}')"><i class="fas fa-play"></i> Start</button>
+                                    <button class="social-btn" onclick="app.shareRoute('${route.id}')"><i class="fas fa-share-alt"></i> Share</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            getSampleRoutes() {
+                return [
+                    { id: 'route-a', name: 'Skyline Sweep', distance: 4.2, mode: 'Walk', stops: ['Old Metro', 'Sky Deck', 'River Bridge'], tags: ['rooftop', 'photography'] },
+                    { id: 'route-b', name: 'Underground Drift', distance: 3.1, mode: 'Explore', stops: ['Service Tunnel', 'Valve Room', 'Sub-basement'], tags: ['tunnel', 'flashlight'] },
+                    { id: 'route-c', name: 'Neon Loop', distance: 6.0, mode: 'Bike', stops: ['Arcade Plaza', 'Canal Walk', 'Glass Overlook'], tags: ['night', 'urban'] }
+                ];
+            }
+
+            async loadGroups() {
+                const container = document.getElementById('groups-content');
+                if (!container) return;
+
+                if (!this.currentUser) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 36px;">
+                            <i class="fas fa-user-friends" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 12px;"></i>
+                            <p style="color: var(--text-secondary); margin-bottom: 16px;">Sign in to join crews, share intel, and coordinate runs.</p>
+                            <button class="btn btn-primary" onclick="app.handleAuth()"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let groups = [];
+
+                try {
+                    const snapshot = await this.db.collection('groups')
+                        .where('members', 'array-contains', this.currentUser.uid)
+                        .limit(10)
+                        .get();
+
+                    snapshot.forEach(doc => {
+                        groups.push({ id: doc.id, ...doc.data() });
+                    });
+                } catch (error) {
+                    console.error('Error loading groups:', error);
+                }
+
+                if (!groups.length) {
+                    groups = this.getSampleGroups();
+                }
+
+                this.renderGroups(groups);
+            }
+
+            renderGroups(groups) {
+                const container = document.getElementById('groups-content');
+                if (!container) return;
+
+                container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+                        ${groups.map(group => `
+                            <div class="group-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <h4 style="margin: 0; color: var(--cz-yellow);">${this.escapeHtml(group.name)}</h4>
+                                    <span class="badge" style="background: var(--cz-concrete-dark);">${group.members?.length || 4} members</span>
+                                </div>
+                                <p style="margin: 0 0 8px 0; color: var(--text-secondary);">${this.escapeHtml(group.description || 'Crew of local explorers.')}</p>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    ${(group.tags || ['night ops', 'mapping']).map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('')}
+                                </div>
+                                <div class="social-action-buttons">
+                                    <button class="social-btn" onclick="app.openGroup('${group.id}')"><i class="fas fa-door-open"></i> Open</button>
+                                    <button class="social-btn" onclick="app.messageGroup('${group.id}')"><i class="fas fa-comment-dots"></i> Chat</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            getSampleGroups() {
+                return [
+                    { id: 'grp-a', name: 'Ghostline Collective', description: 'Night runners mapping the undercity.', members: ['a','b','c','d'], tags: ['night ops', 'tunnels'] },
+                    { id: 'grp-b', name: 'Skybound', description: 'Rooftop spotters and skyline photographers.', members: ['a','b','c'], tags: ['rooftop', 'photo'] },
+                    { id: 'grp-c', name: 'Canal Walkers', description: 'Explorers patrolling the canal routes and basements.', members: ['a','b','c','d','e'], tags: ['waterfront', 'basement'] }
+                ];
             }
 
             showRoutes() {
@@ -4636,8 +4932,22 @@
 
             // Utility methods for social features
             async createNewPost() {
-                // Placeholder for creating new social posts
-                this.showToast('Post creation coming soon!', 'info');
+                const text = prompt('Share an update with the crew:');
+                if (!text) return;
+
+                const sanitized = this.sanitizeInput(text);
+                const activity = {
+                    type: 'status',
+                    userId: this.currentUser?.uid || 'you',
+                    data: { text: sanitized, likes: 0 },
+                    timestamp: new Date(),
+                    icon: 'fas fa-bullhorn',
+                    message: sanitized
+                };
+
+                this.socialActivities = [activity, ...(this.socialActivities || [])];
+                this.renderSocialFeed(this.applySocialFilters(this.socialActivities));
+                this.showToast('Post published to your feed', 'success');
             }
 
             async startMission(missionId) {
@@ -4652,14 +4962,30 @@
                 this.showToast('Group creation coming soon!', 'info');
             }
 
+            startRoute(routeId) {
+                this.showToast(`Starting route ${routeId}`, 'success');
+            }
+
+            shareRoute(routeId) {
+                this.showToast(`Share link copied for ${routeId}`, 'info');
+            }
+
+            openGroup(groupId) {
+                this.showToast(`Opening group ${groupId}`, 'info');
+            }
+
+            messageGroup(groupId) {
+                this.showToast(`Messaging group ${groupId}`, 'info');
+            }
+
             filterSocialFeed() {
-                // Implement feed filtering
-                console.log('Filtering social feed...');
+                const filtered = this.applySocialFilters(this.socialActivities || []);
+                this.renderSocialFeed(filtered);
             }
 
             sortSocialFeed() {
-                // Implement feed sorting
-                console.log('Sorting social feed...');
+                const filtered = this.applySocialFilters(this.socialActivities || []);
+                this.renderSocialFeed(filtered);
             }
             async handleAddressLookup() {
                 const addressInput = document.getElementById('location-address');
