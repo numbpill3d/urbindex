@@ -27,7 +27,11 @@ const STATIC_ASSETS = [
     // Firebase SDKs
     'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',
     'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js',
-    'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js'
+    'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js',
+    // Leaflet markercluster
+    'https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js',
+    'https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css',
+    'https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css'
 ];
 
 // Cache strategies
@@ -58,7 +62,7 @@ const API_ENDPOINTS = {
  */
 self.addEventListener('install', (event) => {
     console.log('[SW] Installing service worker v3.0.0');
-    
+    console.log('[SW] Install event started');
     event.waitUntil(
         Promise.all([
             // Cache static assets
@@ -83,7 +87,7 @@ self.addEventListener('install', (event) => {
  */
 self.addEventListener('activate', (event) => {
     console.log('[SW] Activating service worker v3.0.0');
-    
+    console.log('[SW] Activate event started');
     event.waitUntil(
         Promise.all([
             // Clean up old caches
@@ -92,6 +96,7 @@ self.addEventListener('activate', (event) => {
             self.clients.claim()
         ]).then(() => {
             console.log('[SW] Service worker activated');
+            console.log('[SW] Activate event completed');
         })
     );
 });
@@ -102,7 +107,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const { request } = event;
     const url = new URL(request.url);
-    
+    console.log('[SW] Fetch event for:', request.url);
     // Skip non-GET requests
     if (request.method !== 'GET') {
         return;
@@ -188,10 +193,12 @@ self.addEventListener('notificationclick', (event) => {
  * Handle Static Assets (CSS, JS, etc.)
  */
 async function handleStaticAsset(request) {
+    console.log('[SW] Handling static asset:', request.url);
     const cache = await caches.open(STATIC_CACHE);
     const cached = await cache.match(request);
     
     if (cached) {
+        console.log('[SW] Static asset found in cache:', request.url);
         // Return cached version and update in background
         fetch(request).then(response => {
             if (response.ok) {
@@ -206,6 +213,7 @@ async function handleStaticAsset(request) {
     try {
         const response = await fetch(request);
         if (response.ok) {
+            console.log('[SW] Caching static asset:', request.url);
             cache.put(request, response.clone());
         }
         return response;
@@ -219,18 +227,21 @@ async function handleStaticAsset(request) {
  * Handle API Requests with Network-First Strategy
  */
 async function handleAPIRequest(request) {
+    console.log('[SW] Handling API request:', request.url);
     const cache = await caches.open(API_CACHE);
     
     try {
         const response = await fetch(request);
         if (response.ok) {
             // Cache successful responses
-            await cache.put(request, response.clone());
+            const cacheKey = request.url;
+            await cache.put(cacheKey, response.clone());
         }
         return response;
     } catch (error) {
         // Network failed, try cache
-        const cached = await cache.match(request);
+        const cacheKey = request.url;
+        const cached = await cache.match(cacheKey);
         if (cached) {
             // Add offline indicator header
             const headers = new Headers(cached.headers);
@@ -244,10 +255,10 @@ async function handleAPIRequest(request) {
         }
         
         // No cached version available
-        return new Response(JSON.stringify({ 
-            error: 'Network unavailable', 
-            offline: true 
-        }), {
+        return new Response(JSON.stringify({
+        error: 'Network unavailable',
+        offline: true
+    }), {
             status: 503,
             headers: { 'Content-Type': 'application/json' }
         });
@@ -258,6 +269,7 @@ async function handleAPIRequest(request) {
  * Handle Image Requests with Cache-First Strategy
  */
 async function handleImageRequest(request) {
+    console.log('[SW] Handling image request:', request.url);
     const cache = await caches.open(IMAGES_CACHE);
     const cached = await cache.match(request);
     
@@ -284,6 +296,7 @@ async function handleImageRequest(request) {
  * Handle HTML Requests with Network-First Strategy
  */
 async function handleHTMLRequest(request) {
+    console.log('[SW] Handling HTML request:', request.url);
     const cache = await caches.open(DYNAMIC_CACHE);
     
     try {
@@ -345,16 +358,26 @@ async function handleDynamicRequest(request) {
  * Background Sync Implementation
  */
 async function performBackgroundSync() {
+    const lastSync = localStorage.getItem('lastBackgroundSync');
+    const now = Date.now();
+    const syncInterval = 5 * 60 * 1000; // 5 minutes
+
+    if (lastSync && now - lastSync < syncInterval) {
+      console.log('[SW] Background sync throttled');
+      return;
+    }
+
     console.log('[SW] Performing background sync');
-    
+
     try {
         // Sync pending location data
         await syncPendingLocations();
         
         // Sync user data updates
         await syncPendingUserUpdates();
-        
+
         console.log('[SW] Background sync completed');
+        localStorage.setItem('lastBackgroundSync', now);
     } catch (error) {
         console.error('[SW] Background sync failed:', error);
     }
@@ -626,3 +649,8 @@ function getPerformanceMetrics() {
 }
 
 console.log('[SW] Service Worker script loaded');
+
+// Unregister service worker
+self.addEventListener('install', function(event) {
+  event.waitUntil(self.registration.unregister());
+});
