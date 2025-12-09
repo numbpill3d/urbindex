@@ -388,6 +388,134 @@
 
         #map { height: 100%; min-height: 400px; }
 
+        /* Command Center Hero */
+        .dashboard-hero {
+            margin-bottom: 16px;
+            padding: 18px;
+            background:
+                linear-gradient(135deg, rgba(255, 208, 0, 0.08), transparent 55%),
+                radial-gradient(circle at 20% 20%, rgba(255, 107, 0, 0.12), transparent 40%),
+                var(--cz-concrete);
+            border: 3px solid var(--cz-black);
+            box-shadow: var(--shadow-industrial);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(0,0,0,0.25), transparent 35%);
+            pointer-events: none;
+        }
+
+        .dashboard-hero::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 110px;
+            height: 6px;
+            background: var(--hazard-stripe);
+            transform: skew(-12deg);
+            opacity: 0.6;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            align-items: stretch;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-lede h2 {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+
+        .hero-lede p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            max-width: 560px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border: 2px solid var(--cz-black);
+            background: var(--cz-black);
+            color: var(--cz-yellow);
+            font-family: var(--font-blueprint);
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .chip.live { background: var(--cz-yellow); color: var(--cz-black); }
+        .chip.safe { background: var(--cz-green); color: var(--cz-black); }
+        .chip.signal { background: var(--cz-blueprint); border-color: var(--cz-yellow); color: white; }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .quick-actions .btn {
+            padding: 8px 12px;
+            font-size: 10px;
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--cz-black);
+            padding: 12px;
+            position: relative;
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .stat-card.highlight {
+            background: linear-gradient(135deg, rgba(255, 208, 0, 0.2), rgba(255, 107, 0, 0.08));
+            border-color: var(--cz-yellow-dark);
+        }
+
+        .stat-label {
+            font-family: var(--font-blueprint);
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--cz-yellow);
+            text-shadow: 2px 2px 0 var(--cz-black);
+            margin-bottom: 4px;
+        }
+
+        .stat-trend {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
         .btn {
             background: var(--cz-concrete);
             border: 3px solid var(--cz-black);
@@ -2508,6 +2636,117 @@
             font-size: 0.8rem;
             color: var(--text-muted);
         }
+
+        /* Profile + Highlight Layouts */
+        .profile-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .profile-hero {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid var(--cz-black);
+            box-shadow: 3px 3px 0 var(--cz-black);
+            background: linear-gradient(135deg, var(--cz-blueprint), var(--cz-black));
+            display: grid;
+            place-items: center;
+            color: var(--cz-yellow);
+            font-size: 3rem;
+            font-weight: 900;
+        }
+
+        .profile-meta h2 {
+            margin: 0 0 6px 0;
+            font-size: 1.6rem;
+        }
+
+        .profile-meta p {
+            margin: 0 0 8px 0;
+            color: var(--text-secondary);
+        }
+
+        .meta-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .profile-stats {
+            position: relative;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .profile-card h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+        }
+
+        .profile-highlight {
+            background: var(--bg-secondary);
+            border: 2px solid var(--cz-black);
+            padding: 12px;
+            box-shadow: 2px 2px 0 var(--cz-black);
+            display: grid;
+            gap: 6px;
+        }
+
+        .timeline {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 10px;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--cz-yellow);
+            border: 2px solid var(--cz-black);
+            margin-top: 4px;
+        }
+
+        #user-badges {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -2674,6 +2913,55 @@
 
         <main class="main" role="main" id="main-content">
             <div class="view active" id="map-view" role="tabpanel" aria-labelledby="map-tab">
+                <section class="dashboard-hero" aria-label="Command center overview">
+                    <div class="hero-grid">
+                        <div class="hero-lede">
+                            <div class="chip live" aria-label="Live network status">
+                                <i class="fas fa-broadcast-tower" aria-hidden="true"></i> Live Ops
+                            </div>
+                            <h2>Field Ops Command Center</h2>
+                            <p>
+                                Track the network at a glance, drop new finds, and jump back to the map without losing your flow.
+                            </p>
+                            <div class="meta-chips" style="margin-top: 8px;">
+                                <span class="chip safe"><i class="fas fa-shield-alt" aria-hidden="true"></i> Secure Session</span>
+                                <span class="chip signal"><i class="fas fa-location-arrow" aria-hidden="true"></i> GPS Ready</span>
+                            </div>
+                        </div>
+                        <div class="stat-grid" aria-label="Live stats summary">
+                            <div class="stat-card highlight">
+                                <div class="stat-label">Locations online</div>
+                                <div class="stat-value" id="hero-total-locations">0</div>
+                                <div class="stat-trend">Active pins in the network</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Active explorers</div>
+                                <div class="stat-value" id="hero-active-users">0</div>
+                                <div class="stat-trend">Signed in past 24h</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Activity index</div>
+                                <div class="stat-value" id="hero-activity-index">--</div>
+                                <div class="stat-trend">Pace of new reports</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quick-actions" aria-label="Quick map actions">
+                        <button class="btn btn-primary" type="button" onclick="app.showAddLocationModal()">
+                            <i class="fas fa-plus" aria-hidden="true"></i> Drop a Location
+                        </button>
+                        <button class="btn" type="button" onclick="app.recenterToUserLocation()">
+                            <i class="fas fa-crosshairs" aria-hidden="true"></i> Snap to Me
+                        </button>
+                        <button class="btn" type="button" onclick="app.showView('missions')">
+                            <i class="fas fa-trophy" aria-hidden="true"></i> Missions
+                        </button>
+                        <button class="btn" type="button" onclick="app.showView('profile')">
+                            <i class="fas fa-id-badge" aria-hidden="true"></i> My Profile
+                        </button>
+                    </div>
+                </section>
+
                 <div class="map-layout">
                     <aside class="sidebar" role="complementary" aria-label="Map sidebar with activity and statistics">
                         <div class="panel">
@@ -3026,6 +3314,26 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label class="form-label" for="profile-links">
+                        <i class="fas fa-link" aria-hidden="true"></i>
+                        Links (one per line)
+                    </label>
+                    <textarea class="textarea" id="profile-links" name="links" rows="3"
+                              placeholder="https://your-site.com&#10;https://instagram.com/you"></textarea>
+                    <div class="field-help">Add URLs to share with visitors.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="profile-gallery">
+                        <i class="fas fa-images" aria-hidden="true"></i>
+                        Gallery Image URLs (one per line)
+                    </label>
+                    <textarea class="textarea" id="profile-gallery" name="gallery" rows="3"
+                              placeholder="https://example.com/photo1.jpg&#10;https://example.com/photo2.jpg"></textarea>
+                    <div class="field-help">Provide direct image links to showcase in your gallery.</div>
+                </div>
+
                 <div class="form-actions">
                     <button type="button" class="btn" onclick="app.hideEditProfileModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary" id="profile-submit-btn">
@@ -3033,6 +3341,15 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- User Locations Modal -->
+    <div class="modal" id="user-locations-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="user-locations-title">
+        <div class="modal-content">
+            <button class="modal-close" onclick="app.hideUserLocationsModal()">&times;</button>
+            <h3 id="user-locations-title">User Locations</h3>
+            <div id="user-locations-list" class="loading" role="status" aria-live="polite">Loading user locations...</div>
         </div>
     </div>
 
@@ -3507,6 +3824,16 @@
                     console.error('Failed to recenter to user location:', error);
                     this.showToast(error.message, 'error');
                 }
+            }
+
+            focusMapOnLocation(lat, lng, zoom = 15) {
+                if (!this.map || lat === null || lng === null) return;
+                this.showView('map');
+                setTimeout(() => {
+                    this.map.setView([lat, lng], zoom);
+                }, 150);
+                this.showToast('Centered on location', 'success');
+                this.hideUserLocationsModal();
             }
 
             async getUserLocation() {
@@ -4218,6 +4545,77 @@
                 }
             }
 
+            async rateLocation(locationId, value) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to rate locations', 'warning');
+                    return;
+                }
+
+                if (![1, -1].includes(value)) return;
+
+                const opKey = `rate-${locationId}`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    const docId = `${this.currentUser.uid}_${locationId}`;
+                    const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+                    await this.db.collection('location_ratings').doc(docId).set({
+                        userId: this.currentUser.uid,
+                        locationId,
+                        value,
+                        updatedAt: timestamp,
+                        createdAt: timestamp
+                    }, { merge: true });
+
+                    await this.loadLocationRating(locationId);
+                    this.showToast(value === 1 ? 'Upvoted location' : 'Downvoted location', 'success');
+                } catch (error) {
+                    console.error('Error rating location:', error);
+                    this.showToast('Failed to update rating', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async loadLocationRating(locationId) {
+                try {
+                    const snapshot = await this.db.collection('location_ratings')
+                        .where('locationId', '==', locationId)
+                        .get();
+
+                    let score = 0;
+                    let userVote = 0;
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const val = data.value === -1 ? -1 : 1;
+                        score += val;
+                        if (data.userId === this.currentUser?.uid) {
+                            userVote = val;
+                        }
+                    });
+
+                    this.ratings.set(locationId, { score, userVote });
+                    this.updateRatingUI(locationId, score, userVote);
+                } catch (error) {
+                    console.error('Error loading rating:', error);
+                }
+            }
+
+            updateRatingUI(locationId, score = null, userVote = null) {
+                const data = this.ratings.get(locationId) || {};
+                const displayScore = score ?? data.score ?? 0;
+                const displayVote = userVote ?? data.userVote ?? 0;
+
+                const scoreEl = document.getElementById(`rating-score-${locationId}`);
+                if (scoreEl) scoreEl.textContent = typeof displayScore === 'number' ? displayScore : '--';
+
+                const upBtn = document.getElementById(`rate-up-${locationId}`);
+                const downBtn = document.getElementById(`rate-down-${locationId}`);
+                if (upBtn) upBtn.classList.toggle('liked', displayVote === 1);
+                if (downBtn) downBtn.classList.toggle('disliked', displayVote === -1);
+            }
+
             async addComment(locationId, commentText) {
                 if (!this.currentUser) {
                     this.showToast('Please sign in to add comments', 'warning');
@@ -4506,6 +4904,15 @@
 
                         <div class="location-actions" style="margin: 16px 0; padding: 12px; background: var(--cz-concrete-light); border: 2px solid var(--cz-black);">
                             ${this.currentUser ? `
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <button class="rating-btn" id="rate-up-${locationId}" onclick="app.rateLocation('${locationId}', 1)">
+                                        <i class="fas fa-thumbs-up"></i>
+                                    </button>
+                                    <div class="cz-text" style="font-size: 1rem;">Score: <span id="rating-score-${locationId}">--</span></div>
+                                    <button class="rating-btn" id="rate-down-${locationId}" onclick="app.rateLocation('${locationId}', -1)">
+                                        <i class="fas fa-thumbs-down"></i>
+                                    </button>
+                                </div>
                                 <button class="btn" onclick="app.likeLocation('${locationId}')" id="like-btn-${locationId}">
                                     <i class="fas fa-heart"></i> Like
                                 </button>
@@ -4543,6 +4950,7 @@
                 this.loadLocationComments(locationId).then(comments => {
                     this.renderComments(locationId, comments);
                 });
+                this.loadLocationRating(locationId);
             }
 
             async submitComment(locationId) {
@@ -4566,6 +4974,167 @@
                     <div class="comment">
                         <div class="comment-header">
                             <span class="comment-author">Explorer</span>
+                            <span class="comment-time">${this.timeAgo(comment.createdAt?.toDate())}</span>
+                        </div>
+                        <div class="comment-text">${this.escapeHtml(comment.text)}</div>
+                    </div>
+                `).join('');
+            }
+
+            async submitProfilePost(userId) {
+                const input = document.getElementById('profile-post-input');
+                if (!input) return;
+                await this.addProfilePost(userId, input.value);
+                input.value = '';
+            }
+
+            async addProfilePost(userId, text) {
+                if (!this.currentUser) {
+                    this.showToast('Sign in to post updates', 'warning');
+                    return;
+                }
+                if (this.currentUser.uid !== userId) {
+                    this.showToast('You can only post on your own profile', 'warning');
+                    return;
+                }
+                if (!text || !text.trim()) {
+                    this.showToast('Post cannot be empty', 'warning');
+                    return;
+                }
+
+                const opKey = `profile-post-${userId}`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    await this.db.collection('profile_posts').add({
+                        userId,
+                        text: this.sanitizeInput(text.trim()),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    this.showToast('Posted to your feed', 'success');
+                    this.loadProfilePosts(userId);
+                } catch (error) {
+                    console.error('Error adding profile post:', error);
+                    this.showToast('Failed to post', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async loadProfilePosts(userId) {
+                const container = document.getElementById('profile-posts-list');
+                if (!container) return;
+                container.innerHTML = '<div class="loading">Loading posts...</div>';
+
+                try {
+                    const snapshot = await this.db.collection('profile_posts')
+                        .where('userId', '==', userId)
+                        .orderBy('createdAt', 'desc')
+                        .limit(25)
+                        .get();
+
+                    const posts = [];
+                    snapshot.forEach(doc => posts.push({ id: doc.id, ...doc.data() }));
+                    this.renderProfilePosts(posts);
+                } catch (error) {
+                    console.error('Error loading profile posts:', error);
+                    container.innerHTML = '<div class="error">Failed to load posts</div>';
+                }
+            }
+
+            renderProfilePosts(posts) {
+                const container = document.getElementById('profile-posts-list');
+                if (!container) return;
+
+                if (!posts.length) {
+                    container.innerHTML = '<div style="color: var(--text-muted);">No posts yet.</div>';
+                    return;
+                }
+
+                container.innerHTML = posts.map(post => `
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span class="comment-author">Update</span>
+                            <span class="comment-time">${this.timeAgo(post.createdAt?.toDate())}</span>
+                        </div>
+                        <div class="comment-text">${this.escapeHtml(post.text)}</div>
+                    </div>
+                `).join('');
+            }
+
+            async submitProfileComment(targetUserId) {
+                const input = document.getElementById('profile-comment-input');
+                if (!input) return;
+                await this.addProfileComment(targetUserId, input.value);
+                input.value = '';
+            }
+
+            async addProfileComment(targetUserId, text) {
+                if (!this.currentUser) {
+                    this.showToast('Sign in to comment', 'warning');
+                    return;
+                }
+                if (!text || !text.trim()) {
+                    this.showToast('Comment cannot be empty', 'warning');
+                    return;
+                }
+
+                const opKey = `profile-comment-${targetUserId}`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    await this.db.collection('profile_comments').add({
+                        targetUserId,
+                        userId: this.currentUser.uid,
+                        text: this.sanitizeInput(text.trim()),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    this.showToast('Comment added', 'success');
+                    this.loadProfileComments(targetUserId);
+                } catch (error) {
+                    console.error('Error adding profile comment:', error);
+                    this.showToast('Failed to add comment', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async loadProfileComments(targetUserId) {
+                const container = document.getElementById('profile-comments-list');
+                if (!container) return;
+                container.innerHTML = '<div class="loading">Loading comments...</div>';
+
+                try {
+                    const snapshot = await this.db.collection('profile_comments')
+                        .where('targetUserId', '==', targetUserId)
+                        .orderBy('createdAt', 'desc')
+                        .limit(25)
+                        .get();
+
+                    const comments = [];
+                    snapshot.forEach(doc => comments.push({ id: doc.id, ...doc.data() }));
+                    this.renderProfileComments(comments);
+                } catch (error) {
+                    console.error('Error loading profile comments:', error);
+                    container.innerHTML = '<div class="error">Failed to load comments</div>';
+                }
+            }
+
+            renderProfileComments(comments) {
+                const container = document.getElementById('profile-comments-list');
+                if (!container) return;
+
+                if (!comments.length) {
+                    container.innerHTML = '<div style="color: var(--text-muted);">No comments yet.</div>';
+                    return;
+                }
+
+                container.innerHTML = comments.map(comment => `
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span class="comment-author">${this.escapeHtml(comment.userId === this.currentUser?.uid ? 'You' : 'Explorer')}</span>
                             <span class="comment-time">${this.timeAgo(comment.createdAt?.toDate())}</span>
                         </div>
                         <div class="comment-text">${this.escapeHtml(comment.text)}</div>
@@ -4955,11 +5524,93 @@
             }
 
             async createNewRoute() {
-                this.showToast('Route planning coming soon!', 'info');
+                if (!this.currentUser) {
+                    this.showToast('Sign in to save routes', 'warning');
+                    this.handleAuth();
+                    return;
+                }
+
+                const nameInput = prompt('Name your route (e.g., Skyline Sweep):');
+                const name = nameInput ? this.sanitizeInput(nameInput) : '';
+                if (!name) {
+                    this.showToast('Route name is required', 'warning');
+                    return;
+                }
+
+                const distanceRaw = prompt('Approximate distance in km (optional):', '3.5');
+                const distanceVal = distanceRaw ? parseFloat(distanceRaw) : null;
+                const distance = Number.isFinite(distanceVal) ? Number(distanceVal.toFixed(1)) : null;
+
+                const stopsRaw = prompt('Stops (comma separated, e.g., Old Metro, Sky Deck):', '');
+                const stops = stopsRaw ? stopsRaw.split(',').map(s => this.sanitizeInput(s.trim())).filter(Boolean) : [];
+
+                const modeInput = prompt('Mode (Walk, Bike, Explore):', 'Walk');
+                const mode = modeInput ? this.sanitizeInput(modeInput) : 'Walk';
+
+                const tagsRaw = prompt('Tags (comma separated):', stops.slice(0, 2).join(', '));
+                const tags = tagsRaw ? tagsRaw.split(',').map(t => this.sanitizeInput(t.trim())).filter(Boolean) : [];
+
+                const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+                try {
+                    await this.db.collection('routes').add({
+                        name,
+                        distance,
+                        stops,
+                        mode,
+                        tags,
+                        userId: this.currentUser.uid,
+                        createdAt: timestamp,
+                        updatedAt: timestamp
+                    });
+
+                    this.showToast('Route saved and ready to run', 'success');
+                    this.loadRoutes();
+                } catch (error) {
+                    console.error('Error creating route:', error);
+                    this.showToast('Failed to create route', 'error');
+                }
             }
 
             async createNewGroup() {
-                this.showToast('Group creation coming soon!', 'info');
+                if (!this.currentUser) {
+                    this.showToast('Sign in to create a group', 'warning');
+                    this.handleAuth();
+                    return;
+                }
+
+                const nameInput = prompt('Name your crew:', 'New Exploration Team');
+                const name = nameInput ? this.sanitizeInput(nameInput) : '';
+                if (!name) {
+                    this.showToast('Group name is required', 'warning');
+                    return;
+                }
+
+                const descriptionInput = prompt('Describe the group mission:', 'Local explorers sharing intel.');
+                const description = descriptionInput ? this.sanitizeInput(descriptionInput) : '';
+
+                const tagsInput = prompt('Tags (comma separated):', 'night ops, mapping');
+                const tags = tagsInput ? tagsInput.split(',').map(t => this.sanitizeInput(t.trim())).filter(Boolean) : [];
+
+                const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+                try {
+                    await this.db.collection('groups').add({
+                        name,
+                        description,
+                        tags,
+                        members: [this.currentUser.uid],
+                        ownerId: this.currentUser.uid,
+                        createdAt: timestamp,
+                        updatedAt: timestamp
+                    });
+
+                    this.showToast('Group created and ready to rally', 'success');
+                    this.loadGroups();
+                } catch (error) {
+                    console.error('Error creating group:', error);
+                    this.showToast('Failed to create group', 'error');
+                }
             }
 
             startRoute(routeId) {
@@ -5215,7 +5866,9 @@
                 this.followers = new Map();
                 this.following = new Map();
                 this.likes = new Map();
+                this.ratings = new Map();
                 this.comments = new Map();
+                this.profilePosts = new Map();
                 this.notifications = [];
                 this.visits = new Map();
                 this.badges = new Map();
@@ -5449,13 +6102,105 @@
                 }
             }
 
-            messageUser(userId) {
-                this.showToast('Direct messaging coming soon!', 'info');
+            async messageUser(userId) {
+                if (!this.currentUser) {
+                    this.showToast('Sign in to message explorers', 'warning');
+                    this.handleAuth();
+                    return;
+                }
+
+                if (!userId) {
+                    this.showToast('No recipient selected', 'error');
+                    return;
+                }
+
+                const bodyInput = prompt('Send a quick message:');
+                const body = bodyInput ? this.sanitizeInput(bodyInput) : '';
+                if (!body) {
+                    this.showToast('Message cannot be empty', 'warning');
+                    return;
+                }
+
+                const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+                try {
+                    await this.db.collection('user_messages').add({
+                        toUserId: userId,
+                        fromUserId: this.currentUser.uid,
+                        body,
+                        createdAt: timestamp,
+                        read: false
+                    });
+                    this.showToast('Message sent', 'success');
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    this.showToast('Failed to send message', 'error');
+                }
             }
 
             async viewUserLocations(userId) {
-                this.showToast('Loading user locations...', 'info');
-                // This would show a filtered view of the user's locations
+                const modal = document.getElementById('user-locations-modal');
+                const list = document.getElementById('user-locations-list');
+                const title = document.getElementById('user-locations-title');
+
+                if (!modal || !list || !title) return;
+
+                modal.classList.add('active');
+                modal.setAttribute('aria-hidden', 'false');
+                list.innerHTML = '<div class="loading">Loading user locations...</div>';
+                title.textContent = 'User Locations';
+
+                if (!userId) {
+                    list.innerHTML = '<div class="error">No user specified</div>';
+                    return;
+                }
+
+                try {
+                    const snapshot = await this.db.collection('locations')
+                        .where('createdBy', '==', userId)
+                        .where('status', '==', 'active')
+                        .get();
+
+                    if (snapshot.empty) {
+                        list.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">No locations to display.</div>';
+                        return;
+                    }
+
+                    list.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const lat = Array.isArray(data.coordinates) ? data.coordinates[0] : null;
+                        const lng = Array.isArray(data.coordinates) ? data.coordinates[1] : null;
+
+                        const card = document.createElement('div');
+                        card.className = 'location-card';
+                        card.innerHTML = `
+                            <div class="location-header">
+                                <h4>${this.escapeHtml(data.name || 'Unnamed')}</h4>
+                                <span class="risk risk-${data.riskLevel || 'unknown'}">${data.riskLevel || 'unknown'}</span>
+                            </div>
+                            <p style="color: var(--text-secondary); margin-bottom: 10px;">${this.escapeHtml(data.description || 'No description')}</p>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
+                                <i class="fas fa-tag"></i> ${this.escapeHtml(data.category || 'uncategorized')}
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                ${(data.tags || []).slice(0, 5).map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('')}
+                            </div>
+                            ${lat !== null && lng !== null ? `
+                                <div style="margin-top: 10px;">
+                                    <button class="btn" style="font-size: 0.8rem; padding: 4px 8px;" onclick="app.focusMapOnLocation(${lat}, ${lng})">
+                                        <i class="fas fa-location-arrow"></i> View on Map
+                                    </button>
+                                </div>
+                            ` : ''}
+                        `;
+
+                        list.appendChild(card);
+                    });
+                } catch (error) {
+                    console.error('Error loading user locations:', error);
+                    list.innerHTML = '<div class="error">Failed to load locations</div>';
+                }
             }
 
             async loadUserSocialStats(userId) {
@@ -5712,8 +6457,22 @@
                         this.db.collection('users').where('lastSeen', '>', new Date(Date.now() - 86400000)).get()
                     ]);
 
-                    document.getElementById('total-locations').textContent = locationsSnap.size;
-                    document.getElementById('active-users').textContent = usersSnap.size;
+                    const locationCount = locationsSnap.size;
+                    const activeUserCount = usersSnap.size;
+
+                    document.getElementById('total-locations').textContent = locationCount;
+                    document.getElementById('active-users').textContent = activeUserCount;
+
+                    const heroLocations = document.getElementById('hero-total-locations');
+                    const heroUsers = document.getElementById('hero-active-users');
+                    const activityIndexElement = document.getElementById('hero-activity-index');
+
+                    if (heroLocations) heroLocations.textContent = locationCount;
+                    if (heroUsers) heroUsers.textContent = activeUserCount;
+                    if (activityIndexElement) {
+                        const activityIndex = Math.min(99, Math.max(0, Math.round(locationCount * 0.7 + activeUserCount * 1.3)));
+                        activityIndexElement.textContent = activityIndex;
+                    }
                 } catch (error) {
                     console.error('Error loading stats:', error);
                 }
@@ -5908,6 +6667,15 @@
                             <i class="fas fa-tag"></i> ${this.escapeHtml(data.category)}
                             ${data.coordinates ? ` • <i class="fas fa-map-marker-alt"></i> ${data.coordinates[0].toFixed(4)}, ${data.coordinates[1].toFixed(4)}` : ''}
                         </div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                            <button class="rating-btn" id="rate-up-${id}" onclick="app.rateLocation('${id}', 1)" title="Upvote location">
+                                <i class="fas fa-thumbs-up"></i>
+                            </button>
+                            <div class="cz-text" style="font-size: 0.95rem;">Score: <span id="rating-score-${id}">--</span></div>
+                            <button class="rating-btn" id="rate-down-${id}" onclick="app.rateLocation('${id}', -1)" title="Downvote location">
+                                <i class="fas fa-thumbs-down"></i>
+                            </button>
+                        </div>
                         <div class="location-actions">
                             <button class="btn" style="font-size: 0.8rem; padding: 4px 8px;" onclick="app.editLocation('${id}')">
                                 <i class="fas fa-edit"></i> Edit
@@ -5918,6 +6686,7 @@
                         </div>
                     `;
                     grid.appendChild(card);
+                    this.loadLocationRating(id);
                 });
             }
 
@@ -5969,144 +6738,220 @@
                     const userAvatar = userData.photoURL || null;
                     const userBio = userData.bio || '';
                     const joinedDate = userData.createdAt ? new Date(userData.createdAt.toDate()).toLocaleDateString() : 'Recently';
+                    const bioHtml = userBio
+                        ? `<p class="cz-text" style="margin: 0; color: var(--text-secondary);">${this.escapeHtml(userBio)}</p>`
+                        : `<p class="cz-text" style="margin: 0; color: var(--text-muted); font-style: italic;">${isOwnProfile ? 'Add a short field note so others know your style.' : 'No bio shared yet.'}</p>`;
+
+                    const highlights = locations.slice(0, 4);
+                    const highlightHtml = highlights.length ? `
+                        <div class="highlight-grid">
+                            ${highlights.map(loc => {
+                                const description = typeof loc.description === 'string' ? loc.description : '';
+                                const trimmedDesc = this.escapeHtml(description.substring(0, 90));
+                                const risk = loc.riskLevel || 'unknown';
+                                const coords = loc.coordinates && Array.isArray(loc.coordinates)
+                                    ? `<span class="cz-text" style="color: var(--text-muted); font-size: 0.8rem;"><i class="fas fa-location-arrow"></i> ${loc.coordinates[0].toFixed(4)}, ${loc.coordinates[1].toFixed(4)}</span>`
+                                    : '';
+                                return `
+                                    <div class="profile-highlight">
+                                        <div style="display: flex; justify-content: space-between; gap: 8px;">
+                                            <h4 style="margin: 0; font-size: 1rem;">${this.escapeHtml(loc.name || 'Untitled')}</h4>
+                                            <span class="risk risk-${risk}" style="text-transform: capitalize;">${risk}</span>
+                                        </div>
+                                        <div class="cz-text" style="color: var(--text-secondary); font-size: 0.9rem;">${trimmedDesc}${description.length > 90 ? '...' : ''}</div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div class="cz-text" style="color: var(--text-muted); font-size: 0.85rem;"><i class="fas fa-tag"></i> ${this.escapeHtml(loc.category || 'uncategorized')}</div>
+                                            ${coords}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    ` : `
+                        <div class="profile-highlight" style="text-align: center; color: var(--text-muted);">
+                            <i class="fas fa-map" style="font-size: 2rem; margin-bottom: 6px;"></i>
+                            <div>${isOwnProfile ? 'No locations yet. Drop your first spot from the map.' : 'No locations to display yet.'}</div>
+                        </div>
+                    `;
+
+                    const timelineHtml = locations.slice(0, 4).map(loc => {
+                        const description = typeof loc.description === 'string' ? loc.description : '';
+                        const timestamp = loc.createdAt?.toDate ? this.timeAgo(loc.createdAt.toDate()) : 'Recently';
+                        return `
+                            <li class="timeline-item">
+                                <div class="timeline-dot" aria-hidden="true"></div>
+                                <div>
+                                    <div style="font-weight: 700;">${this.escapeHtml(loc.name || 'New location')}</div>
+                                    <div class="cz-text" style="color: var(--text-secondary); font-size: 0.9rem;">${this.escapeHtml(description.substring(0, 80))}${description.length > 80 ? '...' : ''}</div>
+                                    <div style="color: var(--text-muted); font-size: 0.8rem;"><i class="fas fa-clock"></i> ${timestamp}</div>
+                                </div>
+                            </li>
+                        `;
+                    }).join('') || `
+                        <li class="timeline-item">
+                            <div class="timeline-dot" aria-hidden="true"></div>
+                            <div>
+                                <div style="font-weight: 700;">${isOwnProfile ? 'Get your first ping in.' : 'No check-ins yet.'}</div>
+                                <div style="color: var(--text-muted); font-size: 0.9rem;">Activity updates appear after logging locations.</div>
+                            </div>
+                        </li>
+                    `;
+
+                    const linksList = Array.isArray(userData.links) ? userData.links.filter(Boolean) : [];
+                    const linksHtml = linksList.length ? `
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${linksList.map(link => `
+                                <a class="btn" style="width: fit-content;" href="${this.escapeHtml(link)}" target="_blank" rel="noopener">
+                                    <i class="fas fa-external-link-alt" aria-hidden="true"></i> ${this.escapeHtml(link)}
+                                </a>
+                            `).join('')}
+                        </div>
+                    ` : `<div style="color: var(--text-muted);">No links shared.</div>`;
+
+                    const galleryList = Array.isArray(userData.gallery) ? userData.gallery.filter(Boolean) : [];
+                    const galleryHtml = galleryList.length ? `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+                            ${galleryList.map(src => `
+                                <div style="border: 2px solid var(--cz-black); background: var(--cz-concrete-dark); padding: 4px;">
+                                    <img src="${this.escapeHtml(src)}" alt="Gallery item" style="width: 100%; height: 120px; object-fit: cover; display: block;">
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `<div style="color: var(--text-muted);">No gallery images yet.</div>`;
 
                     content.innerHTML = `
-    <div style="max-width: 1200px; margin: 0 auto;">
-        <!-- Profile Header -->
-        <div class="panel" style="margin-bottom: 24px;">
-            <div style="display: flex; gap: 24px; align-items: start;">
-                <div style="flex-shrink: 0;">
-                    ${userAvatar ?
-                        `<img src="${this.escapeHtml(userAvatar)}" alt="${this.escapeHtml(username)}"
-                            style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-blue);">` :
-                        `<div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-blue), var(--primary));
-                            display: flex; align-items: center; justify-content: center; font-size: 3rem; color: white; font-weight: bold;">
-                            ${username.charAt(0).toUpperCase()}
-                        </div>`
-                    }
-                </div>
-                <div style="flex: 1;">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
-                        <div>
-                            <h2 style="margin: 0 0 8px 0; font-size: 2rem;">${this.escapeHtml(username)}</h2>
-                            <p style="color: var(--text-muted); margin: 0;">
-                                <i class="fas fa-calendar-alt"></i> Joined ${joinedDate}
-                            </p>
-                        </div>
-                        ${isOwnProfile ? `
-                            <button class="btn btn-primary" onclick="app.showEditProfile()">
-                                <i class="fas fa-edit"></i> Edit Profile
-                            </button>
-                        ` : ''}
-                    </div>
-                    ${userBio ? `
-                        <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; border-left: 3px solid var(--accent-blue);">
-                            <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">${this.escapeHtml(userBio)}</p>
-                        </div>
-                    ` : (isOwnProfile ? `
-                        <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; border-left: 3px solid var(--text-muted); opacity: 0.7;">
-                            <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; font-style: italic;">
-                                <i class="fas fa-info-circle"></i> Add a bio to tell others about yourself
-                            </p>
-                        </div>
-                    ` : '')}
-                </div>
-            </div>
-        </div>
+                        <div class="profile-shell">
+                            <section class="panel profile-hero" aria-label="Profile overview">
+                                <div class="profile-avatar">
+                                    ${userAvatar
+                                        ? `<img src="${this.escapeHtml(userAvatar)}" alt="${this.escapeHtml(username)}" style="width: 100%; height: 100%; object-fit: cover;">`
+                                        : `<span>${this.escapeHtml(username.charAt(0).toUpperCase())}</span>`
+                                    }
+                                </div>
+                                <div class="profile-meta">
+                                    <div class="chip live"><i class="fas fa-id-card" aria-hidden="true"></i> Explorer Dossier</div>
+                                    <h2>${this.escapeHtml(username)}</h2>
+                                    ${bioHtml}
+                                    <div class="meta-chips" style="margin-top: 10px;">
+                                        <span class="chip"><i class="fas fa-calendar-alt" aria-hidden="true"></i> Joined ${joinedDate}</span>
+                                        <span class="chip"><i class="fas fa-map-pin" aria-hidden="true"></i> ${totalLocations} locations</span>
+                                        <span class="chip signal"><i class="fas fa-shield-alt" aria-hidden="true"></i> ${isOwnProfile ? 'Private controls on' : 'Public profile view'}</span>
+                                    </div>
+                                </div>
+                                <div class="profile-actions">
+                                    ${isOwnProfile ? `
+                                        <button class="btn btn-primary" onclick="app.showEditProfile()"><i class="fas fa-edit" aria-hidden="true"></i> Edit Profile</button>
+                                        <button class="btn" onclick="app.showAddLocationModal()"><i class="fas fa-plus" aria-hidden="true"></i> Add Location</button>
+                                        <button class="btn" onclick="app.viewUserLocations('${targetUserId}')"><i class="fas fa-map-marked-alt" aria-hidden="true"></i> View Locations</button>
+                                    ` : `
+                                        <button class="btn btn-primary" id="follow-btn-${targetUserId}" onclick="app.toggleFollow('${targetUserId}')"><i class="fas fa-user-plus" aria-hidden="true"></i> Follow</button>
+                                        <button class="btn" onclick="app.messageUser('${targetUserId}')"><i class="fas fa-envelope" aria-hidden="true"></i> Message</button>
+                                        <button class="btn" onclick="app.viewUserLocations('${targetUserId}')"><i class="fas fa-map-marked-alt" aria-hidden="true"></i> Locations</button>
+                                    `}
+                                </div>
+                            </section>
 
-        <!-- Stats Overview -->
-        <div class="panel" style="margin-bottom: 24px;">
-            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);"><i class="fas fa-chart-line"></i> Stats</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-blue); margin-bottom: 8px;">${totalLocations}</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Locations</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary); margin-bottom: 8px;" id="profile-followers-count">--</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Followers</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--success); margin-bottom: 8px;" id="profile-following-count">--</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Following</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--warning); margin-bottom: 8px;" id="profile-likes-count">--</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Likes Received</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--danger); margin-bottom: 8px;" id="profile-visits-count">--</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Visits</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-yellow); margin-bottom: 8px;" id="profile-badges-count">--</div>
-                    <div style="color: var(--text-muted); font-size: 0.9rem;">Badges</div>
-                </div>
-            </div>
-        </div>
+                            <section class="panel profile-stats" aria-label="Profile stats">
+                                <div class="stat-grid">
+                                    <div class="stat-card highlight">
+                                        <div class="stat-label">Locations Logged</div>
+                                        <div class="stat-value">${totalLocations}</div>
+                                        <div class="stat-trend">Active contributions</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Followers</div>
+                                        <div class="stat-value" id="profile-followers-count">--</div>
+                                        <div class="stat-trend">Network reach</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Following</div>
+                                        <div class="stat-value" id="profile-following-count">--</div>
+                                        <div class="stat-trend">Explorers tracked</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Likes</div>
+                                        <div class="stat-value" id="profile-likes-count">--</div>
+                                        <div class="stat-trend">Appreciation on posts</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Visits</div>
+                                        <div class="stat-value" id="profile-visits-count">--</div>
+                                        <div class="stat-trend">Check-ins on your spots</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Badges</div>
+                                        <div class="stat-value" id="profile-badges-count">--</div>
+                                        <div class="stat-trend">Earned achievements</div>
+                                    </div>
+                                </div>
+                            </section>
 
-        <!-- Locations Gallery -->
-        <div class="panel" style="margin-bottom: 24px;">
-            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);">
-                <i class="fas fa-map-marked-alt"></i> Locations (${totalLocations})
-            </h3>
-            ${totalLocations > 0 ? `
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;">
-                    ${locations.slice(0, 6).map(loc => `
-                        <div class="location-card" style="cursor: pointer;" onclick="app.showView('map'); ${loc.coordinates && Array.isArray(loc.coordinates) ? `app.map?.setView([${loc.coordinates[0]}, ${loc.coordinates[1]}], 16);` : ''}">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                                <h4 style="margin: 0; font-size: 1.1rem;">${this.escapeHtml(loc.name)}</h4>
-                                <span class="risk risk-${loc.riskLevel}" style="font-size: 0.75rem;">${loc.riskLevel}</span>
+                            <div class="profile-grid">
+                                <section class="panel profile-card" aria-label="Location highlights">
+                                    <h3 style="margin-bottom: 12px;"><i class="fas fa-map-marked-alt" aria-hidden="true"></i> Location Highlights</h3>
+                                    ${highlightHtml}
+                                    ${totalLocations > 4 ? `
+                                        <div style="margin-top: 10px;">
+                                            <button class="btn" type="button" onclick="app.showView('locations')">
+                                                <i class="fas fa-th" aria-hidden="true"></i> View all ${totalLocations}
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                </section>
+
+                                <section class="panel profile-card" aria-label="Activity timeline">
+                                    <h3 style="margin-bottom: 12px;"><i class="fas fa-stream" aria-hidden="true"></i> Activity Log</h3>
+                                    <ul class="timeline">
+                                        ${timelineHtml}
+                                    </ul>
+                                </section>
                             </div>
-                            <p style="color: var(--text-secondary); margin-bottom: 8px; font-size: 0.9rem;">${this.escapeHtml(loc.description).substring(0, 80)}${loc.description.length > 80 ? '...' : ''}</p>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">
-                                <i class="fas fa-tag"></i> ${this.escapeHtml(loc.category)}
-                                ${loc.coordinates && Array.isArray(loc.coordinates) ? ` • <i class="fas fa-map-marker-alt"></i> ${loc.coordinates[0].toFixed(4)}, ${loc.coordinates[1].toFixed(4)}` : ''}
+
+                            <div class="profile-grid">
+                                <section class="panel profile-card" aria-label="Profile links">
+                                    <h3 style="margin-bottom: 12px;"><i class="fas fa-link" aria-hidden="true"></i> Links</h3>
+                                    ${linksHtml}
+                                </section>
+
+                                <section class="panel profile-card" aria-label="Gallery">
+                                    <h3 style="margin-bottom: 12px;"><i class="fas fa-images" aria-hidden="true"></i> Gallery</h3>
+                                    ${galleryHtml}
+                                </section>
                             </div>
+
+                            <section class="panel profile-card" aria-label="Profile feed">
+                                <h3 style="margin-bottom: 12px;"><i class="fas fa-bullhorn" aria-hidden="true"></i> Posts</h3>
+                                ${isOwnProfile ? `
+                                    <div style="margin-bottom: 12px;">
+                                        <textarea class="textarea" id="profile-post-input" rows="3" placeholder="Share an update or drop intel..."></textarea>
+                                        <button class="btn btn-primary" style="margin-top: 8px;" onclick="app.submitProfilePost('${targetUserId}')"><i class="fas fa-paper-plane"></i> Post</button>
+                                    </div>
+                                ` : ''}
+                                <div id="profile-posts-list" class="loading" role="status" aria-live="polite">Loading posts...</div>
+                            </section>
+
+                            <section class="panel profile-card" aria-label="Profile comments">
+                                <h3 style="margin-bottom: 12px;"><i class="fas fa-comments" aria-hidden="true"></i> Comments</h3>
+                                ${this.currentUser ? `
+                                    <div style="margin-bottom: 12px;">
+                                        <textarea class="textarea" id="profile-comment-input" rows="3" placeholder="Leave a note..."></textarea>
+                                        <button class="btn btn-primary" style="margin-top: 8px;" onclick="app.submitProfileComment('${targetUserId}')"><i class="fas fa-comment"></i> Comment</button>
+                                    </div>
+                                ` : '<div style="color: var(--text-muted);">Sign in to comment.</div>'}
+                                <div id="profile-comments-list" class="loading" role="status" aria-live="polite">Loading comments...</div>
+                            </section>
+
+                            <section class="panel profile-card" aria-label="Badges and achievements">
+                                <h3 style="margin-bottom: 12px;"><i class="fas fa-award" aria-hidden="true"></i> Badges & Cred</h3>
+                                <div id="user-badges" class="achievement-grid"></div>
+                            </section>
                         </div>
-                    `).join('')}
-                </div>
-                ${totalLocations > 6 ? `
-                    <div style="text-align: center; margin-top: 16px;">
-                        <button class="btn" onclick="app.showView('locations')">
-                            <i class="fas fa-th"></i> View All ${totalLocations} Locations
-                        </button>
-                    </div>
-                ` : ''}
-            ` : `
-                <div style="text-align: center; padding: 48px; color: var(--text-muted);">
-                    <i class="fas fa-map" style="font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.5;"></i>
-                    <p>${isOwnProfile ? 'No locations yet. Start exploring!' : 'No locations to display.'}</p>
-                </div>
-            `}
-        </div>
-
-        <!-- Images Gallery -->
-        <div class="panel" style="margin-bottom: 24px;">
-            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);">
-                <i class="fas fa-images"></i> Images (0)
-            </h3>
-            <div style="text-align: center; padding: 48px; color: var(--text-muted);">
-                <i class="fas fa-camera" style="font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.5;"></i>
-                <p>No images uploaded yet.</p>
-            </div>
-        </div>
-
-        <!-- Activity Feed -->
-        <div class="panel">
-            <h3 style="margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid var(--border);">
-                <i class="fas fa-stream"></i> Activity
-            </h3>
-            <div style="text-align: center; padding: 48px; color: var(--text-muted);">
-                <i class="fas fa-rss" style="font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.5;"></i>
-                <p>No recent activity to display.</p>
-            </div>
-        </div>
-    </div>
-`;
+                    `;
 
                     // Load and hydrate social stats/badges after rendering
                     this.loadUserSocialStats(targetUserId);
+                    this.loadProfilePosts(targetUserId);
+                    this.loadProfileComments(targetUserId);
                 } catch (error) {
                     console.error('Error loading profile:', error);
                     content.innerHTML = '<div class="error">FAILED TO LOAD INSPECTION REPORT</div>';
@@ -6750,6 +7595,8 @@
                             document.getElementById('profile-display-name').value = userData.displayName || '';
                             document.getElementById('profile-bio').value = userData.bio || '';
                             document.getElementById('profile-photo-url').value = userData.photoURL || '';
+                            document.getElementById('profile-links').value = (userData.links || []).join('\\n');
+                            document.getElementById('profile-gallery').value = (userData.gallery || []).join('\\n');
                         })
                         .catch(error => {
                             console.error('Error loading profile data:', error);
@@ -6773,6 +7620,14 @@
                 }
             }
 
+            hideUserLocationsModal() {
+                const modal = document.getElementById('user-locations-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    modal.setAttribute('aria-hidden', 'true');
+                }
+            }
+
             async handleEditProfile(e) {
                 e.preventDefault();
 
@@ -6784,6 +7639,10 @@
                 const displayName = document.getElementById('profile-display-name').value.trim();
                 const bio = document.getElementById('profile-bio').value.trim();
                 const photoURL = document.getElementById('profile-photo-url').value.trim();
+                const linksRaw = document.getElementById('profile-links').value || '';
+                const galleryRaw = document.getElementById('profile-gallery').value || '';
+                const links = linksRaw.split(/\n+/).map(l => this.sanitizeInput(l.trim())).filter(Boolean);
+                const gallery = galleryRaw.split(/\n+/).map(l => this.sanitizeInput(l.trim())).filter(Boolean);
 
                 const submitBtn = document.getElementById('profile-submit-btn');
                 const originalText = submitBtn.textContent;
@@ -6796,6 +7655,8 @@
                         displayName: displayName || null,
                         bio: bio || null,
                         photoURL: photoURL || null,
+                        links,
+                        gallery,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
 
