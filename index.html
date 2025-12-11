@@ -3498,6 +3498,11 @@
                 this.activeOperations = new Set(); // Track active async operations to prevent duplicate clicks
                 this.notifications = [];
                 this.unreadNotifications = 0;
+                this.userProfiles = new Map(); // Cache of user profile data for social surfaces
+                this.socialFeedItems = []; // Cached social feed items
+                this.followingIds = []; // Cached following list for feed filters
+                this.postLikeState = new Map(); // Track whether the current user liked a social post
+                this.postCommentCache = new Map(); // Cache of recent comments per post
                 this.init();
                 this.initTagSystem();
             }
@@ -4184,11 +4189,24 @@
                                     <i class="fas fa-map" aria-hidden="true"></i>
                                     <span>Back to Map</span>
                                 </button>
-                                <button class="btn btn-primary" onclick="app.createNewPost()" aria-label="Create new post">
-                                    <i class="fas fa-plus" aria-hidden="true"></i>
-                                    <span>New Post</span>
-                                </button>
                             </div>
+                        </div>
+
+                        <div class="panel" id="social-compose-panel" style="margin-bottom: 16px;">
+                            <form id="social-post-form">
+                                <label class="form-label" for="social-post-input">Share an update</label>
+                                <textarea class="textarea" id="social-post-input" rows="3" maxlength="500" placeholder="Drop intel, meetup details, or gear checks..." required></textarea>
+                                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px;">
+                                    <input class="input" type="text" id="social-post-tags" placeholder="Tags (comma separated, optional)" style="flex: 1;">
+                                    <input class="input" type="text" id="social-post-location" placeholder="Related location ID (optional)" style="flex: 1;">
+                                    <button class="btn btn-primary" type="submit" id="social-post-submit">
+                                        <i class="fas fa-paper-plane"></i> Post Update
+                                    </button>
+                                </div>
+                                <div id="social-post-helper" class="cz-text" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 6px;">
+                                    Posts are shared with the explorers you follow and your own feed.
+                                </div>
+                            </form>
                         </div>
 
                         <div class="panel" style="margin-bottom: 24px;">
@@ -4218,6 +4236,10 @@
                             Loading social feed...
                         </div>
                     `;
+                    const postForm = document.getElementById('social-post-form');
+                    if (postForm) {
+                        postForm.addEventListener('submit', (e) => this.handleSocialPostSubmit(e));
+                    }
                     this.loadSocialFeed();
                 }
             }
@@ -4226,7 +4248,10 @@
                 const container = document.getElementById('social-feed-content');
                 if (!container) return;
 
+                const composePanel = document.getElementById('social-compose-panel');
+
                 if (!this.currentUser) {
+                    if (composePanel) composePanel.style.display = 'none';
                     container.innerHTML = `
                         <div style="text-align: center; padding: 48px;">
                             <i class="fas fa-user-lock" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px; display: block;"></i>
@@ -4240,75 +4265,66 @@
                     return;
                 }
 
-                try {
-                    const activities = await this.getSocialActivities();
-                    this.socialActivities = activities.length ? activities : this.getSampleSocialActivities();
-                    this.renderSocialFeed(this.applySocialFilters(this.socialActivities));
-                } catch (error) {
-                    console.error('Error loading social feed:', error);
-                    this.socialActivities = this.getSampleSocialActivities();
-                    this.renderSocialFeed(this.applySocialFilters(this.socialActivities));
-                }
-            }
+                if (composePanel) composePanel.style.display = '';
 
-            async getSocialActivities() {
-                const activities = [];
-                
-                // Get followed users' locations
-                const followedSnapshot = await this.db.collection('user_followers')
-                    .where('followerId', '==', this.currentUser.uid)
-                    .get();
-                
-                const followingIds = followedSnapshot.docs.map(doc => doc.data().followingId);
-                
-                if (followingIds.length > 0) {
-                    const locationSnapshot = await this.db.collection('locations')
-                        .where('createdBy', 'in', followingIds.slice(0, 10)) // Firestore 'in' limit
-                        .orderBy('createdAt', 'desc')
-                        .limit(20)
+                try {
+                    container.innerHTML = '<div class="loading">Building your feed...</div>';
+
+                    const followedSnapshot = await this.db.collection('user_followers')
+                        .where('followerId', '==', this.currentUser.uid)
                         .get();
-                    
-                    locationSnapshot.forEach(doc => {
-                        activities.push({
-                            type: 'location-added',
-                            userId: doc.data().createdBy,
-                            data: doc.data(),
-                            timestamp: doc.data().createdAt,
-                            icon: 'fas fa-map-marker-alt',
-                            message: `added a new location: ${doc.data().name}`
+
+                    this.followingIds = followedSnapshot.docs.map(doc => doc.data().followingId);
+                    const authorIds = Array.from(new Set([this.currentUser.uid, ...this.followingIds])).slice(0, 30);
+
+                    const postPromises = [];
+                    if (authorIds.length) {
+                        for (let i = 0; i < authorIds.length; i += 10) {
+                            const chunk = authorIds.slice(i, i + 10);
+                            postPromises.push(
+                                this.db.collection('forum')
+                                    .where('createdBy', 'in', chunk)
+                                    .orderBy('createdAt', 'desc')
+                                    .limit(30)
+                                    .get()
+                            );
+                        }
+                    } else {
+                        postPromises.push(
+                            this.db.collection('forum')
+                                .orderBy('createdAt', 'desc')
+                                .limit(30)
+                                .get()
+                        );
+                    }
+
+                    const postSnapshots = await Promise.all(postPromises);
+                    const dedup = new Map();
+                    postSnapshots.forEach(snapshot => {
+                        snapshot.forEach(doc => {
+                            const data = { id: doc.id, type: doc.data().type || 'post', ...doc.data() };
+                            dedup.set(doc.id, data);
                         });
                     });
+                    const posts = Array.from(dedup.values());
+
+                    const uniqueAuthors = Array.from(new Set(posts.map(p => p.createdBy).filter(Boolean)));
+                    await Promise.all(uniqueAuthors.map(id => this.getUserProfile(id)));
+
+                    posts.sort((a, b) => {
+                        const aTime = a.createdAt?.toDate ? a.createdAt.toDate() : a.createdAt;
+                        const bTime = b.createdAt?.toDate ? b.createdAt.toDate() : b.createdAt;
+                        return (bTime || 0) - (aTime || 0);
+                    });
+
+                    this.socialFeedItems = posts;
+                    this.renderSocialFeed(this.applySocialFilters(this.socialFeedItems));
+                    await this.hydrateSocialEngagement(this.socialFeedItems);
+                } catch (error) {
+                    console.error('Error loading social feed:', error);
+                    this.socialFeedItems = [];
+                    container.innerHTML = '<div class="error">Failed to load social feed</div>';
                 }
-
-                // Get comments on user's locations
-                const commentsSnapshot = await this.db.collection('location_comments')
-                    .where('flagged', '==', false)
-                    .orderBy('createdAt', 'desc')
-                    .limit(15)
-                    .get();
-                
-                commentsSnapshot.forEach(doc => {
-                    const comment = doc.data();
-                    if (comment.userId !== this.currentUser.uid) {
-                        activities.push({
-                            type: 'comment',
-                            userId: comment.userId,
-                            data: comment,
-                            timestamp: comment.createdAt,
-                            icon: 'fas fa-comment',
-                            message: 'commented on a location'
-                        });
-                    }
-                });
-
-                const getTime = (ts) => {
-                    if (!ts) return 0;
-                    if (ts.toMillis) return ts.toMillis();
-                    if (ts.toDate) return ts.toDate().getTime();
-                    return new Date(ts).getTime();
-                };
-
-                return activities.sort((a, b) => getTime(b.timestamp) - getTime(a.timestamp));
             }
 
             renderSocialFeed(activities) {
@@ -4326,82 +4342,65 @@
                     return;
                 }
 
-                container.innerHTML = activities.map(activity => `
-                    <div class="social-feed-item">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                            <div class="activity-icon" style="width: 32px; height: 32px;">
-                                <i class="${activity.icon}"></i>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: bold; color: var(--cz-yellow);">
-                                    Explorer ${activity.userId.substring(0, 8)}
+                container.innerHTML = activities.map(activity => {
+                    const author = this.userProfiles.get(activity.createdBy) || {};
+                    const displayName = this.escapeHtml(author.displayName || `Explorer ${activity.createdBy?.substring(0, 6) || ''}`);
+                    const timestamp = activity.createdAt?.toDate ? activity.createdAt.toDate() : activity.createdAt;
+                    const likeCount = activity.likesCount ?? 0;
+                    const commentCount = activity.commentCount ?? 0;
+                    const liked = this.postLikeState.get(activity.id);
+
+                    return `
+                        <div class="social-feed-item" id="social-item-${activity.id}">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                <div class="activity-icon" style="width: 32px; height: 32px;">
+                                    ${author.photoURL
+                                        ? `<img src="${this.escapeHtml(author.photoURL)}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%;">`
+                                        : `<i class="fas fa-user-astronaut"></i>`}
                                 </div>
-                                <div class="activity-time">
-                                    ${this.timeAgo(activity.timestamp?.toDate ? activity.timestamp.toDate() : activity.timestamp)}
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; color: var(--cz-yellow);">${displayName}</div>
+                                    <div class="activity-time">${this.timeAgo(timestamp)}</div>
                                 </div>
-                            </div>
-                            <div class="social-action-buttons">
-                                ${activity.type === 'location-added' ? `
-                                    <button class="social-btn" onclick="app.showLocationDetailModal('${activity.data.id}', ${JSON.stringify(activity.data).replace(/"/g, '&quot;')})">
-                                        <i class="fas fa-eye"></i> View
+                                <div class="social-action-buttons">
+                                    <button class="social-btn ${liked ? 'liked' : ''}" id="post-like-${activity.id}" onclick="app.togglePostLike('${activity.id}')">
+                                        <i class="fas fa-heart"></i> <span id="post-like-count-${activity.id}">${likeCount}</span>
                                     </button>
-                                ` : ''}
-                                <button class="social-btn" onclick="app.followUser('${activity.userId}')">
-                                    <i class="fas fa-user-plus"></i> Follow
-                                </button>
+                                    <button class="social-btn" onclick="app.togglePostComments('${activity.id}')">
+                                        <i class="fas fa-comment-dots"></i> <span id="post-comment-count-${activity.id}">${commentCount}</span>
+                                    </button>
+                                    <button class="social-btn" onclick="app.followUser('${activity.createdBy}')">
+                                        <i class="fas fa-user-plus"></i> Follow
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <div style="margin-left: 44px;">
-                            <p style="margin: 0; color: var(--text-secondary);">${activity.message}</p>
-                            ${activity.data.name ? `
-                                <div style="margin-top: 8px; padding: 8px; background: var(--cz-concrete-dark); border: 1px solid var(--cz-black);">
-                                    <strong>${this.escapeHtml(activity.data.name)}</strong>
-                                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px;">
-                                        ${this.escapeHtml(activity.data.description || '').substring(0, 120)}${(activity.data.description || '').length > 120 ? '...' : ''}
+                            <div style="margin-left: 44px;">
+                                <p style="margin: 0; color: var(--text-secondary); white-space: pre-wrap;">${this.escapeHtml(activity.body || activity.message || '')}</p>
+                                ${activity.tags?.length ? `
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+                                        ${activity.tags.slice(0, 6).map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('')}
+                                    </div>
+                                ` : ''}
+                                ${activity.locationId ? `
+                                    <div style="margin-top: 8px;">
+                                        <button class="social-btn checked-in" onclick="app.viewPostLocation('${activity.id}','${activity.locationId}')">
+                                            <i class="fas fa-map-marker-alt"></i> View related location
+                                        </button>
+                                    </div>
+                                ` : ''}
+                                <div id="post-comments-${activity.id}" style="margin-top: 10px; display: none;">
+                                    <div id="post-comments-list-${activity.id}" class="loading">Loading comments...</div>
+                                    <div style="margin-top: 8px;">
+                                        <textarea class="textarea" id="post-comment-input-${activity.id}" rows="2" placeholder="Add a comment..."></textarea>
+                                        <button class="btn btn-primary" style="margin-top: 6px;" onclick="app.submitPostComment('${activity.id}')">
+                                            <i class="fas fa-paper-plane"></i> Comment
+                                        </button>
                                     </div>
                                 </div>
-                            ` : ''}
+                            </div>
                         </div>
-                    </div>
-                `).join('');
-            }
-
-            getSampleSocialActivities() {
-                const now = Date.now();
-                return [
-                    {
-                        type: 'location-added',
-                        userId: 'alex-rivera',
-                        data: { id: 'loc-metro', name: 'Old Metro Tunnels', description: 'Hidden service corridor under the central station with amazing acoustics.' },
-                        timestamp: new Date(now - 5 * 60 * 1000),
-                        icon: 'fas fa-map-marker-alt',
-                        message: 'added a new location: Old Metro Tunnels'
-                    },
-                    {
-                        type: 'comment',
-                        userId: 'rae-night',
-                        data: { id: 'c1', text: 'Meetup this weekend at the rooftops?', related: 'Skyline Observation Deck' },
-                        timestamp: new Date(now - 35 * 60 * 1000),
-                        icon: 'fas fa-comment',
-                        message: 'commented on Skyline Observation Deck'
-                    },
-                    {
-                        type: 'achievement',
-                        userId: 'vex-crawler',
-                        data: { badge: 'Explorer Lv. 2', detail: '10 verified locations visited' },
-                        timestamp: new Date(now - 2 * 60 * 60 * 1000),
-                        icon: 'fas fa-medal',
-                        message: 'earned Explorer Lv. 2'
-                    },
-                    {
-                        type: 'group',
-                        userId: 'team-ghostline',
-                        data: { name: 'Ghostline Collective', update: 'Scheduled a night run through the river tunnels.' },
-                        timestamp: new Date(now - 4 * 60 * 60 * 1000),
-                        icon: 'fas fa-users',
-                        message: 'posted an update in Ghostline Collective'
-                    }
-                ];
+                    `;
+                }).join('');
             }
 
             applySocialFilters(source = []) {
@@ -4412,20 +4411,27 @@
 
                 if (filter !== 'all') {
                     items = items.filter(item => {
-                        if (filter === 'following') return item.type === 'location-added' || item.type === 'comment';
-                        if (filter === 'location-updates') return item.type === 'location-added';
-                        if (filter === 'social') return item.type === 'comment' || item.type === 'group';
+                        if (filter === 'following') {
+                            return (this.followingIds || []).includes(item.createdBy);
+                        }
+                        if (filter === 'location-updates') return Boolean(item.locationId);
+                        if (filter === 'social') return !item.locationId;
                         if (filter === 'achievements') return item.type === 'achievement';
                         return true;
                     });
                 }
 
                 items.sort((a, b) => {
-                    if (sort === 'popular' || sort === 'engagement') {
-                        return (b.data?.likes || 0) - (a.data?.likes || 0);
-                    }
-                    const aTime = a.timestamp?.toDate ? a.timestamp.toDate() : a.timestamp;
-                    const bTime = b.timestamp?.toDate ? b.timestamp.toDate() : b.timestamp;
+                    const aLikes = a.likesCount ?? 0;
+                    const bLikes = b.likesCount ?? 0;
+                    const aComments = a.commentCount ?? 0;
+                    const bComments = b.commentCount ?? 0;
+
+                    if (sort === 'popular') return bLikes - aLikes;
+                    if (sort === 'engagement') return (bLikes + bComments) - (aLikes + aComments);
+
+                    const aTime = a.createdAt?.toDate ? a.createdAt.toDate() : a.createdAt;
+                    const bTime = b.createdAt?.toDate ? b.createdAt.toDate() : b.createdAt;
                     return (bTime || 0) - (aTime || 0);
                 });
 
@@ -5007,10 +5013,13 @@
                 this.activeOperations.add(opKey);
 
                 try {
-                    await this.db.collection('profile_posts').add({
-                        userId,
-                        text: this.sanitizeInput(text.trim()),
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    await this.db.collection('forum').add({
+                        type: 'post',
+                        body: this.sanitizeInput(text.trim()),
+                        createdBy: this.currentUser.uid,
+                        targetUserId: userId,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     this.showToast('Posted to your feed', 'success');
                     this.loadProfilePosts(userId);
@@ -5028,14 +5037,15 @@
                 container.innerHTML = '<div class="loading">Loading posts...</div>';
 
                 try {
-                    const snapshot = await this.db.collection('profile_posts')
-                        .where('userId', '==', userId)
+                    const snapshot = await this.db.collection('forum')
+                        .where('createdBy', '==', userId)
                         .orderBy('createdAt', 'desc')
                         .limit(25)
                         .get();
 
                     const posts = [];
                     snapshot.forEach(doc => posts.push({ id: doc.id, ...doc.data() }));
+                    await this.getUserProfile(userId);
                     this.renderProfilePosts(posts);
                 } catch (error) {
                     console.error('Error loading profile posts:', error);
@@ -5055,10 +5065,10 @@
                 container.innerHTML = posts.map(post => `
                     <div class="comment">
                         <div class="comment-header">
-                            <span class="comment-author">Update</span>
+                            <span class="comment-author">${this.escapeHtml(this.userProfiles.get(post.createdBy)?.displayName || 'Update')}</span>
                             <span class="comment-time">${this.timeAgo(post.createdAt?.toDate())}</span>
                         </div>
-                        <div class="comment-text">${this.escapeHtml(post.text)}</div>
+                        <div class="comment-text">${this.escapeHtml(post.body || post.text || '')}</div>
                     </div>
                 `).join('');
             }
@@ -5085,9 +5095,10 @@
                 this.activeOperations.add(opKey);
 
                 try {
-                    await this.db.collection('profile_comments').add({
-                        targetUserId,
-                        userId: this.currentUser.uid,
+                    await this.db.collection('comments').add({
+                        targetId: targetUserId,
+                        targetType: 'profile',
+                        createdBy: this.currentUser.uid,
                         text: this.sanitizeInput(text.trim()),
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
@@ -5107,14 +5118,21 @@
                 container.innerHTML = '<div class="loading">Loading comments...</div>';
 
                 try {
-                    const snapshot = await this.db.collection('profile_comments')
-                        .where('targetUserId', '==', targetUserId)
+                    const snapshot = await this.db.collection('comments')
+                        .where('targetId', '==', targetUserId)
+                        .where('targetType', '==', 'profile')
                         .orderBy('createdAt', 'desc')
                         .limit(25)
                         .get();
 
                     const comments = [];
-                    snapshot.forEach(doc => comments.push({ id: doc.id, ...doc.data() }));
+                    const authors = new Set();
+                    snapshot.forEach(doc => {
+                        const data = { id: doc.id, ...doc.data() };
+                        comments.push(data);
+                        if (data.createdBy) authors.add(data.createdBy);
+                    });
+                    await Promise.all(Array.from(authors).map(id => this.getUserProfile(id)));
                     this.renderProfileComments(comments);
                 } catch (error) {
                     console.error('Error loading profile comments:', error);
@@ -5134,7 +5152,7 @@
                 container.innerHTML = comments.map(comment => `
                     <div class="comment">
                         <div class="comment-header">
-                            <span class="comment-author">${this.escapeHtml(comment.userId === this.currentUser?.uid ? 'You' : 'Explorer')}</span>
+                            <span class="comment-author">${this.escapeHtml(comment.createdBy === this.currentUser?.uid ? 'You' : (this.userProfiles.get(comment.createdBy)?.displayName || 'Explorer'))}</span>
                             <span class="comment-time">${this.timeAgo(comment.createdAt?.toDate())}</span>
                         </div>
                         <div class="comment-text">${this.escapeHtml(comment.text)}</div>
@@ -5501,22 +5519,327 @@
 
             // Utility methods for social features
             async createNewPost() {
-                const text = prompt('Share an update with the crew:');
-                if (!text) return;
+                // Focus the composer when called programmatically
+                if (!this.currentUser) {
+                    this.showToast('Sign in to post updates', 'warning');
+                    this.handleAuth();
+                    return;
+                }
+                this.showView('social');
+                setTimeout(() => document.getElementById('social-post-input')?.focus(), 150);
+            }
 
-                const sanitized = this.sanitizeInput(text);
-                const activity = {
-                    type: 'status',
-                    userId: this.currentUser?.uid || 'you',
-                    data: { text: sanitized, likes: 0 },
-                    timestamp: new Date(),
-                    icon: 'fas fa-bullhorn',
-                    message: sanitized
+            async handleSocialPostSubmit(e) {
+                e.preventDefault();
+
+                if (!this.currentUser) {
+                    this.showToast('Sign in to post updates', 'warning');
+                    this.handleAuth();
+                    return;
+                }
+
+                const textArea = document.getElementById('social-post-input');
+                const tagsInput = document.getElementById('social-post-tags');
+                const locationInput = document.getElementById('social-post-location');
+                const submitBtn = document.getElementById('social-post-submit');
+
+                const rawBody = textArea?.value || '';
+                const body = this.sanitizeInput(rawBody);
+
+                if (!body) {
+                    this.showToast('Post cannot be empty', 'warning');
+                    textArea?.focus();
+                    return;
+                }
+
+                const tags = (tagsInput?.value || '')
+                    .split(',')
+                    .map(t => this.sanitizeInput(t.trim()))
+                    .filter(Boolean)
+                    .slice(0, 8);
+
+                const locationId = this.sanitizeInput(locationInput?.value?.trim() || '');
+
+                const payload = {
+                    body,
+                    tags,
+                    locationId: locationId || null,
+                    type: 'post',
+                    createdBy: this.currentUser.uid,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
-                this.socialActivities = [activity, ...(this.socialActivities || [])];
-                this.renderSocialFeed(this.applySocialFilters(this.socialActivities));
-                this.showToast('Post published to your feed', 'success');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
+                }
+
+                try {
+                    await this.db.collection('forum').add(payload);
+                    textArea.value = '';
+                    if (tagsInput) tagsInput.value = '';
+                    if (locationInput) locationInput.value = '';
+                    this.showToast('Post published to your feed', 'success');
+                    await this.loadSocialFeed();
+                } catch (error) {
+                    console.error('Error creating post:', error);
+                    this.showToast('Failed to publish post', 'error');
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post Update';
+                    }
+                }
+            }
+
+            async getUserProfile(userId) {
+                if (!userId) return {};
+                if (this.userProfiles.has(userId)) {
+                    return this.userProfiles.get(userId);
+                }
+
+                try {
+                    const doc = await this.db.collection('users').doc(userId).get();
+                    const data = doc.exists ? doc.data() : {};
+                    const profile = {
+                        displayName: data.displayName || data.email || 'Urban Explorer',
+                        photoURL: data.photoURL || null
+                    };
+                    this.userProfiles.set(userId, profile);
+                    return profile;
+                } catch (error) {
+                    console.error('Error loading profile for social feed:', error);
+                    const fallback = { displayName: 'Urban Explorer', photoURL: null };
+                    this.userProfiles.set(userId, fallback);
+                    return fallback;
+                }
+            }
+
+            async hydrateSocialEngagement(items = []) {
+                if (!items.length) return;
+
+                const ids = items.map(item => item.id);
+                // Firestore `in` queries accept max 10; chunk to limit network
+                const chunk = (arr, size) => {
+                    const res = [];
+                    for (let i = 0; i < arr.length; i += size) {
+                        res.push(arr.slice(i, i + size));
+                    }
+                    return res;
+                };
+
+                try {
+                    const likeChunks = chunk(ids, 10);
+                    for (const set of likeChunks) {
+                        const likeSnap = await this.db.collection('post_likes')
+                            .where('postId', 'in', set)
+                            .get();
+
+                        const likeCounts = {};
+                        likeSnap.forEach(doc => {
+                            const data = doc.data();
+                            likeCounts[data.postId] = (likeCounts[data.postId] || 0) + 1;
+                            if (data.userId === this.currentUser?.uid) {
+                                this.postLikeState.set(data.postId, true);
+                            }
+                        });
+
+                        set.forEach(id => {
+                            const count = likeCounts[id] || 0;
+                            this.updateSocialLikeUI(id, count, this.postLikeState.get(id));
+                            const item = this.socialFeedItems?.find(p => p.id === id);
+                            if (item) item.likesCount = count;
+                        });
+                    }
+
+                    for (const set of chunk(ids, 5)) {
+                        for (const postId of set) {
+                            const commentsSnap = await this.db.collection('comments')
+                                .where('targetId', '==', postId)
+                                .get();
+                            const count = commentsSnap.size;
+                            const item = this.socialFeedItems?.find(p => p.id === postId);
+                            if (item) item.commentCount = count;
+                            const countEl = document.getElementById(`post-comment-count-${postId}`);
+                            if (countEl) countEl.textContent = count;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error hydrating social engagement:', error);
+                }
+            }
+
+            updateSocialLikeUI(postId, likeCount = 0, liked = false) {
+                const likeBtn = document.getElementById(`post-like-${postId}`);
+                const likeCountEl = document.getElementById(`post-like-count-${postId}`);
+                if (likeBtn) likeBtn.classList.toggle('liked', Boolean(liked));
+                if (likeCountEl) likeCountEl.textContent = likeCount;
+            }
+
+            async togglePostLike(postId) {
+                if (!this.currentUser) {
+                    this.showToast('Sign in to like posts', 'warning');
+                    this.handleAuth();
+                    return;
+                }
+
+                const opKey = `post-like-${postId}`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    const alreadyLiked = this.postLikeState.get(postId);
+
+                    if (alreadyLiked) {
+                        const snapshot = await this.db.collection('post_likes')
+                            .where('userId', '==', this.currentUser.uid)
+                            .where('postId', '==', postId)
+                            .limit(1)
+                            .get();
+                        snapshot.forEach(doc => doc.ref.delete());
+                        this.postLikeState.set(postId, false);
+                    } else {
+                        await this.db.collection('post_likes').add({
+                            userId: this.currentUser.uid,
+                            postId,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        this.postLikeState.set(postId, true);
+                    }
+
+                    // Refresh counts for this post only
+                    const countSnap = await this.db.collection('post_likes')
+                        .where('postId', '==', postId)
+                        .get();
+                    const likeCount = countSnap.size;
+                    this.updateSocialLikeUI(postId, likeCount, this.postLikeState.get(postId));
+
+                    const item = this.socialFeedItems?.find(p => p.id === postId);
+                    if (item) item.likesCount = likeCount;
+                } catch (error) {
+                    console.error('Error toggling post like:', error);
+                    this.showToast('Failed to update like', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            togglePostComments(postId) {
+                const wrap = document.getElementById(`post-comments-${postId}`);
+                if (!wrap) return;
+                const isVisible = wrap.style.display === 'block';
+                wrap.style.display = isVisible ? 'none' : 'block';
+                if (!isVisible) {
+                    this.loadPostComments(postId);
+                }
+            }
+
+            async viewPostLocation(postId, locationId) {
+                if (!locationId) return;
+                try {
+                    const doc = await this.db.collection('locations').doc(locationId).get();
+                    if (doc.exists) {
+                        this.showLocationDetailModal(locationId, { id: locationId, ...doc.data() });
+                    } else {
+                        this.showToast('Related location not found', 'warning');
+                    }
+                } catch (error) {
+                    console.error(`Error opening location for post ${postId}:`, error);
+                    this.showToast('Unable to open related location', 'error');
+                }
+            }
+
+            async submitPostComment(postId) {
+                const input = document.getElementById(`post-comment-input-${postId}`);
+                if (!input) return;
+                const text = input.value.trim();
+                if (!text) {
+                    this.showToast('Comment cannot be empty', 'warning');
+                    return;
+                }
+                await this.addPostComment(postId, text);
+                input.value = '';
+                await this.loadPostComments(postId);
+            }
+
+            async addPostComment(postId, text) {
+                if (!this.currentUser) {
+                    this.showToast('Sign in to comment', 'warning');
+                    this.handleAuth();
+                    return;
+                }
+
+                const opKey = `post-comment-${postId}`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    await this.db.collection('comments').add({
+                        targetId: postId,
+                        targetType: 'post',
+                        createdBy: this.currentUser.uid,
+                        text: this.sanitizeInput(text),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    this.showToast('Comment added', 'success');
+                } catch (error) {
+                    console.error('Error adding post comment:', error);
+                    this.showToast('Failed to add comment', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async loadPostComments(postId) {
+                const container = document.getElementById(`post-comments-list-${postId}`);
+                if (!container) return;
+
+                container.innerHTML = '<div class="loading">Loading comments...</div>';
+
+                try {
+                    const snapshot = await this.db.collection('comments')
+                        .where('targetId', '==', postId)
+                        .where('targetType', '==', 'post')
+                        .orderBy('createdAt', 'desc')
+                        .limit(20)
+                        .get();
+
+                    const comments = [];
+                    snapshot.forEach(doc => comments.push({ id: doc.id, ...doc.data() }));
+                    const uniqueAuthors = Array.from(new Set(comments.map(c => c.createdBy).filter(Boolean)));
+                    await Promise.all(uniqueAuthors.map(id => this.getUserProfile(id)));
+                    this.postCommentCache.set(postId, comments);
+                    this.renderPostComments(postId, comments);
+
+                    const countEl = document.getElementById(`post-comment-count-${postId}`);
+                    if (countEl) countEl.textContent = comments.length;
+                    const item = this.socialFeedItems?.find(p => p.id === postId);
+                    if (item) item.commentCount = comments.length;
+                } catch (error) {
+                    console.error('Error loading post comments:', error);
+                    container.innerHTML = '<div class="error">Failed to load comments</div>';
+                }
+            }
+
+            renderPostComments(postId, comments) {
+                const container = document.getElementById(`post-comments-list-${postId}`);
+                if (!container) return;
+
+                if (!comments.length) {
+                    container.innerHTML = '<div style="color: var(--text-muted);">No comments yet. Be the first!</div>';
+                    return;
+                }
+
+                container.innerHTML = comments.map(comment => `
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span class="comment-author">${this.escapeHtml(this.userProfiles.get(comment.createdBy)?.displayName || 'Explorer')}</span>
+                            <span class="comment-time">${this.timeAgo(comment.createdAt?.toDate ? comment.createdAt.toDate() : comment.createdAt)}</span>
+                        </div>
+                        <div class="comment-text">${this.escapeHtml(comment.text)}</div>
+                    </div>
+                `).join('');
             }
 
             async startMission(missionId) {
@@ -5630,12 +5953,12 @@
             }
 
             filterSocialFeed() {
-                const filtered = this.applySocialFilters(this.socialActivities || []);
+                const filtered = this.applySocialFilters(this.socialFeedItems || []);
                 this.renderSocialFeed(filtered);
             }
 
             sortSocialFeed() {
-                const filtered = this.applySocialFilters(this.socialActivities || []);
+                const filtered = this.applySocialFilters(this.socialFeedItems || []);
                 this.renderSocialFeed(filtered);
             }
             async handleAddressLookup() {

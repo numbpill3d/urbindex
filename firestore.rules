@@ -45,7 +45,7 @@ service cloud.firestore {
     // Comments - authenticated users can read all comments
     // Users can only create, update, or delete their own comments
     match /comments/{commentId} {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow create: if request.auth != null && request.resource.data.createdBy == request.auth.uid;
       allow update: if request.auth != null && resource.data.createdBy == request.auth.uid;
       allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
@@ -126,6 +126,14 @@ service cloud.firestore {
     // Users can only manage their own likes
     match /location_likes/{likeId} {
       allow read: if true; // Allow public read for like counts
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Post likes - authenticated users can read all likes
+    // Users can only manage their own likes
+    match /post_likes/{likeId} {
+      allow read: if true;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
       allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
