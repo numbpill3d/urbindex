@@ -1819,6 +1819,20 @@
                 font-size: 16px;
             }
 
+            .social-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .social-hero {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .social-hero-actions {
+                width: 100%;
+                align-items: flex-start;
+            }
+
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -2045,10 +2059,15 @@
             animation: fadeInOut 1.5s ease-in-out infinite;
         }
 
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+}
 
         /* Logo Glow Animation */
         .logo {
@@ -2701,6 +2720,261 @@
 
         .profile-card h3 {
             margin: 0 0 10px 0;
+        }
+
+        /* Social + Feed polish */
+        .social-hero {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(255, 208, 0, 0.14), rgba(30, 58, 95, 0.2));
+            border: 3px solid var(--cz-black);
+            box-shadow: var(--shadow-industrial);
+        }
+
+        .social-hero-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .social-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .social-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .mini-stat {
+            background: var(--bg-secondary);
+            border: 2px solid var(--cz-black);
+            padding: 10px;
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .mini-label {
+            font-family: var(--font-blueprint);
+            font-size: 10px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .mini-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--cz-yellow);
+            text-shadow: 2px 2px 0 var(--cz-black);
+            line-height: 1.2;
+        }
+
+        .social-compose-panel {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-compose-panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,208,0,0.05), transparent 55%);
+            pointer-events: none;
+        }
+
+        .composer-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            color: var(--text-muted);
+            font-family: var(--font-blueprint);
+            font-size: 0.9rem;
+        }
+
+        .input-warning {
+            border-color: var(--cz-orange);
+        }
+
+        .social-filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            align-items: end;
+        }
+
+        .social-feed-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .social-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--cz-black);
+            padding: 12px;
+            box-shadow: 3px 3px 0 var(--cz-black);
+        }
+
+        .social-card-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .social-author {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .social-author img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--cz-black);
+        }
+
+        .social-post-body {
+            margin: 10px 0;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+        }
+
+        .social-meta-line {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .social-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            background: var(--cz-black);
+            color: var(--cz-yellow);
+            border: 2px solid var(--cz-black);
+            font-family: var(--font-blueprint);
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .social-chip.light {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border-color: var(--cz-black);
+        }
+
+        .social-action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 2px solid var(--cz-black);
+            padding: 6px 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-blueprint);
+            font-size: 11px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .social-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--cz-yellow);
+        }
+
+        .social-btn.liked,
+        .social-btn.following {
+            background: var(--cz-yellow);
+            color: var(--cz-black);
+            border-color: var(--cz-black);
+        }
+
+        .social-btn.checked-in {
+            background: var(--cz-blueprint);
+            color: white;
+            border-color: var(--cz-black);
+        }
+
+        .social-skeleton {
+            display: grid;
+            gap: 8px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border: 2px dashed var(--cz-concrete);
+        }
+
+        .skeleton-row {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .skeleton-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #2d2d2d 0%, #3a3a3a 50%, #2d2d2d 100%);
+            background-size: 400px 100%;
+            animation: shimmer 1.2s infinite;
+        }
+
+        .skeleton-line {
+            height: 12px;
+            background: linear-gradient(90deg, #2d2d2d 0%, #3a3a3a 50%, #2d2d2d 100%);
+            border-radius: 4px;
+            background-size: 400px 100%;
+            animation: shimmer 1.2s infinite;
+        }
+
+        .profile-feed-item {
+            background: var(--bg-secondary);
+            border: 2px solid var(--cz-black);
+            padding: 10px;
+            box-shadow: 2px 2px 0 var(--cz-black);
+            margin-bottom: 10px;
+        }
+
+        .profile-feed-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        .profile-feed-body {
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+        }
+
+        .chip.mini {
+            padding: 4px 8px;
+            font-size: 9px;
         }
 
         .highlight-grid {
@@ -3503,6 +3777,8 @@
                 this.followingIds = []; // Cached following list for feed filters
                 this.postLikeState = new Map(); // Track whether the current user liked a social post
                 this.postCommentCache = new Map(); // Cache of recent comments per post
+                this.socialSearchTerm = '';
+                this.lastSocialRefresh = null;
                 this.init();
                 this.initTagSystem();
             }
@@ -4182,65 +4458,246 @@
                 const view = document.getElementById('social-view-content');
                 if (view) {
                     view.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                            <h2>Social Feed</h2>
-                            <div style="display: flex; gap: 12px;">
-                                <button class="btn" onclick="app.showView('map')" aria-label="Return to map view">
-                                    <i class="fas fa-map" aria-hidden="true"></i>
-                                    <span>Back to Map</span>
-                                </button>
+                        <section class="panel social-hero" aria-label="Network activity overview">
+                            <div>
+                                <div class="cz-label" style="margin-bottom: 6px;">Network Ops</div>
+                                <h2 style="margin-bottom: 6px;">Social Feed</h2>
+                                <p class="cz-text" style="color: var(--text-secondary); max-width: 560px;">
+                                    Field intel, meetups, and location drops from your crew. Filters and tags keep things sharp.
+                                </p>
+                                <div class="social-metrics">
+                                    <div class="mini-stat">
+                                        <div class="mini-label">Posts</div>
+                                        <div class="mini-value" id="social-post-count">--</div>
+                                    </div>
+                                    <div class="mini-stat">
+                                        <div class="mini-label">Crew watched</div>
+                                        <div class="mini-value" id="social-following-count">--</div>
+                                    </div>
+                                    <div class="mini-stat">
+                                        <div class="mini-label">Contributors</div>
+                                        <div class="mini-value" id="social-authors-count">--</div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="panel" id="social-compose-panel" style="margin-bottom: 16px;">
-                            <form id="social-post-form">
-                                <label class="form-label" for="social-post-input">Share an update</label>
-                                <textarea class="textarea" id="social-post-input" rows="3" maxlength="500" placeholder="Drop intel, meetup details, or gear checks..." required></textarea>
-                                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px;">
-                                    <input class="input" type="text" id="social-post-tags" placeholder="Tags (comma separated, optional)" style="flex: 1;">
-                                    <input class="input" type="text" id="social-post-location" placeholder="Related location ID (optional)" style="flex: 1;">
-                                    <button class="btn btn-primary" type="submit" id="social-post-submit">
-                                        <i class="fas fa-paper-plane"></i> Post Update
+                            <div class="social-hero-actions">
+                                <div id="social-last-updated" class="cz-text" style="color: var(--text-muted);">Waiting for sync...</div>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+                                    <button class="btn btn-primary" type="button" onclick="app.createNewPost()">
+                                        <i class="fas fa-bullhorn"></i> New Post
+                                    </button>
+                                    <button class="btn" id="social-refresh-btn" type="button">
+                                        <i class="fas fa-sync"></i> Refresh
+                                    </button>
+                                    <button class="btn" onclick="app.showView('map')" aria-label="Return to map view">
+                                        <i class="fas fa-map" aria-hidden="true"></i>
+                                        <span>Back to Map</span>
                                     </button>
                                 </div>
-                                <div id="social-post-helper" class="cz-text" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 6px;">
-                                    Posts are shared with the explorers you follow and your own feed.
+                            </div>
+                        </section>
+
+                        <div class="social-grid">
+                            <section class="panel social-compose-panel" id="social-compose-panel" aria-label="Create a new post">
+                                <div class="cz-label" style="margin-bottom: 6px;">Share an update</div>
+                                <form id="social-post-form">
+                                    <textarea class="textarea" id="social-post-input" rows="3" maxlength="500" placeholder="Drop intel, meetup details, or gear checks..." required></textarea>
+                                    <div class="composer-meta">
+                                        <span id="social-char-count">0/500</span>
+                                        <span id="social-post-helper" class="cz-text" style="color: var(--text-muted); font-size: 0.85rem;">
+                                            Posts are shared with the explorers you follow and your own feed.
+                                        </span>
+                                    </div>
+                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px;">
+                                        <input class="input" type="text" id="social-post-tags" placeholder="Tags (comma separated, optional)" style="flex: 1; min-width: 160px;">
+                                        <input class="input" type="text" id="social-post-location" placeholder="Related location ID (optional)" style="flex: 1; min-width: 160px;">
+                                        <button class="btn btn-primary" type="submit" id="social-post-submit">
+                                            <i class="fas fa-paper-plane"></i> Post Update
+                                        </button>
+                                    </div>
+                                </form>
+                            </section>
+
+                            <section class="panel social-filter-panel" aria-label="Filter social feed">
+                                <h3 style="margin-bottom: 10px;">Filters</h3>
+                                <div class="social-filter-row">
+                                    <div class="form-group" style="margin: 0;">
+                                        <label for="social-filter" class="form-label">Filter Feed</label>
+                                        <select class="select" id="social-filter" style="margin: 0;" onchange="app.filterSocialFeed()">
+                                            <option value="all">All Activity</option>
+                                            <option value="following">Following</option>
+                                            <option value="location-updates">Location Updates</option>
+                                            <option value="social">Social Actions</option>
+                                            <option value="achievements">Achievements</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="margin: 0;">
+                                        <label for="sort-feed" class="form-label">Sort By</label>
+                                        <select class="select" id="sort-feed" style="margin: 0;" onchange="app.sortSocialFeed()">
+                                            <option value="recent">Most Recent</option>
+                                            <option value="popular">Most Popular</option>
+                                            <option value="engagement">Most Engaged</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </form>
+
+                                <div class="form-group" style="margin: 12px 0 0 0;">
+                                    <label for="social-search" class="form-label">Search</label>
+                                    <input class="input" type="search" id="social-search" placeholder="Search text or #tags" autocomplete="off">
+                                    <div class="cz-text" id="social-active-filter" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">
+                                        Showing full feed
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 10px;">
+                                    <div class="cz-label" style="margin-bottom: 6px;">Trending tags</div>
+                                    <div id="social-trending-tags" style="display: flex; gap: 6px; flex-wrap: wrap; color: var(--text-muted); font-size: 0.9rem;">
+                                        Warming up...
+                                    </div>
+                                </div>
+                            </section>
                         </div>
 
-                        <div class="panel" style="margin-bottom: 24px;">
-                            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-                                <div class="form-group" style="margin: 0;">
-                                    <label for="social-filter" class="form-label">Filter Feed</label>
-                                    <select class="select" id="social-filter" style="margin: 0;" onchange="app.filterSocialFeed()">
-                                        <option value="all">All Activity</option>
-                                        <option value="following">Following</option>
-                                        <option value="location-updates">Location Updates</option>
-                                        <option value="social">Social Actions</option>
-                                        <option value="achievements">Achievements</option>
-                                    </select>
+                        <section class="panel" id="social-feed-shell">
+                            <div class="social-action-bar" style="margin-bottom: 8px;">
+                                <div class="social-meta-line">
+                                    <span class="cz-label">Live feed</span>
                                 </div>
-                                <div class="form-group" style="margin: 0;">
-                                    <label for="sort-feed" class="form-label">Sort By</label>
-                                    <select class="select" id="sort-feed" style="margin: 0;" onchange="app.sortSocialFeed()">
-                                        <option value="recent">Most Recent</option>
-                                        <option value="popular">Most Popular</option>
-                                        <option value="engagement">Most Engaged</option>
-                                    </select>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <button class="btn" type="button" onclick="app.filterSocialFeed()"><i class="fas fa-filter"></i> Apply</button>
+                                    <button class="btn" type="button" onclick="app.sortSocialFeed()"><i class="fas fa-sort-amount-down"></i> Resort</button>
                                 </div>
                             </div>
-                        </div>
-
-                        <div id="social-feed-content" class="loading">
-                            Loading social feed...
-                        </div>
+                            <div id="social-feed-content" class="social-feed-grid">
+                                ${this.renderSocialSkeleton(3)}
+                            </div>
+                        </section>
                     `;
                     const postForm = document.getElementById('social-post-form');
                     if (postForm) {
                         postForm.addEventListener('submit', (e) => this.handleSocialPostSubmit(e));
                     }
+                    const searchInput = document.getElementById('social-search');
+                    if (searchInput) {
+                        searchInput.addEventListener('input', () => this.searchSocialFeed());
+                    }
+                    const refreshBtn = document.getElementById('social-refresh-btn');
+                    if (refreshBtn) {
+                        refreshBtn.addEventListener('click', () => this.loadSocialFeed(true));
+                    }
+                    this.bindSocialComposer();
                     this.loadSocialFeed();
+                }
+            }
+
+            renderSocialSkeleton(count = 3) {
+                return Array.from({ length: count }).map(() => `
+                    <div class="social-skeleton" aria-hidden="true">
+                        <div class="skeleton-row">
+                            <div class="skeleton-avatar"></div>
+                            <div>
+                                <div class="skeleton-line" style="width: 60%;"></div>
+                                <div class="skeleton-line" style="width: 40%; margin-top: 6px;"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-line" style="width: 100%; height: 14px; margin-top: 10px;"></div>
+                        <div class="skeleton-line" style="width: 80%; height: 14px;"></div>
+                    </div>
+                `).join('');
+            }
+
+            bindSocialComposer() {
+                const textarea = document.getElementById('social-post-input');
+                const counter = document.getElementById('social-char-count');
+                const submitBtn = document.getElementById('social-post-submit');
+                if (!textarea) return;
+
+                const update = () => {
+                    const length = textarea.value.trim().length;
+                    if (counter) counter.textContent = `${length}/500`;
+                    if (submitBtn) submitBtn.disabled = length === 0 || length > 500;
+                    textarea.classList.toggle('input-warning', length > 440);
+                };
+
+                textarea.addEventListener('input', update);
+                update();
+            }
+
+            searchSocialFeed() {
+                const searchInput = document.getElementById('social-search');
+                this.socialSearchTerm = (searchInput?.value || '').trim().toLowerCase();
+                this.filterSocialFeed();
+                this.updateActiveFilterMessage();
+            }
+
+            applyTagFilter(tag) {
+                if (!tag) return;
+                const normalized = tag.startsWith('#') ? tag : `#${tag}`;
+                const searchInput = document.getElementById('social-search');
+                if (searchInput) searchInput.value = normalized;
+                this.socialSearchTerm = normalized.toLowerCase();
+                this.filterSocialFeed();
+                this.updateActiveFilterMessage();
+            }
+
+            updateActiveFilterMessage() {
+                const msg = document.getElementById('social-active-filter');
+                if (!msg) return;
+                msg.textContent = this.socialSearchTerm
+                    ? `Filtering feed by “${this.socialSearchTerm}”`
+                    : 'Showing full feed';
+            }
+
+            updateSocialMeta(items = []) {
+                const postCountEl = document.getElementById('social-post-count');
+                const followingEl = document.getElementById('social-following-count');
+                const authorsEl = document.getElementById('social-authors-count');
+                if (postCountEl) postCountEl.textContent = items.length;
+                if (followingEl) followingEl.textContent = this.followingIds?.length || 0;
+                const authors = Array.from(new Set(items.map(item => item.createdBy).filter(Boolean)));
+                if (authorsEl) authorsEl.textContent = authors.length;
+                this.renderTrendingTags(items);
+            }
+
+            renderTrendingTags(items = []) {
+                const container = document.getElementById('social-trending-tags');
+                if (!container) return;
+
+                const tagCounts = {};
+                items.forEach(item => {
+                    (item.tags || []).forEach(tag => {
+                        const key = (tag || '').toLowerCase();
+                        if (!key) return;
+                        tagCounts[key] = (tagCounts[key] || 0) + 1;
+                    });
+                });
+
+                const top = Object.entries(tagCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 6);
+
+                if (!top.length) {
+                    container.innerHTML = '<span style="color: var(--text-muted);">Tag something to trend it.</span>';
+                    return;
+                }
+
+                container.innerHTML = top.map(([tag, count]) => `
+                    <button class="social-chip light social-tag-btn" data-tag="${this.escapeHtml(tag)}" type="button">
+                        #${this.escapeHtml(tag)} <span style="color: var(--text-muted); font-size: 0.8rem;">${count}</span>
+                    </button>
+                `).join('');
+
+                container.querySelectorAll('.social-tag-btn').forEach(btn => {
+                    btn.addEventListener('click', () => this.applyTagFilter(btn.dataset.tag || ''));
+                });
+            }
+
+            updateSocialRefreshTime() {
+                const el = document.getElementById('social-last-updated');
+                if (el) {
+                    el.textContent = this.lastSocialRefresh
+                        ? `Updated ${this.timeAgo(this.lastSocialRefresh)}`
+                        : 'Waiting for sync...';
                 }
             }
 
@@ -4268,7 +4725,7 @@
                 if (composePanel) composePanel.style.display = '';
 
                 try {
-                    container.innerHTML = '<div class="loading">Building your feed...</div>';
+                    container.innerHTML = this.renderSocialSkeleton(4);
 
                     const followedSnapshot = await this.db.collection('user_followers')
                         .where('followerId', '==', this.currentUser.uid)
@@ -4318,12 +4775,16 @@
                     });
 
                     this.socialFeedItems = posts;
+                    this.lastSocialRefresh = new Date();
+                    this.updateSocialMeta(posts);
+                    this.updateSocialRefreshTime();
                     this.renderSocialFeed(this.applySocialFilters(this.socialFeedItems));
                     await this.hydrateSocialEngagement(this.socialFeedItems);
                 } catch (error) {
                     console.error('Error loading social feed:', error);
                     this.socialFeedItems = [];
                     container.innerHTML = '<div class="error">Failed to load social feed</div>';
+                    this.updateSocialRefreshTime();
                 }
             }
 
@@ -4335,8 +4796,11 @@
                     container.innerHTML = `
                         <div style="text-align: center; padding: 48px; color: var(--text-muted);">
                             <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.5;"></i>
-                            <p>No social activity yet. Follow other explorers to see their updates!</p>
-                            <button class="btn btn-primary" onclick="app.showView('map')">Start Exploring</button>
+                            <p>No social activity yet. Follow other explorers or post your first update.</p>
+                            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                                <button class="btn btn-primary" onclick="app.createNewPost()"><i class="fas fa-plus"></i> Post update</button>
+                                <button class="btn" onclick="app.showView('map')">Start Exploring</button>
+                            </div>
                         </div>
                     `;
                     return;
@@ -4349,58 +4813,79 @@
                     const likeCount = activity.likesCount ?? 0;
                     const commentCount = activity.commentCount ?? 0;
                     const liked = this.postLikeState.get(activity.id);
+                    const isFollowing = (this.followingIds || []).includes(activity.createdBy);
+                    const isOwnPost = activity.createdBy === this.currentUser?.uid;
+                    const tagList = (activity.tags || []).slice(0, 6);
 
                     return `
-                        <div class="social-feed-item" id="social-item-${activity.id}">
-                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                                <div class="activity-icon" style="width: 32px; height: 32px;">
-                                    ${author.photoURL
-                                        ? `<img src="${this.escapeHtml(author.photoURL)}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%;">`
-                                        : `<i class="fas fa-user-astronaut"></i>`}
+                        <article class="social-card" id="social-item-${activity.id}">
+                            <header class="social-card-header">
+                                <div class="social-author">
+                                    <div class="activity-icon" style="width: 44px; height: 44px;">
+                                        ${author.photoURL
+                                            ? `<img src="${this.escapeHtml(author.photoURL)}" alt="${displayName}">`
+                                            : `<i class="fas fa-user-astronaut"></i>`}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 800; color: var(--cz-yellow);">${displayName}</div>
+                                        <div class="social-meta-line">
+                                            <span>${this.timeAgo(timestamp)}</span>
+                                            <span class="social-chip light">${activity.locationId ? 'Location intel' : 'Broadcast'}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: bold; color: var(--cz-yellow);">${displayName}</div>
-                                    <div class="activity-time">${this.timeAgo(timestamp)}</div>
+                                <div class="social-chip">${activity.tags?.length ? `#${this.escapeHtml(activity.tags[0])}` : 'Feed'}</div>
+                            </header>
+                            <div class="social-post-body">${this.escapeHtml(activity.body || activity.message || '')}</div>
+                            ${tagList.length ? `
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    ${tagList.map(tag => `
+                                        <button type="button" class="social-chip light social-tag-btn" data-tag="${this.escapeHtml(tag)}">
+                                            #${this.escapeHtml(tag)}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            ${activity.locationId ? `
+                                <div style="margin: 10px 0 6px 0;">
+                                    <button class="social-btn checked-in" onclick="app.viewPostLocation('${activity.id}','${activity.locationId}')">
+                                        <i class="fas fa-map-marker-alt"></i> View related location
+                                    </button>
+                                </div>
+                            ` : ''}
+                            <div class="social-action-bar">
+                                <div class="social-meta-line">
+                                    <span><i class="fas fa-heart"></i> <span id="post-like-count-${activity.id}">${likeCount}</span></span>
+                                    <span><i class="fas fa-comment-dots"></i> <span id="post-comment-count-${activity.id}">${commentCount}</span></span>
                                 </div>
                                 <div class="social-action-buttons">
                                     <button class="social-btn ${liked ? 'liked' : ''}" id="post-like-${activity.id}" onclick="app.togglePostLike('${activity.id}')">
-                                        <i class="fas fa-heart"></i> <span id="post-like-count-${activity.id}">${likeCount}</span>
+                                        <i class="fas fa-heart"></i> ${liked ? 'Liked' : 'Like'}
                                     </button>
                                     <button class="social-btn" onclick="app.togglePostComments('${activity.id}')">
-                                        <i class="fas fa-comment-dots"></i> <span id="post-comment-count-${activity.id}">${commentCount}</span>
+                                        <i class="fas fa-comment-dots"></i> Comments
                                     </button>
-                                    <button class="social-btn" onclick="app.followUser('${activity.createdBy}')">
-                                        <i class="fas fa-user-plus"></i> Follow
+                                    <button class="social-btn ${isFollowing ? 'following' : ''}" data-follow-target="${activity.createdBy}" ${isOwnPost ? 'disabled' : ''} onclick="app.toggleFollowFromFeed('${activity.createdBy}')">
+                                        <i class="fas ${isFollowing ? 'fa-user-check' : 'fa-user-plus'}"></i> ${isOwnPost ? 'You' : (isFollowing ? 'Following' : 'Follow')}
                                     </button>
                                 </div>
                             </div>
-                            <div style="margin-left: 44px;">
-                                <p style="margin: 0; color: var(--text-secondary); white-space: pre-wrap;">${this.escapeHtml(activity.body || activity.message || '')}</p>
-                                ${activity.tags?.length ? `
-                                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
-                                        ${activity.tags.slice(0, 6).map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('')}
-                                    </div>
-                                ` : ''}
-                                ${activity.locationId ? `
-                                    <div style="margin-top: 8px;">
-                                        <button class="social-btn checked-in" onclick="app.viewPostLocation('${activity.id}','${activity.locationId}')">
-                                            <i class="fas fa-map-marker-alt"></i> View related location
-                                        </button>
-                                    </div>
-                                ` : ''}
-                                <div id="post-comments-${activity.id}" style="margin-top: 10px; display: none;">
-                                    <div id="post-comments-list-${activity.id}" class="loading">Loading comments...</div>
-                                    <div style="margin-top: 8px;">
-                                        <textarea class="textarea" id="post-comment-input-${activity.id}" rows="2" placeholder="Add a comment..."></textarea>
-                                        <button class="btn btn-primary" style="margin-top: 6px;" onclick="app.submitPostComment('${activity.id}')">
-                                            <i class="fas fa-paper-plane"></i> Comment
-                                        </button>
-                                    </div>
+                            <div id="post-comments-${activity.id}" style="margin-top: 10px; display: none;">
+                                <div id="post-comments-list-${activity.id}" class="loading">Loading comments...</div>
+                                <div style="margin-top: 8px;">
+                                    <textarea class="textarea" id="post-comment-input-${activity.id}" rows="2" placeholder="Add a comment..."></textarea>
+                                    <button class="btn btn-primary" style="margin-top: 6px;" onclick="app.submitPostComment('${activity.id}')">
+                                        <i class="fas fa-paper-plane"></i> Comment
+                                    </button>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     `;
                 }).join('');
+
+                container.querySelectorAll('.social-tag-btn').forEach(btn => {
+                    btn.addEventListener('click', () => this.applyTagFilter(btn.dataset.tag || ''));
+                });
             }
 
             applySocialFilters(source = []) {
@@ -4418,6 +4903,16 @@
                         if (filter === 'social') return !item.locationId;
                         if (filter === 'achievements') return item.type === 'achievement';
                         return true;
+                    });
+                }
+
+                const term = (this.socialSearchTerm || '').trim().toLowerCase();
+                if (term) {
+                    items = items.filter(item => {
+                        const text = `${item.body || item.message || ''}`.toLowerCase();
+                        const author = (this.userProfiles.get(item.createdBy)?.displayName || '').toLowerCase();
+                        const tags = (item.tags || []).join(' ').toLowerCase();
+                        return text.includes(term) || tags.includes(term.replace('#', '')) || author.includes(term);
                     });
                 }
 
@@ -4468,6 +4963,41 @@
                 } finally {
                     this.activeOperations.delete(opKey);
                 }
+            }
+
+            async toggleFollowFromFeed(userId) {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to follow users', 'warning');
+                    this.handleAuth();
+                    return;
+                }
+
+                if (userId === this.currentUser.uid) {
+                    this.showToast('That is your post', 'info');
+                    return;
+                }
+
+                const isFollowing = (this.followingIds || []).includes(userId);
+
+                if (isFollowing) {
+                    await this.unfollowUser(userId);
+                    this.followingIds = (this.followingIds || []).filter(id => id !== userId);
+                    this.updateFollowButtons(userId, false);
+                } else {
+                    await this.followUser(userId);
+                    this.followingIds = Array.from(new Set([...(this.followingIds || []), userId]));
+                    this.updateFollowButtons(userId, true);
+                }
+
+                this.updateSocialMeta(this.socialFeedItems || []);
+            }
+
+            updateFollowButtons(userId, isFollowing) {
+                document.querySelectorAll(`[data-follow-target="${userId}"]`).forEach(btn => {
+                    btn.classList.toggle('following', isFollowing);
+                    btn.innerHTML = `<i class="fas ${isFollowing ? 'fa-user-check' : 'fa-user-plus'}"></i> ${isFollowing ? 'Following' : 'Follow'}`;
+                    btn.setAttribute('aria-label', isFollowing ? 'Unfollow explorer' : 'Follow explorer');
+                });
             }
 
             async unfollowUser(userId) {
@@ -5018,11 +5548,13 @@
                         body: this.sanitizeInput(text.trim()),
                         createdBy: this.currentUser.uid,
                         targetUserId: userId,
+                        targetType: 'profile',
+                        source: 'profile-feed',
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     this.showToast('Posted to your feed', 'success');
-                    this.loadProfilePosts(userId);
+                    await this.loadProfilePosts(userId);
                 } catch (error) {
                     console.error('Error adding profile post:', error);
                     this.showToast('Failed to post', 'error');
@@ -5037,15 +5569,33 @@
                 container.innerHTML = '<div class="loading">Loading posts...</div>';
 
                 try {
-                    const snapshot = await this.db.collection('forum')
-                        .where('createdBy', '==', userId)
-                        .orderBy('createdAt', 'desc')
-                        .limit(25)
-                        .get();
+                    // Gather both targeted and authored posts so profile feed never misses entries and avoids composite index requirements.
+                    const postsById = new Map();
+                    const collect = (snapshot) => {
+                        snapshot.forEach(doc => postsById.set(doc.id, { id: doc.id, ...doc.data() }));
+                    };
 
-                    const posts = [];
-                    snapshot.forEach(doc => posts.push({ id: doc.id, ...doc.data() }));
-                    await this.getUserProfile(userId);
+                    const targetedSnap = await this.db.collection('forum')
+                        .where('targetUserId', '==', userId)
+                        .limit(50)
+                        .get();
+                    collect(targetedSnap);
+
+                    const authoredSnap = await this.db.collection('forum')
+                        .where('createdBy', '==', userId)
+                        .limit(50)
+                        .get();
+                    collect(authoredSnap);
+
+                    const posts = Array.from(postsById.values()).sort((a, b) => {
+                        const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+                        const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+                        return bTime - aTime;
+                    });
+
+                    const authorIds = Array.from(new Set(posts.map(p => p.createdBy).filter(Boolean)));
+                    await Promise.all(authorIds.map(id => this.getUserProfile(id)));
+
                     this.renderProfilePosts(posts);
                 } catch (error) {
                     console.error('Error loading profile posts:', error);
@@ -5551,6 +6101,11 @@
                     textArea?.focus();
                     return;
                 }
+                if (body.length > 500) {
+                    this.showToast('Post is over the 500 character limit', 'warning');
+                    textArea?.focus();
+                    return;
+                }
 
                 const tags = (tagsInput?.value || '')
                     .split(',')
@@ -5578,6 +6133,7 @@
                 try {
                     await this.db.collection('forum').add(payload);
                     textArea.value = '';
+                    textArea.dispatchEvent(new Event('input'));
                     if (tagsInput) tagsInput.value = '';
                     if (locationInput) locationInput.value = '';
                     this.showToast('Post published to your feed', 'success');
@@ -5955,6 +6511,7 @@
             filterSocialFeed() {
                 const filtered = this.applySocialFilters(this.socialFeedItems || []);
                 this.renderSocialFeed(filtered);
+                this.updateActiveFilterMessage();
             }
 
             sortSocialFeed() {
@@ -7302,6 +7859,7 @@
                     form.reset();
                     // Clear edit mode
                     delete form.dataset.editId;
+                    delete form.dataset.originalCoordinates;
                 }
 
                 // Reset modal title and button text
@@ -7340,11 +7898,28 @@
                     this.selectedLatLng = e.latlng;
                     document.getElementById('coordinates-display').textContent = 
                         `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
+
+                    // Drop or move a temporary marker so the user gets visual confirmation
+                    if (this.tempMarker) {
+                        this.map.removeLayer(this.tempMarker);
+                    }
+                    this.tempMarker = L.marker(e.latlng, { keyboard: false }).addTo(this.map);
+                    const coordsDisplay = document.getElementById('coordinates-display');
+                    if (coordsDisplay) {
+                        coordsDisplay.style.background = '#fff';
+                        coordsDisplay.style.color = 'var(--cz-black)';
+                    }
                 }
             }
 
             async handleLocationSubmit(e) {
                 e.preventDefault();
+
+                // Prevent double submissions while an in-flight save is running
+                const opKey = 'location-submit';
+                if (this.activeOperations.has(opKey)) {
+                    return;
+                }
 
                 if (!this.currentUser) {
                     this.showToast('Please sign in to manage locations', 'warning');
@@ -7359,11 +7934,34 @@
                     return;
                 }
 
-                if (!this.selectedLatLng) {
+                if (name.length < 3) {
+                    this.showToast('Location name needs at least 3 characters', 'warning');
+                    return;
+                }
+
+                if (description.length < 10) {
+                    this.showToast('Add a bit more detail to the description (10+ characters)', 'warning');
+                    return;
+                }
+
+                const existingCoords = (() => {
+                    try {
+                        const raw = e.target.dataset.originalCoordinates;
+                        return raw ? JSON.parse(raw) : null;
+                    } catch {
+                        return null;
+                    }
+                })();
+                const coordsToSave = this.selectedLatLng
+                    ? [this.selectedLatLng.lat, this.selectedLatLng.lng]
+                    : existingCoords;
+
+                if (!coordsToSave) {
                     this.showToast('Please select a location on the map', 'warning');
                     return;
                 }
 
+                this.activeOperations.add(opKey);
                 const submitBtn = e.target.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
                 submitBtn.textContent = 'Saving...';
@@ -7376,7 +7974,7 @@
                     riskLevel: document.getElementById('location-risk').value,
                     address: this.sanitizeInput(document.getElementById('location-address').value.trim()),
                     tags: this.getSelectedTags(),
-                    coordinates: [this.selectedLatLng.lat, this.selectedLatLng.lng],
+                    coordinates: coordsToSave,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
@@ -7417,6 +8015,7 @@
                 } finally {
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
+                    this.activeOperations.delete(opKey);
                 }
             }
             
@@ -7631,6 +8230,7 @@
 
                     // Store the location ID for update
                     document.getElementById('location-form').dataset.editId = id;
+                    document.getElementById('location-form').dataset.originalCoordinates = JSON.stringify(data.coordinates || null);
 
                     this.showAddLocationModal();
 
