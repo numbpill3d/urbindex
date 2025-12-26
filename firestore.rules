@@ -42,12 +42,12 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
     }
     
-    // Comments - authenticated users can read all comments
-    // Users can only create, update, or delete their own comments
+    // Comments - for profile and post comments
+    // Users can read all comments, but only create/edit/delete their own
     match /comments/{commentId} {
-      allow read: if true;
+      allow read: if request.auth != null;
       allow create: if request.auth != null && request.resource.data.createdBy == request.auth.uid;
-      allow update: if request.auth != null && resource.data.createdBy == request.auth.uid;
+      allow update: if request.auth != null && resource.data.createdBy == request.auth.uid && resource.data.createdAt != request.time;
       allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
     }
     

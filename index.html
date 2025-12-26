@@ -5625,9 +5625,21 @@
 
             async submitProfileComment(targetUserId) {
                 const input = document.getElementById('profile-comment-input');
-                if (!input) return;
-                await this.addProfileComment(targetUserId, input.value);
-                input.value = '';
+                const button = document.querySelector(`button[onclick="app.submitProfileComment('${targetUserId}')"]`);
+                if (!input || !button) return;
+
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
+                button.disabled = true;
+
+                try {
+                    await this.addProfileComment(targetUserId, input.value);
+                    input.value = '';
+                    this.updateCommentCounters();
+                } finally {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
             }
 
             async addProfileComment(targetUserId, text) {
@@ -5637,6 +5649,10 @@
                 }
                 if (!text || !text.trim()) {
                     this.showToast('Comment cannot be empty', 'warning');
+                    return;
+                }
+                if (text.trim().length < 2) {
+                    this.showToast('Comment must be at least 2 characters long', 'warning');
                     return;
                 }
 
