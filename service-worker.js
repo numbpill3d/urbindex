@@ -1,6 +1,6 @@
 const CACHE_NAME = 'urbindex-cache-v12';
 const STATIC_ASSETS = [
-  './final.html',
+  './index.html',
   './manifest.json',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
@@ -9,7 +9,7 @@ const STATIC_ASSETS = [
 
 // URLs for offline fallback content with enhanced options
 const OFFLINE_FALLBACKS = {
-  document: '/final.html',
+  document: '/index.html',
   json: JSON.stringify({
     error: 'You are currently offline',
     code: 'OFFLINE_MODE',
@@ -19,7 +19,7 @@ const OFFLINE_FALLBACKS = {
 
 // URLs that should be available offline even if not explicitly cached
 const CRITICAL_ASSETS = [
-  '/final.html'
+  '/index.html'
 ];
 
 // Install event - cache static assets
@@ -770,18 +770,23 @@ self.addEventListener('error', event => {
 
 // Function to fetch with timeout
 function fetchWithTimeout(request, timeout = 8000) {
+  console.log('[SW] fetchWithTimeout called for:', request.url, 'with timeout:', timeout);
   return new Promise((resolve, reject) => {
     // Set timeout
     const timeoutId = setTimeout(() => {
+      console.error('[SW] fetchWithTimeout: Request timed out after', timeout, 'ms for:', request.url);
       reject(new Error('Request timeout'));
     }, timeout);
-    
+
+    console.log('[SW] fetchWithTimeout: Starting fetch for:', request.url);
     fetch(request).then(
       (response) => {
+        console.log('[SW] fetchWithTimeout: Fetch completed successfully for:', request.url);
         clearTimeout(timeoutId);
         resolve(response);
       },
       (err) => {
+        console.error('[SW] fetchWithTimeout: Fetch failed with error:', err, 'for:', request.url);
         clearTimeout(timeoutId);
         reject(err);
       }

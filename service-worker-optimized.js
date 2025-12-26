@@ -61,13 +61,13 @@ const API_ENDPOINTS = {
  * Service Worker Installation
  */
 self.addEventListener('install', (event) => {
-    console.log('[SW] Installing service worker v3.0.0');
-    console.log('[SW] Install event started');
+    console.log('[SW] NORMAL INSTALL: Installing service worker v3.0.0');
+    console.log('[SW] NORMAL INSTALL: Install event started');
     event.waitUntil(
         Promise.all([
             // Cache static assets
             caches.open(STATIC_CACHE).then((cache) => {
-                console.log('[SW] Caching static assets');
+                console.log('[SW] NORMAL INSTALL: Caching static assets');
                 return cache.addAll(STATIC_ASSETS);
             }),
             // Initialize other caches
@@ -75,7 +75,7 @@ self.addEventListener('install', (event) => {
             caches.open(IMAGES_CACHE),
             caches.open(API_CACHE)
         ]).then(() => {
-            console.log('[SW] Static assets cached successfully');
+            console.log('[SW] NORMAL INSTALL: Static assets cached successfully');
             // Skip waiting to activate immediately
             return self.skipWaiting();
         })
@@ -650,7 +650,11 @@ function getPerformanceMetrics() {
 
 console.log('[SW] Service Worker script loaded');
 
+// DEBUG: Check if this self-destruct code is being reached
+console.log('[SW] About to check for self-destruct code...');
+
 // Unregister service worker
 self.addEventListener('install', function(event) {
+  console.log('[SW] CRITICAL: Self-destruct code triggered! Unregistering service worker...');
   event.waitUntil(self.registration.unregister());
 });
