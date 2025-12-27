@@ -3053,103 +3053,6 @@
                 </button>
             </div>
 
-            <!-- Auth Modal -->
-            <div class="modal" id="auth-modal" role="dialog" aria-modal="true" aria-hidden="true">
-                <div class="modal-content">
-                    <button class="modal-close" onclick="app.hideAuthModal()">&times;</button>
-                    <div class="auth-tabs">
-                        <button class="auth-tab active" data-tab="signin">Sign In</button>
-                        <button class="auth-tab" data-tab="signup">Sign Up</button>
-                    </div>
-
-                    <div class="auth-form active" id="signin-form">
-                        <h3>Sign In to Urbindex</h3>
-                        <form id="signin-form-element">
-                            <div class="form-group">
-                                <label class="form-label required" for="signin-email">
-                                    <i class="fas fa-envelope" aria-hidden="true"></i>
-                                    Email Address
-                                </label>
-                                <input class="input" type="email" id="signin-email" name="email"
-                                       required aria-describedby="signin-email-help" autocomplete="email">
-                                <div id="signin-email-help" class="field-help">
-                                    Enter your registered email address
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required" for="signin-password" style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span><i class="fas fa-lock" aria-hidden="true"></i> Password</span>
-                                    <button type="button" class="btn-link" onclick="app.hideAuthModal(); app.showPasswordResetModal();" style="font-size: 9px; padding: 0;">
-                                        Forgot?
-                                    </button>
-                                </label>
-                                <input class="input" type="password" id="signin-password" name="password"
-                                       required aria-describedby="signin-password-help" autocomplete="current-password">
-                                <div id="signin-password-help" class="field-help">
-                                    Enter your password
-                                </div>
-                            </div>
-                            <div class="form-actions">
-                                <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
-                                <button type="submit" class="btn btn-primary" aria-label="Sign in to your account">Sign In</button>
-                            </div>
-                        </form>
-                        <div class="auth-alternatives">
-                            <button class="btn btn-link" onclick="app.signInAnonymously()" aria-label="Continue without creating an account">
-                                <i class="fas fa-user-secret" aria-hidden="true"></i> Continue as Guest
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="auth-form" id="signup-form">
-                        <h3>Create Account</h3>
-                        <form id="signup-form-element">
-                            <div class="form-group">
-                                <label class="form-label required" for="signup-email">
-                                    <i class="fas fa-envelope" aria-hidden="true"></i>
-                                    Email Address
-                                </label>
-                                <input class="input" type="email" id="signup-email" name="email"
-                                       required aria-describedby="signup-email-help signup-email-error" autocomplete="email">
-                                <div id="signup-email-help" class="field-help">
-                                    Enter a valid email address
-                                </div>
-                                <div id="signup-email-error" class="form-error" role="alert"></div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required" for="signup-password">
-                                    <i class="fas fa-lock" aria-hidden="true"></i>
-                                    Password
-                                </label>
-                                <input class="input" type="password" id="signup-password" name="password"
-                                       required minlength="6" aria-describedby="signup-password-help signup-password-error"
-                                       autocomplete="new-password">
-                                <div id="signup-password-help" class="field-help">
-                                    Password must be at least 6 characters long
-                                </div>
-                                <div id="signup-password-error" class="form-error" role="alert"></div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required" for="signup-confirm-password">
-                                    <i class="fas fa-lock" aria-hidden="true"></i>
-                                    Confirm Password
-                                </label>
-                                <input class="input" type="password" id="signup-confirm-password" name="confirmPassword"
-                                       required minlength="6" aria-describedby="signup-confirm-password-help signup-confirm-password-error"
-                                       autocomplete="new-password">
-                                <div id="signup-confirm-password-help" class="field-help">
-                                    Re-enter the same password
-                                </div>
-                                <div id="signup-confirm-password-error" class="form-error" role="alert"></div>
-                            </div>
-                            <div class="form-actions">
-                                <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
-                                <button type="submit" class="btn btn-primary" aria-label="Create your new account">Create Account</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
         </header>
 
         <nav class="nav" role="navigation" aria-label="Main Navigation" id="navigation">
@@ -3624,6 +3527,96 @@
             <button class="modal-close" onclick="app.hideUserLocationsModal()">&times;</button>
             <h3 id="user-locations-title">User Locations</h3>
             <div id="user-locations-list" class="loading" role="status" aria-live="polite">Loading user locations...</div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal" id="auth-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="app.hideAuthModal()">&times;</button>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="signin" aria-label="Sign in to your account">Sign In</button>
+                <button class="auth-tab" data-tab="signup" aria-label="Create a new account">Sign Up</button>
+            </div>
+            <div id="signin-form" class="auth-form active">
+                <form id="signin-form-element">
+                    <div class="form-group">
+                        <label class="form-label required" for="signin-email">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            Email
+                        </label>
+                        <input class="input" type="email" id="signin-email" name="email"
+                               required aria-describedby="signin-email-help" autocomplete="email">
+                        <div id="signin-email-help" class="field-help">
+                            Enter your registered email address
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" for="signin-password">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                            Password
+                        </label>
+                        <input class="input" type="password" id="signin-password" name="password"
+                               required aria-describedby="signin-password-help" autocomplete="current-password">
+                        <div id="signin-password-help" class="field-help">
+                            Enter your account password
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                    </div>
+                    <div class="auth-alternatives">
+                        <button class="btn-link" onclick="app.showPasswordResetModal()">Forgot password?</button>
+                        <span> | </span>
+                        <button class="btn-link" onclick="app.signInAnonymously()">Continue as guest</button>
+                    </div>
+                </form>
+            </div>
+            <div id="signup-form" class="auth-form">
+                <form id="signup-form-element">
+                    <div class="form-group">
+                        <label class="form-label required" for="signup-email">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            Email
+                        </label>
+                        <input class="input" type="email" id="signup-email" name="email"
+                               required aria-describedby="signup-email-help" autocomplete="email">
+                        <div id="signup-email-help" class="field-help">
+                            Choose a valid email address
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" for="signup-password">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                            Password
+                        </label>
+                        <input class="input" type="password" id="signup-password" name="password"
+                               required aria-describedby="signup-password-help" autocomplete="new-password" minlength="6">
+                        <div id="signup-password-help" class="field-help">
+                            Minimum 6 characters
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" for="signup-confirm-password">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                            Confirm Password
+                        </label>
+                        <input class="input" type="password" id="signup-confirm-password" name="confirmPassword"
+                               required aria-describedby="signup-confirm-help" autocomplete="new-password">
+                        <div id="signup-confirm-help" class="field-help">
+                            Re-enter your password
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Account</button>
+                    </div>
+                    <div class="auth-alternatives">
+                        <button class="btn-link" onclick="app.signInAnonymously()">Continue as guest instead</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
