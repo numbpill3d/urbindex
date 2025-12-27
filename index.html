@@ -6,6 +6,8 @@
     <title>Urbindex - Urban Exploration Network</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <style>
         :root {
             /* Construction Zone Color Palette */
@@ -680,6 +682,231 @@
         .btn-link:hover {
             color: var(--cz-orange);
             text-decoration: none;
+        }
+
+        /* OAuth Button Styles */
+        .oauth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .oauth-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: white;
+            border: 2px solid var(--cz-black);
+            color: var(--cz-black);
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-stencil);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 2px 2px 0 var(--cz-black);
+            position: relative;
+        }
+
+        .oauth-btn:hover {
+            background: #f5f5f5;
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0 var(--cz-black);
+        }
+
+        .oauth-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: none;
+        }
+
+        .oauth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #f0f0f0 !important;
+            color: #666 !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        .oauth-btn.google {
+            background: #4285f4;
+            color: white;
+        }
+
+        .oauth-btn.google:hover {
+            background: #357ae8;
+        }
+
+        .oauth-btn.github {
+            background: #333;
+            color: white;
+        }
+
+        .oauth-btn.github:hover {
+            background: #24292e;
+        }
+
+        .oauth-divider {
+            display: flex;
+            align-items: center;
+            margin: 16px 0;
+            color: var(--text-muted);
+            font-family: var(--font-blueprint);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .oauth-divider::before,
+        .oauth-divider::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: var(--cz-black);
+            margin: 0 12px;
+        }
+
+        /* Enhanced Form Validation Styles */
+        .input.error {
+            border-color: var(--cz-red);
+            box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.3), inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+        }
+
+        .input.success {
+            border-color: var(--cz-green);
+            box-shadow: 0 0 0 2px rgba(0, 170, 68, 0.3), inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #808080;
+        }
+
+        .field-error {
+            color: var(--cz-red);
+            font-size: 10px;
+            font-family: var(--font-blueprint), 'Arial', sans-serif;
+            margin-top: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .field-success {
+            color: var(--cz-green);
+            font-size: 10px;
+            font-family: var(--font-blueprint), 'Arial', sans-serif;
+            margin-top: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Password Strength Indicator */
+        .password-strength {
+            margin-top: 8px;
+            font-size: 9px;
+            font-family: var(--font-blueprint);
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: var(--cz-concrete-light);
+            border: 1px solid var(--cz-black);
+            margin: 4px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        .strength-weak {
+            background: var(--cz-red);
+            width: 25%;
+        }
+
+        .strength-fair {
+            background: var(--cz-orange);
+            width: 50%;
+        }
+
+        .strength-good {
+            background: var(--cz-yellow);
+            width: 75%;
+        }
+
+        .strength-strong {
+            background: var(--cz-green);
+            width: 100%;
+        }
+
+        /* Auth Status Indicators */
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--cz-concrete-dark);
+            border: 2px solid var(--cz-black);
+            font-family: var(--font-blueprint);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .auth-status.logged-in {
+            background: var(--cz-green);
+            color: white;
+        }
+
+        .auth-status.guest {
+            background: var(--cz-concrete);
+            color: var(--text-secondary);
+        }
+
+        .auth-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--cz-yellow);
+            border: 2px solid var(--cz-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--cz-black);
+        }
+
+        /* Session Warning */
+        .session-warning {
+            background: var(--cz-orange);
+            color: white;
+            padding: 8px 12px;
+            font-family: var(--font-stencil);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            border: 2px solid var(--cz-black);
+            box-shadow: 2px 2px 0 var(--cz-black);
+            margin-top: 8px;
+        }
+
+        .session-warning.warning {
+            background: var(--cz-red);
+            animation: pulse 1s infinite;
         }
 
         .modal {
@@ -3043,14 +3270,27 @@
                 <span id="status-text">Connected</span>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
+                <!-- Auth Status Indicator -->
+                <div id="auth-status" class="auth-status guest" style="display: none;">
+                    <div class="auth-avatar" id="auth-avatar">
+                        <i class="fas fa-user" aria-hidden="true"></i>
+                    </div>
+                    <span id="auth-status-text">Guest Mode</span>
+                </div>
+                
                 <button class="btn btn-secondary" id="profile-btn" aria-label="View Profile" onclick="app.handleProfileButtonClick()">
                     <i class="fas fa-user-circle" aria-hidden="true"></i>
-                    <span>Profile</span>
+                    <span id="profile-btn-text">Profile</span>
                 </button>
                 <button class="btn btn-primary" id="auth-btn" type="button" aria-label="Authentication and Account Management" style="font-weight: 700;">
                     <i class="fas fa-user" aria-hidden="true"></i>
-                    <span>Sign In / Register</span>
+                    <span id="auth-btn-text">Sign In / Register</span>
                 </button>
+                
+                <!-- Session Warning -->
+                <div id="session-warning" class="session-warning" style="display: none;">
+                    Session expires in <span id="session-countdown">5</span> minutes
+                </div>
             </div>
 
         </header>
@@ -3546,10 +3786,11 @@
                             Email
                         </label>
                         <input class="input" type="email" id="signin-email" name="email"
-                               required aria-describedby="signin-email-help" autocomplete="email">
+                               required aria-describedby="signin-email-help signin-email-error" autocomplete="email">
                         <div id="signin-email-help" class="field-help">
                             Enter your registered email address
                         </div>
+                        <div id="signin-email-error" class="field-error" style="display: none;"></div>
                     </div>
                     <div class="form-group">
                         <label class="form-label required" for="signin-password">
@@ -3557,14 +3798,29 @@
                             Password
                         </label>
                         <input class="input" type="password" id="signin-password" name="password"
-                               required aria-describedby="signin-password-help" autocomplete="current-password">
+                               required aria-describedby="signin-password-help signin-password-error" autocomplete="current-password">
                         <div id="signin-password-help" class="field-help">
                             Enter your account password
                         </div>
+                        <div id="signin-password-error" class="field-error" style="display: none;"></div>
                     </div>
+                    
+                    <!-- OAuth Buttons -->
+                    <div class="oauth-divider">OR CONTINUE WITH</div>
+                    <div class="oauth-buttons">
+                        <button type="button" class="oauth-btn google" id="google-signin-btn">
+                            <i class="fab fa-google" aria-hidden="true"></i>
+                            <span>Sign in with Google</span>
+                        </button>
+                        <button type="button" class="oauth-btn github" id="github-signin-btn">
+                            <i class="fab fa-github" aria-hidden="true"></i>
+                            <span>Sign in with GitHub</span>
+                        </button>
+                    </div>
+
                     <div class="form-actions">
                         <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Sign In</button>
+                        <button type="submit" class="btn btn-primary" id="signin-submit-btn">Sign In</button>
                     </div>
                     <div class="auth-alternatives">
                         <button class="btn-link" onclick="app.showPasswordResetModal()">Forgot password?</button>
@@ -3581,10 +3837,11 @@
                             Email
                         </label>
                         <input class="input" type="email" id="signup-email" name="email"
-                               required aria-describedby="signup-email-help" autocomplete="email">
+                               required aria-describedby="signup-email-help signup-email-error" autocomplete="email">
                         <div id="signup-email-help" class="field-help">
                             Choose a valid email address
                         </div>
+                        <div id="signup-email-error" class="field-error" style="display: none;"></div>
                     </div>
                     <div class="form-group">
                         <label class="form-label required" for="signup-password">
@@ -3592,9 +3849,16 @@
                             Password
                         </label>
                         <input class="input" type="password" id="signup-password" name="password"
-                               required aria-describedby="signup-password-help" autocomplete="new-password" minlength="6">
+                               required aria-describedby="signup-password-help signup-password-error" autocomplete="new-password">
                         <div id="signup-password-help" class="field-help">
-                            Minimum 6 characters
+                            Minimum 8 characters with uppercase, lowercase, numbers, and symbols
+                        </div>
+                        <div id="signup-password-error" class="field-error" style="display: none;"></div>
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="password-strength-fill"></div>
+                            </div>
+                            <div id="password-strength-text" style="margin-top: 4px;">Password strength: Not entered</div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -3603,14 +3867,29 @@
                             Confirm Password
                         </label>
                         <input class="input" type="password" id="signup-confirm-password" name="confirmPassword"
-                               required aria-describedby="signup-confirm-help" autocomplete="new-password">
+                               required aria-describedby="signup-confirm-help signup-confirm-error" autocomplete="new-password">
                         <div id="signup-confirm-help" class="field-help">
                             Re-enter your password
                         </div>
+                        <div id="signup-confirm-error" class="field-error" style="display: none;"></div>
                     </div>
+                    
+                    <!-- OAuth Buttons -->
+                    <div class="oauth-divider">OR SIGN UP WITH</div>
+                    <div class="oauth-buttons">
+                        <button type="button" class="oauth-btn google" id="google-signup-btn">
+                            <i class="fab fa-google" aria-hidden="true"></i>
+                            <span>Sign up with Google</span>
+                        </button>
+                        <button type="button" class="oauth-btn github" id="github-signup-btn">
+                            <i class="fab fa-github" aria-hidden="true"></i>
+                            <span>Sign up with GitHub</span>
+                        </button>
+                    </div>
+
                     <div class="form-actions">
                         <button type="button" class="btn" onclick="app.hideAuthModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create Account</button>
+                        <button type="submit" class="btn btn-primary" id="signup-submit-btn">Create Account</button>
                     </div>
                     <div class="auth-alternatives">
                         <button class="btn-link" onclick="app.signInAnonymously()">Continue as guest instead</button>
@@ -3750,10 +4029,16 @@
     
     <script src="firebase-config.js" onerror="console.error('Failed to load Firebase configuration')"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onerror="console.error('Failed to load Leaflet')"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" onerror="console.error('Failed to load Marker Cluster')"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" onerror="console.error('Failed to load Firebase App')"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" onerror="console.error('Failed to load Firebase Auth')"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" onerror="console.error('Failed to load Firebase Firestore')"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
+    
+    <!-- Google OAuth SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- GitHub OAuth SDK -->
+    <script src="https://github.com/login/oauth/authorize" style="display: none;"></script>
     
     <script>
         class UrbindexApp {
@@ -3783,6 +4068,8 @@
                     this.initMap();
                     this.initUI();
                     this.initAuth();
+                    this.initSessionManagement(); // Initialize session management
+                    this.initRateLimiting(); // Initialize rate limiting
                     this.loadData();
 
                     // Hide loading screen after successful initialization
@@ -6910,12 +7197,19 @@
 
                 this.auth.onAuthStateChanged(user => {
                     this.currentUser = user;
-                    this.updateAuthUI();
+                    this.updateAuthUI(); // Call enhanced auth UI update
+                    
                     if (user) {
                         console.log('User authenticated:', user.uid, user.isAnonymous ? '(anonymous)' : '(registered)');
                         this.loadUserData();
+                        
+                        // Initialize session management for authenticated users
+                        if (!user.isAnonymous) {
+                            this.initSessionManagement();
+                        }
                     } else {
                         console.log('User not authenticated');
+                        this.stopSessionManagement();
                     }
                     // Always load public data regardless of auth state
                 }, error => {
@@ -6943,6 +7237,12 @@
                 if (signupForm) {
                     signupForm.addEventListener('submit', (e) => this.handleSignUp(e));
                 }
+
+                // OAuth button event listeners
+                this.initOAuthButtons();
+                
+                // Enhanced form validation
+                this.initFormValidation();
             }
 
             async loadData() {
@@ -8337,8 +8637,12 @@
                 const email = document.getElementById('signin-email').value.trim();
                 const password = document.getElementById('signin-password').value.trim();
 
-                if (!email || !password) {
-                    this.showToast('Please fill in all fields', 'warning');
+                // Validate inputs
+                const emailInput = document.getElementById('signin-email');
+                const passwordInput = document.getElementById('signin-password');
+                
+                if (!this.validateEmail(emailInput) || !password) {
+                    this.showToast('Please correct the errors above', 'warning');
                     return;
                 }
 
@@ -8367,6 +8671,12 @@
                         case 'auth/user-disabled':
                             message = 'This account has been disabled';
                             break;
+                        case 'auth/too-many-requests':
+                            message = 'Too many failed attempts. Please try again later.';
+                            break;
+                        case 'auth/invalid-credential':
+                            message = 'Invalid email or password';
+                            break;
                         default:
                             message = error.message;
                     }
@@ -8384,18 +8694,17 @@
                 const password = document.getElementById('signup-password').value.trim();
                 const confirmPassword = document.getElementById('signup-confirm-password').value.trim();
 
-                if (!email || !password || !confirmPassword) {
-                    this.showToast('Please fill in all fields', 'warning');
-                    return;
-                }
-
-                if (password !== confirmPassword) {
-                    this.showToast('Passwords do not match', 'error');
-                    return;
-                }
-
-                if (password.length < 6) {
-                    this.showToast('Password must be at least 6 characters', 'warning');
+                // Validate inputs using enhanced validation
+                const emailInput = document.getElementById('signup-email');
+                const passwordInput = document.getElementById('signup-password');
+                const confirmPasswordInput = document.getElementById('signup-confirm-password');
+                
+                const isEmailValid = this.validateEmail(emailInput);
+                const isPasswordValid = this.validatePassword(passwordInput);
+                const isConfirmPasswordValid = this.validatePasswordConfirmation();
+                
+                if (!isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+                    this.showToast('Please correct the errors above', 'warning');
                     return;
                 }
 
@@ -8406,8 +8715,13 @@
 
                 try {
                     const result = await this.auth.createUserWithEmailAndPassword(email, password);
+                    
+                    // Create user profile
+                    await this.createUserProfile(result.user, 'email');
+                    
                     // Send email verification
                     await result.user.sendEmailVerification();
+                    
                     this.hideAuthModal();
                     this.showToast('Account created! Please check your email to verify your account.', 'success');
                 } catch (error) {
@@ -8422,6 +8736,12 @@
                             break;
                         case 'auth/weak-password':
                             message = 'Password is too weak';
+                            break;
+                        case 'auth/operation-not-allowed':
+                            message = 'Email/password accounts are not enabled';
+                            break;
+                        case 'auth/too-many-requests':
+                            message = 'Too many requests. Please try again later.';
                             break;
                         default:
                             message = error.message;
@@ -8445,6 +8765,764 @@
                     } else {
                         this.showToast('Failed to sign in anonymously', 'error');
                     }
+                }
+            }
+
+            // ====================
+            // ENHANCED AUTH METHODS
+            // ====================
+
+            initOAuthButtons() {
+                // Google OAuth buttons
+                const googleSignInBtn = document.getElementById('google-signin-btn');
+                const googleSignUpBtn = document.getElementById('google-signup-btn');
+                
+                if (googleSignInBtn) {
+                    googleSignInBtn.addEventListener('click', () => this.signInWithProvider('google'));
+                }
+                if (googleSignUpBtn) {
+                    googleSignUpBtn.addEventListener('click', () => this.signUpWithProvider('google'));
+                }
+
+                // GitHub OAuth buttons
+                const githubSignInBtn = document.getElementById('github-signin-btn');
+                const githubSignUpBtn = document.getElementById('github-signup-btn');
+                
+                if (githubSignInBtn) {
+                    githubSignInBtn.addEventListener('click', () => this.signInWithProvider('github'));
+                }
+                if (githubSignUpBtn) {
+                    githubSignUpBtn.addEventListener('click', () => this.signUpWithProvider('github'));
+                }
+            }
+
+            async signInWithProvider(provider) {
+                const opKey = `oauth-${provider}-signin`;
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    const providerObj = this.getProvider(provider);
+                    const result = await this.auth.signInWithPopup(providerObj);
+                    
+                    // Handle new user
+                    if (result.user && result.user.metadata.creationTime === result.user.metadata.lastSignInTime) {
+                        await this.createUserProfile(result.user, provider);
+                        this.showToast(`Welcome to Urbindex! Account created with ${provider}.`, 'success');
+                    } else {
+                        this.showToast(`Signed in successfully with ${provider}!`, 'success');
+                    }
+                    
+                    this.hideAuthModal();
+                } catch (error) {
+                    console.error(`${provider} sign in error:`, error);
+                    let message = `Failed to sign in with ${provider}`;
+                    switch (error.code) {
+                        case 'auth/popup-closed-by-user':
+                            message = 'Sign in cancelled';
+                            break;
+                        case 'auth/popup-blocked':
+                            message = 'Pop-up blocked. Please allow pop-ups for this site.';
+                            break;
+                        case 'auth/cancelled-popup-request':
+                            message = 'Sign in request cancelled';
+                            break;
+                        case 'auth/account-exists-with-different-credential':
+                            message = `An account already exists with the same email but different credentials`;
+                            break;
+                        default:
+                            message = error.message;
+                    }
+                    this.showToast(message, 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async signUpWithProvider(provider) {
+                // For OAuth, sign up and sign in are the same operation
+                await this.signInWithProvider(provider);
+            }
+
+            getProvider(providerName) {
+                switch (providerName) {
+                    case 'google':
+                        return new firebase.auth.GoogleAuthProvider();
+                    case 'github':
+                        return new firebase.auth.GithubAuthProvider();
+                    default:
+                        throw new Error(`Unsupported provider: ${providerName}`);
+                }
+            }
+
+            async createUserProfile(user, provider) {
+                try {
+                    const userData = {
+                        email: user.email,
+                        displayName: user.displayName || `Explorer ${user.uid.substring(0, 6)}`,
+                        photoURL: user.photoURL,
+                        provider: provider,
+                        emailVerified: user.emailVerified,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    await this.db.collection('users').doc(user.uid).set(userData, { merge: true });
+                } catch (error) {
+                    console.error('Error creating user profile:', error);
+                }
+            }
+
+            initFormValidation() {
+                // Real-time email validation
+                const emailInputs = ['signin-email', 'signup-email'];
+                emailInputs.forEach(inputId => {
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        input.addEventListener('input', () => this.validateEmail(input));
+                        input.addEventListener('blur', () => this.validateEmail(input));
+                    }
+                });
+
+                // Real-time password validation for sign up
+                const passwordInput = document.getElementById('signup-password');
+                if (passwordInput) {
+                    passwordInput.addEventListener('input', () => this.validatePassword(passwordInput));
+                    passwordInput.addEventListener('blur', () => this.validatePassword(passwordInput));
+                }
+
+                // Password confirmation validation
+                const confirmPasswordInput = document.getElementById('signup-confirm-password');
+                if (confirmPasswordInput) {
+                    confirmPasswordInput.addEventListener('input', () => this.validatePasswordConfirmation());
+                    confirmPasswordInput.addEventListener('blur', () => this.validatePasswordConfirmation());
+                }
+            }
+
+            // Enhanced authentication error handling and validation
+            getAuthErrorMessage(error) {
+                const errorCodes = {
+                    'auth/user-not-found': 'No account found with this email address.',
+                    'auth/wrong-password': 'Incorrect password. Please try again.',
+                    'auth/email-already-in-use': 'An account with this email already exists.',
+                    'auth/weak-password': 'Password is too weak. Please choose a stronger password.',
+                    'auth/invalid-email': 'Please enter a valid email address.',
+                    'auth/invalid-credential': 'Invalid login credentials. Please check your email and password.',
+                    'auth/user-disabled': 'This account has been disabled. Please contact support.',
+                    'auth/too-many-requests': 'Too many failed attempts. Please wait 15 minutes before trying again.',
+                    'auth/network-request-failed': 'Network error. Please check your connection and try again.',
+                    'auth/popup-closed-by-user': 'Sign-in popup was closed. Please try again.',
+                    'auth/popup-blocked': 'Sign-in popup was blocked. Please allow popups and try again.',
+                    'auth/requires-recent-login': 'Please sign out and sign back in to perform this action.',
+                    'auth/operation-not-allowed': 'This sign-in method is not enabled. Please contact support.',
+                    'auth/quota-exceeded': 'Service temporarily unavailable. Please try again later.',
+                    'auth/argument-error': 'Invalid authentication parameters. Please try again.',
+                    'auth/timeout': 'Request timed out. Please check your connection and try again.',
+                    'auth/cancelled-popup-request': 'Multiple popup requests detected. Please try again.',
+                    'auth/email-not-verified': 'Please verify your email address before signing in.',
+                    'auth/credential-already-in-use': 'This credential is already associated with a different account.'
+                };
+
+                // Check for specific error codes first
+                if (errorCodes[error.code]) {
+                    return errorCodes[error.code];
+                }
+
+                // Handle network and generic errors
+                if (error.message) {
+                    if (error.message.includes('Network Error') || error.message.includes('fetch')) {
+                        return 'Network error. Please check your internet connection and try again.';
+                    }
+                    if (error.message.includes('timeout')) {
+                        return 'Request timed out. Please try again.';
+                    }
+                    if (error.message.includes('popup')) {
+                        return 'Popup was blocked or closed. Please allow popups and try again.';
+                    }
+                }
+
+                // Default error message
+                return 'An unexpected error occurred. Please try again.';
+            }
+
+            // Rate limiting warning display
+            showRateLimitWarning() {
+                const warning = document.createElement('div');
+                warning.className = 'rate-limit-warning';
+                warning.innerHTML = `
+                    <div style="background: var(--cz-red); color: white; padding: 12px; margin: 8px 0; border: 2px solid var(--cz-black); font-family: var(--font-stencil); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">
+                        <i class="fas fa-exclamation-triangle"></i> Too many failed attempts. Please wait before trying again.
+                    </div>
+                `;
+                
+                const authModal = document.getElementById('auth-modal');
+                if (authModal && authModal.classList.contains('active')) {
+                    const modalContent = authModal.querySelector('.modal-content');
+                    if (modalContent) {
+                        modalContent.insertBefore(warning, modalContent.firstChild.nextSibling);
+                        
+                        // Remove warning after 10 seconds
+                        setTimeout(() => {
+                            if (warning.parentNode) {
+                                warning.remove();
+                            }
+                        }, 10000);
+                    }
+                }
+            }
+
+            // Enhanced password strength validation
+            validatePasswordStrength(password) {
+                const checks = {
+                    length: password.length >= 8,
+                    lowercase: /[a-z]/.test(password),
+                    uppercase: /[A-Z]/.test(password),
+                    numbers: /\d/.test(password),
+                    symbols: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+                };
+                
+                const passedChecks = Object.values(checks).filter(Boolean).length;
+                let strength = 'weak';
+                
+                if (passedChecks >= 4) {
+                    strength = 'strong';
+                } else if (passedChecks >= 3) {
+                    strength = 'good';
+                } else if (passedChecks >= 2) {
+                    strength = 'fair';
+                }
+                
+                return { strength, checks, passedChecks };
+            }
+
+            // Enhanced session management with timeout warnings
+            initSessionManagement() {
+                // Set up session timeout (30 minutes)
+                this.sessionTimeout = 30 * 60 * 1000; // 30 minutes in milliseconds
+                this.warningTime = 5 * 60 * 1000; // 5 minutes warning
+                
+                this.lastActivity = Date.now();
+                
+                // Track user activity
+                ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+                    document.addEventListener(event, () => {
+                        this.lastActivity = Date.now();
+                    }, true);
+                });
+                
+                // Check session timeout every minute
+                setInterval(() => {
+                    this.checkSessionTimeout();
+                }, 60000); // Check every minute
+                
+                // Initial check
+                this.checkSessionTimeout();
+            }
+            
+            checkSessionTimeout() {
+                if (!this.currentUser || this.currentUser.isAnonymous) {
+                    return; // Don't timeout anonymous users
+                }
+                
+                const now = Date.now();
+                const timeSinceActivity = now - this.lastActivity;
+                
+                if (timeSinceActivity >= this.sessionTimeout) {
+                    // Session expired
+                    this.handleSessionExpired();
+                } else if (timeSinceActivity >= (this.sessionTimeout - this.warningTime)) {
+                    // Show warning
+                    this.showSessionWarning();
+                } else {
+                    // Hide warning if shown
+                    this.hideSessionWarning();
+                }
+            }
+            
+            showSessionWarning() {
+                const sessionWarning = document.getElementById('session-warning');
+                if (sessionWarning) {
+                    sessionWarning.style.display = 'block';
+                    
+                    const timeLeft = Math.ceil((this.sessionTimeout - (Date.now() - this.lastActivity)) / 60000);
+                    const countdownElement = document.getElementById('session-countdown');
+                    if (countdownElement) {
+                        countdownElement.textContent = timeLeft;
+                    }
+                    
+                    // Add warning class for visual emphasis
+                    sessionWarning.classList.add('warning');
+                }
+            }
+            
+            hideSessionWarning() {
+                const sessionWarning = document.getElementById('session-warning');
+                if (sessionWarning) {
+                    sessionWarning.style.display = 'none';
+                    sessionWarning.classList.remove('warning');
+                }
+            }
+            
+            async handleSessionExpired() {
+                try {
+                    await this.auth.signOut();
+                    this.currentUser = null;
+                    this.hideSessionWarning();
+                    this.updateAuthUI();
+                    this.showToast('Your session has expired. Please sign in again.', 'warning');
+                } catch (error) {
+                    console.error('Session cleanup error:', error);
+                }
+            }
+            
+            async refreshSession() {
+                try {
+                    if (this.currentUser) {
+                        await this.currentUser.getIdToken(true); // Force token refresh
+                        this.lastActivity = Date.now();
+                        this.hideSessionWarning();
+                    }
+                } catch (error) {
+                    console.error('Session refresh failed:', error);
+                    this.handleSessionExpired();
+                }
+            }
+
+            // Rate limiting for authentication attempts
+            initRateLimiting() {
+                this.authAttempts = new Map();
+                this.maxAttempts = 5;
+                this.attemptWindow = 15 * 60 * 1000; // 15 minutes
+            }
+            
+            checkRateLimit(identifier) {
+                const now = Date.now();
+                const attempts = this.authAttempts.get(identifier) || [];
+                
+                // Remove old attempts outside the window
+                const recentAttempts = attempts.filter(time => now - time < this.attemptWindow);
+                
+                if (recentAttempts.length >= this.maxAttempts) {
+                    return false; // Rate limited
+                }
+                
+                return true; // Not rate limited
+            }
+            
+            recordAuthAttempt(identifier) {
+                const now = Date.now();
+                const attempts = this.authAttempts.get(identifier) || [];
+                
+                // Remove old attempts and add new one
+                const recentAttempts = attempts.filter(time => now - time < this.attemptWindow);
+                recentAttempts.push(now);
+                
+                this.authAttempts.set(identifier, recentAttempts);
+            }
+
+            // Enhanced form validation with comprehensive edge case coverage
+            validateFormInput(input, type) {
+                const value = input.value.trim();
+                const errors = [];
+                
+                switch (type) {
+                    case 'email':
+                        if (!value) {
+                            errors.push('Email address is required');
+                        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                            errors.push('Please enter a valid email address');
+                        } else if (value.length > 254) {
+                            errors.push('Email address is too long');
+                        }
+                        break;
+                        
+                    case 'password':
+                        if (!value) {
+                            errors.push('Password is required');
+                        } else {
+                            const strength = this.validatePasswordStrength(value);
+                            if (strength.checks.length < 3) {
+                                errors.push('Password must be at least 8 characters with uppercase, lowercase, and numbers');
+                            }
+                            if (value.length > 128) {
+                                errors.push('Password is too long (maximum 128 characters)');
+                            }
+                        }
+                        break;
+                        
+                    case 'confirmPassword':
+                        const password = document.getElementById('signup-password')?.value;
+                        if (!value) {
+                            errors.push('Please confirm your password');
+                        } else if (password && value !== password) {
+                            errors.push('Passwords do not match');
+                        }
+                        break;
+                        
+                    case 'displayName':
+                        if (!value) {
+                            errors.push('Display name is required');
+                        } else if (value.length < 2) {
+                            errors.push('Display name must be at least 2 characters');
+                        } else if (value.length > 50) {
+                            errors.push('Display name is too long (maximum 50 characters)');
+                        } else if (!/^[a-zA-Z0-9\s\-_]+$/.test(value)) {
+                            errors.push('Display name can only contain letters, numbers, spaces, hyphens, and underscores');
+                        }
+                        break;
+                }
+                
+                return errors;
+            }
+            
+            displayFieldError(input, errors) {
+                const errorElement = input.parentNode.querySelector('.field-error');
+                const successElement = input.parentNode.querySelector('.field-success');
+                
+                // Clear previous states
+                input.classList.remove('error', 'success');
+                if (errorElement) errorElement.style.display = 'none';
+                if (successElement) successElement.style.display = 'none';
+                
+                if (errors.length > 0) {
+                    input.classList.add('error');
+                    if (errorElement) {
+                        errorElement.textContent = errors[0];
+                        errorElement.style.display = 'flex';
+                    }
+                } else if (input.value.trim()) {
+                    input.classList.add('success');
+                    if (successElement) {
+                        successElement.innerHTML = '<i class="fas fa-check"></i> Valid';
+                        successElement.style.display = 'flex';
+                    }
+                }
+            }
+
+            validateEmail(input) {
+                const email = input.value.trim();
+                const errorElement = document.getElementById(`${input.id}-error`);
+                
+                // Remove existing classes
+                input.classList.remove('error', 'success');
+                
+                if (!email) {
+                    this.showFieldError(input, errorElement, 'Email is required');
+                    return false;
+                }
+                
+                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (!emailRegex.test(email)) {
+                    this.showFieldError(input, errorElement, 'Please enter a valid email address');
+                    return false;
+                }
+                
+                this.showFieldSuccess(input, errorElement, 'Valid email address');
+                return true;
+            }
+
+            validatePassword(input) {
+                const password = input.value;
+                const errorElement = document.getElementById(`${input.id}-error`);
+                const strengthFill = document.getElementById('password-strength-fill');
+                const strengthText = document.getElementById('password-strength-text');
+                
+                // Remove existing classes
+                input.classList.remove('error', 'success');
+                
+                if (!password) {
+                    this.showFieldError(input, errorElement, 'Password is required');
+                    this.updatePasswordStrength('', strengthFill, strengthText);
+                    return false;
+                }
+                
+                const validation = this.checkPasswordStrength(password);
+                
+                if (!validation.isValid) {
+                    this.showFieldError(input, errorElement, validation.message);
+                    this.updatePasswordStrength(password, strengthFill, strengthText);
+                    return false;
+                }
+                
+                this.showFieldSuccess(input, errorElement, 'Strong password');
+                this.updatePasswordStrength(password, strengthFill, strengthText);
+                
+                // Re-validate password confirmation if it exists
+                this.validatePasswordConfirmation();
+                
+                return true;
+            }
+
+            checkPasswordStrength(password) {
+                const checks = {
+                    length: password.length >= 8,
+                    lowercase: /[a-z]/.test(password),
+                    uppercase: /[A-Z]/.test(password),
+                    numbers: /\d/.test(password),
+                    symbols: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+                };
+                
+                const passedChecks = Object.values(checks).filter(Boolean).length;
+                
+                if (password.length === 0) {
+                    return { isValid: false, message: 'Password is required', strength: 0 };
+                }
+                
+                if (passedChecks < 3) {
+                    return { isValid: false, message: 'Password must be at least 8 characters with uppercase, lowercase, numbers, and symbols', strength: 1 };
+                }
+                
+                if (passedChecks < 4) {
+                    return { isValid: true, message: 'Fair password strength', strength: 2 };
+                }
+                
+                if (passedChecks < 5) {
+                    return { isValid: true, message: 'Good password strength', strength: 3 };
+                }
+                
+                return { isValid: true, message: 'Strong password', strength: 4 };
+            }
+
+            updatePasswordStrength(password, strengthFill, strengthText) {
+                if (!strengthFill || !strengthText) return;
+                
+                const validation = this.checkPasswordStrength(password);
+                
+                // Reset classes
+                strengthFill.className = 'strength-fill';
+                
+                switch (validation.strength) {
+                    case 1:
+                        strengthFill.classList.add('strength-weak');
+                        strengthText.textContent = 'Password strength: Weak';
+                        break;
+                    case 2:
+                        strengthFill.classList.add('strength-fair');
+                        strengthText.textContent = 'Password strength: Fair';
+                        break;
+                    case 3:
+                        strengthFill.classList.add('strength-good');
+                        strengthText.textContent = 'Password strength: Good';
+                        break;
+                    case 4:
+                        strengthFill.classList.add('strength-strong');
+                        strengthText.textContent = 'Password strength: Strong';
+                        break;
+                    default:
+                        strengthText.textContent = 'Password strength: Not entered';
+                }
+            }
+
+            validatePasswordConfirmation() {
+                const passwordInput = document.getElementById('signup-password');
+                const confirmPasswordInput = document.getElementById('signup-confirm-password');
+                const errorElement = document.getElementById('signup-confirm-error');
+                
+                if (!passwordInput || !confirmPasswordInput || !errorElement) return false;
+                
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
+                // Remove existing classes
+                confirmPasswordInput.classList.remove('error', 'success');
+                
+                if (!confirmPassword) {
+                    this.showFieldError(confirmPasswordInput, errorElement, 'Please confirm your password');
+                    return false;
+                }
+                
+                if (password !== confirmPassword) {
+                    this.showFieldError(confirmPasswordInput, errorElement, 'Passwords do not match');
+                    return false;
+                }
+                
+                this.showFieldSuccess(confirmPasswordInput, errorElement, 'Passwords match');
+                return true;
+            }
+
+            showFieldError(input, errorElement, message) {
+                input.classList.add('error');
+                input.classList.remove('success');
+                if (errorElement) {
+                    errorElement.innerHTML = `<i class="fas fa-exclamation-triangle" aria-hidden="true"></i> ${message}`;
+                    errorElement.style.display = 'block';
+                }
+            }
+
+            showFieldSuccess(input, errorElement, message) {
+                input.classList.add('success');
+                input.classList.remove('error');
+                if (errorElement) {
+                    errorElement.innerHTML = `<i class="fas fa-check-circle" aria-hidden="true"></i> ${message}`;
+                    errorElement.style.display = 'block';
+                }
+            }
+
+            updateAuthUI() {
+                const authStatus = document.getElementById('auth-status');
+                const authStatusText = document.getElementById('auth-status-text');
+                const authAvatar = document.getElementById('auth-avatar');
+                const authBtnText = document.getElementById('auth-btn-text');
+                const profileBtnText = document.getElementById('profile-btn-text');
+                
+                if (!this.currentUser) {
+                    // Guest state
+                    if (authStatus) {
+                        authStatus.className = 'auth-status guest';
+                        authStatus.style.display = 'flex';
+                    }
+                    if (authStatusText) authStatusText.textContent = 'Guest Mode';
+                    if (authAvatar) {
+                        authAvatar.innerHTML = '<i class="fas fa-user" aria-hidden="true"></i>';
+                    }
+                    if (authBtnText) authBtnText.textContent = 'Sign In / Register';
+                    if (profileBtnText) profileBtnText.textContent = 'Profile';
+                } else if (this.currentUser.isAnonymous) {
+                    // Anonymous state
+                    if (authStatus) {
+                        authStatus.className = 'auth-status guest';
+                        authStatus.style.display = 'flex';
+                    }
+                    if (authStatusText) authStatusText.textContent = 'Anonymous';
+                    if (authAvatar) {
+                        authAvatar.innerHTML = '<i class="fas fa-user-secret" aria-hidden="true"></i>';
+                    }
+                    if (authBtnText) authBtnText.textContent = 'Sign In';
+                    if (profileBtnText) profileBtnText.textContent = 'Profile';
+                } else {
+                    // Logged in state
+                    if (authStatus) {
+                        authStatus.className = 'auth-status logged-in';
+                        authStatus.style.display = 'flex';
+                    }
+                    if (authStatusText) {
+                        const displayName = this.currentUser.displayName || 'Explorer';
+                        authStatusText.textContent = displayName;
+                    }
+                    if (authAvatar) {
+                        if (this.currentUser.photoURL) {
+                            authAvatar.innerHTML = `<img src="${this.escapeHtml(this.currentUser.photoURL)}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                        } else {
+                            authAvatar.innerHTML = '<i class="fas fa-user" aria-hidden="true"></i>';
+                        }
+                    }
+                    if (authBtnText) authBtnText.textContent = 'Sign Out';
+                    if (profileBtnText) profileBtnText.textContent = 'Profile';
+                }
+            }
+
+            // ====================
+            // SESSION MANAGEMENT
+            // ====================
+
+            initSessionManagement() {
+                if (!this.currentUser || this.currentUser.isAnonymous) return;
+                
+                this.sessionWarningTimer = null;
+                this.sessionCountdownTimer = null;
+                
+                // Show session warning 5 minutes before expiry
+                const sessionWarningTime = 50 * 60 * 1000; // 50 minutes
+                
+                this.sessionWarningTimer = setTimeout(() => {
+                    this.showSessionWarning();
+                }, sessionWarningTime);
+                
+                // Refresh session token every hour
+                this.sessionRefreshTimer = setInterval(() => {
+                    this.refreshSession();
+                }, 60 * 60 * 1000); // 1 hour
+                
+                console.log('Session management initialized');
+            }
+
+            stopSessionManagement() {
+                if (this.sessionWarningTimer) {
+                    clearTimeout(this.sessionWarningTimer);
+                    this.sessionWarningTimer = null;
+                }
+                
+                if (this.sessionCountdownTimer) {
+                    clearInterval(this.sessionCountdownTimer);
+                    this.sessionCountdownTimer = null;
+                }
+                
+                if (this.sessionRefreshTimer) {
+                    clearInterval(this.sessionRefreshTimer);
+                    this.sessionRefreshTimer = null;
+                }
+                
+                this.hideSessionWarning();
+                console.log('Session management stopped');
+            }
+
+            async refreshSession() {
+                if (!this.currentUser || this.currentUser.isAnonymous) return;
+                
+                try {
+                    // Force token refresh
+                    await this.currentUser.getIdToken(true);
+                    console.log('Session refreshed successfully');
+                    this.hideSessionWarning();
+                } catch (error) {
+                    console.error('Session refresh failed:', error);
+                    // If refresh fails, user might need to re-authenticate
+                    if (error.code === 'auth/id-token-expired') {
+                        this.showToast('Your session has expired. Please sign in again.', 'warning');
+                        await this.auth.signOut();
+                    }
+                }
+            }
+
+            showSessionWarning() {
+                const sessionWarning = document.getElementById('session-warning');
+                const countdownSpan = document.getElementById('session-countdown');
+                
+                if (sessionWarning) {
+                    sessionWarning.style.display = 'block';
+                }
+                
+                let countdown = 300; // 5 minutes
+                
+                if (countdownSpan) {
+                    countdownSpan.textContent = Math.floor(countdown / 60);
+                }
+                
+                this.sessionCountdownTimer = setInterval(() => {
+                    countdown -= 1;
+                    
+                    if (countdown <= 0) {
+                        this.hideSessionWarning();
+                        this.showToast('Your session has expired. Please sign in again.', 'warning');
+                        this.auth.signOut();
+                        return;
+                    }
+                    
+                    if (countdown <= 60) {
+                        // Show warning style in final minute
+                        if (sessionWarning) {
+                            sessionWarning.classList.add('warning');
+                        }
+                    }
+                    
+                    if (countdownSpan) {
+                        const minutes = Math.floor(countdown / 60);
+                        const seconds = countdown % 60;
+                        countdownSpan.textContent = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : seconds;
+                    }
+                }, 1000);
+            }
+
+            hideSessionWarning() {
+                const sessionWarning = document.getElementById('session-warning');
+                if (sessionWarning) {
+                    sessionWarning.style.display = 'none';
+                    sessionWarning.classList.remove('warning');
+                }
+                
+                if (this.sessionCountdownTimer) {
+                    clearInterval(this.sessionCountdownTimer);
+                    this.sessionCountdownTimer = null;
                 }
             }
 

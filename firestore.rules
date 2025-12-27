@@ -1,15 +1,46 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Enhanced security rules with additional validations
+    
+    // Rate limiting helper function
+    function isRateLimited(userId) {
+      let attempts = get(/databases/$(database)/documents/rate_limits/$(userId)).data.attempts;
+      let lastAttempt = get(/databases/$(database)/documents/rate_limits/$(userId)).data.lastAttempt;
+      return attempts > 10 && (request.time.toMillis() - lastAttempt) < 900000; // 15 minutes
+    }
+    
+    // Input validation helper function
+    function isValidEmail(email) {
+      return email.matches('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}') && email.size() < 255;
+    }
+    
+    function isValidDisplayName(name) {
+      return name.size() >= 2 && name.size() <= 50 && name.matches('[a-zA-Z0-9\\s\\-_]+');
+    }
+    
+    function isValidPassword(password) {
+      return password.size() >= 8 && password.size() <= 128;
+    }
+    
+    // Rate limiting collection
+    match /rate_limits/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
     // User profiles - authenticated users can read all profiles, only edit their own
     match /users/{userId} {
-      allow read: if request.auth != null; // Require auth for profile access
+      allow read: if request.auth != null && !isRateLimited(request.auth.uid); // Require auth and not rate limited
       allow create: if request.auth != null && request.auth.uid == userId &&
                     request.resource.data.keys().hasAll(['email', 'displayName']) &&
-                    request.resource.data.email.matches('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}');
+                    isValidEmail(request.resource.data.email) &&
+                    isValidDisplayName(request.resource.data.displayName) &&
+                    request.resource.data.createdAt == request.time;
       allow update: if request.auth != null && request.auth.uid == userId &&
                     // Prevent email changes through direct updates (use auth)
-                    !request.resource.data.diff(resource.data).affectedKeys().hasAny(['email']);
+                    !request.resource.data.diff(resource.data).affectedKeys().hasAny(['email']) &&
+                    (!('displayName' in request.resource.data) || isValidDisplayName(request.resource.data.displayName)) &&
+                    !isRateLimited(request.auth.uid);
       allow delete: if false; // Prevent profile deletion
     }
 
