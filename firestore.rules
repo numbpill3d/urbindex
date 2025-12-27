@@ -1,19 +1,37 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // User profiles - users can read all profiles but only edit their own
+    // User profiles - authenticated users can read all profiles, only edit their own
     match /users/{userId} {
-      allow read: if true; // Allow public read for user presence and stats
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
-      allow delete: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null; // Require auth for profile access
+      allow create: if request.auth != null && request.auth.uid == userId &&
+                    request.resource.data.keys().hasAll(['email', 'displayName']) &&
+                    request.resource.data.email.matches('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}');
+      allow update: if request.auth != null && request.auth.uid == userId &&
+                    // Prevent email changes through direct updates (use auth)
+                    !request.resource.data.diff(resource.data).affectedKeys().hasAny(['email']);
+      allow delete: if false; // Prevent profile deletion
     }
-    
-    // Locations - allow public read, authenticated write
+
+    // User profile extensions - for additional profile data
+    match /user_profiles/{userId} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    // Locations - authenticated read/write with proper validation
     match /locations/{locationId} {
-      allow read: if true; // Allow public read for map display
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && resource.data.createdBy == request.auth.uid;
+      allow read: if request.auth != null; // Require authentication for location access
+      allow create: if request.auth != null &&
+                    request.resource.data.createdBy == request.auth.uid &&
+                    request.resource.data.keys().hasAll(['name', 'coordinates', 'createdBy']) &&
+                    request.resource.data.coordinates is list &&
+                    request.resource.data.coordinates.size() == 2;
+      allow update: if request.auth != null && resource.data.createdBy == request.auth.uid &&
+                    // Only allow status changes and content updates
+                    request.resource.data.diff(resource.data).affectedKeys()
+                      .hasOnly(['name', 'description', 'category', 'riskLevel', 'coordinates', 'address', 'tags', 'updatedAt', 'status']);
       allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
     }
     
