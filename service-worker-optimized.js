@@ -12,13 +12,8 @@ const API_CACHE = 'urbindex-api-v3.0.0';
 // Critical resources to cache immediately
 const STATIC_ASSETS = [
     '/',
-    '/final-optimized.html',
-    '/css/app.css',
-    '/js/app-optimized.js',
-    '/js/firebase-optimized.js',
-    '/js/map-optimized.js',
-    '/js/ui-optimized.js',
-    '/js/auth-optimized.js',
+    '/index.html',
+    '/firebase-config.js',
     '/manifest.json',
     // Add Firebase CDNs
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',

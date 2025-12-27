@@ -2,6 +2,7 @@ const CACHE_NAME = 'urbindex-cache-v12';
 const STATIC_ASSETS = [
   './index.html',
   './manifest.json',
+  './firebase-config.js',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
@@ -19,7 +20,9 @@ const OFFLINE_FALLBACKS = {
 
 // URLs that should be available offline even if not explicitly cached
 const CRITICAL_ASSETS = [
-  '/index.html'
+  '/index.html',
+  '/manifest.json',
+  '/firebase-config.js'
 ];
 
 // Install event - cache static assets
@@ -160,11 +163,15 @@ async function cacheFirstWithUpdateStrategy(event) {
       return cache.match(OFFLINE_FALLBACKS.document);
     }
     
-    // For image requests, return a simple response
+    // For image requests, return a proper error image
     if (event.request.destination === 'image') {
-      return new Response('Image unavailable offline', {
+      // DEBUG: Log image request failure
+      console.log(`DEBUG: Image request failed, returning error image for: ${event.request.url}`);
+      // Return a base64 encoded transparent pixel as error image
+      const errorImageBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+      return new Response(errorImageBase64, {
         status: 503,
-        headers: { 'Content-Type': 'text/plain' }
+        headers: { 'Content-Type': 'image/png' }
       });
     }
     
