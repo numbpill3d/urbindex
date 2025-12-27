@@ -770,23 +770,18 @@ self.addEventListener('error', event => {
 
 // Function to fetch with timeout
 function fetchWithTimeout(request, timeout = 8000) {
-  console.log('[SW] fetchWithTimeout called for:', request.url, 'with timeout:', timeout);
   return new Promise((resolve, reject) => {
     // Set timeout
     const timeoutId = setTimeout(() => {
-      console.error('[SW] fetchWithTimeout: Request timed out after', timeout, 'ms for:', request.url);
       reject(new Error('Request timeout'));
     }, timeout);
 
-    console.log('[SW] fetchWithTimeout: Starting fetch for:', request.url);
     fetch(request).then(
       (response) => {
-        console.log('[SW] fetchWithTimeout: Fetch completed successfully for:', request.url);
         clearTimeout(timeoutId);
         resolve(response);
       },
       (err) => {
-        console.error('[SW] fetchWithTimeout: Fetch failed with error:', err, 'for:', request.url);
         clearTimeout(timeoutId);
         reject(err);
       }
