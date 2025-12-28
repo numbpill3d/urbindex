@@ -3789,14 +3789,30 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="profile-photo-url">
+                    <label class="form-label" for="profile-photo-upload">
                         <i class="fas fa-image" aria-hidden="true"></i>
-                        Profile Photo URL
+                        Profile Photo
                     </label>
-                    <input class="input" type="url" id="profile-photo-url" name="photoURL"
-                           placeholder="https://example.com/photo.jpg" aria-describedby="photo-help">
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <input class="input" type="file" id="profile-photo-upload" name="photoUpload"
+                               accept="image/*" aria-describedby="photo-help" style="flex: 1;">
+                        <button type="button" class="btn" id="upload-photo-btn" style="min-width: 80px;">
+                            <i class="fas fa-upload"></i> Upload
+                        </button>
+                    </div>
                     <div id="photo-help" class="field-help">
-                        Enter a URL to your profile photo (leave blank to use default)
+                        Choose an image file (max 5MB, JPG/PNG/WEBP)
+                    </div>
+                    <div id="photo-progress" style="display: none; margin-top: 8px;">
+                        <div style="width: 100%; height: 4px; background: var(--cz-concrete); border: 1px solid var(--cz-black);">
+                            <div id="photo-progress-bar" style="height: 100%; background: var(--cz-yellow); width: 0%; transition: width 0.3s ease;"></div>
+                        </div>
+                        <div style="margin-top: 4px; font-size: 0.8rem; color: var(--text-muted);" id="photo-progress-text">Uploading...</div>
+                    </div>
+                    <input class="input" type="url" id="profile-photo-url" name="photoURL"
+                           placeholder="Or enter photo URL" aria-describedby="photo-url-help" style="margin-top: 8px;">
+                    <div id="photo-url-help" class="field-help">
+                        Alternative: enter a direct URL to your profile photo
                     </div>
                 </div>
 
@@ -4109,6 +4125,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" onerror="console.error('Failed to load Firebase App')"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" onerror="console.error('Failed to load Firebase Auth')"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" onerror="console.error('Failed to load Firebase Firestore')"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js" onerror="console.error('Failed to load Firebase Storage')"></script>
     
     <!-- Google OAuth SDK -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -4233,6 +4250,7 @@
                     }
                     this.db = firebase.firestore();
                     this.auth = firebase.auth();
+                    this.storage = firebase.storage();
                 } catch (error) {
                     console.error('Firebase initialization error:', error);
                     throw new Error('Failed to initialize Firebase. Please check your internet connection and refresh the page.');
@@ -8284,6 +8302,122 @@
                     console.error('Error creating location marker:', error);
                     return null;
                 }
+            }
+
+            // Profile photo upload methods
+            async uploadProfilePhoto() {
+                const fileInput = document.getElementById('profile-photo-upload');
+                const uploadBtn = document.getElementById('upload-photo-btn');
+                const progressDiv = document.getElementById('photo-progress');
+                const progressBar = document.getElementById('photo-progress-bar');
+                const progressText = document.getElementById('photo-progress-text');
+
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    this.showToast('Please select a photo to upload', 'warning');
+                    return;
+                }
+
+                const file = fileInput.files[0];
+
+                // Validate file
+                try {
+                    this.validateImageFile(file);
+                } catch (error) {
+                    this.showToast(error.message, 'error');
+                    return;
+                }
+
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to upload photos', 'warning');
+                    return;
+                }
+
+                const opKey = 'photo-upload';
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+                progressDiv.style.display = 'block';
+
+                try {
+                    const storageRef = this.storage.ref();
+                    const photoRef = storageRef.child(`profile-photos/${this.currentUser.uid}/${Date.now()}_${file.name}`);
+
+                    const uploadTask = photoRef.put(file);
+
+                    uploadTask.on('state_changed',
+                        (snapshot) => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            progressBar.style.width = progress + '%';
+                            progressText.textContent = `Uploading... ${Math.round(progress)}%`;
+                        },
+                        (error) => {
+                            console.error('Upload error:', error);
+                            this.showToast('Failed to upload photo', 'error');
+                        },
+                        async () => {
+                            try {
+                                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+
+                                // Update user profile with new photo URL
+                                await this.currentUser.updateProfile({
+                                    photoURL: downloadURL
+                                });
+
+                                // Update Firestore user document
+                                await this.db.collection('users').doc(this.currentUser.uid).update({
+                                    photoURL: downloadURL,
+                                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+
+                                document.getElementById('profile-photo-url').value = downloadURL;
+                                this.showToast('Profile photo uploaded successfully!', 'success');
+
+                                // Refresh profile if currently viewing
+                                if (document.getElementById('profile-view').classList.contains('active')) {
+                                    this.loadProfile();
+                                }
+                            } catch (error) {
+                                console.error('Error updating profile:', error);
+                                this.showToast('Photo uploaded but failed to update profile', 'error');
+                            }
+                        }
+                    );
+                } catch (error) {
+                    console.error('Upload setup error:', error);
+                    this.showToast('Failed to start upload', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+                    setTimeout(() => {
+                        progressDiv.style.display = 'none';
+                        progressBar.style.width = '0%';
+                    }, 2000);
+                }
+            }
+
+            validateImageFile(file) {
+                // Check file type
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    throw new Error('Please select a valid image file (JPG, PNG, WEBP, or GIF)');
+                }
+
+                // Check file size (5MB limit)
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    throw new Error('File size must be less than 5MB');
+                }
+
+                // Check for malicious file names
+                const suspiciousPatterns = [/[<>\"'&]/, /\.\./, /\/\//];
+                if (suspiciousPatterns.some(pattern => pattern.test(file.name))) {
+                    throw new Error('Invalid file name');
+                }
+
+                return true;
             }
 
             async loadProfile(userId = null) {
