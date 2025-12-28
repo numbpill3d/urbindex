@@ -2729,6 +2729,61 @@
             animation: pulse 2s infinite;
         }
 
+        /* Custom marker styles */
+        .custom-location-marker {
+            background: none !important;
+            border: none !important;
+        }
+
+        .custom-location-marker div {
+            transition: all 0.3s ease;
+        }
+
+        .custom-location-marker:hover div {
+            transform: scale(1.3);
+            box-shadow: 0 0 15px rgba(255, 208, 0, 0.6);
+        }
+
+        /* Enhanced marker cluster styles */
+        .marker-cluster {
+            background: var(--cz-yellow);
+            border: 3px solid var(--cz-black);
+            color: var(--cz-black);
+            border-radius: 0;
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .marker-cluster-small {
+            background: var(--cz-yellow);
+            color: var(--cz-black);
+        }
+
+        .marker-cluster-medium {
+            background: var(--cz-orange);
+            color: white;
+        }
+
+        .marker-cluster-large {
+            background: var(--cz-red);
+            color: white;
+        }
+
+        .marker-cluster div {
+            background: none !important;
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-stencil);
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         /* Navigation badges for notifications */
         .nav-badge {
             position: absolute;
@@ -3446,18 +3501,18 @@
                     <div class="sr-only" id="locations-filter-instructions">
                         Use these controls to search and filter your locations. Results update automatically.
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: center;">
+                    <div style="display: grid; grid-template-columns: 1fr auto auto auto; gap: 16px; align-items: center;">
                         <div class="form-group" style="margin: 0;">
                             <label for="location-search" class="form-label" style="margin-bottom: 4px;">
                                 <i class="fas fa-search" aria-hidden="true"></i>
                                 Search Locations
                             </label>
                             <input class="input" type="text" id="location-search"
-                                   placeholder="Search by name or description..."
+                                   placeholder="Search by name, description, or tags..."
                                    aria-describedby="location-search-instructions"
                                    style="margin: 0;">
                             <div id="location-search-instructions" class="sr-only">
-                                Search through your location names and descriptions
+                                Search through your location names, descriptions, and tags
                             </div>
                         </div>
 
@@ -3486,6 +3541,20 @@
                                 <option value="low">Low Risk</option>
                                 <option value="moderate">Moderate Risk</option>
                                 <option value="high">High Risk</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin: 0;">
+                            <label for="sort-filter" class="form-label" style="margin-bottom: 4px;">
+                                <i class="fas fa-sort-amount-down" aria-hidden="true"></i>
+                                Sort By
+                            </label>
+                            <select class="select" id="sort-filter" style="margin: 0;" aria-label="Sort locations">
+                                <option value="recent">Most Recent</option>
+                                <option value="name">Name (A-Z)</option>
+                                <option value="popularity">Popularity</option>
+                                <option value="risk-low">Risk Level (Low-High)</option>
+                                <option value="risk-high">Risk Level (High-Low)</option>
                             </select>
                         </div>
                     </div>
@@ -4025,6 +4094,13 @@
                 window.app.showToast('Urbindex installed successfully!', 'success');
             }
         });
+        
+        // Google Places API callback
+        function initGooglePlaces() {
+            if (window.app) {
+                window.app.initGooglePlaces();
+            }
+        }
     </script>
     
     <script src="firebase-config.js" onerror="console.error('Failed to load Firebase configuration')"></script>
@@ -4040,12 +4116,18 @@
     <!-- GitHub OAuth SDK -->
     <script src="https://github.com/login/oauth/authorize" style="display: none;"></script>
     
+    <!-- Google Places API -->
+    <script async defer 
+            src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_PLACES_API_KEY&libraries=places&callback=initGooglePlaces">
+    </script>
+    
     <script>
         class UrbindexApp {
             constructor() {
                 this.map = null;
                 this.currentUser = null;
                 this.markers = new Map();
+                this.markerClusterGroup = null; // Marker clustering group
                 this.selectedLatLng = null;
                 this.tempMarker = null;
                 this.activeOperations = new Set(); // Track active async operations to prevent duplicate clicks
@@ -4060,6 +4142,47 @@
                 this.lastSocialRefresh = null;
                 this.init();
                 this.initTagSystem();
+                
+                // Initialize Google Places API if available
+                this.initGooglePlaces();
+            }
+            
+            // Google Places API initialization
+            initGooglePlaces() {
+                // This will be called by the Google Places API callback
+                if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                    this.googlePlacesAvailable = true;
+                    console.log('Google Places API loaded successfully');
+                    this.initPlacesAutocomplete();
+                } else {
+                    this.googlePlacesAvailable = false;
+                    console.log('Google Places API not available, using OpenStreetMap only');
+                }
+            }
+            
+            initPlacesAutocomplete() {
+                if (!this.googlePlacesAvailable) return;
+                
+                const addressInput = document.getElementById('location-address');
+                if (!addressInput) return;
+                
+                // Create autocomplete instance
+                this.placesAutocomplete = new google.maps.places.Autocomplete(addressInput, {
+                    types: ['establishment', 'geocode'],
+                    componentRestrictions: { country: [] } // Allow worldwide search
+                });
+                
+                // Add place changed listener
+                this.placesAutocomplete.addListener('place_changed', () => {
+                    const place = this.placesAutocomplete.getPlace();
+                    if (place.geometry && place.geometry.location) {
+                        const lat = place.geometry.location.lat();
+                        const lng = place.geometry.location.lng();
+                        const address = place.formatted_address || place.name;
+                        this.setLocationFromCoordinates(lat, lng, address);
+                        this.showToast(`Location found: ${address}`, 'success');
+                    }
+                });
             }
 
             async init() {
@@ -6921,7 +7044,20 @@
 
             async geocodeAddress(address) {
                 try {
-                    // Nominatim API call with proper headers
+                    // Try Google Places API first if available
+                    if (this.googlePlacesAvailable && this.placesAutocomplete) {
+                        try {
+                            const result = await this.geocodeWithGoogle(address);
+                            if (result) {
+                                console.log('Geocoded with Google Places API');
+                                return result;
+                            }
+                        } catch (googleError) {
+                            console.warn('Google Places geocoding failed, trying OpenStreetMap:', googleError);
+                        }
+                    }
+                    
+                    // Fallback to Nominatim API call with proper headers
                     const encodedAddress = encodeURIComponent(address);
                     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1&addressdetails=1`;
                     
@@ -6954,6 +7090,32 @@
                     console.error('Nominatim geocoding error:', error);
                     throw error;
                 }
+            }
+            
+            async geocodeWithGoogle(address) {
+                return new Promise((resolve, reject) => {
+                    if (!this.googlePlacesAvailable || !google.maps.Geocoder) {
+                        reject(new Error('Google Geocoder not available'));
+                        return;
+                    }
+                    
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ address: address }, (results, status) => {
+                        if (status === google.maps.GeocoderStatus.OK && results && results.length > 0) {
+                            const result = results[0];
+                            resolve({
+                                lat: result.geometry.location.lat(),
+                                lng: result.geometry.location.lng(),
+                                displayName: result.formatted_address,
+                                placeId: result.place_id,
+                                types: result.types,
+                                addressComponents: result.address_components
+                            });
+                        } else {
+                            reject(new Error(`Google Geocoding failed: ${status}`));
+                        }
+                    });
+                });
             }
 
             async reverseGeocode(lat, lng) {
@@ -7518,21 +7680,54 @@
                 }
 
                 try {
+                    // Initialize marker cluster group if not exists
+                    if (!this.markerClusterGroup) {
+                        this.markerClusterGroup = L.markerClusterGroup({
+                            chunkedLoading: true,
+                            chunkProgress: (processed, total, elapsed) => {
+                                console.log(`Clustering ${processed} of ${total} markers (${Math.round(processed/total*100)}%)`);
+                            },
+                            maxClusterRadius: 50,
+                            spiderfyOnMaxZoom: true,
+                            showCoverageOnHover: false,
+                            zoomToBoundsOnClick: true,
+                            disableClusteringAtZoom: 16,
+                            removeOutsideVisibleBounds: true,
+                            animate: true,
+                            animateAddingMarkers: true,
+                            singleMarkerMode: false,
+                            iconCreateFunction: (cluster) => {
+                                const count = cluster.getChildCount();
+                                let className = 'marker-cluster-small';
+                                if (count > 10) className = 'marker-cluster-medium';
+                                if (count > 20) className = 'marker-cluster-large';
+                                
+                                return new L.DivIcon({
+                                    html: `<div><span>${count}</span></div>`,
+                                    className: `marker-cluster ${className}`,
+                                    iconSize: new L.Point(40, 40)
+                                });
+                            }
+                        });
+                        
+                        // Add cluster group to map
+                        this.map.addLayer(this.markerClusterGroup);
+                    }
+
                     // Load locations for public viewing (rules now allow public read)
                     this.db.collection('locations')
                         .where('status', '==', 'active')
                         .orderBy('createdAt', 'desc')
                         .onSnapshot(snapshot => {
-                            // Clear existing markers
-                            this.markers.forEach(marker => {
-                                if (this.map && this.map.hasLayer(marker)) {
-                                    this.map.removeLayer(marker);
-                                }
-                            });
+                            // Clear existing markers from cluster
+                            if (this.markerClusterGroup) {
+                                this.markerClusterGroup.clearLayers();
+                            }
                             this.markers.clear();
 
                             let locationCount = 0;
                             let invalidLocations = 0;
+                            const validMarkers = [];
 
                             snapshot.forEach(doc => {
                                 try {
@@ -7544,15 +7739,24 @@
                                         if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
                                             locationCount++;
 
-                                            const marker = L.marker([lat, lng])
+                                            // Create custom icon based on risk level
+                                            const riskColor = this.getRiskColor(data.riskLevel);
+                                            const marker = L.marker([lat, lng], {
+                                                icon: L.divIcon({
+                                                    className: 'custom-location-marker',
+                                                    html: `<div style="background: ${riskColor}; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
+                                                    iconSize: [16, 16],
+                                                    iconAnchor: [8, 8]
+                                                })
+                                            })
                                                 .bindTooltip(data.name || 'Unnamed Location', {
                                                     direction: 'top',
                                                     permanent: false,
                                                     offset: [0, -10]
                                                 })
-                                                .bindPopup(this.createLocationPopup(data, doc.id))
-                                                .addTo(this.map);
+                                                .bindPopup(this.createLocationPopup(data, doc.id));
 
+                                            validMarkers.push(marker);
                                             this.markers.set(doc.id, marker);
                                         } else {
                                             invalidLocations++;
@@ -7567,6 +7771,13 @@
                                     invalidLocations++;
                                 }
                             });
+
+                            // Add markers to cluster group
+                            if (validMarkers.length > 0 && this.markerClusterGroup) {
+                                validMarkers.forEach(marker => {
+                                    this.markerClusterGroup.addLayer(marker);
+                                });
+                            }
 
                             console.log(`Loaded ${locationCount} locations on map${invalidLocations > 0 ? ` (${invalidLocations} invalid locations skipped)` : ''}`);
 
@@ -7598,6 +7809,26 @@
                 const escapedName = this.escapeHtml(data.name || 'Unnamed Location');
                 const escapedDescription = this.escapeHtml(data.description || 'No description available');
                 const category = this.escapeHtml(data.category || 'other');
+                const formattedDate = data.createdAt ? new Date(data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt).toLocaleDateString() : 'Unknown';
+                const visitCount = data.visitCount || 0;
+                const likeCount = data.likesCount || 0;
+                
+                // Render photos if available
+                let photosHtml = '';
+                if (data.photos && Array.isArray(data.photos) && data.photos.length > 0) {
+                    photosHtml = `
+                        <div class="photos-section">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 4px; margin: 8px 0;">
+                                ${data.photos.slice(0, 4).map((photo, index) => 
+                                    `<img src="${this.escapeHtml(photo)}" alt="Location photo ${index + 1}" 
+                                         style="width: 80px; height: 80px; object-fit: cover; border: 2px solid var(--cz-black); cursor: pointer;"
+                                         onclick="app.showLocationPhotoModal('${docId}', ${index})">`
+                                ).join('')}
+                                ${data.photos.length > 4 ? `<div style="width: 80px; height: 80px; background: var(--cz-concrete); border: 2px solid var(--cz-black); display: flex; align-items: center; justify-content: center; font-size: 0.8em; color: var(--text-muted);">+${data.photos.length - 4}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
                 
                 // Render tags if available
                 let tagsHtml = '';
@@ -7611,9 +7842,18 @@
                         </div>
                     `;
                 }
+                
+                // Render metadata
+                let metadataHtml = `
+                    <div style="display: flex; gap: 8px; font-size: 0.75em; color: #666; margin: 8px 0; padding-top: 6px; border-top: 1px solid #eee;">
+                        <span><i class="fas fa-calendar" aria-hidden="true"></i> ${formattedDate}</span>
+                        <span><i class="fas fa-eye" aria-hidden="true"></i> ${visitCount} visits</span>
+                        <span><i class="fas fa-heart" aria-hidden="true"></i> ${likeCount} likes</span>
+                    </div>
+                `;
 
                 return `
-                    <div style="min-width: 200px; max-width: 300px;">
+                    <div style="min-width: 250px; max-width: 400px;">
                         <div style="margin-bottom: 8px;">
                             <strong style="font-size: 1.1em; color: var(--accent-blue);">${escapedName}</strong>
                         </div>
@@ -7624,12 +7864,15 @@
                             <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 0; color: #333;">${category}</span>
                             <span style="background: ${riskColor}; padding: 2px 6px; border-radius: 0; color: white;">${data.riskLevel || 'unknown'}</span>
                         </div>
+                        ${photosHtml}
                         ${tagsHtml}
+                        ${metadataHtml}
                         ${this.currentUser ? `
-                            <div style="display: flex; gap: 4px; margin-top: 8px;">
-                                <button onclick="app.editLocation('${docId}')" style="font-size: 0.8em; padding: 4px 8px; border-radius: 0;">Edit</button>
-                                <button onclick="app.deleteLocation('${docId}')" style="font-size: 0.8em; padding: 4px 8px; background: #ff3860; color: white; border-radius: 0;">Delete</button>
-                                <button onclick="app.showView('locations'); setTimeout(() => app.loadUserLocations(), 100);" style="font-size: 0.8em; padding: 4px 8px; background: var(--cz-yellow); color: var(--cz-black); border-radius: 0;">View in List</button>
+                            <div style="display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap;">
+                                <button onclick="app.editLocation('${docId}')" style="font-size: 0.75em; padding: 4px 8px; border-radius: 0; border: 1px solid var(--cz-black);">Edit</button>
+                                <button onclick="app.deleteLocation('${docId}')" style="font-size: 0.75em; padding: 4px 8px; background: var(--cz-red); color: white; border: 1px solid var(--cz-black);">Delete</button>
+                                <button onclick="app.showView('locations'); setTimeout(() => app.loadUserLocations(), 100);" style="font-size: 0.75em; padding: 4px 8px; background: var(--cz-yellow); color: var(--cz-black); border: 1px solid var(--cz-black);">List View</button>
+                                ${data.photos && data.photos.length > 0 ? `<button onclick="app.showLocationPhotos('${docId}')" style="font-size: 0.75em; padding: 4px 8px; background: var(--cz-concrete); color: var(--text-primary); border: 1px solid var(--cz-black);">Photos (${data.photos.length})</button>` : ''}
                             </div>
                         ` : `
                             <div style="margin-top: 8px;">
@@ -7796,9 +8039,17 @@
                 const searchInput = document.getElementById('location-search');
                 const categoryFilter = document.getElementById('category-filter');
                 const riskFilter = document.getElementById('risk-filter');
+                const sortFilter = document.getElementById('sort-filter');
 
+                // Debounced search with fuzzy matching
                 if (searchInput) {
-                    searchInput.addEventListener('input', () => this.renderFilteredLocations());
+                    let searchTimeout;
+                    searchInput.addEventListener('input', () => {
+                        clearTimeout(searchTimeout);
+                        searchTimeout = setTimeout(() => {
+                            this.renderFilteredLocations();
+                        }, 300); // 300ms debounce
+                    });
                 }
 
                 if (categoryFilter) {
@@ -7808,21 +8059,116 @@
                 if (riskFilter) {
                     riskFilter.addEventListener('change', () => this.renderFilteredLocations());
                 }
+
+                if (sortFilter) {
+                    sortFilter.addEventListener('change', () => this.renderFilteredLocations());
+                }
             }
 
+            // Fuzzy matching function for better search results
+            fuzzyMatch(text, searchTerm) {
+                if (!searchTerm) return true;
+                
+                const textLower = text.toLowerCase();
+                const termLower = searchTerm.toLowerCase();
+                
+                // Exact match
+                if (textLower.includes(termLower)) return true;
+                
+                // Fuzzy matching - allow for typos and similar words
+                const words = textLower.split(/\s+/);
+                const termWords = termLower.split(/\s+/);
+                
+                return termWords.every(termWord => {
+                    return words.some(word => {
+                        // Allow 1 character difference for words longer than 3 characters
+                        if (word.length > 3 && termWord.length > 3) {
+                            const diff = this.charDifference(word, termWord);
+                            return diff <= 1;
+                        }
+                        return word.startsWith(termWord) || termWord.startsWith(word);
+                    });
+                });
+            }
+            
+            // Calculate character difference between two strings
+            charDifference(str1, str2) {
+                const len1 = str1.length;
+                const len2 = str2.length;
+                const maxLen = Math.max(len1, len2);
+                
+                if (maxLen === 0) return 0;
+                
+                let differences = 0;
+                const minLen = Math.min(len1, len2);
+                
+                for (let i = 0; i < minLen; i++) {
+                    if (str1[i] !== str2[i]) differences++;
+                }
+                
+                differences += Math.abs(len1 - len2);
+                return differences;
+            }
+            
+            // Get location rating score for sorting
+            getLocationScore(locationData) {
+                const ratings = locationData.ratings || {};
+                const values = Object.values(ratings);
+                if (values.length === 0) return 0;
+                
+                const sum = values.reduce((acc, val) => acc + val, 0);
+                return sum / values.length;
+            }
+            
+            // Sort locations based on selected criteria
+            sortLocations(locations, sortBy) {
+                switch (sortBy) {
+                    case 'name':
+                        return locations.sort((a, b) => a.data.name.localeCompare(b.data.name));
+                    case 'popularity':
+                        return locations.sort((a, b) => {
+                            const scoreA = this.getLocationScore(a.data);
+                            const scoreB = this.getLocationScore(b.data);
+                            return scoreB - scoreA; // Higher score first
+                        });
+                    case 'risk-low':
+                        const riskOrder = { 'low': 1, 'moderate': 2, 'high': 3 };
+                        return locations.sort((a, b) => {
+                            const riskA = riskOrder[a.data.riskLevel] || 999;
+                            const riskB = riskOrder[b.data.riskLevel] || 999;
+                            return riskA - riskB;
+                        });
+                    case 'risk-high':
+                        const riskOrderDesc = { 'high': 1, 'moderate': 2, 'low': 3 };
+                        return locations.sort((a, b) => {
+                            const riskA = riskOrderDesc[a.data.riskLevel] || 999;
+                            const riskB = riskOrderDesc[b.data.riskLevel] || 999;
+                            return riskA - riskB;
+                        });
+                    case 'recent':
+                    default:
+                        return locations.sort((a, b) => {
+                            const timeA = a.data.createdAt?.toDate ? a.data.createdAt.toDate() : new Date(a.data.createdAt || 0);
+                            const timeB = b.data.createdAt?.toDate ? b.data.createdAt.toDate() : new Date(b.data.createdAt || 0);
+                            return timeB - timeA; // Newest first
+                        });
+                }
+            }
+            
             renderFilteredLocations() {
                 if (!this.allUserLocations) return;
 
-                const searchTerm = (document.getElementById('location-search')?.value || '').toLowerCase();
+                const searchTerm = (document.getElementById('location-search')?.value || '').trim();
                 const categoryFilter = document.getElementById('category-filter')?.value || '';
                 const riskFilter = document.getElementById('risk-filter')?.value || '';
+                const sortFilter = document.getElementById('sort-filter')?.value || 'recent';
 
-                const filteredLocations = this.allUserLocations.filter(({ data }) => {
-                    // Search filter
-                    const matchesSearch = !searchTerm ||
-                        data.name?.toLowerCase().includes(searchTerm) ||
-                        data.description?.toLowerCase().includes(searchTerm) ||
-                        data.category?.toLowerCase().includes(searchTerm);
+                let filteredLocations = this.allUserLocations.filter(({ data }) => {
+                    // Enhanced search filter with fuzzy matching and tags support
+                    const matchesSearch = !searchTerm || this.fuzzyMatch(
+                        [data.name, data.description, data.category, ...(data.tags || [])].join(' '), 
+                        searchTerm
+                    );
 
                     // Category filter
                     const matchesCategory = !categoryFilter || data.category === categoryFilter;
@@ -7832,6 +8178,9 @@
 
                     return matchesSearch && matchesCategory && matchesRisk;
                 });
+
+                // Apply sorting
+                filteredLocations = this.sortLocations(filteredLocations, sortFilter);
 
                 const grid = document.getElementById('locations-grid');
                 if (!grid) return;
@@ -7847,6 +8196,8 @@
                 filteredLocations.forEach(({ id, data }) => {
                     const card = document.createElement('div');
                     card.className = 'location-card';
+                    const locationScore = this.getLocationScore(data);
+                    
                     card.innerHTML = `
                         <div class="location-header">
                             <h4>${this.escapeHtml(data.name)}</h4>
@@ -7855,13 +8206,14 @@
                         <p style="color: var(--text-secondary); margin-bottom: 12px;">${this.escapeHtml(data.description)}</p>
                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
                             <i class="fas fa-tag"></i> ${this.escapeHtml(data.category)}
+                            ${data.tags && data.tags.length > 0 ? ` • <i class="fas fa-tags"></i> ${data.tags.map(tag => this.escapeHtml(tag)).join(', ')}` : ''}
                             ${data.coordinates ? ` • <i class="fas fa-map-marker-alt"></i> ${data.coordinates[0].toFixed(4)}, ${data.coordinates[1].toFixed(4)}` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
                             <button class="rating-btn" id="rate-up-${id}" onclick="app.rateLocation('${id}', 1)" title="Upvote location">
                                 <i class="fas fa-thumbs-up"></i>
                             </button>
-                            <div class="cz-text" style="font-size: 0.95rem;">Score: <span id="rating-score-${id}">--</span></div>
+                            <div class="cz-text" style="font-size: 0.95rem;">Score: <span id="rating-score-${id}">${locationScore.toFixed(1)}</span></div>
                             <button class="rating-btn" id="rate-down-${id}" onclick="app.rateLocation('${id}', -1)" title="Downvote location">
                                 <i class="fas fa-thumbs-down"></i>
                             </button>
@@ -7873,11 +8225,65 @@
                             <button class="btn" style="font-size: 0.8rem; padding: 4px 8px; background: var(--danger); color: white;" onclick="app.deleteLocation('${id}')">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
+                            <button class="btn" style="font-size: 0.8rem; padding: 4px 8px; background: var(--cz-blueprint); color: white;" onclick="app.focusMapOnLocation(${data.coordinates?.[0] || 0}, ${data.coordinates?.[1] || 0})">
+                                <i class="fas fa-map"></i> View on Map
+                            </button>
                         </div>
                     `;
                     grid.appendChild(card);
                     this.loadLocationRating(id);
                 });
+                
+                // Update map markers to reflect filtered results
+                this.updateMapMarkers(filteredLocations);
+            }
+            
+            updateMapMarkers(filteredLocations) {
+                if (!this.map || !this.markerClusterGroup) return;
+                
+                try {
+                    // Clear existing markers
+                    this.markerClusterGroup.clearLayers();
+                    
+                    // Add markers for filtered locations
+                    filteredLocations.forEach(({ id, data }) => {
+                        if (data.coordinates && data.coordinates.length === 2) {
+                            const [lat, lng] = data.coordinates;
+                            const marker = this.createLocationMarker(id, data, lat, lng);
+                            if (marker) {
+                                this.markerClusterGroup.addLayer(marker);
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error updating map markers:', error);
+                }
+            }
+            
+            createLocationMarker(id, data, lat, lng) {
+                try {
+                    // Create custom icon based on risk level
+                    const riskColor = this.getRiskColor(data.riskLevel);
+                    const marker = L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            className: 'custom-location-marker',
+                            html: `<div style="background: ${riskColor}; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
+                            iconSize: [16, 16],
+                            iconAnchor: [8, 8]
+                        })
+                    })
+                        .bindTooltip(data.name || 'Unnamed Location', {
+                            direction: 'top',
+                            permanent: false,
+                            offset: [0, -10]
+                        })
+                        .bindPopup(this.createLocationPopup(data, id));
+                    
+                    return marker;
+                } catch (error) {
+                    console.error('Error creating location marker:', error);
+                    return null;
+                }
             }
 
             async loadProfile(userId = null) {
@@ -8238,22 +8644,30 @@
 
                 const name = document.getElementById('location-name').value.trim();
                 const description = document.getElementById('location-description').value.trim();
+                const category = document.getElementById('location-category').value;
+                const riskLevel = document.getElementById('location-risk').value;
+                const address = document.getElementById('location-address').value.trim();
 
-                if (!name || !description) {
-                    this.showToast('Please fill in all required fields', 'warning');
-                    return;
+                // Comprehensive validation
+                const validationErrors = [];
+                
+                // Required field validation
+                if (!name) validationErrors.push('Location name is required');
+                if (!description) validationErrors.push('Description is required');
+                
+                // Length validation
+                if (name && name.length < 3) validationErrors.push('Location name must be at least 3 characters');
+                if (name && name.length > 100) validationErrors.push('Location name must be less than 100 characters');
+                if (description && description.length < 10) validationErrors.push('Description must be at least 10 characters');
+                if (description && description.length > 1000) validationErrors.push('Description must be less than 1000 characters');
+                if (address && address.length > 200) validationErrors.push('Address must be less than 200 characters');
+                
+                // Content validation
+                if (name && !/^[a-zA-Z0-9\s\-_.,!?()\[\]]+$/.test(name)) {
+                    validationErrors.push('Location name contains invalid characters');
                 }
-
-                if (name.length < 3) {
-                    this.showToast('Location name needs at least 3 characters', 'warning');
-                    return;
-                }
-
-                if (description.length < 10) {
-                    this.showToast('Add a bit more detail to the description (10+ characters)', 'warning');
-                    return;
-                }
-
+                
+                // Coordinate validation
                 const existingCoords = (() => {
                     try {
                         const raw = e.target.dataset.originalCoordinates;
@@ -8267,9 +8681,42 @@
                     : existingCoords;
 
                 if (!coordsToSave) {
-                    this.showToast('Please select a location on the map', 'warning');
+                    validationErrors.push('Please select a location on the map');
+                }
+                
+                // Validate coordinates are within valid ranges
+                if (coordsToSave) {
+                    const [lat, lng] = coordsToSave;
+                    if (isNaN(lat) || isNaN(lng)) {
+                        validationErrors.push('Invalid coordinates');
+                    } else if (lat < -90 || lat > 90) {
+                        validationErrors.push('Latitude must be between -90 and 90');
+                    } else if (lng < -180 || lng > 180) {
+                        validationErrors.push('Longitude must be between -180 and 180');
+                    }
+                }
+                
+                // Tags validation
+                const tags = this.getSelectedTags();
+                if (tags.length > 10) {
+                    validationErrors.push('Maximum 10 tags allowed');
+                }
+                for (const tag of tags) {
+                    if (tag.length > 25) {
+                        validationErrors.push('Each tag must be less than 25 characters');
+                        break;
+                    }
+                }
+                
+                // Display validation errors
+                if (validationErrors.length > 0) {
+                    const errorMessage = validationErrors.join('. ');
+                    this.showToast(errorMessage, 'warning');
+                    this.announceFormErrors(validationErrors.map(msg => ({ message: msg })));
                     return;
                 }
+
+
 
                 this.activeOperations.add(opKey);
                 const submitBtn = e.target.querySelector('button[type="submit"]');
@@ -8339,6 +8786,109 @@
                 this.showToast(message, 'error');
             }
 
+            showLocationPhotos(locationId) {
+                // Load and display photos in a modal
+                this.db.collection('locations').doc(locationId).get().then(doc => {
+                    if (!doc.exists) return;
+                    const data = doc.data();
+                    if (!data.photos || !Array.isArray(data.photos)) return;
+                    
+                    this.showPhotoModal(data.photos, data.name || 'Location Photos');
+                }).catch(error => {
+                    console.error('Error loading location photos:', error);
+                    this.showToast('Failed to load photos', 'error');
+                });
+            }
+            
+            showLocationPhotoModal(locationId, photoIndex) {
+                this.db.collection('locations').doc(locationId).get().then(doc => {
+                    if (!doc.exists) return;
+                    const data = doc.data();
+                    if (!data.photos || !Array.isArray(data.photos) || photoIndex >= data.photos.length) return;
+                    
+                    this.showPhotoModal(data.photos, data.name || 'Location Photos', photoIndex);
+                }).catch(error => {
+                    console.error('Error loading location photo:', error);
+                    this.showToast('Failed to load photo', 'error');
+                });
+            }
+            
+            showPhotoModal(photos, title = 'Photos', startIndex = 0) {
+                // Create photo modal
+                const modal = document.createElement('div');
+                modal.className = 'modal location-detail-modal';
+                modal.style.display = 'flex';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 90vw; max-height: 90vh; width: auto; height: auto;">
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                        <div style="text-align: center; margin-bottom: 16px;">
+                            <h3>${this.escapeHtml(title)}</h3>
+                            <div style="font-size: 0.9em; color: var(--text-muted);">${photos.length} photo${photos.length !== 1 ? 's' : ''}</div>
+                        </div>
+                        <div id="photo-gallery" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-height: 70vh; overflow-y: auto;">
+                            ${photos.map((photo, index) => 
+                                `<img src="${this.escapeHtml(photo)}" alt="Photo ${index + 1}" 
+                                     style="max-width: 200px; max-height: 200px; object-fit: cover; border: 2px solid var(--cz-black); cursor: pointer;"
+                                     onclick="window.currentPhotoIndex = ${index}; window.currentPhotos = ${JSON.stringify(photos)}; app.showFullScreenPhoto()">`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Close modal when clicking outside
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            }
+            
+            showFullScreenPhoto() {
+                const photos = window.currentPhotos;
+                const index = window.currentPhotoIndex;
+                
+                if (!photos || index === undefined) return;
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.style.display = 'flex';
+                modal.innerHTML = `
+                    <div style="position: relative; max-width: 95vw; max-height: 95vh;">
+                        <img src="${this.escapeHtml(photos[index])}" alt="Photo ${index + 1}" 
+                             style="max-width: 100%; max-height: 100%; object-fit: contain; border: 4px solid var(--cz-black);">
+                        <button class="modal-close" onclick="this.closest('.modal').remove()" style="top: 8px; right: 8px;">&times;</button>
+                        ${photos.length > 1 ? `
+                            <button onclick="window.currentPhotoIndex = (${index} - 1 + ${photos.length}) % ${photos.length}; app.showFullScreenPhoto()" 
+                                    style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.7); color: white; border: none; padding: 8px 12px; cursor: pointer;">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button onclick="window.currentPhotoIndex = (${index} + 1) % ${photos.length}; app.showFullScreenPhoto()" 
+                                    style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.7); color: white; border: none; padding: 8px 12px; cursor: pointer;">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; font-size: 0.9em;">
+                                ${index + 1} / ${photos.length}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                // Remove the photo gallery modal
+                const galleryModal = document.querySelector('.location-detail-modal');
+                if (galleryModal) galleryModal.remove();
+                
+                document.body.appendChild(modal);
+                
+                // Close modal when clicking outside
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            }
+            
             showToast(message, type = 'info', duration = 3000) {
                 // Remove any existing toasts
                 document.querySelectorAll('.toast').forEach(t => t.remove());
