@@ -62,6 +62,24 @@
             --shadow-industrial: 3px 3px 0 var(--cz-black), 6px 6px 12px rgba(0,0,0,0.5);
             --shadow-plate: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.3);
 
+            /* Enhanced Color Contrast - Construction Zone */
+            --text-high-contrast: #FFFFFF;
+            --text-high-contrast-dark: #000000;
+            --bg-high-contrast: #000000;
+            --focus-high-contrast: #FFD000;
+            --error-high-contrast: #FF0000;
+            --success-high-contrast: #00FF00;
+
+            /* Loading States - Construction Zone */
+            --loading-bg: rgba(0, 0, 0, 0.9);
+            --loading-spinner: var(--cz-yellow);
+            --loading-text: var(--text-high-contrast);
+
+            /* Error States - Construction Zone */
+            --error-bg: rgba(204, 0, 0, 0.1);
+            --error-border: var(--cz-red);
+            --error-text: var(--cz-red);
+
             /* Industrial Styling */
             --radius: 2px;
             --shadow: var(--shadow-industrial);
@@ -1345,10 +1363,191 @@
             top: -12px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--cz-red);
+            background: var(--error-border);
             color: white;
             padding: 2px 12px;
             font-size: 10px;
+        }
+
+        /* Loading States - Construction Zone */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--loading-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: var(--hazard-stripe);
+        }
+
+        .loading-overlay::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: var(--hazard-stripe);
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--cz-concrete);
+            border-top: 4px solid var(--loading-spinner);
+            border-right: 4px solid var(--cz-orange);
+            border-radius: 0;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 30px rgba(255, 208, 0, 0.3);
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-family: var(--font-stencil);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--loading-text);
+            animation: fadeInOut 1.5s ease-in-out infinite;
+        }
+
+        .loading-message {
+            margin-top: 10px;
+            font-family: var(--font-blueprint);
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            max-width: 300px;
+        }
+
+        /* Inline Loading States - Construction Zone */
+        .inline-loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--cz-yellow);
+            font-family: var(--font-stencil);
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .inline-loading::before {
+            content: '';
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--cz-black);
+            border-top: 2px solid var(--cz-yellow);
+            border-radius: 0;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Button Loading States - Construction Zone */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--cz-black);
+            border-top: 2px solid var(--cz-yellow);
+            border-radius: 0;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Error States - Construction Zone */
+        .error-message {
+            background: var(--error-bg);
+            border: 2px solid var(--error-border);
+            padding: 12px;
+            color: var(--error-text);
+            margin: 8px 0;
+            font-family: var(--font-blueprint);
+            font-size: 11px;
+            border-radius: 0;
+            text-align: center;
+        }
+
+        .error-icon {
+            color: var(--error-border);
+            margin-right: 8px;
+        }
+
+        /* Success States - Construction Zone */
+        .success-message {
+            background: rgba(0, 170, 68, 0.1);
+            border: 2px solid var(--cz-green);
+            padding: 12px;
+            color: var(--cz-green);
+            margin: 8px 0;
+            font-family: var(--font-blueprint);
+            font-size: 11px;
+            border-radius: 0;
+            text-align: center;
+        }
+
+        .success-icon {
+            color: var(--cz-green);
+            margin-right: 8px;
+        }
+
+        /* Info States - Construction Zone */
+        .info-message {
+            background: rgba(30, 58, 95, 0.1);
+            border: 2px solid var(--cz-blueprint);
+            padding: 12px;
+            color: var(--cz-blueprint);
+            margin: 8px 0;
+            font-family: var(--font-blueprint);
+            font-size: 11px;
+            border-radius: 0;
+            text-align: center;
+        }
+
+        .info-icon {
+            color: var(--cz-blueprint);
+            margin-right: 8px;
+        }
+
+        /* Warning States - Construction Zone */
+        .warning-message {
+            background: rgba(255, 107, 0, 0.1);
+            border: 2px solid var(--cz-orange);
+            padding: 12px;
+            color: var(--cz-orange);
+            margin: 8px 0;
+            font-family: var(--font-blueprint);
+            font-size: 11px;
+            border-radius: 0;
+            text-align: center;
+        }
+
+        .warning-icon {
+            color: var(--cz-orange);
+            margin-right: 8px;
         }
 
         .no-data {
@@ -1388,6 +1587,56 @@
         .btn:focus, .nav-btn:focus, .auth-tab:focus, .fab:focus {
             outline: 3px solid var(--cz-yellow);
             outline-offset: 2px;
+        }
+
+        /* Enhanced Keyboard Navigation - Construction Zone */
+        .nav-btn:focus-visible,
+        .auth-tab:focus-visible,
+        .oauth-btn:focus-visible,
+        .predefined-tag:focus-visible,
+        .rating-btn:focus-visible,
+        .social-btn:focus-visible,
+        .btn-link:focus-visible {
+            outline: 3px solid var(--cz-yellow);
+            outline-offset: 3px;
+            box-shadow: 0 0 8px 2px rgba(255, 208, 0, 0.5);
+        }
+
+        /* Focus styles for interactive elements */
+        .location-card:focus-visible,
+        .comment:focus-visible,
+        .notification-item:focus-visible,
+        .mission-card:focus-visible,
+        .group-card:focus-visible,
+        .route-card:focus-visible {
+            outline: 4px solid var(--cz-yellow);
+            outline-offset: 2px;
+            box-shadow: 0 0 12px 3px rgba(255, 208, 0, 0.4);
+        }
+
+        /* Keyboard navigation for modal elements */
+        .modal-content:focus-within {
+            box-shadow: 0 0 0 4px var(--cz-yellow), var(--shadow-industrial);
+        }
+
+        /* Skip link for keyboard users */
+        .skip-link:focus {
+            top: 6px;
+            outline: 3px solid var(--cz-yellow);
+            outline-offset: 2px;
+        }
+
+        /* Enhanced focus states for form elements */
+        .tags-input-container:focus-within {
+            outline: 3px solid var(--cz-yellow);
+            outline-offset: 2px;
+        }
+
+        /* Focus styles for map controls */
+        .recenter-btn:focus-visible {
+            outline: 3px solid var(--cz-yellow);
+            outline-offset: 2px;
+            box-shadow: 0 0 8px 2px rgba(255, 208, 0, 0.5);
         }
 
         /* Screen Reader Only Content */
@@ -1704,6 +1953,195 @@
             font-size: 32px;
             color: var(--cz-yellow);
             text-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        /* Profile Page Styles */
+        .profile-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .profile-hero {
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            gap: 20px;
+            align-items: center;
+            padding: 24px;
+            background: linear-gradient(135deg, var(--cz-concrete-dark) 0%, var(--cz-concrete) 50%, var(--cz-concrete-light) 100%);
+            border: 4px solid var(--cz-black);
+            box-shadow: var(--shadow-industrial);
+            position: relative;
+        }
+
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: var(--hazard-stripe);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border: 4px solid var(--cz-black);
+            background: var(--cz-concrete);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--cz-yellow);
+            box-shadow: 4px 4px 0 var(--cz-black);
+            position: relative;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-meta {
+            flex: 1;
+        }
+
+        .profile-meta h2 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: var(--cz-yellow);
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .profile-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 16px;
+        }
+
+        .profile-card {
+            padding: 16px;
+        }
+
+        .profile-stats {
+            padding: 16px;
+        }
+
+        .highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+        }
+
+        .profile-highlight {
+            background: var(--cz-concrete-dark);
+            border: 2px solid var(--cz-black);
+            padding: 12px;
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .timeline {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 2px dashed var(--cz-black);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--cz-yellow);
+            border: 2px solid var(--cz-black);
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .achievement-tag {
+            background: var(--cz-concrete);
+            border: 2px solid var(--cz-black);
+            padding: 12px;
+            text-align: center;
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        .tag-icon {
+            font-size: 1.5rem;
+            color: var(--cz-yellow);
+            margin-bottom: 8px;
+        }
+
+        .tag-name {
+            font-family: var(--font-stencil);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .tag-desc {
+            font-family: var(--font-blueprint);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Photo upload progress */
+        #photo-progress {
+            display: none;
+            margin-top: 12px;
+            background: var(--cz-concrete);
+            border: 2px solid var(--cz-black);
+            padding: 12px;
+            box-shadow: 2px 2px 0 var(--cz-black);
+        }
+
+        #photo-progress-bar {
+            height: 8px;
+            background: var(--cz-yellow);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        #photo-progress-text {
+            font-family: var(--font-blueprint);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            text-align: center;
+        }
             line-height: 1;
             margin-bottom: 8px;
         }
@@ -2079,6 +2517,62 @@
 
             .report-actions .btn {
                 width: 100%;
+            }
+        }
+
+        /* Enhanced tablet layout - Construction Zone */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .map-layout {
+                grid-template-columns: 280px 1fr;
+                gap: 12px;
+            }
+
+            .sidebar {
+                max-height: calc(100vh - 120px);
+                overflow-y: auto;
+            }
+
+            .locations-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .modal-content {
+                width: 90%;
+                max-width: 600px;
+            }
+
+            .nav-btn span { display: inline; }
+
+            .social-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .achievement-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Desktop layout enhancements - Construction Zone */
+        @media (min-width: 1025px) {
+            .map-layout {
+                grid-template-columns: 320px 1fr;
+                gap: 16px;
+            }
+
+            .locations-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .modal-content {
+                max-width: 500px;
+            }
+
+            .social-grid {
+                grid-template-columns: 2fr 1fr;
+            }
+
+            .achievement-grid {
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
@@ -3355,6 +3849,10 @@
                 <i class="fas fa-map" aria-hidden="true"></i>
                 <span>Map</span>
             </button>
+            <button class="nav-btn" type="button" data-view="profile" aria-label="Profile View">
+                <i class="fas fa-user" aria-hidden="true"></i>
+                <span>Profile</span>
+            </button>
             <button class="nav-btn" type="button" data-view="locations" aria-label="Locations View">
                 <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                 <span>Locations</span>
@@ -3380,6 +3878,10 @@
                 <i class="fas fa-bell" aria-hidden="true"></i>
                 <span>Alerts</span>
                 <span class="nav-badge" id="notification-badge" style="display: none;"></span>
+            </button>
+            <button class="nav-btn" type="button" data-view="settings" aria-label="User Settings">
+                <i class="fas fa-cog" aria-hidden="true"></i>
+                <span>Settings</span>
             </button>
         </nav>
 
@@ -3568,6 +4070,12 @@
             <div class="view" id="profile-view" role="tabpanel" aria-labelledby="profile-tab">
                 <h2>Profile</h2>
                 <div id="profile-content" class="loading" role="status" aria-live="polite">Loading profile...</div>
+            </div>
+
+            <!-- User Settings Panel -->
+            <div class="view" id="settings-view" role="tabpanel" aria-labelledby="settings-tab">
+                <h2>Settings</h2>
+                <div id="settings-content" class="loading" role="status" aria-live="polite">Loading settings...</div>
             </div>
 
             <div class="view" id="social-view" role="tabpanel" aria-labelledby="social-tab">
@@ -4859,6 +5367,8 @@
                     this.loadUserLocations();
                 } else if (viewName === 'profile') {
                     this.loadProfile();
+                } else if (viewName === 'settings') {
+                    this.showSettings();
                 } else if (viewName === 'social') {
                     this.showSocialFeed();
                 } else if (viewName === 'missions') {
@@ -10485,10 +10995,821 @@
             getRiskColor(riskLevel) {
                 const colors = {
                     low: '#23d160',
-                    moderate: '#ffdd57', 
+                    moderate: '#ffdd57',
                     high: '#ff3860'
                 };
                 return colors[riskLevel] || '#7a7a9a';
+            }
+
+            // Enhanced profile photo upload with Firebase Storage
+            async uploadProfilePhoto() {
+                const fileInput = document.getElementById('profile-photo-upload');
+                const uploadBtn = document.getElementById('upload-photo-btn');
+                const progressDiv = document.getElementById('photo-progress');
+                const progressBar = document.getElementById('photo-progress-bar');
+                const progressText = document.getElementById('photo-progress-text');
+
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    this.showToast('Please select a photo to upload', 'warning');
+                    return;
+                }
+
+                const file = fileInput.files[0];
+
+                // Validate file
+                try {
+                    this.validateImageFile(file);
+                } catch (error) {
+                    this.showToast(error.message, 'error');
+                    return;
+                }
+
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to upload photos', 'warning');
+                    return;
+                }
+
+                const opKey = 'photo-upload';
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+                progressDiv.style.display = 'block';
+
+                try {
+                    const storageRef = this.storage.ref();
+                    const photoRef = storageRef.child(`profile-photos/${this.currentUser.uid}/${Date.now()}_${file.name}`);
+
+                    const uploadTask = photoRef.put(file);
+
+                    uploadTask.on('state_changed',
+                        (snapshot) => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            progressBar.style.width = progress + '%';
+                            progressText.textContent = `Uploading... ${Math.round(progress)}%`;
+                        },
+                        (error) => {
+                            console.error('Upload error:', error);
+                            this.showToast('Failed to upload photo', 'error');
+                        },
+                        async () => {
+                            try {
+                                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+
+                                // Update user profile with new photo URL
+                                await this.currentUser.updateProfile({
+                                    photoURL: downloadURL
+                                });
+
+                                // Update Firestore user document
+                                await this.db.collection('users').doc(this.currentUser.uid).update({
+                                    photoURL: downloadURL,
+                                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+
+                                document.getElementById('profile-photo-url').value = downloadURL;
+                                this.showToast('Profile photo uploaded successfully!', 'success');
+
+                                // Refresh profile if currently viewing
+                                if (document.getElementById('profile-view').classList.contains('active')) {
+                                    this.loadProfile();
+                                }
+                            } catch (error) {
+                                console.error('Error updating profile:', error);
+                                this.showToast('Photo uploaded but failed to update profile', 'error');
+                            }
+                        }
+                    );
+                } catch (error) {
+                    console.error('Upload setup error:', error);
+                    this.showToast('Failed to start upload', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+                    setTimeout(() => {
+                        progressDiv.style.display = 'none';
+                        progressBar.style.width = '0%';
+                    }, 2000);
+                }
+            }
+
+            validateImageFile(file) {
+                // Check file type
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    throw new Error('Please select a valid image file (JPG, PNG, WEBP, or GIF)');
+                }
+
+                // Check file size (5MB limit)
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    throw new Error('File size must be less than 5MB');
+                }
+
+                // Check for malicious file names
+                const suspiciousPatterns = [/[<>"'&]/, /\.\./, /\/\//];
+                if (suspiciousPatterns.some(pattern => pattern.test(file.name))) {
+                    throw new Error('Invalid file name');
+                }
+
+                return true;
+            }
+
+            // Enhanced profile view with statistics and achievements
+            async loadProfile(userId = null) {
+                const content = document.getElementById('profile-content');
+                if (!content) return;
+
+                // If no userId provided, show current user's profile
+                const targetUserId = userId || this.currentUser?.uid;
+                const isOwnProfile = targetUserId === this.currentUser?.uid;
+
+                if (!targetUserId) {
+                    content.innerHTML = `
+                        <div style="text-align: center; padding: 80px 20px;">
+                            <i class="fas fa-user-lock" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 24px; display: block;"></i>
+                            <h3 style="color: var(--text-secondary); margin-bottom: 16px;">Sign In Required</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                                Create an account to build your urban exploration profile, track your locations, and connect with the community.
+                            </p>
+                            <button class="btn btn-primary" onclick="app.handleAuth()">
+                                <i class="fas fa-sign-in-alt"></i> Sign In / Register
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                try {
+                    content.innerHTML = '<div class="loading">Loading profile...</div>';
+
+                    // Load user profile data and locations in parallel
+                    const [userDoc, snapshot] = await Promise.all([
+                        this.db.collection('users').doc(targetUserId).get(),
+                        this.db.collection('locations')
+                            .where('createdBy', '==', targetUserId)
+                            .where('status', '==', 'active')
+                            .get()
+                    ]);
+
+                    const userData = userDoc.exists ? userDoc.data() : {};
+
+                    const locations = [];
+                    snapshot.forEach(doc => {
+                        locations.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    const totalLocations = locations.length;
+                    const username = userData.displayName || userData.email || 'Urban Explorer';
+                    const userAvatar = userData.photoURL || null;
+                    const userBio = userData.bio || '';
+                    const joinedDate = userData.createdAt ? new Date(userData.createdAt.toDate()).toLocaleDateString() : 'Recently';
+                    const bioHtml = userBio
+                        ? `<p class="cz-text" style="margin: 0; color: var(--text-secondary);">${this.escapeHtml(userBio)}</p>`
+                        : `<p class="cz-text" style="margin: 0; color: var(--text-muted); font-style: italic;">${isOwnProfile ? 'Add a short field note so others know your style.' : 'No bio shared yet.'}</p>`;
+
+                    const highlights = locations.slice(0, 4);
+                    const highlightHtml = highlights.length ? `
+                        <div class="highlight-grid">
+                            ${highlights.map(loc => {
+                                const description = typeof loc.description === 'string' ? loc.description : '';
+                                const trimmedDesc = this.escapeHtml(description.substring(0, 90));
+                                const risk = loc.riskLevel || 'unknown';
+                                const coords = loc.coordinates && Array.isArray(loc.coordinates)
+                                    ? `<span class="cz-text" style="color: var(--text-muted); font-size: 0.8rem;"><i class="fas fa-location-arrow"></i> ${loc.coordinates[0].toFixed(4)}, ${loc.coordinates[1].toFixed(4)}</span>`
+                                    : '';
+                                return `
+                                    <div class="profile-highlight">
+                                        <div style="display: flex; justify-content: space-between; gap: 8px;">
+                                            <h4 style="margin: 0; font-size: 1rem;">${this.escapeHtml(loc.name || 'Untitled')}</h4>
+                                            <span class="risk risk-${risk}" style="text-transform: capitalize;">${risk}</span>
+                                        </div>
+                                        <div class="cz-text" style="color: var(--text-secondary); font-size: 0.9rem;">${trimmedDesc}${description.length > 90 ? '...' : ''}</div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div class="cz-text" style="color: var(--text-muted); font-size: 0.85rem;"><i class="fas fa-tag"></i> ${this.escapeHtml(loc.category || 'uncategorized')}</div>
+                                            ${coords}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    ` : `
+                        <div class="profile-highlight" style="text-align: center; color: var(--text-muted);">
+                            <i class="fas fa-map" style="font-size: 2rem; margin-bottom: 6px;"></i>
+                            <div>${isOwnProfile ? 'No locations yet. Drop your first spot from the map.' : 'No locations to display yet.'}</div>
+                        </div>
+                    `;
+
+                    const timelineHtml = locations.slice(0, 4).map(loc => {
+                        const description = typeof loc.description === 'string' ? loc.description : '';
+                        const timestamp = loc.createdAt?.toDate ? this.timeAgo(loc.createdAt.toDate()) : 'Recently';
+                        return `
+                            <li class="timeline-item">
+                                <div class="timeline-dot" aria-hidden="true"></div>
+                                <div>
+                                    <div style="font-weight: 700;">${this.escapeHtml(loc.name || 'New location')}</div>
+                                    <div class="cz-text" style="color: var(--text-secondary); font-size: 0.9rem;">${this.escapeHtml(description.substring(0, 80))}${description.length > 80 ? '...' : ''}</div>
+                                    <div style="color: var(--text-muted); font-size: 0.8rem;"><i class="fas fa-clock"></i> ${timestamp}</div>
+                                </div>
+                            </li>
+                        `;
+                    }).join('') || `
+                        <li class="timeline-item">
+                            <div class="timeline-dot" aria-hidden="true"></div>
+                            <div>
+                                <div style="font-weight: 700;">${isOwnProfile ? 'Get your first ping in.' : 'No check-ins yet.'}</div>
+                                <div style="color: var(--text-muted); font-size: 0.9rem;">Activity updates appear after logging locations.</div>
+                            </div>
+                        </li>
+                    `;
+
+                    const linksList = Array.isArray(userData.links) ? userData.links.filter(Boolean) : [];
+                    const linksHtml = linksList.length ? `
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${linksList.map(link => `
+                                <a class="btn" style="width: fit-content;" href="${this.escapeHtml(link)}" target="_blank" rel="noopener">
+                                    <i class="fas fa-external-link-alt" aria-hidden="true"></i> ${this.escapeHtml(link)}
+                                </a>
+                            `).join('')}
+                        </div>
+                    ` : `<div style="color: var(--text-muted);">No links shared.</div>`;
+
+                    const galleryList = Array.isArray(userData.gallery) ? userData.gallery.filter(Boolean) : [];
+                    const galleryHtml = galleryList.length ? `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+                            ${galleryList.map(src => `
+                                <div style="border: 2px solid var(--cz-black); background: var(--cz-concrete-dark); padding: 4px;">
+                                    <img src="${this.escapeHtml(src)}" alt="Gallery item" style="width: 100%; height: 120px; object-fit: cover; display: block;">
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `<div style="color: var(--text-muted);">No gallery images yet.</div>`;
+
+                    content.innerHTML = `
+                        <div class="profile-shell">
+                            <section class="panel profile-hero" aria-label="Profile overview">
+                                <div class="profile-avatar">
+                                    ${userAvatar
+                                        ? `<img src="${this.escapeHtml(userAvatar)}" alt="${this.escapeHtml(username)}" style="width: 100%; height: 100%; object-fit: cover;">`
+                                        : `<span>${this.escapeHtml(username.charAt(0).toUpperCase())}</span>`
+                                    }
+                                </div>
+                                <div class="profile-meta">
+                                    <div class="chip live"><i class="fas fa-id-card" aria-hidden="true"></i> Explorer Dossier</div>
+                                    <h2>${this.escapeHtml(username)}</h2>
+                                    ${bioHtml}
+                                    <div class="meta-chips" style="margin-top: 10px;">
+                                        <span class="chip"><i class="fas fa-calendar-alt" aria-hidden="true"></i> Joined ${joinedDate}</span>
+                                        <span class="chip"><i class="fas fa-map-pin" aria-hidden="true"></i> ${totalLocations} locations</span>
+                                        <span class="chip signal"><i class="fas fa-shield-alt" aria-hidden="true"></i> ${isOwnProfile ? 'Private controls on' : 'Public profile view'}</span>
+                                    </div>
+                                </div>
+                                <div class="profile-actions">
+                                    ${isOwnProfile ? `
+                                        <button class="btn btn-primary" onclick="app.showEditProfile()"><i class="fas fa-edit" aria-hidden="true"></i> Edit Profile</button>
+                                        <button class="btn" onclick="app.showAddLocationModal()"><i class="fas fa-plus" aria-hidden="true"></i> Add Location</button>
+                                        <button class="btn" onclick="app.viewUserLocations('${targetUserId}')"><i class="fas fa-map-marked-alt" aria-hidden="true"></i> View Locations</button>
+                                    ` : `
+                                        <button class="btn btn-primary" id="follow-btn-${targetUserId}" onclick="app.toggleFollow('${targetUserId}')"><i class="fas fa-user-plus" aria-hidden="true"></i> Follow</button>
+                                        <button class="btn" onclick="app.messageUser('${targetUserId}')"><i class="fas fa-envelope" aria-hidden="true"></i> Message</button>
+                                        <button class="btn" onclick="app.viewUserLocations('${targetUserId}')"><i class="fas fa-map-marked-alt" aria-hidden="true"></i> Locations</button>
+                                    `}
+                                </div>
+                            </section>
+
+                            <section class="panel profile-stats" aria-label="Profile stats">
+                                <div class="stat-grid">
+                                    <div class="stat-card highlight">
+                                        <div class="stat-label">Locations Logged</div>
+                                        <div class="stat-value">${totalLocations}</div>
+                                        <div class="stat-trend">Active contributions</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Followers</div>
+                                        <div class="stat-value" id="profile-followers-count">--</div>
+                                        <div class="stat-trend">Network reach</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Following</div>
+                                        <div class="stat-value" id="profile-following-count">--</div>
+                                        <div class="stat-trend">Explorers tracked</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Likes</div>
+                                        <div class="stat-value" id="profile-likes-count">--</div>
+                                        <div class="stat-trend">Appreciation on posts</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Visits</div>
+                                        <div class="stat-value" id="profile-visits-count">--</div>
+                                        <div class="stat-trend">Check-ins on your spots</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Badges</div>
+                                        <div class="stat-value" id="profile-badges-count">--</div>
+                                        <div class="stat-trend">Earned achievements</div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <div class="profile-grid">
+                                <section class="panel profile-card" aria-label="Location highlights">
+                                    <h3 style="margin-bottom: 12px;"><i class="fas fa-map-marked-alt" aria-hidden="true"></i> Location Highlights</h3>
+                                    ${highlightHtml}
+                                    ${totalLocations > 4 ? `
+                                        <div style="margin-top: 10px;">
+                                            <button class="btn" type="button" onclick="app.showView('locations')">
+                                                <i class="fas fa-th" aria-hidden="true"></i> View all ${totalLocations}
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                </section>
+
+                                <section class="panel profile-card" aria-label="Activity timeline">
+                                    <h3 style="margin-bottom: 12px;"><i class="fas fa-stream" aria-hidden="true"></i> Activity Log</h3>
+                                    <ul class="timeline">
+                                        ${timelineHtml}
+                                    </ul>
+                                </section>
+                            </div>
+
+                            <div class="profile-grid">
+                                <section class="panel profile-card" aria-label="Profile links">
+                                    <h3 style="margin-bottom: 12px;"><i class="fas fa-link" aria-hidden="true"></i> Links</h3>
+                                    ${linksHtml}
+                                </section>
+
+                                <section class="panel profile-card" aria-label="Gallery">
+                                    <h3 style="margin-bottom: 12px;"><i class="fas fa-images" aria-hidden="true"></i> Gallery</h3>
+                                    ${galleryHtml}
+                                </section>
+                            </div>
+
+                            <section class="panel profile-card" aria-label="Badges and achievements">
+                                <h3 style="margin-bottom: 12px;"><i class="fas fa-award" aria-hidden="true"></i> Badges & Cred</h3>
+                                <div id="user-badges" class="achievement-grid"></div>
+                            </section>
+                        </div>
+                    `;
+
+                    // Load and hydrate social stats/badges after rendering
+                    this.loadUserSocialStats(targetUserId);
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                    content.innerHTML = '<div class="error">FAILED TO LOAD INSPECTION REPORT</div>';
+                }
+            }
+
+            // Load user social statistics
+            async loadUserSocialStats(userId) {
+                try {
+                    // Load follower count
+                    const followersSnapshot = await this.db.collection('user_followers')
+                        .where('followingId', '==', userId)
+                        .get();
+
+                    // Load following count
+                    const followingSnapshot = await this.db.collection('user_followers')
+                        .where('followerId', '==', userId)
+                        .get();
+
+                    // Load likes received on user's locations
+                    const userLocationsSnapshot = await this.db.collection('locations')
+                        .where('createdBy', '==', userId)
+                        .get();
+
+                    const locationIds = userLocationsSnapshot.docs.map(doc => doc.id);
+                    let likesCount = 0;
+
+                    if (locationIds.length > 0) {
+                        const likesSnapshot = await this.db.collection('location_likes')
+                            .where('locationId', 'in', locationIds.slice(0, 10)) // Firestore limit
+                            .get();
+                        likesCount = likesSnapshot.size;
+                    }
+
+                    // Load visits to user's locations
+                    let visitsCount = 0;
+                    if (locationIds.length > 0) {
+                        const visitsSnapshot = await this.db.collection('location_visits')
+                            .where('locationId', 'in', locationIds.slice(0, 10))
+                            .get();
+                        visitsCount = visitsSnapshot.size;
+                    }
+
+                    // Load user badges
+                    const badgesSnapshot = await this.db.collection('user_badges')
+                        .where('userId', '==', userId)
+                        .get();
+
+                    // Update the stats in the profile
+                    const followersElement = document.getElementById('profile-followers-count');
+                    const followingElement = document.getElementById('profile-following-count');
+                    const likesElement = document.getElementById('profile-likes-count');
+                    const visitsElement = document.getElementById('profile-visits-count');
+                    const badgesElement = document.getElementById('profile-badges-count');
+
+                    if (followersElement) followersElement.textContent = followersSnapshot.size;
+                    if (followingElement) followingElement.textContent = followingSnapshot.size;
+                    if (likesElement) likesElement.textContent = likesCount;
+                    if (visitsElement) visitsElement.textContent = visitsCount;
+                    if (badgesElement) badgesElement.textContent = badgesSnapshot.size;
+
+                    this.renderUserBadges(badgesSnapshot.docs.map(doc => doc.data()));
+
+                } catch (error) {
+                    console.error('Error loading user social stats:', error);
+                }
+            }
+
+            renderUserBadges(badges) {
+                const container = document.getElementById('user-badges');
+                if (!container) return;
+
+                if (badges.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 24px; color: var(--text-muted); grid-column: 1 / -1;">
+                            <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 8px; display: block; opacity: 0.5;"></i>
+                            <p>No badges earned yet. Start exploring to unlock achievements!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = badges.map(badge => `
+                    <div class="achievement-tag">
+                        <div class="tag-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="tag-name">${this.getBadgeName(badge.badgeId)}</div>
+                        <div class="tag-desc">${this.getBadgeDescription(badge.badgeId)}</div>
+                    </div>
+                `).join('');
+            }
+
+            getBadgeName(badgeId) {
+                const badgeNames = {
+                    'first_location': 'First Explorer',
+                    'mapper_10': 'Mapper',
+                    'mapper_50': 'Master Mapper',
+                    'first_visit': 'First Check-in',
+                    'explorer_10': 'Explorer',
+                    'explorer_50': 'Master Explorer',
+                    'social_butterfly': 'Social Butterfly',
+                    'commentator_10': 'Commentator',
+                    'appreciator': 'Appreciator',
+                    'liker_25': 'Liked'
+                };
+                return badgeNames[badgeId] || 'Achievement';
+            }
+
+            getBadgeDescription(badgeId) {
+                const badgeDescriptions = {
+                    'first_location': 'Added your first location',
+                    'mapper_10': 'Added 10 locations',
+                    'mapper_50': 'Added 50 locations',
+                    'first_visit': 'First location visit',
+                    'explorer_10': 'Visited 10 locations',
+                    'explorer_50': 'Visited 50 locations',
+                    'social_butterfly': 'Made your first comment',
+                    'commentator_10': 'Posted 10 comments',
+                    'appreciator': 'First location like',
+                    'liker_25': 'Received 25 likes'
+                };
+                return badgeDescriptions[badgeId] || 'Special achievement';
+            }
+
+            // User settings panel
+            showSettings() {
+                const content = document.getElementById('settings-content');
+                if (!content) return;
+
+                if (!this.currentUser) {
+                    content.innerHTML = `
+                        <div style="text-align: center; padding: 48px;">
+                            <i class="fas fa-lock" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
+                            <h3 style="color: var(--text-secondary); margin-bottom: 12px;">Sign In Required</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 20px;">Sign in to manage your account settings and preferences</p>
+                            <button class="btn btn-primary" onclick="app.handleAuth()">
+                                <i class="fas fa-sign-in-alt"></i> Sign In Now
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                content.innerHTML = `
+                    <div class="panel">
+                        <h3 style="margin-bottom: 16px;"><i class="fas fa-user-cog"></i> Account Settings</h3>
+
+                        <div class="form-group">
+                            <label class="form-label">Display Name</label>
+                            <input class="input" type="text" id="settings-display-name" value="${this.escapeHtml(this.currentUser.displayName || '')}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input class="input" type="email" id="settings-email" value="${this.escapeHtml(this.currentUser.email || '')}" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Account Created</label>
+                            <input class="input" type="text" value="${this.currentUser.metadata?.creationTime || 'Unknown'}" disabled>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn btn-primary" onclick="app.updateAccountSettings()">Save Changes</button>
+                        </div>
+                    </div>
+
+                    <div class="panel" style="margin-top: 16px;">
+                        <h3 style="margin-bottom: 16px;"><i class="fas fa-bell"></i> Notification Settings</h3>
+
+                        <div class="form-group">
+                            <label class="form-label">Email Notifications</label>
+                            <select class="select" id="settings-email-notifications">
+                                <option value="all">All Activity</option>
+                                <option value="important">Important Only</option>
+                                <option value="none">Disabled</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Push Notifications</label>
+                            <select class="select" id="settings-push-notifications">
+                                <option value="enabled">Enabled</option>
+                                <option value="disabled">Disabled</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Notification Frequency</label>
+                            <select class="select" id="settings-notification-frequency">
+                                <option value="realtime">Real-time</option>
+                                <option value="daily">Daily Digest</option>
+                                <option value="weekly">Weekly Summary</option>
+                            </select>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn btn-primary" onclick="app.updateNotificationSettings()">Save Notification Preferences</button>
+                        </div>
+                    </div>
+
+                    <div class="panel" style="margin-top: 16px;">
+                        <h3 style="margin-bottom: 16px;"><i class="fas fa-lock"></i> Privacy Controls</h3>
+
+                        <div class="form-group">
+                            <label class="form-label">Profile Visibility</label>
+                            <select class="select" id="settings-profile-visibility">
+                                <option value="public">Public (Anyone can view)</option>
+                                <option value="followers">Followers Only</option>
+                                <option value="private">Private (Only me)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Location Visibility</label>
+                            <select class="select" id="settings-location-visibility">
+                                <option value="public">Public</option>
+                                <option value="followers">Followers Only</option>
+                                <option value="private">Private</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Activity Feed Visibility</label>
+                            <select class="select" id="settings-activity-visibility">
+                                <option value="public">Public</option>
+                                <option value="followers">Followers Only</option>
+                                <option value="private">Private</option>
+                            </select>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn btn-primary" onclick="app.updatePrivacySettings()">Save Privacy Settings</button>
+                        </div>
+                    </div>
+
+                    <div class="panel" style="margin-top: 16px;">
+                        <h3 style="margin-bottom: 16px;"><i class="fas fa-palette"></i> Display Preferences</h3>
+
+                        <div class="form-group">
+                            <label class="form-label">Theme</label>
+                            <select class="select" id="settings-theme">
+                                <option value="system">System Default</option>
+                                <option value="light">Light Mode</option>
+                                <option value="dark">Dark Mode</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Map Style</label>
+                            <select class="select" id="settings-map-style">
+                                <option value="default">Default</option>
+                                <option value="satellite">Satellite</option>
+                                <option value="terrain">Terrain</option>
+                            </select>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn btn-primary" onclick="app.updateDisplaySettings()">Save Display Preferences</button>
+                        </div>
+                    </div>
+
+                    <div class="panel" style="margin-top: 16px;">
+                        <h3 style="margin-bottom: 16px;"><i class="fas fa-exclamation-triangle"></i> Account Management</h3>
+
+                        <div class="form-group">
+                            <button class="btn" style="background: var(--cz-orange); color: white;" onclick="app.changePassword()">
+                                <i class="fas fa-key"></i> Change Password
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <button class="btn" style="background: var(--cz-red); color: white;" onclick="app.deleteAccount()">
+                                <i class="fas fa-trash"></i> Delete Account
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <button class="btn" onclick="app.exportData()">
+                                <i class="fas fa-download"></i> Export My Data
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                // Load current settings
+                this.loadUserSettings();
+            }
+
+            async loadUserSettings() {
+                if (!this.currentUser) return;
+
+                try {
+                    const settingsDoc = await this.db.collection('user_settings').doc(this.currentUser.uid).get();
+                    if (settingsDoc.exists) {
+                        const settings = settingsDoc.data();
+                        
+                        // Load notification settings
+                        if (settings.emailNotifications) {
+                            document.getElementById('settings-email-notifications').value = settings.emailNotifications;
+                        }
+                        if (settings.pushNotifications) {
+                            document.getElementById('settings-push-notifications').value = settings.pushNotifications;
+                        }
+                        if (settings.notificationFrequency) {
+                            document.getElementById('settings-notification-frequency').value = settings.notificationFrequency;
+                        }
+
+                        // Load privacy settings
+                        if (settings.profileVisibility) {
+                            document.getElementById('settings-profile-visibility').value = settings.profileVisibility;
+                        }
+                        if (settings.locationVisibility) {
+                            document.getElementById('settings-location-visibility').value = settings.locationVisibility;
+                        }
+                        if (settings.activityVisibility) {
+                            document.getElementById('settings-activity-visibility').value = settings.activityVisibility;
+                        }
+
+                        // Load display settings
+                        if (settings.theme) {
+                            document.getElementById('settings-theme').value = settings.theme;
+                        }
+                        if (settings.mapStyle) {
+                            document.getElementById('settings-map-style').value = settings.mapStyle;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading user settings:', error);
+                }
+            }
+
+            async updateAccountSettings() {
+                if (!this.currentUser) return;
+
+                const displayName = document.getElementById('settings-display-name').value.trim();
+
+                try {
+                    await this.currentUser.updateProfile({
+                        displayName: displayName
+                    });
+
+                    await this.db.collection('users').doc(this.currentUser.uid).update({
+                        displayName: displayName,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    this.showToast('Account settings updated successfully!', 'success');
+                    
+                    // Refresh profile if currently viewing
+                    if (document.getElementById('profile-view').classList.contains('active')) {
+                        this.loadProfile();
+                    }
+                } catch (error) {
+                    console.error('Error updating account settings:', error);
+                    this.showToast('Failed to update account settings', 'error');
+                }
+            }
+
+            async updateNotificationSettings() {
+                if (!this.currentUser) return;
+
+                const emailNotifications = document.getElementById('settings-email-notifications').value;
+                const pushNotifications = document.getElementById('settings-push-notifications').value;
+                const notificationFrequency = document.getElementById('settings-notification-frequency').value;
+
+                try {
+                    await this.db.collection('user_settings').doc(this.currentUser.uid).set({
+                        emailNotifications,
+                        pushNotifications,
+                        notificationFrequency,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    this.showToast('Notification settings updated!', 'success');
+                } catch (error) {
+                    console.error('Error updating notification settings:', error);
+                    this.showToast('Failed to update notification settings', 'error');
+                }
+            }
+
+            async updatePrivacySettings() {
+                if (!this.currentUser) return;
+
+                const profileVisibility = document.getElementById('settings-profile-visibility').value;
+                const locationVisibility = document.getElementById('settings-location-visibility').value;
+                const activityVisibility = document.getElementById('settings-activity-visibility').value;
+
+                try {
+                    await this.db.collection('user_settings').doc(this.currentUser.uid).set({
+                        profileVisibility,
+                        locationVisibility,
+                        activityVisibility,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    this.showToast('Privacy settings updated!', 'success');
+                } catch (error) {
+                    console.error('Error updating privacy settings:', error);
+                    this.showToast('Failed to update privacy settings', 'error');
+                }
+            }
+
+            async updateDisplaySettings() {
+                if (!this.currentUser) return;
+
+                const theme = document.getElementById('settings-theme').value;
+                const mapStyle = document.getElementById('settings-map-style').value;
+
+                try {
+                    await this.db.collection('user_settings').doc(this.currentUser.uid).set({
+                        theme,
+                        mapStyle,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    // Apply theme immediately
+                    if (theme === 'dark') {
+                        document.body.classList.add('dark-mode');
+                    } else if (theme === 'light') {
+                        document.body.classList.remove('dark-mode');
+                    } else {
+                        // System default - use prefers-color-scheme
+                        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        if (prefersDark) {
+                            document.body.classList.add('dark-mode');
+                        } else {
+                            document.body.classList.remove('dark-mode');
+                        }
+                    }
+
+                    this.showToast('Display settings updated!', 'success');
+                } catch (error) {
+                    console.error('Error updating display settings:', error);
+                    this.showToast('Failed to update display settings', 'error');
+                }
+            }
+
+            changePassword() {
+                // Show password change modal or redirect to password change page
+                this.showToast('Password change functionality would be implemented here', 'info');
+            }
+
+            deleteAccount() {
+                if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                    // Implement account deletion logic
+                    this.showToast('Account deletion functionality would be implemented here', 'info');
+                }
+            }
+
+            exportData() {
+                // Implement data export functionality
+                this.showToast('Data export functionality would be implemented here', 'info');
             }
         }
 

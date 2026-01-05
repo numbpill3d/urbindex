@@ -1,0 +1,64 @@
+// Firebase Storage Security Rules for Urbindex
+// Version: 1.0.0
+// Last Updated: 2024-01-05
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Profile photos - only allow authenticated users to upload to their own profile photos directory
+    match /profile-photos/{userId}/{allPaths=**} {
+      allow read: if request.auth != null && (
+        request.auth.uid == userId ||
+        resource.metadata.privacy == 'public' ||
+        exists(/databases/(default)/documents/user_followers/{userId}_{request.auth.uid})
+      );
+      
+      allow write: if request.auth != null && 
+                   request.auth.uid == userId &&
+                   request.resource.size < 5 * 1024 * 1024 && // 5MB limit
+                   request.resource.contentType.matches('image/.*') &&
+                   request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    }
+
+    // User gallery images - similar rules to profile photos
+    match /user-gallery/{userId}/{allPaths=**} {
+      allow read: if request.auth != null && (
+        request.auth.uid == userId ||
+        resource.metadata.privacy == 'public' ||
+        exists(/databases/(default)/documents/user_followers/{userId}_{request.auth.uid})
+      );
+      
+      allow write: if request.auth != null && 
+                   request.auth.uid == userId &&
+                   request.resource.size < 10 * 1024 * 1024 && // 10MB limit
+                   request.resource.contentType.matches('image/.*');
+    }
+
+    // Location photos - allow location owners to upload
+    match /location-photos/{locationId}/{allPaths=**} {
+      allow read: if request.auth != null && (
+        resource.metadata.privacy == 'public' ||
+        exists(/databases/(default)/documents/locations/{locationId}) &&
+        (resource.metadata.privacy == 'followers' && exists(/databases/(default)/documents/user_followers/{(resource.metadata.ownerId)}_{request.auth.uid})) ||
+        resource.metadata.ownerId == request.auth.uid
+      );
+      
+      allow write: if request.auth != null &&
+                   exists(/databases/(default)/documents/locations/{locationId}) &&
+                   request.auth.uid == resource.metadata.ownerId &&
+                   request.resource.size < 10 * 1024 * 1024 &&
+                   request.resource.contentType.matches('image/.*');
+    }
+
+    // Temporary uploads - short-lived files for processing
+    match /temp-uploads/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null &&
+                          request.auth.uid == userId &&
+                          request.time < timestamp.date(request.resource.timeCreated) + duration.value(1, 'h');
+    }
+
+    // Default deny rule for all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
