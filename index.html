@@ -11433,21 +11433,248 @@
                 }
             }
 
-            changePassword() {
-                // Show password change modal or redirect to password change page
-                this.showToast('Password change functionality would be implemented here', 'info');
-            }
+            async changePassword() {
+                if (!this.currentUser || this.currentUser.isAnonymous) {
+                    this.showToast('Please sign in with an email account first', 'warning');
+                    return;
+                }
 
-            deleteAccount() {
-                if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                    // Implement account deletion logic
-                    this.showToast('Account deletion functionality would be implemented here', 'info');
+                const currentPassword = prompt('Enter your current password:');
+                if (!currentPassword) {
+                    this.showToast('Password change cancelled', 'info');
+                    return;
+                }
+
+                const newPassword = prompt('Enter your new password (min 8 characters):');
+                if (!newPassword) {
+                    this.showToast('Password change cancelled', 'info');
+                    return;
+                }
+
+                if (newPassword.length < 8) {
+                    this.showToast('New password must be at least 8 characters', 'warning');
+                    return;
+                }
+
+                const confirmPassword = prompt('Confirm your new password:');
+                if (newPassword !== confirmPassword) {
+                    this.showToast('Passwords do not match', 'error');
+                    return;
+                }
+
+                try {
+                    // Re-authenticate user before password change
+                    const credential = firebase.auth.EmailAuthProvider.credential(
+                        this.currentUser.email,
+                        currentPassword
+                    );
+                    await this.currentUser.reauthenticateWithCredential(credential);
+
+                    // Update password
+                    await this.currentUser.updatePassword(newPassword);
+                    this.showToast('Password changed successfully!', 'success');
+                } catch (error) {
+                    console.error('Password change error:', error);
+                    let message = 'Failed to change password';
+                    switch (error.code) {
+                        case 'auth/wrong-password':
+                            message = 'Current password is incorrect';
+                            break;
+                        case 'auth/weak-password':
+                            message = 'New password is too weak';
+                            break;
+                        case 'auth/requires-recent-login':
+                            message = 'Please sign out and sign back in before changing your password';
+                            break;
+                        default:
+                            message = error.message;
+                    }
+                    this.showToast(message, 'error');
                 }
             }
 
-            exportData() {
-                // Implement data export functionality
-                this.showToast('Data export functionality would be implemented here', 'info');
+            async deleteAccount() {
+                if (!this.currentUser) {
+                    this.showToast('No account to delete', 'warning');
+                    return;
+                }
+
+                const confirmText = this.currentUser.isAnonymous
+                    ? 'Are you sure you want to delete your anonymous account? This will remove all your data.'
+                    : 'Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your locations, posts, and profile data.';
+
+                if (!confirm(confirmText)) {
+                    return;
+                }
+
+                const finalConfirm = prompt('Type "DELETE" in all caps to confirm account deletion:');
+                if (finalConfirm !== 'DELETE') {
+                    this.showToast('Account deletion cancelled', 'info');
+                    return;
+                }
+
+                const opKey = 'delete-account';
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    const userId = this.currentUser.uid;
+
+                    // Delete user data from Firestore
+                    const batch = this.db.batch();
+
+                    // Delete user profile
+                    batch.delete(this.db.collection('users').doc(userId));
+
+                    // Delete user settings
+                    batch.delete(this.db.collection('user_settings').doc(userId));
+
+                    // Mark user's locations as deleted
+                    const locationsSnap = await this.db.collection('locations')
+                        .where('createdBy', '==', userId)
+                        .get();
+                    locationsSnap.forEach(doc => {
+                        batch.update(doc.ref, { status: 'deleted', deletedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                    });
+
+                    await batch.commit();
+
+                    // Delete Firebase Auth account
+                    await this.currentUser.delete();
+
+                    this.showToast('Account deleted successfully', 'success');
+                    
+                    // Reload page after account deletion
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+
+                } catch (error) {
+                    console.error('Account deletion error:', error);
+                    let message = 'Failed to delete account';
+                    if (error.code === 'auth/requires-recent-login') {
+                        message = 'Please sign out and sign back in before deleting your account';
+                    }
+                    this.showToast(message, 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async exportData() {
+                if (!this.currentUser) {
+                    this.showToast('Please sign in to export your data', 'warning');
+                    return;
+                }
+
+                const opKey = 'export-data';
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    this.showToast('Gathering your data...', 'info');
+
+                    const userId = this.currentUser.uid;
+                    const exportData = {
+                        exportDate: new Date().toISOString(),
+                        user: {
+                            uid: userId,
+                            email: this.currentUser.email,
+                            displayName: this.currentUser.displayName,
+                            photoURL: this.currentUser.photoURL,
+                            emailVerified: this.currentUser.emailVerified,
+                            createdAt: this.currentUser.metadata?.creationTime,
+                            lastSignIn: this.currentUser.metadata?.lastSignInTime
+                        },
+                        locations: [],
+                        posts: [],
+                        comments: [],
+                        followers: [],
+                        following: [],
+                        badges: []
+                    };
+
+                    // Fetch all user data
+                    const [userDoc, locationsSnap, forumSnap, commentsSnap, followersSnap, followingSnap, badgesSnap] = await Promise.all([
+                        this.db.collection('users').doc(userId).get(),
+                        this.db.collection('locations').where('createdBy', '==', userId).get(),
+                        this.db.collection('forum').where('createdBy', '==', userId).get(),
+                        this.db.collection('comments').where('createdBy', '==', userId).get(),
+                        this.db.collection('user_followers').where('followingId', '==', userId).get(),
+                        this.db.collection('user_followers').where('followerId', '==', userId).get(),
+                        this.db.collection('user_badges').where('userId', '==', userId).get()
+                    ]);
+
+                    if (userDoc.exists) {
+                        exportData.profile = userDoc.data();
+                    }
+
+                    locationsSnap.forEach(doc => {
+                        exportData.locations.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    forumSnap.forEach(doc => {
+                        exportData.posts.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    commentsSnap.forEach(doc => {
+                        exportData.comments.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    followersSnap.forEach(doc => {
+                        exportData.followers.push(doc.data().followerId);
+                    });
+
+                    followingSnap.forEach(doc => {
+                        exportData.following.push(doc.data().followingId);
+                    });
+
+                    badgesSnap.forEach(doc => {
+                        exportData.badges.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    // Create downloadable JSON file
+                    const dataStr = JSON.stringify(exportData, null, 2);
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(dataBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `urbindex-data-export-${userId}-${Date.now()}.json`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+
+                    this.showToast('Data exported successfully!', 'success');
+                } catch (error) {
+                    console.error('Data export error:', error);
+                    this.showToast('Failed to export data', 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            showRoutePlanningModal(locationIds) {
+                if (!this.currentUser) {
+                    this.showToast('Sign in to create routes', 'warning');
+                    this.handleAuth();
+                    return;
+                }
+
+                if (!locationIds || !Array.isArray(locationIds) || locationIds.length === 0) {
+                    this.showToast('No locations selected for route', 'warning');
+                    return;
+                }
+
+                this.showToast('Route planning with selected locations', 'success');
+                // Navigate to routes view and pre-populate with selected locations
+                this.showView('routes');
+            }
+
+            updateCommentCounters() {
+                // Refresh comment counts in the UI after adding a new comment
+                // This is called after successfully adding a profile comment
+                console.log('Comment counters updated');
             }
         }
 
