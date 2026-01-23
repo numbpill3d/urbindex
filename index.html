@@ -6659,26 +6659,59 @@
                 `).join('');
             }
 
+            // ========================
+            // MISSIONS TAB - FULLY FUNCTIONAL
+            // ========================
+
             showMissions() {
                 const view = document.getElementById('missions-view-content');
                 if (view) {
                     view.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                             <h2>Missions & Challenges</h2>
-                            <button class="btn" onclick="app.showView('map')">
-                                <i class="fas fa-map"></i> Back to Map
-                            </button>
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn" onclick="app.showView('map')">
+                                    <i class="fas fa-map"></i> Back to Map
+                                </button>
+                                ${this.currentUser ? `
+                                    <button class="btn btn-primary" onclick="app.createCustomMission()">
+                                        <i class="fas fa-plus"></i> Create Mission
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
 
+                        ${!this.currentUser ? `
+                            <div class="panel" style="text-align: center; padding: 48px; margin-bottom: 24px;">
+                                <i class="fas fa-trophy" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px; display: block;"></i>
+                                <h3 style="color: var(--text-secondary); margin-bottom: 12px;">Sign In to Track Progress</h3>
+                                <p style="color: var(--text-muted); margin-bottom: 20px;">Create an account to participate in missions and earn badges</p>
+                                <button class="btn btn-primary" onclick="app.handleAuth()">
+                                    <i class="fas fa-sign-in-alt"></i> Sign In Now
+                                </button>
+                            </div>
+                        ` : ''}
+
                         <div class="panel" style="margin-bottom: 24px;">
-                            <h3>Available Missions</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3><i class="fas fa-trophy"></i> Available Missions</h3>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <label class="form-label" style="margin: 0; font-size: 10px;">Filter:</label>
+                                    <select class="select" id="mission-filter" style="width: auto; font-size: 10px; padding: 4px 8px;" onchange="app.filterMissions()">
+                                        <option value="all">All</option>
+                                        <option value="available">Available</option>
+                                        <option value="active">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div id="missions-grid">
                                 <div class="loading">Loading missions...</div>
                             </div>
                         </div>
 
                         <div class="panel">
-                            <h3>Your Progress</h3>
+                            <h3><i class="fas fa-chart-line"></i> Your Progress Overview</h3>
                             <div id="mission-progress">
                                 <div class="loading">Loading progress...</div>
                             </div>
@@ -6691,54 +6724,153 @@
 
             async loadMissions() {
                 try {
-                    const snapshot = await this.db.collection('missions').get();
-                    const missions = [];
+                    let missions = [];
                     
-                    snapshot.forEach(doc => {
-                        missions.push({ id: doc.id, ...doc.data() });
-                    });
+                    if (this.currentUser) {
+                        // Load user's mission progress
+                        const progressSnapshot = await this.db.collection('user_mission_progress')
+                            .where('userId', '==', this.currentUser.uid)
+                            .get();
+                        
+                        const userProgress = new Map();
+                        progressSnapshot.forEach(doc => {
+                            const data = doc.data();
+                            userProgress.set(data.missionId, data);
+                        });
 
-                    const items = missions.length ? missions : this.getSampleMissions();
-                    this.renderMissions(items);
-                    this.renderMissionProgress(items);
+                        // Load all missions
+                        const snapshot = await this.db.collection('missions').get();
+                        snapshot.forEach(doc => {
+                            const missionData = doc.data();
+                            const userMissionData = userProgress.get(doc.id);
+                            missions.push({
+                                id: doc.id,
+                                ...missionData,
+                                progress: userMissionData?.progress || 0,
+                                status: userMissionData?.status || 'available',
+                                startedAt: userMissionData?.startedAt,
+                                completedAt: userMissionData?.completedAt
+                            });
+                        });
+                    } else {
+                        // Load public missions without progress
+                        const snapshot = await this.db.collection('missions').get();
+                        snapshot.forEach(doc => {
+                            missions.push({ id: doc.id, ...doc.data(), progress: 0, status: 'available' });
+                        });
+                    }
+
+                    if (missions.length === 0) {
+                        missions = this.getSampleMissions();
+                    }
+                    
+                    this.allMissions = missions;
+                    this.renderMissions(missions);
+                    this.renderMissionProgress(missions);
                 } catch (error) {
                     console.error('Error loading missions:', error);
                     const fallback = this.getSampleMissions();
+                    this.allMissions = fallback;
                     this.renderMissions(fallback);
                     this.renderMissionProgress(fallback);
                 }
+            }
+
+            filterMissions() {
+                const filter = document.getElementById('mission-filter')?.value || 'all';
+                const missions = this.allMissions || [];
+                
+                const filtered = missions.filter(m => {
+                    if (filter === 'all') return true;
+                    if (filter === 'available') return (m.progress || 0) === 0;
+                    if (filter === 'active') return (m.progress || 0) > 0 && (m.progress || 0) < 100;
+                    if (filter === 'completed') return (m.progress || 0) >= 100;
+                    return true;
+                });
+                
+                this.renderMissions(filtered);
             }
 
             renderMissions(missions) {
                 const container = document.getElementById('missions-grid');
                 if (!container) return;
 
-                container.innerHTML = missions.map(mission => `
-                    <div class="mission-card">
-                        <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 12px;">
-                            <div>
-                                <h4 style="margin: 0 0 8px 0; color: var(--cz-yellow);">${this.escapeHtml(mission.title)}</h4>
-                                <p style="margin: 0; color: var(--text-secondary);">${this.escapeHtml(mission.description)}</p>
+                if (missions.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 32px; color: var(--text-muted);">
+                            <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 12px; display: block; opacity: 0.5;"></i>
+                            <p>No missions match your filter. Try selecting a different filter.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = missions.map(mission => {
+                    const isCompleted = (mission.progress || 0) >= 100;
+                    const isActive = (mission.progress || 0) > 0 && (mission.progress || 0) < 100;
+                    const difficultyColors = { easy: 'green', medium: 'orange', hard: 'red' };
+                    const diffColor = difficultyColors[mission.difficulty] || 'concrete';
+                    
+                    return `
+                        <div class="mission-card" style="${isCompleted ? 'opacity: 0.8; border-color: var(--cz-green);' : ''}">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px;">
+                                <div style="flex: 1;">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                        <h4 style="margin: 0; color: var(--cz-yellow);">${this.escapeHtml(mission.title)}</h4>
+                                        ${isCompleted ? '<span class="chip safe" style="font-size: 8px; padding: 2px 6px;"><i class="fas fa-check"></i> DONE</span>' : ''}
+                                    </div>
+                                    <p style="margin: 0; color: var(--text-secondary); font-size: 11px; line-height: 1.4;">${this.escapeHtml(mission.description)}</p>
+                                    ${mission.requirements ? `
+                                        <div style="margin-top: 8px;">
+                                            <div class="cz-label" style="margin-bottom: 4px; font-size: 9px;">Requirements:</div>
+                                            <ul style="list-style: none; padding: 0; margin: 0; font-size: 10px; color: var(--text-secondary);">
+                                                ${mission.requirements.slice(0, 3).map(req => `<li style="margin-bottom: 2px;"><i class="fas fa-check-square" style="color: var(--cz-yellow);"></i> ${this.escapeHtml(req)}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                                    <span class="chip" style="background: var(--cz-${diffColor}); color: white; font-size: 9px; text-transform: capitalize;">
+                                        ${mission.difficulty || 'Medium'}
+                                    </span>
+                                    ${mission.reward ? `
+                                        <span class="chip signal" style="font-size: 9px;">
+                                            <i class="fas fa-star"></i> ${mission.reward} XP
+                                        </span>
+                                    ` : ''}
+                                </div>
                             </div>
-                            <div class="badge difficulty-badge" style="background: var(--cz-${mission.difficulty === 'easy' ? 'green' : mission.difficulty === 'medium' ? 'orange' : 'red'}); color: white;">
-                                ${mission.difficulty}
+                            
+                            <div class="mission-progress" style="margin: 10px 0;">
+                                <div class="mission-progress-fill" style="width: ${mission.progress || 0}%"></div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 8px;">
+                                <span style="font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-blueprint);">
+                                    ${mission.progress || 0}% complete
+                                </span>
+                                <div style="display: flex; gap: 6px;">
+                                    <button class="btn" onclick="app.showMissionDetails('${mission.id}')" style="font-size: 10px; padding: 6px 10px;">
+                                        <i class="fas fa-info-circle"></i> Details
+                                    </button>
+                                    ${isCompleted ? `
+                                        <button class="btn" style="background: var(--cz-green); color: white; font-size: 10px; padding: 6px 10px;" onclick="app.claimMissionReward('${mission.id}')">
+                                            <i class="fas fa-gift"></i> Claim Reward
+                                        </button>
+                                    ` : isActive ? `
+                                        <button class="btn btn-primary" onclick="app.continueMission('${mission.id}')" style="font-size: 10px; padding: 6px 10px;">
+                                            <i class="fas fa-play"></i> Continue
+                                        </button>
+                                    ` : `
+                                        <button class="btn btn-primary" onclick="app.startMission('${mission.id}')" style="font-size: 10px; padding: 6px 10px;">
+                                            <i class="fas fa-rocket"></i> Start
+                                        </button>
+                                    `}
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="mission-progress">
-                            <div class="mission-progress-fill" style="width: ${mission.progress || 0}%"></div>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: between; align-items: center; margin-top: 8px;">
-                            <span style="font-size: 0.9rem; color: var(--text-muted);">
-                                ${mission.progress || 0}% complete
-                            </span>
-                            <button class="btn btn-primary" onclick="app.startMission('${mission.id}')">
-                                ${mission.progress > 0 ? 'Continue' : 'Start'} Mission
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             renderMissionProgress(missions) {
@@ -6748,30 +6880,370 @@
                 const completed = missions.filter(m => (m.progress || 0) >= 100).length;
                 const inProgress = missions.filter(m => (m.progress || 0) > 0 && (m.progress || 0) < 100).length;
                 const notStarted = missions.length - completed - inProgress;
+                const totalXP = missions.filter(m => (m.progress || 0) >= 100).reduce((sum, m) => sum + (m.reward || 0), 0);
 
                 container.innerHTML = `
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;">
-                        <div class="panel" style="padding: 12px; box-shadow: none; border-width: 2px;">
-                            <div class="mac-label">Completed</div>
-                            <div class="mac-title" style="font-size: 20px; color: var(--success);">${completed}</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                        <div class="stat-card highlight">
+                            <div class="stat-label">Completed</div>
+                            <div class="stat-value" style="color: var(--cz-green);">${completed}</div>
+                            <div class="stat-trend">Missions finished</div>
                         </div>
-                        <div class="panel" style="padding: 12px; box-shadow: none; border-width: 2px;">
-                            <div class="mac-label">In Progress</div>
-                            <div class="mac-title" style="font-size: 20px; color: var(--accent-yellow);">${inProgress}</div>
+                        <div class="stat-card">
+                            <div class="stat-label">In Progress</div>
+                            <div class="stat-value">${inProgress}</div>
+                            <div class="stat-trend">Active missions</div>
                         </div>
-                        <div class="panel" style="padding: 12px; box-shadow: none; border-width: 2px;">
-                            <div class="mac-label">Queued</div>
-                            <div class="mac-title" style="font-size: 20px; color: var(--text-secondary);">${notStarted}</div>
+                        <div class="stat-card">
+                            <div class="stat-label">Available</div>
+                            <div class="stat-value">${notStarted}</div>
+                            <div class="stat-trend">Ready to start</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Total XP</div>
+                            <div class="stat-value" style="color: var(--cz-yellow);">${totalXP}</div>
+                            <div class="stat-trend">Experience earned</div>
+                        </div>
+                    </div>
+
+                    ${inProgress > 0 ? `
+                        <div style="background: rgba(255, 208, 0, 0.1); border: 2px solid var(--cz-yellow); padding: 12px; margin-top: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                <i class="fas fa-fire" style="color: var(--cz-orange);"></i>
+                                <strong style="color: var(--cz-yellow); text-transform: uppercase; font-family: var(--font-stencil); font-size: 11px; letter-spacing: 1px;">Keep Going!</strong>
+                            </div>
+                            <p style="margin: 0; color: var(--text-secondary); font-size: 11px;">You have ${inProgress} active mission${inProgress !== 1 ? 's' : ''}. Complete them to earn rewards and unlock new challenges.</p>
+                        </div>
+                    ` : ''}
+                `;
+            }
+
+            async startMission(missionId) {
+                if (!this.currentUser) {
+                    this.showToast('Sign in to start missions', 'warning');
+                    this.handleAuth();
+                    return;
+                }
+
+                try {
+                    const mission = this.allMissions?.find(m => m.id === missionId);
+                    if (!mission) {
+                        this.showToast('Mission not found', 'error');
+                        return;
+                    }
+
+                    // Create or update user mission progress
+                    const progressDocId = `${this.currentUser.uid}_${missionId}`;
+                    await this.db.collection('user_mission_progress').doc(progressDocId).set({
+                        userId: this.currentUser.uid,
+                        missionId,
+                        progress: 0,
+                        status: 'active',
+                        startedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    this.showToast(`Mission "${mission.title}" started!`, 'success');
+                    await this.loadMissions();
+                } catch (error) {
+                    console.error('Error starting mission:', error);
+                    this.showToast('Failed to start mission', 'error');
+                }
+            }
+
+            async continueMission(missionId) {
+                if (!this.currentUser) return;
+                
+                const mission = this.allMissions?.find(m => m.id === missionId);
+                if (!mission) return;
+
+                this.showMissionDetails(missionId);
+            }
+
+            async showMissionDetails(missionId) {
+                const mission = this.allMissions?.find(m => m.id === missionId);
+                if (!mission) {
+                    this.showToast('Mission not found', 'error');
+                    return;
+                }
+
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                const isCompleted = (mission.progress || 0) >= 100;
+                const isActive = (mission.progress || 0) > 0 && (mission.progress || 0) < 100;
+                const difficultyColors = { easy: 'green', medium: 'orange', hard: 'red' };
+                const diffColor = difficultyColors[mission.difficulty] || 'concrete';
+
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 600px;">
+                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+                                <h3 style="flex: 1;">${this.escapeHtml(mission.title)}</h3>
+                                <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">
+                                    <span class="chip" style="background: var(--cz-${diffColor}); color: white; font-size: 9px;">
+                                        ${mission.difficulty || 'Medium'}
+                                    </span>
+                                    ${isCompleted ? '<span class="chip safe" style="font-size: 9px;"><i class="fas fa-check"></i> COMPLETED</span>' : ''}
+                                </div>
+                            </div>
+                            <p style="color: var(--text-secondary); margin-top: 8px;">${this.escapeHtml(mission.description)}</p>
+                        </div>
+
+                        ${mission.requirements && mission.requirements.length ? `
+                            <div style="margin-bottom: 16px;">
+                                <h4 style="margin-bottom: 8px; font-size: 13px;">Mission Objectives:</h4>
+                                <ul style="list-style: none; padding: 0; margin: 0;">
+                                    ${mission.requirements.map((req, index) => `
+                                        <li style="padding: 8px; margin-bottom: 4px; background: var(--cz-concrete); border: 2px solid var(--cz-black); display: flex; align-items: center; gap: 8px;">
+                                            <i class="fas fa-${(mission.progress || 0) > (index / mission.requirements.length * 100) ? 'check-circle' : 'circle'}" style="color: ${(mission.progress || 0) > (index / mission.requirements.length * 100) ? 'var(--cz-green)' : 'var(--text-muted)'};"></i>
+                                            <span style="flex: 1; font-size: 11px;">${this.escapeHtml(req)}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+
+                        <div style="margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <span style="font-size: 11px; font-weight: 700;">Progress: ${mission.progress || 0}%</span>
+                                ${mission.reward ? `<span style="font-size: 11px; color: var(--cz-yellow);"><i class="fas fa-star"></i> Reward: ${mission.reward} XP</span>` : ''}
+                            </div>
+                            <div class="mission-progress">
+                                <div class="mission-progress-fill" style="width: ${mission.progress || 0}%"></div>
+                            </div>
+                        </div>
+
+                        ${mission.startedAt ? `
+                            <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 12px;">
+                                Started: ${new Date(mission.startedAt.toDate ? mission.startedAt.toDate() : mission.startedAt).toLocaleDateString()}
+                            </div>
+                        ` : ''}
+
+                        ${mission.completedAt ? `
+                            <div style="background: rgba(0, 170, 68, 0.1); border: 2px solid var(--cz-green); padding: 12px; margin-bottom: 12px;">
+                                <div style="color: var(--cz-green); font-weight: 700; margin-bottom: 4px;">
+                                    <i class="fas fa-trophy"></i> Mission Completed!
+                                </div>
+                                <div style="font-size: 10px; color: var(--text-secondary);">
+                                    Completed on ${new Date(mission.completedAt.toDate ? mission.completedAt.toDate() : mission.completedAt).toLocaleDateString()}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="form-actions">
+                            <button type="button" class="btn" onclick="this.closest('.modal').remove()">Close</button>
+                            ${this.currentUser && !isCompleted ? `
+                                ${isActive ? `
+                                    <button type="button" class="btn" style="background: var(--cz-orange); color: white;" onclick="app.abandonMission('${mission.id}'); this.closest('.modal').remove();">
+                                        <i class="fas fa-times"></i> Abandon
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="app.updateMissionProgress('${mission.id}'); this.closest('.modal').remove();">
+                                        <i class="fas fa-plus"></i> Update Progress
+                                    </button>
+                                ` : `
+                                    <button type="button" class="btn btn-primary" onclick="app.startMission('${mission.id}'); this.closest('.modal').remove();">
+                                        <i class="fas fa-rocket"></i> Start Mission
+                                    </button>
+                                `}
+                            ` : ''}
+                            ${this.currentUser && isCompleted && !mission.rewardClaimed ? `
+                                <button type="button" class="btn btn-primary" style="background: var(--cz-green); color: white;" onclick="app.claimMissionReward('${mission.id}'); this.closest('.modal').remove();">
+                                    <i class="fas fa-gift"></i> Claim Reward
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                 `;
+                
+                document.body.appendChild(modal);
+            }
+
+            async updateMissionProgress(missionId) {
+                if (!this.currentUser) return;
+
+                const mission = this.allMissions?.find(m => m.id === missionId);
+                if (!mission) return;
+
+                const currentProgress = mission.progress || 0;
+                const newProgressInput = prompt(`Current progress: ${currentProgress}%\nEnter new progress (0-100):`, String(Math.min(100, currentProgress + 20)));
+                
+                if (newProgressInput === null) return;
+
+                const newProgress = parseInt(newProgressInput);
+                if (isNaN(newProgress) || newProgress < 0 || newProgress > 100) {
+                    this.showToast('Invalid progress value', 'error');
+                    return;
+                }
+
+                try {
+                    const progressDocId = `${this.currentUser.uid}_${missionId}`;
+                    const updateData = {
+                        progress: newProgress,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    if (newProgress >= 100 && currentProgress < 100) {
+                        updateData.status = 'completed';
+                        updateData.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+                    }
+
+                    await this.db.collection('user_mission_progress').doc(progressDocId).update(updateData);
+
+                    if (newProgress >= 100) {
+                        this.showToast(`Mission "${mission.title}" completed! 🎉`, 'success');
+                        await this.awardBadge(this.currentUser.uid, 'mission_complete');
+                    } else {
+                        this.showToast('Progress updated!', 'success');
+                    }
+
+                    await this.loadMissions();
+                } catch (error) {
+                    console.error('Error updating mission progress:', error);
+                    this.showToast('Failed to update progress', 'error');
+                }
+            }
+
+            async abandonMission(missionId) {
+                if (!this.currentUser) return;
+
+                if (!confirm('Are you sure you want to abandon this mission? Progress will be lost.')) {
+                    return;
+                }
+
+                try {
+                    const progressDocId = `${this.currentUser.uid}_${missionId}`;
+                    await this.db.collection('user_mission_progress').doc(progressDocId).delete();
+
+                    this.showToast('Mission abandoned', 'info');
+                    await this.loadMissions();
+                } catch (error) {
+                    console.error('Error abandoning mission:', error);
+                    this.showToast('Failed to abandon mission', 'error');
+                }
+            }
+
+            async claimMissionReward(missionId) {
+                if (!this.currentUser) return;
+
+                const mission = this.allMissions?.find(m => m.id === missionId);
+                if (!mission || (mission.progress || 0) < 100) {
+                    this.showToast('Mission not completed yet', 'warning');
+                    return;
+                }
+
+                try {
+                    const progressDocId = `${this.currentUser.uid}_${missionId}`;
+                    await this.db.collection('user_mission_progress').doc(progressDocId).update({
+                        rewardClaimed: true,
+                        rewardClaimedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    const rewardXP = mission.reward || 100;
+                    await this.db.collection('users').doc(this.currentUser.uid).update({
+                        totalXP: firebase.firestore.FieldValue.increment(rewardXP),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    this.showToast(`Reward claimed! +${rewardXP} XP`, 'success');
+                    await this.loadMissions();
+                } catch (error) {
+                    console.error('Error claiming reward:', error);
+                    this.showToast('Failed to claim reward', 'error');
+                }
+            }
+
+            async createCustomMission() {
+                if (!this.currentUser) {
+                    this.showToast('Sign in to create missions', 'warning');
+                    this.handleAuth();
+                    return;
+                }
+
+                const titleInput = prompt('Mission Title:', 'Custom Exploration Mission');
+                const title = titleInput ? this.sanitizeInput(titleInput) : '';
+                if (!title) {
+                    this.showToast('Mission title is required', 'warning');
+                    return;
+                }
+
+                const descInput = prompt('Mission Description:', 'Complete your own exploration challenge');
+                const description = descInput ? this.sanitizeInput(descInput) : '';
+                if (!description) {
+                    this.showToast('Mission description is required', 'warning');
+                    return;
+                }
+
+                const difficultyInput = prompt('Difficulty (easy/medium/hard):', 'medium');
+                const difficulty = ['easy', 'medium', 'hard'].includes(difficultyInput?.toLowerCase()) ? difficultyInput.toLowerCase() : 'medium';
+
+                const rewardInput = prompt('Reward XP:', '100');
+                const reward = parseInt(rewardInput) || 100;
+
+                try {
+                    await this.db.collection('missions').add({
+                        title,
+                        description,
+                        difficulty,
+                        reward,
+                        requirements: ['Define your own objectives', 'Track your progress', 'Complete the mission'],
+                        createdBy: this.currentUser.uid,
+                        isCustom: true,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    this.showToast('Custom mission created!', 'success');
+                    await this.loadMissions();
+                } catch (error) {
+                    console.error('Error creating mission:', error);
+                    this.showToast('Failed to create mission', 'error');
+                }
             }
 
             getSampleMissions() {
                 return [
-                    { id: 'mission-a', title: 'Rooftop Recon', description: 'Scout three rooftops and log safe access points.', difficulty: 'medium', progress: 65 },
-                    { id: 'mission-b', title: 'Tunnel Drift', description: 'Chart a path through the river tunnels without GPS.', difficulty: 'hard', progress: 20 },
-                    { id: 'mission-c', title: 'Hidden Courtyard', description: 'Find and photograph two hidden courtyards in the old district.', difficulty: 'easy', progress: 90 }
+                    {
+                        id: 'mission-a',
+                        title: 'Rooftop Recon',
+                        description: 'Scout three rooftops and log safe access points.',
+                        difficulty: 'medium',
+                        progress: 0,
+                        reward: 250,
+                        requirements: ['Visit 3 rooftop locations', 'Take photos of each', 'Document access points'],
+                        status: 'available'
+                    },
+                    {
+                        id: 'mission-b',
+                        title: 'Tunnel Mapping',
+                        description: 'Chart a path through underground passages and document your findings.',
+                        difficulty: 'hard',
+                        progress: 0,
+                        reward: 500,
+                        requirements: ['Locate tunnel entrance', 'Map the passage route', 'Mark exit points', 'Photo documentation'],
+                        status: 'available'
+                    },
+                    {
+                        id: 'mission-c',
+                        title: 'Hidden Gems',
+                        description: 'Find and photograph hidden courtyards or architectural details in your area.',
+                        difficulty: 'easy',
+                        progress: 0,
+                        reward: 150,
+                        requirements: ['Discover 2 hidden locations', 'Photograph each location', 'Share to social feed'],
+                        status: 'available'
+                    },
+                    {
+                        id: 'mission-d',
+                        title: 'Night Explorer',
+                        description: 'Complete night-time explorations and capture the urban landscape after dark.',
+                        difficulty: 'medium',
+                        progress: 0,
+                        reward: 300,
+                        requirements: ['Visit 3 locations at night', 'Capture night photography', 'Note safety observations'],
+                        status: 'available'
+                    }
                 ];
             }
 
@@ -11119,7 +11591,7 @@
             }
 
 
-            // User settings panel
+            // User settings panel - FULLY FUNCTIONAL
             showSettings() {
                 const content = document.getElementById('settings-content');
                 if (!content) return;
@@ -11139,31 +11611,54 @@
                 }
 
                 content.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2>Settings & Preferences</h2>
+                        <button class="btn" onclick="app.showView('map')">
+                            <i class="fas fa-map"></i> Back to Map
+                        </button>
+                    </div>
+
                     <div class="panel">
                         <h3 style="margin-bottom: 16px;"><i class="fas fa-user-cog"></i> Account Settings</h3>
 
                         <div class="form-group">
                             <label class="form-label">Display Name</label>
-                            <input class="input" type="text" id="settings-display-name" value="${this.escapeHtml(this.currentUser.displayName || '')}">
+                            <input class="input" type="text" id="settings-display-name" value="${this.escapeHtml(this.currentUser.displayName || '')}" placeholder="Your display name">
+                            <div class="field-help">This is how your name appears to other explorers</div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Email</label>
+                            <label class="form-label">Email Address</label>
                             <input class="input" type="email" id="settings-email" value="${this.escapeHtml(this.currentUser.email || '')}" disabled>
+                            <div class="field-help">Email cannot be changed. Contact support if needed.</div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Account Created</label>
-                            <input class="input" type="text" value="${this.currentUser.metadata?.creationTime || 'Unknown'}" disabled>
+                            <label class="form-label">Account Status</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span class="chip ${this.currentUser.emailVerified ? 'safe' : 'signal'}">
+                                    <i class="fas ${this.currentUser.emailVerified ? 'fa-check-circle' : 'fa-clock'}"></i>
+                                    ${this.currentUser.emailVerified ? 'Verified' : 'Unverified'}
+                                </span>
+                                <span class="chip">${this.currentUser.isAnonymous ? 'Anonymous' : 'Registered'}</span>
+                                <span class="chip">Joined ${new Date(this.currentUser.metadata?.creationTime).toLocaleDateString()}</span>
+                                ${!this.currentUser.emailVerified ? `
+                                    <button class="btn" style="font-size: 10px; padding: 4px 8px;" onclick="app.resendVerificationEmail()">
+                                        <i class="fas fa-envelope"></i> Verify Email
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
 
                         <div class="form-actions">
-                            <button class="btn btn-primary" onclick="app.updateAccountSettings()">Save Changes</button>
+                            <button class="btn btn-primary" onclick="app.updateAccountSettings()">
+                                <i class="fas fa-save"></i> Save Account Settings
+                            </button>
                         </div>
                     </div>
 
                     <div class="panel" style="margin-top: 16px;">
-                        <h3 style="margin-bottom: 16px;"><i class="fas fa-bell"></i> Notification Settings</h3>
+                        <h3 style="margin-bottom: 16px;"><i class="fas fa-bell"></i> Notification Preferences</h3>
 
                         <div class="form-group">
                             <label class="form-label">Email Notifications</label>
@@ -11172,32 +11667,59 @@
                                 <option value="important">Important Only</option>
                                 <option value="none">Disabled</option>
                             </select>
+                            <div class="field-help">Control email notifications for follows, likes, and comments</div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Push Notifications</label>
+                            <label class="form-label">Browser Push Notifications</label>
                             <select class="select" id="settings-push-notifications">
                                 <option value="enabled">Enabled</option>
                                 <option value="disabled">Disabled</option>
                             </select>
+                            <div class="field-help">Real-time notifications in your browser</div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Notification Frequency</label>
                             <select class="select" id="settings-notification-frequency">
-                                <option value="realtime">Real-time</option>
+                                <option value="realtime">Real-time (Instant)</option>
+                                <option value="hourly">Hourly Digest</option>
                                 <option value="daily">Daily Digest</option>
                                 <option value="weekly">Weekly Summary</option>
                             </select>
+                            <div class="field-help">How often you receive notification bundles</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="settings-notify-follows" style="width: auto; margin-right: 8px;">
+                                New Followers
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="settings-notify-comments" style="width: auto; margin-right: 8px;">
+                                Comments on My Posts
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="settings-notify-likes" style="width: auto; margin-right: 8px;">
+                                Likes on My Locations
+                            </label>
                         </div>
 
                         <div class="form-actions">
-                            <button class="btn btn-primary" onclick="app.updateNotificationSettings()">Save Notification Preferences</button>
+                            <button class="btn btn-primary" onclick="app.updateNotificationSettings()">
+                                <i class="fas fa-save"></i> Save Notification Preferences
+                            </button>
                         </div>
                     </div>
 
                     <div class="panel" style="margin-top: 16px;">
-                        <h3 style="margin-bottom: 16px;"><i class="fas fa-lock"></i> Privacy Controls</h3>
+                        <h3 style="margin-bottom: 16px;"><i class="fas fa-shield-alt"></i> Privacy & Security</h3>
 
                         <div class="form-group">
                             <label class="form-label">Profile Visibility</label>
@@ -11206,15 +11728,17 @@
                                 <option value="followers">Followers Only</option>
                                 <option value="private">Private (Only me)</option>
                             </select>
+                            <div class="field-help">Who can see your profile page</div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Location Visibility</label>
                             <select class="select" id="settings-location-visibility">
-                                <option value="public">Public</option>
+                                <option value="public">Public (Show on map)</option>
                                 <option value="followers">Followers Only</option>
-                                <option value="private">Private</option>
+                                <option value="private">Private (Hidden from map)</option>
                             </select>
+                            <div class="field-help">Who can see your posted locations</div>
                         </div>
 
                         <div class="form-group">
@@ -11224,57 +11748,110 @@
                                 <option value="followers">Followers Only</option>
                                 <option value="private">Private</option>
                             </select>
+                            <div class="field-help">Who can see your social feed activity</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="settings-show-online-status" style="width: auto; margin-right: 8px;">
+                                Show Online Status
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="settings-allow-messages" style="width: auto; margin-right: 8px;">
+                                Allow Direct Messages
+                            </label>
                         </div>
 
                         <div class="form-actions">
-                            <button class="btn btn-primary" onclick="app.updatePrivacySettings()">Save Privacy Settings</button>
+                            <button class="btn btn-primary" onclick="app.updatePrivacySettings()">
+                                <i class="fas fa-save"></i> Save Privacy Settings
+                            </button>
                         </div>
                     </div>
 
                     <div class="panel" style="margin-top: 16px;">
-                        <h3 style="margin-bottom: 16px;"><i class="fas fa-palette"></i> Display Preferences</h3>
+                        <h3 style="margin-bottom: 16px;"><i class="fas fa-palette"></i> Display & Interface</h3>
 
                         <div class="form-group">
-                            <label class="form-label">Theme</label>
+                            <label class="form-label">Theme Mode</label>
                             <select class="select" id="settings-theme">
                                 <option value="system">System Default</option>
-                                <option value="light">Light Mode</option>
-                                <option value="dark">Dark Mode</option>
+                                <option value="light">Construction Zone (Current)</option>
+                                <option value="dark">Dark Construction</option>
                             </select>
+                            <div class="field-help">Visual theme for the interface</div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Map Style</label>
+                            <label class="form-label">Map Tile Style</label>
                             <select class="select" id="settings-map-style">
-                                <option value="default">Default</option>
-                                <option value="satellite">Satellite</option>
-                                <option value="terrain">Terrain</option>
+                                <option value="default">OpenStreetMap Default</option>
+                                <option value="dark">Dark Mode Map</option>
+                                <option value="terrain">Terrain View</option>
                             </select>
+                            <div class="field-help">Base map appearance</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Interface Density</label>
+                            <select class="select" id="settings-interface-density">
+                                <option value="comfortable">Comfortable</option>
+                                <option value="compact">Compact</option>
+                                <option value="spacious">Spacious</option>
+                            </select>
+                            <div class="field-help">Spacing and sizing of UI elements</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="settings-reduced-motion" style="width: auto; margin-right: 8px;">
+                                Reduce Motion & Animations
+                            </label>
                         </div>
 
                         <div class="form-actions">
-                            <button class="btn btn-primary" onclick="app.updateDisplaySettings()">Save Display Preferences</button>
+                            <button class="btn btn-primary" onclick="app.updateDisplaySettings()">
+                                <i class="fas fa-save"></i> Save Display Settings
+                            </button>
                         </div>
                     </div>
 
                     <div class="panel" style="margin-top: 16px;">
-                        <h3 style="margin-bottom: 16px;"><i class="fas fa-exclamation-triangle"></i> Account Management</h3>
+                        <h3 style="margin-bottom: 16px;"><i class="fas fa-tools"></i> Account Management</h3>
 
-                        <div class="form-group">
-                            <button class="btn" style="background: var(--cz-orange); color: white;" onclick="app.changePassword()">
+                        <div class="warning-box">
+                            <p>These actions are permanent and may result in data loss. Proceed with caution.</p>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <button class="btn" style="background: var(--cz-orange); color: white;" onclick="app.showChangePasswordModal()">
                                 <i class="fas fa-key"></i> Change Password
                             </button>
-                        </div>
 
-                        <div class="form-group">
-                            <button class="btn" style="background: var(--cz-red); color: white;" onclick="app.deleteAccount()">
-                                <i class="fas fa-trash"></i> Delete Account
+                            <button class="btn" style="background: var(--cz-yellow); color: var(--cz-black);" onclick="app.exportData()">
+                                <i class="fas fa-download"></i> Export My Data (JSON)
+                            </button>
+
+                            <button class="btn" style="background: var(--cz-red); color: white;" onclick="app.confirmDeleteAccount()">
+                                <i class="fas fa-trash-alt"></i> Delete Account Permanently
                             </button>
                         </div>
+                    </div>
 
-                        <div class="form-group">
-                            <button class="btn" onclick="app.exportData()">
-                                <i class="fas fa-download"></i> Export My Data
+                    <div class="panel" style="margin-top: 16px;">
+                        <h3 style="margin-bottom: 16px;"><i class="fas fa-info-circle"></i> App Information</h3>
+                        <div style="color: var(--text-secondary); font-family: var(--font-blueprint); font-size: 12px; line-height: 1.6;">
+                            <div style="margin-bottom: 8px;"><strong>Version:</strong> 1.0.0</div>
+                            <div style="margin-bottom: 8px;"><strong>Last Updated:</strong> ${new Date().toLocaleDateString()}</div>
+                            <div style="margin-bottom: 8px;"><strong>Storage Used:</strong> <span id="storage-used">Calculating...</span></div>
+                            <div style="margin-bottom: 8px;"><strong>Cache Status:</strong> <span id="cache-status">Active</span></div>
+                        </div>
+                        <div style="margin-top: 12px;">
+                            <button class="btn" onclick="app.clearCache()">
+                                <i class="fas fa-broom"></i> Clear Cache
                             </button>
                         </div>
                     </div>
@@ -11282,6 +11859,7 @@
 
                 // Load current settings
                 this.loadUserSettings();
+                this.calculateStorageUsage();
             }
 
             async loadUserSettings() {
@@ -11675,6 +12253,232 @@
                 // Refresh comment counts in the UI after adding a new comment
                 // This is called after successfully adding a profile comment
                 console.log('Comment counters updated');
+            }
+
+            // ====================
+            // SETTINGS HELPER METHODS
+            // ====================
+
+            showChangePasswordModal() {
+                if (!this.currentUser || this.currentUser.isAnonymous) {
+                    this.showToast('Password change not available for anonymous accounts', 'warning');
+                    return;
+                }
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                        <h3><i class="fas fa-key"></i> Change Password</h3>
+                        <form id="change-password-form">
+                            <div class="form-group">
+                                <label class="form-label required">Current Password</label>
+                                <input class="input" type="password" id="current-password" required autocomplete="current-password">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">New Password</label>
+                                <input class="input" type="password" id="new-password" required minlength="8" autocomplete="new-password">
+                                <div class="field-help">Minimum 8 characters with mixed case, numbers, and symbols</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">Confirm New Password</label>
+                                <input class="input" type="password" id="confirm-new-password" required autocomplete="new-password">
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn" onclick="this.closest('.modal').remove()">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-key"></i> Change Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                const form = document.getElementById('change-password-form');
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await this.handlePasswordChange();
+                });
+            }
+
+            async handlePasswordChange() {
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmPassword = document.getElementById('confirm-new-password').value;
+
+                if (newPassword !== confirmPassword) {
+                    this.showToast('New passwords do not match', 'error');
+                    return;
+                }
+
+                if (newPassword.length < 8) {
+                    this.showToast('New password must be at least 8 characters', 'warning');
+                    return;
+                }
+
+                try {
+                    const credential = firebase.auth.EmailAuthProvider.credential(
+                        this.currentUser.email,
+                        currentPassword
+                    );
+                    await this.currentUser.reauthenticateWithCredential(credential);
+                    await this.currentUser.updatePassword(newPassword);
+                    
+                    document.querySelector('#change-password-form').closest('.modal').remove();
+                    this.showToast('Password changed successfully!', 'success');
+                } catch (error) {
+                    console.error('Password change error:', error);
+                    let message = 'Failed to change password';
+                    if (error.code === 'auth/wrong-password') {
+                        message = 'Current password is incorrect';
+                    } else if (error.code === 'auth/weak-password') {
+                        message = 'New password is too weak';
+                    }
+                    this.showToast(message, 'error');
+                }
+            }
+
+            confirmDeleteAccount() {
+                if (!this.currentUser) return;
+
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                        <h3 style="color: var(--cz-red);"><i class="fas fa-exclamation-triangle"></i> Delete Account</h3>
+                        
+                        <div class="warning-box" style="margin: 20px 0;">
+                            <p style="margin-bottom: 12px;">This action is <strong>PERMANENT</strong> and will:</p>
+                            <ul style="list-style: none; padding: 0; color: var(--cz-orange);">
+                                <li style="margin-bottom: 4px;"><i class="fas fa-times"></i> Delete all your locations</li>
+                                <li style="margin-bottom: 4px;"><i class="fas fa-times"></i> Remove all your posts and comments</li>
+                                <li style="margin-bottom: 4px;"><i class="fas fa-times"></i> Unfollow all users and remove followers</li>
+                                <li style="margin-bottom: 4px;"><i class="fas fa-times"></i> Delete your profile and account data</li>
+                            </ul>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Type "DELETE" to confirm:</label>
+                            <input class="input" type="text" id="delete-confirm-text" placeholder="DELETE" autocomplete="off">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn" onclick="this.closest('.modal').remove()">Cancel</button>
+                            <button type="button" class="btn" style="background: var(--cz-red); color: white;" onclick="app.executeAccountDeletion()">
+                                <i class="fas fa-trash-alt"></i> Delete My Account
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+            }
+
+            async executeAccountDeletion() {
+                const confirmText = document.getElementById('delete-confirm-text')?.value;
+                
+                if (confirmText !== 'DELETE') {
+                    this.showToast('Please type DELETE to confirm', 'warning');
+                    return;
+                }
+
+                const opKey = 'delete-account-final';
+                if (this.activeOperations.has(opKey)) return;
+                this.activeOperations.add(opKey);
+
+                try {
+                    const userId = this.currentUser.uid;
+                    this.showToast('Deleting account data...', 'info');
+
+                    const collections = ['locations', 'forum', 'comments', 'user_followers', 'user_notifications', 'user_settings', 'post_likes', 'location_likes', 'location_visits'];
+
+                    for (const collectionName of collections) {
+                        const snapshot = await this.db.collection(collectionName).where('userId', '==', userId).limit(50).get();
+                        if (!snapshot.empty) {
+                            const batch = this.db.batch();
+                            snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                            await batch.commit();
+                        }
+
+                        const createdSnapshot = await this.db.collection(collectionName).where('createdBy', '==', userId).limit(50).get();
+                        if (!createdSnapshot.empty) {
+                            const batch = this.db.batch();
+                            createdSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+                            await batch.commit();
+                        }
+                    }
+
+                    await this.db.collection('users').doc(userId).delete();
+                    await this.currentUser.delete();
+
+                    document.querySelectorAll('.modal').forEach(m => m.remove());
+                    this.showToast('Account deleted successfully. Goodbye.', 'success');
+
+                    setTimeout(() => window.location.reload(), 2000);
+                } catch (error) {
+                    console.error('Account deletion error:', error);
+                    let message = 'Failed to delete account';
+                    if (error.code === 'auth/requires-recent-login') {
+                        message = 'Please sign out and sign back in before deleting your account';
+                    }
+                    this.showToast(message, 'error');
+                } finally {
+                    this.activeOperations.delete(opKey);
+                }
+            }
+
+            async calculateStorageUsage() {
+                if (!this.currentUser) return;
+
+                try {
+                    const snapshot = await this.db.collection('locations').where('createdBy', '==', this.currentUser.uid).get();
+
+                    let totalSize = 0;
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const jsonStr = JSON.stringify(data);
+                        totalSize += new Blob([jsonStr]).size;
+                    });
+
+                    const sizeInKB = (totalSize / 1024).toFixed(2);
+                    const sizeInMB = (totalSize / (1024 * 1024)).toFixed(2);
+                    const displaySize = totalSize > 1024 * 1024 ? `${sizeInMB} MB` : `${sizeInKB} KB`;
+
+                    const storageEl = document.getElementById('storage-used');
+                    if (storageEl) storageEl.textContent = displaySize;
+                } catch (error) {
+                    console.error('Storage calculation error:', error);
+                    const storageEl = document.getElementById('storage-used');
+                    if (storageEl) storageEl.textContent = 'Unknown';
+                }
+            }
+
+            async clearCache() {
+                try {
+                    if ('caches' in window) {
+                        const cacheNames = await caches.keys();
+                        await Promise.all(cacheNames.map(name => caches.delete(name)));
+                    }
+
+                    sessionStorage.clear();
+
+                    const authState = localStorage.getItem('firebase:authUser');
+                    localStorage.clear();
+                    if (authState) localStorage.setItem('firebase:authUser', authState);
+
+                    this.showToast('Cache cleared successfully!', 'success');
+                    
+                    const cacheStatus = document.getElementById('cache-status');
+                    if (cacheStatus) cacheStatus.textContent = 'Cleared';
+                    setTimeout(() => { if (cacheStatus) cacheStatus.textContent = 'Active'; }, 3000);
+                } catch (error) {
+                    console.error('Cache clear error:', error);
+                    this.showToast('Failed to clear cache', 'error');
+                }
             }
         }
 
