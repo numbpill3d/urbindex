@@ -1,16 +1,13 @@
 // Firebase Storage Security Rules for Urbindex
-// Version: 1.0.0
-// Last Updated: 2024-01-05
+// Version: 1.1.0
+// Last Updated: 2026-01-28
+// Updated to allow public read access
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Profile photos - only allow authenticated users to upload to their own profile photos directory
+    // Profile photos - allow public read, only allow authenticated users to upload to their own profile photos directory
     match /profile-photos/{userId}/{allPaths=**} {
-      allow read: if request.auth != null && (
-        request.auth.uid == userId ||
-        resource.metadata.privacy == 'public' ||
-        exists(/databases/(default)/documents/user_followers/{userId}_{request.auth.uid})
-      );
+      allow read: if true; // Allow public access to profile photos
       
       allow write: if request.auth != null && 
                    request.auth.uid == userId &&
@@ -19,13 +16,9 @@ service firebase.storage {
                    request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     }
 
-    // User gallery images - similar rules to profile photos
+    // User gallery images - allow public read
     match /user-gallery/{userId}/{allPaths=**} {
-      allow read: if request.auth != null && (
-        request.auth.uid == userId ||
-        resource.metadata.privacy == 'public' ||
-        exists(/databases/(default)/documents/user_followers/{userId}_{request.auth.uid})
-      );
+      allow read: if true; // Allow public access to user galleries
       
       allow write: if request.auth != null && 
                    request.auth.uid == userId &&
@@ -33,14 +26,9 @@ service firebase.storage {
                    request.resource.contentType.matches('image/.*');
     }
 
-    // Location photos - allow location owners to upload
+    // Location photos - allow public read access
     match /location-photos/{locationId}/{allPaths=**} {
-      allow read: if request.auth != null && (
-        resource.metadata.privacy == 'public' ||
-        exists(/databases/(default)/documents/locations/{locationId}) &&
-        (resource.metadata.privacy == 'followers' && exists(/databases/(default)/documents/user_followers/{(resource.metadata.ownerId)}_{request.auth.uid})) ||
-        resource.metadata.ownerId == request.auth.uid
-      );
+      allow read: if true; // Allow public access to location photos
       
       allow write: if request.auth != null &&
                    exists(/databases/(default)/documents/locations/{locationId}) &&
@@ -50,6 +38,7 @@ service firebase.storage {
     }
 
     // Temporary uploads - short-lived files for processing
+    // Keep these private as they're only for processing
     match /temp-uploads/{userId}/{allPaths=**} {
       allow read, write: if request.auth != null &&
                           request.auth.uid == userId &&
